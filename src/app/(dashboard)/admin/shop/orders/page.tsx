@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { Loader2, RefreshCw } from 'lucide-react'
-import Link from 'next/link'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 
@@ -17,12 +15,19 @@ type Order = {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  pending:   { label: 'Chờ duyệt',   color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  approved:  { label: 'Đã duyệt',    color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  pending:   { label: 'Chờ duyệt',     color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  approved:  { label: 'Đã duyệt',      color: 'bg-blue-50 text-blue-700 border-blue-200' },
   paid:      { label: 'Đã thanh toán', color: 'bg-green-50 text-green-700 border-green-200' },
-  fulfilled: { label: 'Hoàn thành',  color: 'bg-[#5B8E9F]/10 text-[#5B8E9F] border-[#5B8E9F]/20' },
-  cancelled: { label: 'Đã huỷ',      color: 'bg-red-50 text-red-700 border-red-200' },
+  fulfilled: { label: 'Hoàn thành',    color: 'bg-[#5B8E9F]/10 text-[#5B8E9F] border-[#5B8E9F]/20' },
+  cancelled: { label: 'Đã huỷ',        color: 'bg-red-50 text-red-700 border-red-200' },
 }
+
+const PAYMENT_METHODS = [
+  { value: 'cash', label: 'Tiền mặt' },
+  { value: 'bank_transfer', label: 'Chuyển khoản' },
+  { value: 'card', label: 'Thẻ' },
+  { value: 'other', label: 'Khác' },
+] as const
 
 function fmt(n: number) { return n.toLocaleString('vi-VN') + 'đ' }
 
@@ -31,6 +36,9 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('pending')
   const [processing, setProcessing] = useState<string | null>(null)
+  const [payingOrderId, setPayingOrderId] = useState<string | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'bank_transfer' | 'card' | 'other'>('cash')
+  const [referenceNumber, setReferenceNumber] = useState('')
 
   const loadOrders = useCallback(async () => {
     setLoading(true)
@@ -44,20 +52,45 @@ export default function OrdersPage() {
 
   useEffect(() => { loadOrders() }, [loadOrders])
 
-  async function handleAction(orderId: string, action: string) {
+  async function handleAction(orderId: string, action: string, extra?: Record<string, unknown>) {
     setProcessing(orderId)
     try {
       const res = await fetch(`/api/shop/orders/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action })
+        body: JSON.stringify({ action, ...extra })
       })
       const data = await res.json()
       if (!res.ok || data.error) { toast.error(data.error?.message ?? 'Lỗi'); return }
-      toast.success(`Đã ${action === 'approve' ? 'duyệt' : action === 'fulfill' ? 'hoàn thành' : 'cập nhật'} đơn hàng!`)
+      const actionLabel = action === 'approve' ? 'duyệt' :
+        action === 'reject' ? 'từ chối' :
+        action === 'pay' ? 'ghi nhận thanh toán' :
+        action === 'fulfill' ? 'hoàn thành' : 'cập nhật'
+      toast.success(`Đã ${actionLabel} đơn hàng!`)
+      if (action === 'pay') {
+        setPayingOrderId(null)
+        setReferenceNumber('')
+      }
       loadOrders()
     } catch { toast.error('Không thể kết nối') }
     finally { setProcessing(null) }
+  }
+
+  function startPay(orderId: string) {
+    setPayingOrderId(orderId)
+    setPaymentMethod('cash')
+    setReferenceNumber('')
+  }
+
+  function submitPay(orderId: string) {
+    if (paymentMethod === 'bank_transfer' && !referenceNumber.trim()) {
+      toast.error('Chuyển khoản cần nhập mã giao dịch')
+      return
+    }
+    handleAction(orderId, 'pay', {
+      paymentMethod,
+      referenceNumber: referenceNumber.trim() || undefined,
+    })
   }
 
   return (
@@ -94,9 +127,7 @@ export default function OrdersPage() {
             <div key={order.id} className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-5 shadow-sm">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <Link href={`/admin/students`} className="font-semibold text-[#1C2B4A] hover:underline">
-                    {order.student.user.fullName}
-                  </Link>
+                  <p className="font-semibold text-[#1C2B4A]">{order.student.user.fullName}</p>
                   <p className="text-xs text-[#1C2B4A]/50 mt-0.5">
                     {format(new Date(order.createdAt), 'HH:mm dd/MM/yyyy', { locale: vi })}
                   </p>
@@ -120,34 +151,99 @@ export default function OrdersPage() {
               </div>
 
               {order.noteFromStudent && (
-                <p className="text-xs italic text-[#1C2B4A]/50 mb-3">"{order.noteFromStudent}"</p>
+                <p className="text-xs italic text-[#1C2B4A]/50 mb-3">&ldquo;{order.noteFromStudent}&rdquo;</p>
               )}
 
-              {/* Actions */}
-              <div className="flex gap-2">
-                {order.status === 'pending' && (
-                  <>
-                    <Button size="sm" variant="outline" className="flex-1"
+              {/* Inline payment form */}
+              {payingOrderId === order.id ? (
+                <div className="border-t border-[#1C2B4A]/8 pt-3 space-y-2">
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+                      Phương thức thanh toán
+                    </label>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {PAYMENT_METHODS.map(m => (
+                        <button
+                          key={m.value}
+                          type="button"
+                          onClick={() => setPaymentMethod(m.value)}
+                          className={`px-2 py-1.5 text-xs rounded-lg border ${
+                            paymentMethod === m.value
+                              ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]'
+                              : 'bg-white text-[#1C2B4A]/60 border-[#1C2B4A]/15'
+                          }`}
+                        >
+                          {m.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {paymentMethod === 'bank_transfer' && (
+                    <div>
+                      <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+                        Mã giao dịch <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={referenceNumber}
+                        onChange={e => setReferenceNumber(e.target.value)}
+                        placeholder="VD: FT250513..."
+                        className="w-full px-3 py-1.5 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
+                      />
+                    </div>
+                  )}
+                  <div className="flex gap-2 pt-1">
+                    <Button
+                      size="sm"
+                      className="flex-1 bg-green-600 text-white hover:bg-green-700"
                       disabled={processing === order.id}
-                      onClick={() => handleAction(order.id, 'reject')}>
-                      Từ chối
+                      onClick={() => submitPay(order.id)}
+                    >
+                      {processing === order.id ? <Loader2 className="w-4 h-4 animate-spin" /> : `Xác nhận ${fmt(order.finalAmount)}`}
                     </Button>
-                    <Button size="sm" className="flex-2 bg-[#1C2B4A] text-[#F6F1EA]"
-                      style={{ flex: 2 }}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setPayingOrderId(null)}
                       disabled={processing === order.id}
-                      onClick={() => handleAction(order.id, 'approve')}>
-                      {processing === order.id ? <Loader2 className="w-4 h-4 animate-spin" /> : '✓ Duyệt'}
+                    >
+                      Huỷ
                     </Button>
-                  </>
-                )}
-                {order.status === 'paid' && (
-                  <Button size="sm" className="flex-1 bg-[#5B8E9F] text-white"
-                    disabled={processing === order.id}
-                    onClick={() => handleAction(order.id, 'fulfill')}>
-                    Hoàn thành giao hàng
-                  </Button>
-                )}
-              </div>
+                  </div>
+                </div>
+              ) : (
+                /* Actions */
+                <div className="flex gap-2">
+                  {order.status === 'pending' && (
+                    <>
+                      <Button size="sm" variant="outline" className="flex-1"
+                        disabled={processing === order.id}
+                        onClick={() => handleAction(order.id, 'reject')}>
+                        Từ chối
+                      </Button>
+                      <Button size="sm" className="bg-[#1C2B4A] text-[#F6F1EA]"
+                        style={{ flex: 2 }}
+                        disabled={processing === order.id}
+                        onClick={() => handleAction(order.id, 'approve')}>
+                        {processing === order.id ? <Loader2 className="w-4 h-4 animate-spin" /> : '✓ Duyệt'}
+                      </Button>
+                    </>
+                  )}
+                  {order.status === 'approved' && (
+                    <Button size="sm" className="flex-1 bg-green-600 text-white hover:bg-green-700"
+                      onClick={() => startPay(order.id)}>
+                      💰 Ghi nhận thanh toán
+                    </Button>
+                  )}
+                  {order.status === 'paid' && (
+                    <Button size="sm" className="flex-1 bg-[#5B8E9F] text-white"
+                      disabled={processing === order.id}
+                      onClick={() => handleAction(order.id, 'fulfill')}>
+                      Hoàn thành giao hàng
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
