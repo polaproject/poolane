@@ -9,79 +9,178 @@ import {
   LayoutDashboard, Users, CalendarDays, DollarSign, Zap,
   BellRing, Brain, ShoppingBag, CheckSquare, ClipboardList,
   Star, BarChart2, Calendar, TrendingUp, Target, BookOpen,
-  ScrollText, Bell, LogOut, ChevronLeft, Menu, X,
-  Activity, UserCog, IdCard, HelpCircle,
+  Bell, LogOut, Menu, X, Activity, UserCog, IdCard, HelpCircle,
+  ChevronDown, ChevronRight, FileText, Video, Image as ImageIcon,
+  ReceiptText, Award, Tags, ShoppingCart,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface NavItem {
   label: string
   href: string
   icon: React.ComponentType<{ className?: string }>
-  badge?: string
 }
 
-const NAV_ITEMS: Record<UserRole, NavItem[]> = {
+interface NavGroup {
+  key: string
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  items: NavItem[]
+}
+
+const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
   admin: [
-    { label: 'Dashboard',      href: '/admin/dashboard',    icon: LayoutDashboard },
-    { label: 'Học viên',       href: '/admin/students',     icon: Users },
-    { label: 'YC cập nhật',    href: '/admin/profile-requests', icon: UserCog },
-    { label: 'Reset MK',       href: '/admin/password-resets', icon: UserCog },
-    { label: 'Lịch học',       href: '/admin/schedule',     icon: CalendarDays },
-    { label: 'Tài chính',      href: '/admin/finance',      icon: DollarSign },
-    { label: 'Hoàn tiền',      href: '/admin/finance/refunds', icon: DollarSign },
-    { label: 'Báo cáo',        href: '/admin/reports',       icon: BarChart2 },
-    { label: 'Pulse Check',    href: '/admin/pulse',        icon: Zap },
-    { label: 'AI Dự Báo',      href: '/admin/ai',           icon: Brain },
-    { label: 'Heatmap KN',     href: '/admin/skill-heatmap', icon: BarChart2 },
-    { label: 'Sản phẩm',       href: '/admin/shop/products', icon: ShoppingBag },
-    { label: 'Đơn hàng',       href: '/admin/shop/orders',  icon: ShoppingBag },
-    { label: 'Blog',           href: '/admin/blog',         icon: BookOpen },
-    { label: 'Sự kiện',        href: '/admin/events',       icon: Star },
-    { label: 'Broadcast',      href: '/admin/broadcast',    icon: BellRing },
+    {
+      key: 'tongquan', label: 'Tổng quan', icon: LayoutDashboard,
+      items: [
+        { label: 'Bảng điều khiển', href: '/admin/dashboard', icon: LayoutDashboard },
+      ]
+    },
+    {
+      key: 'hocvien', label: 'Học viên', icon: Users,
+      items: [
+        { label: 'Danh sách học viên', href: '/admin/students', icon: Users },
+        { label: 'Yêu cầu cập nhật', href: '/admin/profile-requests', icon: UserCog },
+        { label: 'Đặt lại mật khẩu', href: '/admin/password-resets', icon: UserCog },
+      ]
+    },
+    {
+      key: 'vanhanh', label: 'Vận hành', icon: CalendarDays,
+      items: [
+        { label: 'Lịch học', href: '/admin/schedule', icon: CalendarDays },
+        { label: 'Pulse Check', href: '/admin/pulse', icon: Zap },
+      ]
+    },
+    {
+      key: 'taichinh', label: 'Tài chính', icon: DollarSign,
+      items: [
+        { label: 'Tổng quan tài chính', href: '/admin/finance', icon: DollarSign },
+        { label: 'Hoàn tiền', href: '/admin/finance/refunds', icon: ReceiptText },
+        { label: 'Báo cáo & Đối chiếu', href: '/admin/reports', icon: BarChart2 },
+      ]
+    },
+    {
+      key: 'cuahang', label: 'Cửa hàng', icon: ShoppingBag,
+      items: [
+        { label: 'Sản phẩm', href: '/admin/shop/products', icon: ShoppingBag },
+        { label: 'Đơn hàng', href: '/admin/shop/orders', icon: ShoppingCart },
+        { label: 'Mã giảm giá', href: '/admin/vouchers', icon: Tags },
+      ]
+    },
+    {
+      key: 'noidung', label: 'Nội dung', icon: BookOpen,
+      items: [
+        { label: 'Bài viết Blog', href: '/admin/blog', icon: FileText },
+        { label: 'Sự kiện', href: '/admin/events', icon: Star },
+        { label: 'Quiz', href: '/admin/quizzes', icon: HelpCircle },
+        { label: 'Album ảnh', href: '/admin/photos', icon: ImageIcon },
+        { label: 'Video bơi', href: '/admin/videos', icon: Video },
+      ]
+    },
+    {
+      key: 'phantich', label: 'Phân tích', icon: BarChart2,
+      items: [
+        { label: 'AI dự báo', href: '/admin/ai', icon: Brain },
+        { label: 'Heatmap kỹ năng', href: '/admin/skill-heatmap', icon: BarChart2 },
+      ]
+    },
+    {
+      key: 'lienlac', label: 'Liên lạc', icon: BellRing,
+      items: [
+        { label: 'Gửi thông báo chung', href: '/admin/broadcast', icon: BellRing },
+      ]
+    },
   ],
   staff: [
-    { label: 'Duyệt đăng ký',  href: '/staff/registrations', icon: CheckSquare },
-    { label: 'Học viên',       href: '/staff/students',      icon: Users },
-    { label: 'YC cập nhật',    href: '/admin/profile-requests', icon: UserCog },
-    { label: 'Thống kê',       href: '/staff/stats',         icon: BarChart2 },
+    {
+      key: 'tongquan', label: 'Tổng quan', icon: LayoutDashboard,
+      items: [
+        { label: 'Bảng điều khiển', href: '/staff/dashboard', icon: LayoutDashboard },
+        { label: 'Thống kê giảng dạy', href: '/staff/stats', icon: BarChart2 },
+      ]
+    },
+    {
+      key: 'hocvien', label: 'Học viên', icon: Users,
+      items: [
+        { label: 'Danh sách học viên', href: '/staff/students', icon: Users },
+        { label: 'Yêu cầu cập nhật', href: '/admin/profile-requests', icon: UserCog },
+        { label: 'Đặt lại mật khẩu', href: '/admin/password-resets', icon: UserCog },
+      ]
+    },
+    {
+      key: 'vanhanh', label: 'Vận hành', icon: CalendarDays,
+      items: [
+        { label: 'Duyệt đăng ký buổi', href: '/staff/registrations', icon: CheckSquare },
+        { label: 'Video bơi', href: '/staff/videos', icon: Video },
+      ]
+    },
   ],
   student: [
-    { label: 'Hồ sơ',          href: '/student/profile',   icon: IdCard },
-    { label: 'Đăng ký học',    href: '/student/schedule',  icon: Calendar },
-    { label: 'Lịch của tôi',   href: '/student/my-schedule', icon: Calendar },
-    { label: 'Thanh toán',     href: '/student/payments',  icon: DollarSign },
-    { label: 'Tiến độ',        href: '/student/progress',  icon: TrendingUp },
-    { label: 'Tự đánh giá',    href: '/student/self-assessment', icon: ClipboardList },
-    { label: 'Mục tiêu',       href: '/student/goals',     icon: Target },
-    { label: 'Nhật ký',        href: '/student/log',       icon: Activity },
-    { label: 'Quiz',           href: '/student/quiz',      icon: HelpCircle },
-    { label: 'Sự kiện',        href: '/student/events',    icon: Star },
-    { label: 'Thử thách',      href: '/student/challenges', icon: Target },
-    { label: 'Shop',           href: '/student/shop',      icon: ShoppingBag },
-    { label: 'Thông báo',      href: '/shared/notifications', icon: Bell },
+    {
+      key: 'canhan', label: 'Cá nhân', icon: IdCard,
+      items: [
+        { label: 'Hồ sơ của tôi', href: '/student/profile', icon: IdCard },
+        { label: 'Lịch sử thanh toán', href: '/student/payments', icon: ReceiptText },
+        { label: 'Thông báo', href: '/shared/notifications', icon: Bell },
+      ]
+    },
+    {
+      key: 'hoctap', label: 'Học tập', icon: Calendar,
+      items: [
+        { label: 'Đăng ký buổi học', href: '/student/schedule', icon: Calendar },
+        { label: 'Lịch của tôi', href: '/student/my-schedule', icon: CalendarDays },
+        { label: 'Tiến độ kỹ năng', href: '/student/progress', icon: TrendingUp },
+        { label: 'Tự đánh giá', href: '/student/self-assessment', icon: ClipboardList },
+        { label: 'Video bơi', href: '/student/videos', icon: Video },
+        { label: 'Album ảnh', href: '/student/photos', icon: ImageIcon },
+      ]
+    },
+    {
+      key: 'muctieu', label: 'Mục tiêu', icon: Target,
+      items: [
+        { label: 'Mục tiêu cá nhân', href: '/student/goals', icon: Target },
+        { label: 'Nhật ký luyện tập', href: '/student/log', icon: Activity },
+        { label: 'Thử thách', href: '/student/challenges', icon: Award },
+      ]
+    },
+    {
+      key: 'congdong', label: 'Cộng đồng', icon: Star,
+      items: [
+        { label: 'Sự kiện', href: '/student/events', icon: Star },
+        { label: 'Quiz kiến thức', href: '/student/quiz', icon: HelpCircle },
+      ]
+    },
+    {
+      key: 'muasam', label: 'Mua sắm', icon: ShoppingBag,
+      items: [
+        { label: 'Cửa hàng', href: '/student/shop', icon: ShoppingBag },
+        { label: 'Đơn hàng của tôi', href: '/student/shop/orders', icon: ShoppingCart },
+      ]
+    },
   ],
 }
 
 // Bottom nav (mobile) — 5 items max
 const BOTTOM_NAV: Record<UserRole, NavItem[]> = {
   admin: [
-    { label: 'Home',    href: '/admin/dashboard',    icon: LayoutDashboard },
-    { label: 'HV',      href: '/admin/students',     icon: Users },
-    { label: 'Lịch',   href: '/admin/schedule',     icon: CalendarDays },
-    { label: 'Tiền',   href: '/admin/finance',      icon: DollarSign },
-    { label: 'Pulse',   href: '/admin/pulse',        icon: Zap },
+    { label: 'Tổng quan', href: '/admin/dashboard', icon: LayoutDashboard },
+    { label: 'Học viên', href: '/admin/students', icon: Users },
+    { label: 'Lịch', href: '/admin/schedule', icon: CalendarDays },
+    { label: 'Tài chính', href: '/admin/finance', icon: DollarSign },
+    { label: 'Pulse', href: '/admin/pulse', icon: Zap },
   ],
   staff: [
-    { label: 'Duyệt',   href: '/staff/registrations', icon: CheckSquare },
-    { label: 'Thống kê', href: '/staff/stats',         icon: BarChart2 },
+    { label: 'Tổng quan', href: '/staff/dashboard', icon: LayoutDashboard },
+    { label: 'Duyệt', href: '/staff/registrations', icon: CheckSquare },
+    { label: 'Học viên', href: '/staff/students', icon: Users },
+    { label: 'Thống kê', href: '/staff/stats', icon: BarChart2 },
   ],
   student: [
-    { label: 'Lịch',    href: '/student/schedule',  icon: Calendar },
-    { label: 'Tiến độ', href: '/student/progress',  icon: TrendingUp },
-    { label: 'Mục tiêu', href: '/student/goals',    icon: Target },
-    { label: 'Shop',    href: '/student/shop',      icon: ShoppingBag },
-    { label: 'TB',      href: '/shared/notifications', icon: Bell },
+    { label: 'Lịch học', href: '/student/schedule', icon: Calendar },
+    { label: 'Tiến độ', href: '/student/progress', icon: TrendingUp },
+    { label: 'Mục tiêu', href: '/student/goals', icon: Target },
+    { label: 'Cửa hàng', href: '/student/shop', icon: ShoppingBag },
+    { label: 'Thông báo', href: '/shared/notifications', icon: Bell },
   ],
 }
 
@@ -97,11 +196,44 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  const navItems = NAV_ITEMS[userRole] ?? []
+  const groups = NAV_GROUPS[userRole] ?? []
   const bottomItems = BOTTOM_NAV[userRole] ?? []
 
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(href + '/')
+  }
+
+  function isGroupActive(group: NavGroup) {
+    return group.items.some(i => isActive(i.href))
+  }
+
+  // expanded groups: persist via localStorage; default mở group đang active
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    let initial: Set<string>
+    try {
+      const raw = localStorage.getItem('pola.sidebarExpanded')
+      initial = raw ? new Set(JSON.parse(raw)) : new Set()
+    } catch {
+      initial = new Set()
+    }
+    // Auto-mở group chứa trang đang active
+    for (const g of groups) {
+      if (isGroupActive(g)) initial.add(g.key)
+    }
+    setExpanded(initial)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, userRole])
+
+  function toggleGroup(key: string) {
+    setExpanded(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      try { localStorage.setItem('pola.sidebarExpanded', JSON.stringify([...next])) } catch {}
+      return next
+    })
   }
 
   async function handleLogout() {
@@ -122,7 +254,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
       {/* ── SIDEBAR (desktop) ── */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50 flex flex-col w-60 pola-nav
+          fixed inset-y-0 left-0 z-50 flex flex-col w-64 pola-nav
           transition-transform duration-200 ease-in-out
           lg:translate-x-0 lg:static lg:flex
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -148,31 +280,62 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
           </button>
         </div>
 
-        {/* Nav items */}
-        <nav className="flex-1 overflow-y-auto py-3 px-2">
-          {navItems.map(item => {
-            const active = isActive(item.href)
+        {/* Nav groups */}
+        <nav className="flex-1 overflow-y-auto py-2 px-2">
+          {groups.map(group => {
+            const isOpen = expanded.has(group.key) || isGroupActive(group)
+            const GroupIcon = group.icon
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setSidebarOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl mb-0.5 text-sm font-medium transition-all"
-                style={{
-                  background: active ? 'var(--pola-nav-active)' : 'transparent',
-                  color: active ? 'var(--pola-nav-text)' : 'var(--pola-nav-muted)',
-                  borderLeft: active ? `3px solid var(--pola-accent)` : '3px solid transparent',
-                }}
-              >
-                <item.icon className="w-4 h-4 flex-shrink-0" />
-                {item.label}
-                {active && (
-                  <span
-                    className="ml-auto w-1.5 h-1.5 rounded-full"
-                    style={{ background: 'var(--pola-accent)' }}
-                  />
+              <div key={group.key} className="mb-0.5">
+                {/* Group header */}
+                <button
+                  onClick={() => toggleGroup(group.key)}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs uppercase tracking-wider font-semibold transition-colors"
+                  style={{
+                    color: 'var(--pola-nav-muted)',
+                  }}
+                >
+                  <GroupIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="flex-1 text-left">{group.label}</span>
+                  {isOpen
+                    ? <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" />
+                    : <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
+                  }
+                </button>
+
+                {/* Group items */}
+                {isOpen && (
+                  <div className="ml-2 mt-0.5 mb-1.5">
+                    {group.items.map(item => {
+                      const active = isActive(item.href)
+                      const ItemIcon = item.icon
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setSidebarOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-lg mb-0.5 text-sm transition-all"
+                          style={{
+                            background: active ? 'var(--pola-nav-active)' : 'transparent',
+                            color: active ? 'var(--pola-nav-text)' : 'var(--pola-nav-muted)',
+                            borderLeft: active ? `3px solid var(--pola-accent)` : '3px solid transparent',
+                            fontWeight: active ? 600 : 400,
+                          }}
+                        >
+                          <ItemIcon className="w-4 h-4 flex-shrink-0" />
+                          <span className="flex-1 truncate">{item.label}</span>
+                          {active && (
+                            <span
+                              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                              style={{ background: 'var(--pola-accent)' }}
+                            />
+                          )}
+                        </Link>
+                      )
+                    })}
+                  </div>
                 )}
-              </Link>
+              </div>
             )
           })}
         </nav>
@@ -198,7 +361,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
               {userFullName}
             </p>
             <p className="text-xs capitalize" style={{ color: 'var(--pola-nav-muted)' }}>
-              {userRole}
+              {userRole === 'admin' ? 'Quản trị viên' : userRole === 'staff' ? 'Trợ lý' : 'Học viên'}
             </p>
           </div>
           <button
@@ -267,6 +430,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
         >
           {bottomItems.map(item => {
             const active = isActive(item.href)
+            const ItemIcon = item.icon
             return (
               <Link
                 key={item.href}
@@ -274,7 +438,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
                 className="flex flex-col items-center gap-0.5 py-2 px-3 transition-all"
                 style={{ color: active ? 'var(--pola-accent)' : 'var(--pola-nav-muted)' }}
               >
-                <item.icon className="w-5 h-5" />
+                <ItemIcon className="w-5 h-5" />
                 <span className="text-[9px] font-medium leading-none">{item.label}</span>
               </Link>
             )

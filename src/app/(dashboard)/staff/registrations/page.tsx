@@ -47,7 +47,7 @@ export default function RegistrationsPage() {
     try {
       const res = await fetch(`/api/sessions/${sessionId}/registrations`)
       const data = await res.json()
-      if (data.data) setRegistrations(data.data.filter((r: Registration) => ['pending', 'waitlist'].includes(r.status)))
+      if (data.data) setRegistrations(data.data)
     } catch {
       toast.error('Không thể tải danh sách đăng ký')
     } finally {
