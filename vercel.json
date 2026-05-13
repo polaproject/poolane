@@ -1,0 +1,20 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/birthday",
+      "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/cron/reconciliation",
+      "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/cron/pulse-check",
+      "schedule": "0 23 * * 0"
+    },
+    {
+      "path": "/api/cron/absence-reminder",
+      "schedule": "0 23 * * 1"
+    }
+  ]
+}

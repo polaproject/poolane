@@ -3,6 +3,8 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { log, logError } from '@/lib/logger'
 import { processRefundSchema } from '@/lib/validations/payment'
+import { sendEmail } from '@/lib/email/client'
+import { refundConfirmationEmail } from '@/lib/email/templates'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -136,6 +138,22 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         metadata: { refundId: id, action, amount: refund.totalRefundAmount }
       }
     })
+
+    // Gửi email confirmation khi chuyển khoản
+    if (action === 'transfer' && transferReference) {
+      const studentUser = await prisma.user.findUnique({
+        where: { id: refund.student.userId },
+        select: { fullName: true, email: true }
+      })
+      if (studentUser?.email && !studentUser.email.endsWith('@poolane.local')) {
+        const tmpl = refundConfirmationEmail({
+          fullName: studentUser.fullName,
+          amount: refund.totalRefundAmount,
+          transferReference,
+        })
+        sendEmail({ to: studentUser.email, ...tmpl }).catch(() => {})
+      }
+    }
 
     // Audit log
     await prisma.auditLog.create({

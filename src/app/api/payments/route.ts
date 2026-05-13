@@ -3,6 +3,8 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { log, logError } from '@/lib/logger'
 import { recordPaymentSchema } from '@/lib/validations/payment'
+import { sendEmail } from '@/lib/email/client'
+import { paymentReceiptEmail } from '@/lib/email/templates'
 
 // ─── POST /api/payments — Ghi nhận thanh toán ─────────────
 export async function POST(request: NextRequest) {
@@ -91,7 +93,7 @@ export async function POST(request: NextRequest) {
     // Thông báo cho học viên
     const student = await prisma.student.findUnique({
       where: { id: input.studentId },
-      select: { userId: true }
+      include: { user: { select: { fullName: true, email: true } } }
     })
     if (student) {
       await prisma.notification.create({
@@ -104,6 +106,26 @@ export async function POST(request: NextRequest) {
           metadata: { paymentId: payment.id, amount: input.amount, type: input.type }
         }
       })
+
+      // Gửi email biên lai (fire-and-forget)
+      if (student.user.email && !student.user.email.endsWith('@poolane.local')) {
+        const typeLabel = input.type === 'course_fee' ? 'Học phí'
+          : input.type === 'pool_ticket' ? 'Vé bơi'
+          : input.type === 'shop' ? 'Mua hàng'
+          : 'Khác'
+        const methodLabel = input.paymentMethod === 'cash' ? 'Tiền mặt'
+          : input.paymentMethod === 'bank_transfer' ? 'Chuyển khoản'
+          : input.paymentMethod === 'card' ? 'Thẻ' : 'Khác'
+        const tmpl = paymentReceiptEmail({
+          fullName: student.user.fullName,
+          amount: input.amount,
+          type: typeLabel,
+          paymentMethod: methodLabel,
+          recordedAt: new Date(),
+          referenceNumber: input.referenceNumber,
+        })
+        sendEmail({ to: student.user.email, ...tmpl }).catch(() => {})
+      }
     }
 
     log.info('payments.record', `Recorded ${input.type} payment`, {
