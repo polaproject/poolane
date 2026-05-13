@@ -30,6 +30,7 @@ const NAV_ITEMS: Record<UserRole, NavItem[]> = {
     { label: 'Tài chính',      href: '/admin/finance',      icon: DollarSign },
     { label: 'Pulse Check',    href: '/admin/pulse',        icon: Zap },
     { label: 'AI Dự Báo',      href: '/admin/ai',           icon: Brain },
+    { label: 'Sản phẩm',       href: '/admin/shop/products', icon: ShoppingBag },
     { label: 'Đơn hàng',       href: '/admin/shop/orders',  icon: ShoppingBag },
     { label: 'Broadcast',      href: '/admin/broadcast',    icon: BellRing },
   ],

@@ -122,8 +122,8 @@ LAYER 6 — Validation & Security
 |---|---|
 | Student: duyệt + đặt hàng | ✅ |
 | Admin: duyệt/xử lý đơn hàng | ✅ |
-| **Admin: thêm/sửa/xoá sản phẩm** | **❌ THIẾU** |
-| Seed sản phẩm mẫu | ❌ Chưa có |
+| Admin: thêm/sửa/ngừng bán sản phẩm | ✅ `/admin/shop/products` (4 loại với conditional fields) |
+| Seed sản phẩm mẫu | ✅ 9 sản phẩm — `npx dotenv -e .env.local -- npx tsx prisma/seed-products.ts` |
 
 ### Module: Thông Báo & Communication
 | Hạng mục | Status |
@@ -170,14 +170,12 @@ LAYER 6 — Validation & Security
 
 Theo thứ tự quan trọng:
 
-1. **Admin: Quản lý sản phẩm Shop** (`/admin/shop/products`) — thiếu hoàn toàn
-2. **Admin: UI hoàn tiền** (`/admin/finance/refunds`) — API có, UI không
-3. **Admin: UI tạo/sửa blog** (`/admin/blog/new`) — API có, UI không
-4. **Student: UI làm quiz** (`/student/quiz/[id]`) — API có, UI không
-5. **Áp dụng design system** cho tất cả trang còn lại
-6. **Deploy Vercel** + trỏ domain poolane.vn
-7. **Email templates** với Resend
-8. **Trang hồ sơ học viên** (`/student/profile`) — chưa có
+1. **Admin: UI hoàn tiền** (`/admin/finance/refunds`) — API có, UI không
+2. **Admin: UI tạo/sửa blog** (`/admin/blog/new`) — API có, UI không
+3. **Student: UI làm quiz** (`/student/quiz/[id]`) — API có, UI không
+4. **Áp dụng design system** cho tất cả trang còn lại
+5. **Deploy Vercel** + trỏ domain poolane.vn
+6. **Email templates** với Resend
 
 ---
 
