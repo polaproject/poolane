@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { Pencil, Send, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import { PushSubscribeButton } from '@/components/features/PushSubscribeButton'
 
 export default async function StudentProfilePage() {
   const user = await requireRole(['student'])
@@ -125,6 +126,10 @@ export default async function StudentProfilePage() {
             <ConsentRow label="Đồng ý hình ảnh dùng cho marketing" at={u.imageConsentMarketingAt} />
             <ConsentRow label="Đã đọc chính sách hoàn tiền" at={u.refundPolicyAcknowledgedAt} />
             <ConsentRow label="Đã đọc điều khoản sử dụng" at={u.termsAcknowledgedAt} />
+            <div className="pt-3 mt-3 border-t border-[#1C2B4A]/5 flex items-center justify-between">
+              <span className="text-[#1C2B4A]/70">Thông báo đẩy trình duyệt</span>
+              <PushSubscribeButton />
+            </div>
           </div>
         </div>
       </div>
