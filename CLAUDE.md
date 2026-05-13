@@ -103,8 +103,9 @@ LAYER 6 — Validation & Security
 |---|---|
 | Admin: finance dashboard | ✅ |
 | Admin: ghi nhận thanh toán | ✅ (component) |
-| Admin: danh sách hoàn tiền | ❌ `/admin/finance/refunds` chưa có UI |
-| Admin: duyệt/xử lý hoàn tiền | ✅ (API) — ❌ (UI) |
+| Admin: danh sách hoàn tiền | ✅ `/admin/finance/refunds` với tab status + summary |
+| Admin: tạo yêu cầu hoàn tiền | ✅ `/admin/finance/refunds/new` (preview tự tính) |
+| Admin: duyệt + đánh dấu đã chuyển | ✅ `/admin/finance/refunds/[id]` |
 | Student: xem lịch sử thanh toán | ❌ Chưa có trang |
 | Export Excel doanh thu | ❌ Chưa implement |
 
@@ -170,12 +171,11 @@ LAYER 6 — Validation & Security
 
 Theo thứ tự quan trọng:
 
-1. **Admin: UI hoàn tiền** (`/admin/finance/refunds`) — API có, UI không
-2. **Admin: UI tạo/sửa blog** (`/admin/blog/new`) — API có, UI không
-3. **Student: UI làm quiz** (`/student/quiz/[id]`) — API có, UI không
-4. **Áp dụng design system** cho tất cả trang còn lại
-5. **Deploy Vercel** + trỏ domain poolane.vn
-6. **Email templates** với Resend
+1. **Admin: UI tạo/sửa blog** (`/admin/blog/new`) — API có, UI không
+2. **Student: UI làm quiz** (`/student/quiz/[id]`) — API có, UI không
+3. **Áp dụng design system** cho tất cả trang còn lại
+4. **Deploy Vercel** + trỏ domain poolane.vn
+5. **Email templates** với Resend
 
 ---
 

@@ -253,12 +253,15 @@ export default async function StudentDetailPage({ params }: Params) {
       </div>
 
       {/* Quick actions */}
-      <div className="flex gap-3">
-        <Button asChild variant="outline" className="flex-1">
+      <div className="flex gap-3 flex-wrap">
+        <Button asChild variant="outline" className="flex-1 min-w-[150px]">
           <Link href={`/admin/students/${id}/enroll`}>+ Đăng ký khoá học</Link>
         </Button>
-        <Button asChild variant="outline" className="flex-1">
+        <Button asChild variant="outline" className="flex-1 min-w-[150px]">
           <Link href={`/admin/students/${id}/ticket`}>+ Tạo vé bơi</Link>
+        </Button>
+        <Button asChild variant="outline" className="flex-1 min-w-[150px] border-red-200 text-red-700 hover:bg-red-50">
+          <Link href={`/admin/finance/refunds/new?student=${id}`}>💸 Yêu cầu hoàn tiền</Link>
         </Button>
       </div>
     </div>

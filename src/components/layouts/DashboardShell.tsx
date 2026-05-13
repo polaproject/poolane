@@ -28,6 +28,7 @@ const NAV_ITEMS: Record<UserRole, NavItem[]> = {
     { label: 'YC cập nhật',    href: '/admin/profile-requests', icon: UserCog },
     { label: 'Lịch học',       href: '/admin/schedule',     icon: CalendarDays },
     { label: 'Tài chính',      href: '/admin/finance',      icon: DollarSign },
+    { label: 'Hoàn tiền',      href: '/admin/finance/refunds', icon: DollarSign },
     { label: 'Pulse Check',    href: '/admin/pulse',        icon: Zap },
     { label: 'AI Dự Báo',      href: '/admin/ai',           icon: Brain },
     { label: 'Sản phẩm',       href: '/admin/shop/products', icon: ShoppingBag },
