@@ -91,6 +91,22 @@ export async function PATCH(request: NextRequest, { params }: Params) {
             notes: `Thanh toán đơn hàng Shop #${order.id.slice(0, 8).toUpperCase()}`,
           }
         })
+
+        // Auto-create ImprovementSessionPack cho mỗi item type=improvement_pack
+        for (const item of order.orderItems) {
+          if (item.product.type === 'improvement_pack' && item.product.sessionsCount) {
+            for (let i = 0; i < item.quantity; i++) {
+              await tx.improvementSessionPack.create({
+                data: {
+                  studentId: order.studentId,
+                  orderId: order.id,
+                  sessionsPurchased: item.product.sessionsCount,
+                  expiresAt: new Date(Date.now() + 90 * 86400000), // expire sau 90 ngày
+                }
+              })
+            }
+          }
+        }
       }
 
       return updatedOrder

@@ -595,6 +595,21 @@ model OrderItem {
   @@map("order_items")
 }
 
+model ImprovementSessionPack {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId          String   @map("student_id")
+  orderId            String?  @map("order_id")
+  sessionsPurchased  Int      @map("sessions_purchased")
+  sessionsUsed       Int      @default(0) @map("sessions_used")
+  targetSkills       Json     @default("[]") @map("target_skills")
+  expiresAt          DateTime? @map("expires_at")
+
+  @@map("improvement_session_packs")
+  @@index([studentId])
+}
+
 // ─────────────────────────────────────────
 // VOUCHERS
 // ─────────────────────────────────────────
