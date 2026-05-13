@@ -129,8 +129,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl
     const query = profileChangeRequestListQuerySchema.safeParse({
       status: searchParams.get('status') ?? undefined,
-      page: searchParams.get('page'),
-      pageSize: searchParams.get('pageSize'),
+      page: searchParams.get('page') ?? undefined,
+      pageSize: searchParams.get('pageSize') ?? undefined,
     })
 
     if (!query.success) {
