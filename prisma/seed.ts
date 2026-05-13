@@ -30,7 +30,7 @@ function phoneToEmail(phone: string): string {
   return `${phone.replace(/\D/g, '')}@poolane.local`
 }
 
-async function createAuthUser(phone: string, fullName: string, password = 'Poolane@123456') {
+async function createAuthUser(phone: string, fullName: string, role: 'admin' | 'staff' | 'student' = 'student', password = 'Poolane@123456') {
   const email = phoneToEmail(phone)
 
   // Xoá nếu đã tồn tại
@@ -44,7 +44,7 @@ async function createAuthUser(phone: string, fullName: string, password = 'Poola
     email,
     password,
     email_confirm: true,
-    user_metadata: { full_name: fullName }
+    user_metadata: { full_name: fullName, role }  // role trong metadata để tránh RLS
   })
 
   if (error) throw new Error(`Auth create failed for ${phone}: ${error.message}`)
@@ -120,7 +120,7 @@ async function main() {
 
   // ── 2. Admin ─────────────────────────────────────────────
   console.log('👑 Creating admin...')
-  const adminAuth = await createAuthUser('0900000001', 'Nguyễn Văn Admin')
+  const adminAuth = await createAuthUser('0900000001', 'Nguyễn Văn Admin', 'admin')
   await prisma.user.create({
     data: {
       id: adminAuth.id,
@@ -138,8 +138,8 @@ async function main() {
 
   // ── 3. Staff ─────────────────────────────────────────────
   console.log('👥 Creating staff...')
-  const staff1Auth = await createAuthUser('0900000002', 'Trần Thị Staff 1')
-  const staff2Auth = await createAuthUser('0900000003', 'Lê Văn Staff 2')
+  const staff1Auth = await createAuthUser('0900000002', 'Trần Thị Staff 1', 'staff')
+  const staff2Auth = await createAuthUser('0900000003', 'Lê Văn Staff 2', 'staff')
 
   await Promise.all([
     prisma.user.create({

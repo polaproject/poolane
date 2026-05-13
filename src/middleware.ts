@@ -1,8 +1,10 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Routes không cần đăng nhập
-const PUBLIC_ROUTES = ['/', '/login', '/register', '/courses', '/blog', '/faq', '/privacy', '/unauthorized', '/api/health']
+const PUBLIC_ROUTES = [
+  '/', '/login', '/register', '/courses', '/blog', '/faq',
+  '/privacy', '/unauthorized', '/api/health', '/api/auth', '/api/debug'
+]
 const AUTH_ROUTES = ['/login', '/register']
 
 export async function middleware(request: NextRequest) {
@@ -13,13 +15,9 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
+        getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          )
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
@@ -32,16 +30,11 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const path = request.nextUrl.pathname
 
-  // Nếu đã đăng nhập mà vào trang login → redirect về dashboard
+  // Đã đăng nhập mà vào login → redirect về dashboard đúng role
   if (user && AUTH_ROUTES.some(r => path.startsWith(r))) {
-    // Lấy role từ DB để redirect đúng
-    const { data: profile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    const role = profile?.role ?? 'student'
+    // Dùng user_metadata.role (từ JWT) để tránh DB query ở Edge Runtime
+    // user_metadata được set khi tạo user qua admin API (seed.ts)
+    const role = (user.user_metadata?.role as string) ?? 'student'
     const dashboardPath = role === 'admin'
       ? '/admin/dashboard'
       : role === 'staff'
@@ -51,8 +44,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(dashboardPath, request.url))
   }
 
-  // Nếu chưa đăng nhập mà vào route protected → redirect login
-  const isPublic = PUBLIC_ROUTES.some(r => path === r || path.startsWith('/blog') || path.startsWith('/courses') || path.startsWith('/api/health'))
+  const isPublic = PUBLIC_ROUTES.some(r =>
+    path === r ||
+    path.startsWith('/blog') ||
+    path.startsWith('/courses') ||
+    path.startsWith('/api/health') ||
+    path.startsWith('/api/auth') ||
+    path.startsWith('/api/debug')
+  )
 
   if (!user && !isPublic) {
     return NextResponse.redirect(new URL('/login', request.url))

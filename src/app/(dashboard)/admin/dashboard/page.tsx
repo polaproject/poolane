@@ -7,15 +7,9 @@ export default async function AdminDashboard() {
   const user = await requireRole(['admin'])
 
   // Stats
-  const [totalStudents, activeStudents, pendingPayments, recentStudents] = await Promise.all([
+  const [totalStudents, activeStudents, recentStudents] = await Promise.all([
     prisma.student.count(),
     prisma.student.count({ where: { status: { in: ['active', 'extension'] } } }),
-    prisma.enrollment.count({
-      where: {
-        status: 'active',
-        totalPaid: { lt: prisma.enrollment.fields.depositAmount }
-      }
-    }).catch(() => 0),
     prisma.student.findMany({
       where: { createdAt: { gte: new Date(Date.now() - 7 * 86400000) } },
       include: { user: { select: { fullName: true } } },
@@ -23,6 +17,7 @@ export default async function AdminDashboard() {
       take: 5
     })
   ])
+  const pendingPayments = 0 // TODO: Phase 5
 
   const stats = [
     { label: 'Tổng học viên',  value: totalStudents, icon: Users,        href: '/admin/students',              color: 'text-[#1C2B4A]' },

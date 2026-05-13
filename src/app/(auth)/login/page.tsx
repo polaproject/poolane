@@ -38,23 +38,18 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        // Lấy role để redirect đúng trang
-        const { data: profile } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', data.user.id)
-          .single()
-
-        const role = profile?.role ?? 'student'
+        // Lấy role từ user_metadata (không cần query DB, tránh RLS)
+        const role = (data.user.user_metadata?.role as string) ?? 'student'
         const path = role === 'admin'
           ? '/admin/dashboard'
           : role === 'staff'
             ? '/staff/dashboard'
             : '/student/dashboard'
 
+        console.log('LOGIN DEBUG: role=', role, 'path=', path, 'user_metadata=', data.user.user_metadata)
         toast.success('Đăng nhập thành công!')
-        router.push(path)
-        router.refresh()
+        // router.push thay vì refresh để tránh double navigation
+        window.location.href = path
       }
     } catch {
       toast.error('Có lỗi xảy ra. Thử lại sau nhé.')
