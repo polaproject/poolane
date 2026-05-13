@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
 
     // Voucher
     let discountAmount = 0
+    let voucherId: string | null = null
     if (voucherCode) {
       const voucher = await prisma.voucher.findFirst({
         where: {
@@ -73,10 +74,13 @@ export async function POST(request: NextRequest) {
           AND: [
             { OR: [{ validUntil: null }, { validUntil: { gte: new Date() } }] },
             { OR: [{ maxUses: null }, { usedCount: { lt: prisma.voucher.fields.maxUses } }] },
+            { OR: [{ validFrom: null }, { validFrom: { lte: new Date() } }] },
+            { OR: [{ appliesTo: 'any' }, { appliesTo: 'shop_only' }] },
           ],
         }
       })
       if (voucher) {
+        voucherId = voucher.id
         discountAmount = voucher.discountType === 'percent'
           ? Math.floor(totalAmount * (voucher.discountValue / 100))
           : Math.min(voucher.discountValue, totalAmount)
@@ -101,6 +105,17 @@ export async function POST(request: NextRequest) {
         },
         include: { orderItems: { include: { product: true } } }
       })
+
+      // Track voucher usage
+      if (voucherId) {
+        await tx.voucherUsage.create({
+          data: { voucherId, studentId, orderId: newOrder.id }
+        })
+        await tx.voucher.update({
+          where: { id: voucherId },
+          data: { usedCount: { increment: 1 } }
+        })
+      }
 
       // Thông báo cho admin/staff
       const admins = await tx.user.findMany({ where: { role: { in: ['admin', 'staff'] }, isActive: true }, select: { id: true } })
