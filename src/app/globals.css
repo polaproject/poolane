@@ -179,9 +179,236 @@
   --pola-text-muted: rgba(229,237,248,0.45);
 }
 
-/* Utility classes for Poolane brand */
+/* ── Poolane Shadow System ───────────────────────────────── */
+:root {
+  /* Shadow hierarchy — all tinted with navy */
+  --shadow-xs:  0 1px 4px rgba(28,43,74,0.06);
+  --shadow-sm:  0 2px 8px rgba(28,43,74,0.07);
+  --shadow-md:  0 4px 20px rgba(28,43,74,0.09);
+  --shadow-lg:  0 8px 32px rgba(28,43,74,0.14);
+  --shadow-xl:  0 16px 48px rgba(28,43,74,0.18);
+
+  /* Hover lifted shadows */
+  --shadow-sm-hover: 0 4px 16px rgba(28,43,74,0.13);
+  --shadow-md-hover: 0 8px 28px rgba(28,43,74,0.16);
+  --shadow-lg-hover: 0 14px 44px rgba(28,43,74,0.22);
+}
+
+/* ── Utility classes for Poolane brand ──────────────────── */
 .pola-nav    { background-color: var(--pola-nav-bg); color: var(--pola-nav-text); }
 .pola-page   { background-color: var(--pola-page-bg); color: var(--pola-text); }
 .pola-card   { background-color: var(--pola-card-bg); border-color: var(--pola-border); }
 .pola-accent { color: var(--pola-accent); }
 .pola-teal   { color: var(--pola-teal); }
+
+/* ── Premium Card System ────────────────────────────────── */
+
+/* Base card — subtle elevation */
+.card-base {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid rgba(28,43,74,0.08);
+  box-shadow: var(--shadow-md);
+  transition: box-shadow 250ms ease, transform 250ms ease, border-color 250ms ease;
+}
+.card-base:hover {
+  box-shadow: var(--shadow-md-hover);
+  border-color: rgba(28,43,74,0.14);
+}
+
+/* Stats card — clickable, lifts on hover */
+.card-stat {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid rgba(28,43,74,0.08);
+  box-shadow: var(--shadow-md);
+  transition: box-shadow 250ms ease, transform 250ms ease, border-color 250ms ease;
+  cursor: pointer;
+}
+.card-stat:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  border-color: rgba(28,43,74,0.15);
+}
+
+/* Navy card with subtle gradient */
+.card-navy {
+  background: linear-gradient(135deg, #1C2B4A 0%, #162340 100%);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+.card-navy::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+.card-navy::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: -20px;
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: rgba(200,168,75,0.06);
+}
+
+/* Alert card — warning/teal accent left border */
+.card-alert {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid rgba(28,43,74,0.08);
+  border-left: 3px solid var(--pola-teal);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 200ms ease;
+}
+.card-alert:hover { box-shadow: var(--shadow-sm-hover); }
+
+.card-alert-danger {
+  border-left-color: #ef4444;
+}
+.card-alert-warning {
+  border-left-color: var(--pola-accent);
+}
+
+/* ── Premium Button Styles ──────────────────────────────── */
+.btn-pola-primary {
+  background: #1C2B4A;
+  color: #F6F1EA;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(28,43,74,0.20);
+  transition: all 200ms ease;
+  border: none;
+}
+.btn-pola-primary:hover {
+  background: #162340;
+  box-shadow: 0 6px 20px rgba(28,43,74,0.30);
+  transform: translateY(-1px);
+}
+.btn-pola-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(28,43,74,0.20);
+}
+
+.btn-pola-secondary {
+  background: white;
+  color: #1C2B4A;
+  border: 1px solid rgba(28,43,74,0.15);
+  border-radius: 10px;
+  font-weight: 500;
+  box-shadow: var(--shadow-xs);
+  transition: all 200ms ease;
+}
+.btn-pola-secondary:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: rgba(28,43,74,0.25);
+  background: #FAFAF8;
+}
+
+/* ── Premium Table ──────────────────────────────────────── */
+.table-pola {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.table-pola thead tr th {
+  background: rgba(28,43,74,0.03);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(28,43,74,0.45);
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(28,43,74,0.10);
+}
+.table-pola tbody tr {
+  transition: background 150ms ease;
+  border-bottom: 1px solid rgba(28,43,74,0.06);
+}
+.table-pola tbody tr:hover {
+  background: rgba(28,43,74,0.02);
+}
+.table-pola tbody td {
+  padding: 14px 20px;
+}
+.table-pola tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* ── Notification Card ──────────────────────────────────── */
+.notif-card {
+  background: white;
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(28,43,74,0.06);
+  transition: box-shadow 200ms ease;
+}
+.notif-card:hover {
+  box-shadow: var(--shadow-md-hover);
+}
+.notif-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--pola-teal);
+}
+.notif-card.notif-warning::before { background: var(--pola-accent); }
+.notif-card.notif-danger::before  { background: #ef4444; }
+.notif-card.notif-success::before { background: #22c55e; }
+.notif-icon-bg {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  background: rgba(91,142,159,0.12);
+}
+.notif-icon-bg.warning { background: rgba(200,168,75,0.12); }
+.notif-icon-bg.danger  { background: rgba(239,68,68,0.10); }
+
+/* ── Badge / Tag ────────────────────────────────────────── */
+.badge-pola {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.badge-active   { background: rgba(91,142,159,0.12); color: #2A7FA8; }
+.badge-enrolled { background: rgba(28,43,74,0.08);   color: #1C2B4A; }
+.badge-prospect { background: rgba(200,168,75,0.12); color: #8A6010; }
+.badge-warning  { background: rgba(245,158,11,0.12); color: #B45309; }
+.badge-danger   { background: rgba(239,68,68,0.10);  color: #DC2626; }
+.badge-success  { background: rgba(34,197,94,0.12);  color: #16A34A; }
+
+/* ── Pulse / Glow effect for critical items ─────────────── */
+@keyframes pola-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
+  50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+}
+.badge-pulse { animation: pola-pulse 2s infinite; }
+
+/* ── Skeleton loading ───────────────────────────────────── */
+@keyframes pola-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgba(28,43,74,0.06) 25%, rgba(28,43,74,0.10) 50%, rgba(28,43,74,0.06) 75%);
+  background-size: 200% 100%;
+  animation: pola-shimmer 1.5s infinite;
+  border-radius: 8px;
+}

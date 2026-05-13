@@ -127,72 +127,76 @@ export default async function StudentsPage({ searchParams }: { searchParams: Sea
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 overflow-hidden shadow-sm">
-        <table className="w-full text-sm">
+      <div style={{ background: 'white', borderRadius: 16, border: '1px solid rgba(28,43,74,0.08)', boxShadow: 'var(--shadow-md)', overflow: 'hidden' }}>
+        <table className="table-pola">
           <thead>
-            <tr className="border-b border-[#1C2B4A]/8">
-              <th className="text-left px-5 py-3 text-xs font-semibold text-[#1C2B4A]/50 uppercase tracking-wider">Học viên</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-[#1C2B4A]/50 uppercase tracking-wider">Trạng thái</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-[#1C2B4A]/50 uppercase tracking-wider">Khoá học</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-[#1C2B4A]/50 uppercase tracking-wider">Vé bơi</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-[#1C2B4A]/50 uppercase tracking-wider">Lần cuối</th>
+            <tr>
+              <th className="text-left">Học viên</th>
+              <th className="text-left">Trạng thái</th>
+              <th className="text-left">Khoá học</th>
+              <th className="text-left">Vé bơi</th>
+              <th className="text-left">Lần cuối</th>
             </tr>
           </thead>
           <tbody>
             {students.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-12 text-[#1C2B4A]/40">
+                <td colSpan={5} className="text-center py-12" style={{ color: 'rgba(28,43,74,0.35)' }}>
                   {search ? 'Không tìm thấy học viên nào' : 'Chưa có học viên nào'}
                 </td>
               </tr>
             ) : (
-              students.map((student, i) => {
+              students.map((student) => {
                 const statusConfig = STATUS_LABELS[student.status] ?? STATUS_LABELS.prospect
                 const ticket = student.poolTickets[0]
                 const sessionsLeft = ticket ? ticket.maxSessions - ticket.sessionsUsed : null
                 const isLowStock = sessionsLeft !== null && sessionsLeft <= 2
+                const badgeClass = {
+                  prospect: 'badge-pola badge-prospect',
+                  enrolled: 'badge-pola badge-enrolled',
+                  active: 'badge-pola badge-active',
+                  extension: 'badge-pola badge-warning',
+                  completed: 'badge-pola badge-success',
+                  inactive: 'badge-pola badge-danger',
+                  refunded: 'badge-pola badge-enrolled',
+                }[student.status] ?? 'badge-pola badge-enrolled'
 
                 return (
-                  <tr
-                    key={student.id}
-                    className={`border-b border-[#1C2B4A]/5 hover:bg-[#F6F1EA]/50 transition-colors ${i === students.length - 1 ? 'border-0' : ''}`}
-                  >
-                    <td className="px-5 py-3.5">
-                      <Link href={`/admin/students/${student.id}`} className="block hover:text-[#1C2B4A]">
-                        <div className="font-medium text-[#1C2B4A]">{student.user.fullName}</div>
-                        <div className="text-xs text-[#1C2B4A]/50 mt-0.5">
+                  <tr key={student.id}>
+                    <td>
+                      <Link href={`/admin/students/${student.id}`} className="block group">
+                        <div className="font-semibold text-sm group-hover:underline" style={{ color: '#1C2B4A' }}>
+                          {student.user.fullName}
+                        </div>
+                        <div className="text-xs mt-0.5" style={{ color: 'rgba(28,43,74,0.40)' }}>
                           {student.studentCode} · {student.user.phone}
                         </div>
                       </Link>
                     </td>
-                    <td className="px-5 py-3.5">
-                      <Badge variant={statusConfig.variant} className="text-xs">
-                        {statusConfig.label}
-                      </Badge>
+                    <td>
+                      <span className={badgeClass}>{statusConfig.label}</span>
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td>
                       {student.enrollments.length > 0 ? (
                         <div className="flex gap-1 flex-wrap">
                           {student.enrollments.map(e => (
-                            <span key={e.id} className="text-xs bg-[#5B8E9F]/10 text-[#5B8E9F] px-2 py-0.5 rounded-full font-medium">
-                              {e.course.code}
-                            </span>
+                            <span key={e.id} className="badge-pola badge-active">{e.course.code}</span>
                           ))}
                         </div>
                       ) : (
-                        <span className="text-xs text-[#1C2B4A]/30">—</span>
+                        <span className="text-xs" style={{ color: 'rgba(28,43,74,0.25)' }}>—</span>
                       )}
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td>
                       {sessionsLeft !== null ? (
-                        <span className={`text-xs font-medium ${isLowStock ? 'text-red-500' : 'text-[#1C2B4A]/70'}`}>
+                        <span className={`text-xs font-semibold ${isLowStock ? 'text-red-500' : ''}`} style={!isLowStock ? { color: 'rgba(28,43,74,0.65)' } : {}}>
                           {sessionsLeft} buổi {isLowStock ? '⚠️' : ''}
                         </span>
                       ) : (
-                        <span className="text-xs text-[#1C2B4A]/30">Chưa có vé</span>
+                        <span className="text-xs" style={{ color: 'rgba(28,43,74,0.30)' }}>Chưa có vé</span>
                       )}
                     </td>
-                    <td className="px-5 py-3.5 text-xs text-[#1C2B4A]/50">
+                    <td className="text-xs" style={{ color: 'rgba(28,43,74,0.45)' }}>
                       {student.lastAttendedAt
                         ? formatDistanceToNow(student.lastAttendedAt, { addSuffix: true, locale: vi })
                         : '—'
