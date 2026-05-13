@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { ShoppingCart, Plus, Minus, Package, Loader2, CheckCircle } from 'lucide-react'
+import { ShoppingCart, Plus, Minus, Package, Loader2, CheckCircle, Search, History } from 'lucide-react'
+import Link from 'next/link'
 
 type Product = {
   id: string; name: string; type: string; price: number
@@ -16,6 +17,14 @@ const TYPE_LABELS: Record<string, string> = {
   service: '⭐ Dịch vụ', physical: '📦 Vật phẩm'
 }
 
+const FILTER_TABS = [
+  { value: '', label: 'Tất cả' },
+  { value: 'course', label: 'Khoá học' },
+  { value: 'improvement_pack', label: 'Pack' },
+  { value: 'service', label: 'Dịch vụ' },
+  { value: 'physical', label: 'Đồ' },
+]
+
 function fmt(n: number) { return n.toLocaleString('vi-VN') + 'đ' }
 
 export default function ShopPage() {
@@ -25,14 +34,28 @@ export default function ShopPage() {
   const [ordering, setOrdering] = useState(false)
   const [note, setNote] = useState('')
   const [ordered, setOrdered] = useState(false)
+  const [typeFilter, setTypeFilter] = useState('')
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
-    fetch('/api/shop/products')
+    fetch('/api/shop/products?isActive=true&pageSize=100')
       .then(r => r.json())
-      .then(d => { if (d.data) setProducts(d.data) })
+      .then(d => { if (d.data?.items) setProducts(d.data.items) })
       .catch(() => toast.error('Không thể tải sản phẩm'))
       .finally(() => setLoading(false))
   }, [])
+
+  const filteredProducts = useMemo(() => {
+    return products.filter(p => {
+      if (typeFilter && p.type !== typeFilter) return false
+      if (search.trim()) {
+        const q = search.trim().toLowerCase()
+        const hay = `${p.name} ${p.description ?? ''}`.toLowerCase()
+        if (!hay.includes(q)) return false
+      }
+      return true
+    })
+  }, [products, typeFilter, search])
 
   function addToCart(id: string) {
     setCart(prev => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }))
@@ -79,26 +102,67 @@ export default function ShopPage() {
         <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
         <h2 className="font-heading text-2xl text-[#1C2B4A] mb-2">Đặt hàng thành công!</h2>
         <p className="text-[#1C2B4A]/60 mb-4">Lớp sẽ duyệt đơn và liên hệ bạn sớm nhất nhé.</p>
-        <Button onClick={() => setOrdered(false)} className="bg-[#1C2B4A] text-[#F6F1EA]">Tiếp tục mua</Button>
+        <div className="flex gap-2 justify-center">
+          <Button onClick={() => setOrdered(false)} className="bg-[#1C2B4A] text-[#F6F1EA]">Tiếp tục mua</Button>
+          <Button asChild variant="outline">
+            <Link href="/student/shop/orders">Xem đơn của tôi</Link>
+          </Button>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="p-4 max-w-lg mx-auto pb-32">
-      <h1 className="font-heading text-2xl text-[#1C2B4A] mb-1">Shop</h1>
-      <p className="text-xs text-[#1C2B4A]/50 mb-5">Đặt hàng, trả sau khi nhận</p>
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="font-heading text-2xl text-[#1C2B4A]">Shop</h1>
+        <Link
+          href="/student/shop/orders"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-[#1C2B4A]/70 hover:text-[#1C2B4A]"
+        >
+          <History className="w-3.5 h-3.5" /> Đơn của tôi
+        </Link>
+      </div>
+      <p className="text-xs text-[#1C2B4A]/50 mb-4">Đặt hàng, trả sau khi nhận</p>
+
+      {/* Search */}
+      <div className="relative mb-3">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1C2B4A]/40" />
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Tìm sản phẩm..."
+          className="w-full pl-9 pr-4 py-2 text-sm border border-[#1C2B4A]/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
+        />
+      </div>
+
+      {/* Type tabs */}
+      <div className="flex gap-1.5 overflow-x-auto mb-4 -mx-1 px-1 pb-1">
+        {FILTER_TABS.map(t => (
+          <button
+            key={t.value}
+            onClick={() => setTypeFilter(t.value)}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-full whitespace-nowrap border transition-colors ${
+              typeFilter === t.value
+                ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]'
+                : 'bg-white text-[#1C2B4A]/60 border-[#1C2B4A]/15 hover:border-[#1C2B4A]/40'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#1C2B4A]/40" /></div>
-      ) : products.length === 0 ? (
+      ) : filteredProducts.length === 0 ? (
         <div className="text-center py-12 text-[#1C2B4A]/40">
           <Package className="w-8 h-8 mx-auto mb-3 opacity-30" />
-          <p>Chưa có sản phẩm nào</p>
+          <p>{products.length === 0 ? 'Chưa có sản phẩm nào' : 'Không tìm thấy sản phẩm phù hợp'}</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {products.map(p => {
+          {filteredProducts.map(p => {
             const qty = cart[p.id] ?? 0
             const isOutOfStock = p.type === 'physical' && p.stockQuantity !== null && p.stockQuantity <= 0
             return (
