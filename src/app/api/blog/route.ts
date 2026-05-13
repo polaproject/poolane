@@ -12,6 +12,7 @@ const createPostSchema = z.object({
   category: z.enum(['technique', 'safety', 'nutrition', 'student_story', 'news']),
   status: z.enum(['draft', 'published', 'scheduled']).default('draft'),
   scheduledAt: z.string().optional(),
+  coverImageUrl: z.string().url().optional().or(z.literal('')),
 })
 
 export async function POST(request: NextRequest) {
@@ -36,6 +37,7 @@ export async function POST(request: NextRequest) {
         content: parsed.data.content,
         excerpt: parsed.data.excerpt,
         category: parsed.data.category,
+        coverImageUrl: parsed.data.coverImageUrl || null,
         authorId: user.id,
         status: parsed.data.status,
         publishedAt: parsed.data.status === 'published' ? new Date() : null,

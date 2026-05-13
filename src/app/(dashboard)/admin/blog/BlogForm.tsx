@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { PhotoUploader } from '@/components/features/PhotoUploader'
 
 const CATEGORIES = [
   { value: 'technique', label: '🏊 Kỹ thuật' },
@@ -20,6 +21,7 @@ interface FormData {
   content: string
   status: string
   scheduledAt: string
+  coverImageUrl: string
 }
 
 interface Props {
@@ -46,6 +48,7 @@ export function BlogForm({ mode, initial }: Props) {
     content: initial?.content ?? '',
     status: initial?.status ?? 'draft',
     scheduledAt: initial?.scheduledAt ?? '',
+    coverImageUrl: initial?.coverImageUrl ?? '',
   })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -66,6 +69,7 @@ export function BlogForm({ mode, initial }: Props) {
         excerpt: form.excerpt || undefined,
         content: form.content,
         status: form.status,
+        coverImageUrl: form.coverImageUrl || undefined,
       }
       if (form.status === 'scheduled' && form.scheduledAt) {
         payload.scheduledAt = form.scheduledAt
@@ -146,6 +150,16 @@ export function BlogForm({ mode, initial }: Props) {
               className="input-blog" />
           </FormField>
         )}
+
+        <FormField label="Ảnh bìa">
+          <PhotoUploader
+            folder="blog-covers"
+            value={form.coverImageUrl ? [form.coverImageUrl] : []}
+            onChange={urls => setForm(f => ({ ...f, coverImageUrl: urls[0] ?? '' }))}
+            max={1}
+            variant="single"
+          />
+        </FormField>
 
         <FormField label="Tóm tắt (excerpt — hiển thị ở list)">
           <textarea maxLength={300} rows={2}

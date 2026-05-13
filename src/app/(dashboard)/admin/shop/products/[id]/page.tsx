@@ -75,6 +75,7 @@ export default async function ProductDetailPage({ params }: Params) {
           stockQuantity: product.stockQuantity != null ? String(product.stockQuantity) : '',
           lowStockThreshold: product.lowStockThreshold != null ? String(product.lowStockThreshold) : '3',
           isActive: product.isActive,
+          photos: Array.isArray(product.photos) ? (product.photos as string[]) : [],
         }}
       />
     </div>

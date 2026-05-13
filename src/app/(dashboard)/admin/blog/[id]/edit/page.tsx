@@ -28,6 +28,7 @@ export default async function EditBlogPostPage({ params }: Params) {
         content: post.content,
         status: post.status,
         scheduledAt: post.scheduledAt ? post.scheduledAt.toISOString().slice(0, 16) : '',
+        coverImageUrl: post.coverImageUrl ?? '',
       }} />
     </div>
   )

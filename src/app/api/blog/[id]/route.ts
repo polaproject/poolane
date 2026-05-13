@@ -12,6 +12,7 @@ const updatePostSchema = z.object({
   category: z.enum(['technique', 'safety', 'nutrition', 'student_story', 'news']).optional(),
   status: z.enum(['draft', 'published', 'scheduled']).optional(),
   scheduledAt: z.string().optional().nullable(),
+  coverImageUrl: z.string().url().optional().or(z.literal('')).nullable(),
 })
 
 type Params = { params: Promise<{ id: string }> }

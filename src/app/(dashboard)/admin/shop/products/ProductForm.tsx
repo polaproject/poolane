@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PRODUCT_TYPES, PRODUCT_TYPE_LABELS, type ProductType } from '@/lib/validations/product'
+import { PhotoUploader } from '@/components/features/PhotoUploader'
 
 interface Course {
   id: string
@@ -24,6 +25,7 @@ interface FormData {
   stockQuantity: string
   lowStockThreshold: string
   isActive: boolean
+  photos: string[]
 }
 
 interface Props {
@@ -47,6 +49,7 @@ export function ProductForm({ courses, mode, initial }: Props) {
     stockQuantity: initial?.stockQuantity ?? '',
     lowStockThreshold: initial?.lowStockThreshold ?? '3',
     isActive: initial?.isActive ?? true,
+    photos: initial?.photos ?? [],
   })
 
   const [submitting, setSubmitting] = useState(false)
@@ -74,6 +77,7 @@ export function ProductForm({ courses, mode, initial }: Props) {
         price: Number(form.price),
         cost: form.cost ? Number(form.cost) : null,
         description: form.description || undefined,
+        photos: form.photos,
       }
 
       if (form.type === 'course') {
@@ -192,6 +196,17 @@ export function ProductForm({ courses, mode, initial }: Props) {
             onChange={e => update('description', e.target.value)}
             placeholder="Mô tả ngắn về sản phẩm..."
             className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
+          />
+        </div>
+
+        <div>
+          <Label>Ảnh sản phẩm</Label>
+          <PhotoUploader
+            folder="products"
+            value={form.photos}
+            onChange={photos => update('photos', photos)}
+            max={5}
+            variant="grid"
           />
         </div>
       </div>
