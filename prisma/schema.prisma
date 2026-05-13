@@ -98,6 +98,7 @@ model Student {
   studentNotes         StudentNote[]
   profileChangeRequests ProfileChangeRequest[]
   videoLinks           VideoLink[]
+  orders               Order[]
 
   @@map("students")
 }
@@ -548,6 +549,7 @@ model Order {
   fulfilledAt DateTime? @map("fulfilled_at")
   fulfilledBy String?   @map("fulfilled_by")
 
+  student    Student     @relation(fields: [studentId], references: [id])
   orderItems OrderItem[]
 
   @@map("orders")

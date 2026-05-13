@@ -70,8 +70,10 @@ export async function POST(request: NextRequest) {
         where: {
           code: voucherCode,
           isActive: true,
-          OR: [{ validUntil: null }, { validUntil: { gte: new Date() } }],
-          OR: [{ maxUses: null }, { usedCount: { lt: prisma.voucher.fields.maxUses as unknown as number } }]
+          AND: [
+            { OR: [{ validUntil: null }, { validUntil: { gte: new Date() } }] },
+            { OR: [{ maxUses: null }, { usedCount: { lt: prisma.voucher.fields.maxUses } }] },
+          ],
         }
       })
       if (voucher) {

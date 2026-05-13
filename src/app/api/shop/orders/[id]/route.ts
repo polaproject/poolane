@@ -9,6 +9,8 @@ type Params = { params: Promise<{ id: string }> }
 const updateOrderSchema = z.object({
   action: z.enum(['approve', 'reject', 'pay', 'fulfill', 'cancel']),
   fulfillmentNote: z.string().max(300).optional(),
+  paymentMethod: z.enum(['cash', 'bank_transfer', 'card', 'other']).optional(),
+  referenceNumber: z.string().max(100).optional(),
 })
 
 export async function PATCH(request: NextRequest, { params }: Params) {
@@ -22,11 +24,27 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return NextResponse.json({ data: null, error: { code: 'VALIDATION_ERROR', message: 'Dữ liệu không hợp lệ' } }, { status: 400 })
     }
 
-    const { action, fulfillmentNote } = parsed.data
+    const { action, fulfillmentNote, paymentMethod, referenceNumber } = parsed.data
     const order = await prisma.order.findUnique({ where: { id }, include: { orderItems: { include: { product: true } } } })
 
     if (!order) {
       return NextResponse.json({ data: null, error: { code: 'NOT_FOUND', message: 'Không tìm thấy đơn hàng' } }, { status: 404 })
+    }
+
+    // Đơn đã ở trạng thái cuối → không cho thao tác thêm
+    if (order.status === 'fulfilled' || order.status === 'cancelled') {
+      return NextResponse.json(
+        { data: null, error: { code: 'ALREADY_FINALIZED', message: `Đơn hàng đã ${order.status === 'fulfilled' ? 'hoàn thành' : 'huỷ'}` } },
+        { status: 409 }
+      )
+    }
+
+    // Action 'pay' yêu cầu phương thức thanh toán
+    if (action === 'pay' && !paymentMethod) {
+      return NextResponse.json(
+        { data: null, error: { code: 'PAYMENT_METHOD_REQUIRED', message: 'Vui lòng chọn phương thức thanh toán' } },
+        { status: 400 }
+      )
     }
 
     const statusMap: Record<string, string> = {
@@ -36,26 +54,47 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     const newStatus = statusMap[action]
 
-    const updated = await prisma.order.update({
-      where: { id },
-      data: {
-        status: newStatus as 'approved' | 'cancelled' | 'paid' | 'fulfilled' | 'pending',
-        ...(action === 'approve' ? { approvedAt: new Date(), approvedBy: user.id } : {}),
-        ...(action === 'fulfill' ? { fulfilledAt: new Date(), fulfilledBy: user.id, fulfillmentNote } : {}),
-      }
-    })
+    const updated = await prisma.$transaction(async (tx) => {
+      const updatedOrder = await tx.order.update({
+        where: { id },
+        data: {
+          status: newStatus as 'approved' | 'cancelled' | 'paid' | 'fulfilled' | 'pending',
+          ...(action === 'approve' ? { approvedAt: new Date(), approvedBy: user.id } : {}),
+          ...(action === 'fulfill' ? { fulfilledAt: new Date(), fulfilledBy: user.id, fulfillmentNote } : {}),
+        }
+      })
 
-    // Trừ stock khi duyệt đơn physical
-    if (action === 'approve') {
-      for (const item of order.orderItems) {
-        if (item.product.type === 'physical' && item.product.stockQuantity !== null) {
-          await prisma.product.update({
-            where: { id: item.productId },
-            data: { stockQuantity: { decrement: item.quantity } }
-          })
+      // Trừ stock khi duyệt đơn physical
+      if (action === 'approve') {
+        for (const item of order.orderItems) {
+          if (item.product.type === 'physical' && item.product.stockQuantity !== null) {
+            await tx.product.update({
+              where: { id: item.productId },
+              data: { stockQuantity: { decrement: item.quantity } }
+            })
+          }
         }
       }
-    }
+
+      // Ghi nhận thanh toán vào bảng Payment khi action='pay'
+      if (action === 'pay' && paymentMethod) {
+        await tx.payment.create({
+          data: {
+            studentId: order.studentId,
+            amount: order.finalAmount,
+            type: 'shop',
+            referenceType: 'order',
+            referenceId: order.id,
+            paymentMethod,
+            referenceNumber: referenceNumber || null,
+            recordedBy: user.id,
+            notes: `Thanh toán đơn hàng Shop #${order.id.slice(0, 8).toUpperCase()}`,
+          }
+        })
+      }
+
+      return updatedOrder
+    })
 
     // Thông báo học viên
     const student = await prisma.student.findUnique({ where: { id: order.studentId }, select: { userId: true } })
