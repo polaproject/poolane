@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 const PUBLIC_ROUTES = [
   '/', '/login', '/register', '/courses', '/blog', '/faq',
-  '/privacy', '/unauthorized', '/api/health', '/api/auth', '/api/debug'
+  '/privacy', '/unauthorized', '/api/health', '/api/auth', '/api/debug',
+  '/student/achievement'
 ]
 const AUTH_ROUTES = ['/login', '/register']
 
@@ -50,7 +51,8 @@ export async function middleware(request: NextRequest) {
     path.startsWith('/courses') ||
     path.startsWith('/api/health') ||
     path.startsWith('/api/auth') ||
-    path.startsWith('/api/debug')
+    path.startsWith('/api/debug') ||
+    path.startsWith('/student/achievement')
   )
 
   if (!user && !isPublic) {
