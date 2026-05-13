@@ -163,7 +163,8 @@ export async function GET(request: NextRequest) {
     await requireRole(['admin'])
 
     const status = request.nextUrl.searchParams.get('status')
-    const where = status ? { status } : {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = status ? { status } : {}
 
     const refunds = await prisma.refundRequest.findMany({
       where,

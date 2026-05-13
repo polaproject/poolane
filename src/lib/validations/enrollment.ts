@@ -4,9 +4,7 @@ import { COURSE_PRICES, PAYMENT_DEPOSIT_RATE } from '@/config/constants'
 export const createEnrollmentSchema = z.object({
   studentId: z.string().uuid('ID học viên không hợp lệ'),
   courseId: z.string().uuid('ID khoá học không hợp lệ'),
-  paymentPlan: z.enum(['A_full', 'B_course_first', 'C_deposit'], {
-    errorMap: () => ({ message: 'Vui lòng chọn phương án thanh toán' })
-  }),
+  paymentPlan: z.enum(['A_full', 'B_course_first', 'C_deposit']),
   depositAmount: z.number().int().min(0).optional(),
   voucherCode: z.string().optional(),
 }).refine(data => {

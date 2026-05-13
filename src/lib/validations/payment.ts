@@ -2,13 +2,11 @@ import { z } from 'zod'
 
 export const recordPaymentSchema = z.object({
   studentId: z.string().uuid(),
-  amount: z.number().int().positive('Số tiền phải lớn hơn 0'),
+  amount: z.number().int().positive({ message: 'Số tiền phải lớn hơn 0' }),
   type: z.enum(['course_fee', 'pool_ticket', 'shop', 'adjustment']),
   referenceType: z.string().optional(),
   referenceId: z.string().uuid().optional(),
-  paymentMethod: z.enum(['cash', 'bank_transfer', 'card', 'other'], {
-    errorMap: () => ({ message: 'Chọn hình thức thanh toán' })
-  }),
+  paymentMethod: z.enum(['cash', 'bank_transfer', 'card', 'other']),
   referenceNumber: z.string().max(100).optional(),
   notes: z.string().max(300).optional(),
 })
@@ -19,9 +17,7 @@ export const createRefundSchema = z.object({
   poolTicketId: z.string().uuid().optional(),
   includeCourseRefund: z.boolean().default(false),
   includeTicketRefund: z.boolean().default(false),
-  reason: z.enum(['work', 'health', 'other'], {
-    errorMap: () => ({ message: 'Chọn lý do hoàn tiền' })
-  }),
+  reason: z.enum(['work', 'health', 'other']),
   reasonText: z.string().max(300).optional(),
 }).refine(d => d.includeCourseRefund || d.includeTicketRefund, {
   message: 'Phải chọn ít nhất một khoản muốn hoàn',

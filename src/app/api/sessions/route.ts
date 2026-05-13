@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
     const to = searchParams.get('to')     // ISO date
     const timeSlot = searchParams.get('timeSlot') as 'morning' | 'evening' | null
 
-    const where: Parameters<typeof prisma.classSession.findMany>[0]['where'] = {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {}
 
     if (from || to) {
       where.date = {}

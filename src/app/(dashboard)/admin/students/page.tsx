@@ -28,9 +28,12 @@ export default async function StudentsPage({ searchParams }: { searchParams: Sea
   const search = params.search ?? ''
   const statusFilter = params.status ?? ''
 
-  const where: Parameters<typeof prisma.student.findMany>[0]['where'] = {}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: any = {}
 
-  if (statusFilter) where.status = statusFilter as 'prospect'
+  if (statusFilter) {
+    where.status = statusFilter as 'prospect' | 'enrolled' | 'active' | 'extension' | 'completed' | 'inactive' | 'refunded'
+  }
 
   if (search) {
     where.OR = [

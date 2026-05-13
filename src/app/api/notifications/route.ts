@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
     const user = await requireRole(['admin', 'staff', 'student'])
 
     const unreadOnly = request.nextUrl.searchParams.get('unread') === 'true'
-    const where: Parameters<typeof prisma.notification.findMany>[0]['where'] = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {
       userId: user.id,
       ...(unreadOnly ? { readAt: null } : {})
     }

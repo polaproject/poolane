@@ -1,10 +1,8 @@
 import { z } from 'zod'
 
 export const createSessionSchema = z.object({
-  date: z.string().refine(v => !isNaN(Date.parse(v)), 'Ngày không hợp lệ'),
-  timeSlot: z.enum(['morning', 'evening'], {
-    errorMap: () => ({ message: 'Chọn ca sáng hoặc chiều' })
-  }),
+  date: z.string().refine(v => !isNaN(Date.parse(v)), { message: 'Ngày không hợp lệ' }),
+  timeSlot: z.enum(['morning', 'evening']),
   notes: z.string().max(500).optional(),
 })
 
@@ -28,7 +26,7 @@ export const markAttendanceSchema = z.object({
 })
 
 export const cancelSessionSchema = z.object({
-  reason: z.string().min(5, 'Vui lòng nhập lý do huỷ'),
+  reason: z.string().min(5, { message: 'Vui lòng nhập lý do huỷ' }),
 })
 
 export type CreateSessionInput = z.infer<typeof createSessionSchema>

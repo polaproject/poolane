@@ -1,40 +1,32 @@
 import { z } from 'zod'
 
-// Validation cho số điện thoại Việt Nam
 const phoneRegex = /^(0|\+84)(3[2-9]|5[2689]|7[06-9]|8[1-9]|9[0-9])\d{7}$/
 
 export const createStudentSchema = z.object({
-  // Bắt buộc
-  fullName: z.string().min(2, 'Họ tên phải có ít nhất 2 ký tự').max(100),
-  phone: z.string().regex(phoneRegex, 'Số điện thoại không hợp lệ'),
-  email: z.string().email('Email không hợp lệ').optional().or(z.literal('')),
+  fullName: z.string().min(2, { message: 'Họ tên phải có ít nhất 2 ký tự' }).max(100),
+  phone: z.string().regex(phoneRegex, { message: 'Số điện thoại không hợp lệ' }),
+  email: z.string().email({ message: 'Email không hợp lệ' }).optional().or(z.literal('')),
   dob: z.string().refine(val => {
     const date = new Date(val)
     const age = (Date.now() - date.getTime()) / (1000 * 60 * 60 * 24 * 365)
     return age >= 5 && age <= 100
-  }, 'Ngày sinh không hợp lệ'),
-  gender: z.enum(['male', 'female', 'other'], {
-    errorMap: () => ({ message: 'Vui lòng chọn giới tính' })
-  }),
-  ward: z.string().min(1, 'Vui lòng chọn phường/xã'),
-  district: z.string().min(1, 'Vui lòng chọn quận/huyện'),
-  province: z.string().min(1, 'Vui lòng chọn tỉnh/thành phố'),
-
-  // Tuỳ chọn
+  }, { message: 'Ngày sinh không hợp lệ' }),
+  gender: z.enum(['male', 'female', 'other']),
+  ward: z.string().min(1, { message: 'Vui lòng chọn phường/xã' }),
+  district: z.string().min(1, { message: 'Vui lòng chọn quận/huyện' }),
+  province: z.string().min(1, { message: 'Vui lòng chọn tỉnh/thành phố' }),
   addressStreet: z.string().max(200).optional().or(z.literal('')),
   emergencyContactName: z.string().max(100).optional().or(z.literal('')),
-  emergencyContactPhone: z.string().regex(phoneRegex).optional().or(z.literal('')),
+  emergencyContactPhone: z.string().optional().or(z.literal('')),
   occupation: z.string().max(100).optional().or(z.literal('')),
   healthNotes: z.string().max(500).optional().or(z.literal('')),
   swimmingExperience: z.string().max(500).optional().or(z.literal('')),
   learningGoal: z.string().max(500).optional().or(z.literal('')),
   marketingSource: z.string().max(100).optional().or(z.literal('')),
-
-  // Consents — bắt buộc tick
-  photoConsent: z.boolean().refine(v => v === true, 'Cần đồng ý điều khoản hình ảnh'),
+  photoConsent: z.boolean().refine(v => v === true, { message: 'Cần đồng ý điều khoản hình ảnh' }),
   imageConsentMarketing: z.boolean().optional().default(false),
-  refundPolicyAcknowledged: z.boolean().refine(v => v === true, 'Cần xác nhận đã đọc chính sách hoàn tiền'),
-  termsAcknowledged: z.boolean().refine(v => v === true, 'Cần xác nhận điều khoản sử dụng'),
+  refundPolicyAcknowledged: z.boolean().refine(v => v === true, { message: 'Cần xác nhận đã đọc chính sách hoàn tiền' }),
+  termsAcknowledged: z.boolean().refine(v => v === true, { message: 'Cần xác nhận điều khoản sử dụng' }),
 })
 
 export const updateStudentSchema = z.object({

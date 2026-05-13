@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * pageSize
 
     // Build where clause
-    const where: Parameters<typeof prisma.student.findMany>[0]['where'] = {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {}
 
     if (status) {
       where.status = status
@@ -46,7 +47,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy
-    const orderBy: Parameters<typeof prisma.student.findMany>[0]['orderBy'] =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const orderBy: any =
       sortBy === 'fullName'
         ? { user: { fullName: sortOrder } }
         : sortBy === 'lastAttendedAt'

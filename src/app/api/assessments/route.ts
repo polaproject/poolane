@@ -50,9 +50,10 @@ export async function POST(request: NextRequest) {
       const keySkills = KEY_SKILLS_FOR_GRADUATION[courseCode] ?? []
 
       const allAboveMin = scores.every(s => s.score >= ASSESSMENT_SCALE.GRADUATION_MIN)
-      const keySkillsPass = keySkills.every(k =>
-        scores.find(s => s.skillKey === k)?.score >= ASSESSMENT_SCALE.KEY_SKILLS_MIN
-      )
+      const keySkillsPass = keySkills.every(k => {
+        const score = scores.find(s => s.skillKey === k)?.score ?? 0
+        return score >= ASSESSMENT_SCALE.KEY_SKILLS_MIN
+      })
       const continuousMeters = metrics?.find(m => m.metricKey === 'continuous_meters')?.value ?? 0
 
       isGraduationPass = allAboveMin && keySkillsPass && continuousMeters >= ASSESSMENT_SCALE.CONTINUOUS_METERS_MIN
@@ -181,7 +182,8 @@ export async function GET(request: NextRequest) {
     const courseId = searchParams.get('courseId')
     const latest = searchParams.get('latest') === 'true'
 
-    const where: Parameters<typeof prisma.assessment.findMany>[0]['where'] = {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {}
     if (studentId) where.studentId = studentId
     if (courseId) where.courseId = courseId
 

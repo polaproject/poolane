@@ -33,8 +33,9 @@ export default function NewStudentPage() {
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<CreateStudentInput>({
-    resolver: zodResolver(createStudentSchema),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } = useForm<CreateStudentInput, any, CreateStudentInput>({
+    resolver: zodResolver(createStudentSchema) as any,
     defaultValues: {
       gender: 'male',
       photoConsent: false,

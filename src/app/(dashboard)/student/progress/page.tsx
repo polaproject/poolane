@@ -2,24 +2,17 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { COURSE_SKILLS, SCALE_DESCRIPTIONS } from '@/config/constants'
 import { RadarChart } from '@/components/features/assessment/RadarChart'
-import { format } from 'date-fns'
-import { vi } from 'date-fns/locale'
 
 export default async function ProgressPage() {
   const user = await requireRole(['admin', 'staff', 'student'])
 
+  // Lấy student với enrollments
   const student = await prisma.student.findFirst({
     where: { userId: user.id },
     include: {
       enrollments: {
         where: { status: { in: ['active', 'extension', 'completed'] } },
-        include: {
-          course: true,
-          assessments: {
-            orderBy: { sessionNumber: 'asc' },
-            include: { scores: true, metrics: true }
-          }
-        }
+        include: { course: true }
       }
     }
   })
@@ -33,26 +26,38 @@ export default async function ProgressPage() {
     )
   }
 
+  // Lấy assessments riêng (assessment thuộc student+course, không phải enrollment)
+  const assessmentsByEnrollment = await Promise.all(
+    student.enrollments.map(async (enrollment) => {
+      const assessments = await prisma.assessment.findMany({
+        where: { studentId: student.id, courseId: enrollment.courseId },
+        orderBy: { sessionNumber: 'asc' },
+        include: { scores: true, metrics: true }
+      })
+      return { enrollment, assessments }
+    })
+  )
+
   return (
     <div className="p-4 max-w-lg mx-auto">
       <h1 className="font-heading text-3xl text-[#1C2B4A] mb-6">Tiến độ của bạn</h1>
 
-      {student.enrollments.map(enrollment => {
+      {assessmentsByEnrollment.map(({ enrollment, assessments }) => {
         const courseCode = enrollment.course.code as 'ECH' | 'SAI' | 'BUOM'
         const skills = COURSE_SKILLS[courseCode] ?? COURSE_SKILLS.ECH
-        const assessments = enrollment.assessments
 
-        if (assessments.length === 0) return null
+        if (assessments.length === 0) return (
+          <div key={enrollment.id} className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-5 mb-4">
+            <h2 className="font-heading text-xl text-[#1C2B4A]">{enrollment.course.name}</h2>
+            <p className="text-sm text-[#1C2B4A]/50 mt-2">Chưa có đánh giá nào</p>
+          </div>
+        )
 
         const latest = assessments[assessments.length - 1]
         const latestScores = Object.fromEntries(latest.scores.map(s => [s.skillKey, s.score]))
-
-        // Tính average
         const avg = latest.scores.length > 0
           ? latest.scores.reduce((sum, s) => sum + s.score, 0) / latest.scores.length
           : 0
-
-        // Kỹ năng yếu nhất
         const weakSkills = latest.scores
           .filter(s => s.score <= 2)
           .map(s => skills.find(sk => sk.key === s.skillKey)?.label ?? s.skillKey)
@@ -94,18 +99,6 @@ export default async function ProgressPage() {
                     : undefined
                 }
               />
-              {assessments.length > 1 && (
-                <div className="flex gap-4 justify-center mt-3 text-xs">
-                  <span className="flex items-center gap-1">
-                    <span className="w-3 h-0.5 bg-[#1C2B4A] inline-block rounded"></span>
-                    Hiện tại
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-3 h-0.5 bg-[#5B8E9F]/50 inline-block rounded"></span>
-                    Buổi đầu
-                  </span>
-                </div>
-              )}
             </div>
 
             {/* Skill list */}
@@ -116,7 +109,6 @@ export default async function ProgressPage() {
               <div className="divide-y divide-[#1C2B4A]/5">
                 {skills.map(skill => {
                   const score = latestScores[skill.key] ?? 0
-                  const pct = (score / 5) * 100
                   const first = assessments[0].scores.find(s => s.skillKey === skill.key)?.score ?? 0
                   return (
                     <div key={skill.key} className="px-4 py-3">
@@ -135,7 +127,7 @@ export default async function ProgressPage() {
                         <div className="h-1.5 bg-[#1C2B4A]/8 rounded-full">
                           <div
                             className={`h-full rounded-full transition-all ${score <= 2 ? 'bg-red-400' : score >= 4 ? 'bg-green-500' : 'bg-[#5B8E9F]'}`}
-                            style={{ width: `${pct}%` }}
+                            style={{ width: `${(score / 5) * 100}%` }}
                           />
                         </div>
                       )}
@@ -150,7 +142,7 @@ export default async function ProgressPage() {
               </div>
             </div>
 
-            {/* Weak skills highlight */}
+            {/* Weak skills */}
             {weakSkills.length > 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4">
                 <p className="text-sm font-semibold text-amber-800 mb-1">🎯 Cần tập trung luyện thêm:</p>
@@ -158,7 +150,7 @@ export default async function ProgressPage() {
               </div>
             )}
 
-            {/* Objective metrics */}
+            {/* Metrics */}
             {latest.metrics.length > 0 && (
               <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-4">
                 <h3 className="font-semibold text-[#1C2B4A] text-sm mb-3">Chỉ số thực tế</h3>
