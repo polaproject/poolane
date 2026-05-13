@@ -10,7 +10,7 @@ import {
   BellRing, Brain, ShoppingBag, CheckSquare, ClipboardList,
   Star, BarChart2, Calendar, TrendingUp, Target, BookOpen,
   ScrollText, Bell, LogOut, ChevronLeft, Menu, X,
-  Activity,
+  Activity, UserCog, IdCard,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -25,6 +25,7 @@ const NAV_ITEMS: Record<UserRole, NavItem[]> = {
   admin: [
     { label: 'Dashboard',      href: '/admin/dashboard',    icon: LayoutDashboard },
     { label: 'Học viên',       href: '/admin/students',     icon: Users },
+    { label: 'YC cập nhật',    href: '/admin/profile-requests', icon: UserCog },
     { label: 'Lịch học',       href: '/admin/schedule',     icon: CalendarDays },
     { label: 'Tài chính',      href: '/admin/finance',      icon: DollarSign },
     { label: 'Pulse Check',    href: '/admin/pulse',        icon: Zap },
@@ -34,9 +35,12 @@ const NAV_ITEMS: Record<UserRole, NavItem[]> = {
   ],
   staff: [
     { label: 'Duyệt đăng ký',  href: '/staff/registrations', icon: CheckSquare },
+    { label: 'Học viên',       href: '/staff/students',      icon: Users },
+    { label: 'YC cập nhật',    href: '/admin/profile-requests', icon: UserCog },
     { label: 'Thống kê',       href: '/staff/stats',         icon: BarChart2 },
   ],
   student: [
+    { label: 'Hồ sơ',          href: '/student/profile',   icon: IdCard },
     { label: 'Đăng ký học',    href: '/student/schedule',  icon: Calendar },
     { label: 'Tiến độ',        href: '/student/progress',  icon: TrendingUp },
     { label: 'Mục tiêu',       href: '/student/goals',     icon: Target },

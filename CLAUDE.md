@@ -81,9 +81,11 @@ LAYER 6 — Validation & Security
 | Admin: chi tiết + sửa | ✅ |
 | Admin: đăng ký khoá học | ✅ |
 | Admin: tạo vé bơi | ✅ |
-| Staff: xem danh sách | ❌ Chưa có trang riêng |
-| Student: xem hồ sơ bản thân | ❌ Chưa có trang |
-| Student: yêu cầu cập nhật thông tin | ❌ Chưa có UI |
+| Staff: xem danh sách | ✅ `/staff/students` read-only, ẩn tài chính |
+| Student: xem hồ sơ bản thân | ✅ `/student/profile` |
+| Student: tự sửa trường mềm | ✅ `/student/profile/edit-soft` (occupation, healthNotes, emergency) |
+| Student: yêu cầu cập nhật trường định danh | ✅ `/student/profile/request-change` |
+| Admin/Staff: duyệt yêu cầu cập nhật | ✅ `/admin/profile-requests` |
 
 ### Module: Lịch Học & Điểm Danh
 | Hạng mục | Status |
@@ -2017,9 +2019,32 @@ Những điều CHƯA chốt, cần quyết định trước khi build:
 - [ ] Combo 3 khoá: mức giảm giá cụ thể (%)
 - [ ] Trường hợp B hoàn tiền (giữ vé bơi): học viên có tính vào sức chứa ca không?
 - [ ] Combo 3 khoá: có ưu tiên đăng ký buổi không?
-- [ ] Danh sách cụ thể ~20 sản phẩm/dịch vụ trong Shop
+- [ ] Danh sách cụ thể ~20 sản phẩm/dịch vụ trong Shop *(placeholder bên dưới — owner điền chi tiết)*
 - [ ] Email template chi tiết (welcome, invoice, absence, birthday, ...)
-- [ ] Google Workspace cho `support@polaproject.com` — owner cần đăng ký
+- [x] Email: `support@polaproject.com` qua **Resend** — domain `polaproject.com` đã verify (MX + TXT DNS records thêm vào Matbao). `RESEND_API_KEY` đã có trong `.env.local`. *(Không cần Google Workspace)*
+
+### Shop Products Placeholder
+
+> ⚠️ Owner cần điền chi tiết (tên, SKU, giá, tồn kho) trước khi build Phase 10.
+
+**Nhóm 1 — Khoá học (type: `course`)** — không có tồn kho, tạo enrollment khi mua:
+- Khoá Bơi Ếch (10 buổi) — 1.600.000đ
+- Khoá Bơi Sải (10 buổi) — 2.100.000đ
+- Khoá Bơi Bướm (10 buổi) — 3.500.000đ
+- Combo 3 khoá (Ếch + Sải + Bướm) — giá TBD (có giảm giá)
+
+**Nhóm 2 — Buổi cải thiện kỹ năng (type: `improvement_pack`)** — không tồn kho, tạo improvement_sessions khi mua:
+- Pack 5 buổi cải thiện — giá TBD
+- Pack 10 buổi cải thiện — giá TBD
+
+**Nhóm 3 — Dịch vụ (type: `service`)** — không tồn kho, cần lên lịch sau khi mua:
+- *(Owner điền — ví dụ: tư vấn 1-1, video phân tích kỹ thuật...)*
+
+**Nhóm 4 — Đồ vật lý (type: `physical`)** — có tồn kho, giao tại bể:
+- Kính bơi — giá TBD
+- Mũ bơi Poolane — giá TBD
+- Bộ đồ bơi — giá TBD
+- *(Owner điền thêm)*
 - [ ] Tích hợp MoMo/VNPay — có làm Phase 10 không hay sau
 
 ---
