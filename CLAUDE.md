@@ -4,6 +4,183 @@
 
 ---
 
+## ⚠️ QUY TẮC BẮT BUỘC TRƯỚC KHI COMMIT
+
+> AI KHÔNG ĐƯỢC commit một tính năng cho đến khi **TẤT CẢ** các hạng mục trong Definition of Done bên dưới đều được đánh dấu hoàn thành.
+
+### Definition of Done — Cho Mỗi Module/Tính Năng
+
+Mỗi khi user yêu cầu build một tính năng, AI **bắt buộc** phải build ĐẦY ĐỦ tất cả các lớp sau:
+
+```
+LAYER 1 — API (Backend)
+  [ ] GET list endpoint (với pagination, filter)
+  [ ] POST create endpoint (với Zod validation)
+  [ ] GET detail by ID endpoint
+  [ ] PATCH update endpoint
+  [ ] DELETE/deactivate endpoint (nếu applicable)
+  [ ] Audit log cho mọi write operation
+  [ ] Error handling + logError() trên mọi catch
+
+LAYER 2 — UI Admin (Quản trị)
+  [ ] Trang danh sách (với search, filter, pagination)
+  [ ] Form tạo mới (modal hoặc page riêng)
+  [ ] Form chỉnh sửa
+  [ ] Xem chi tiết
+  [ ] Xoá/deactivate với confirmation
+
+LAYER 3 — UI Staff (Nếu role staff cần dùng)
+  [ ] Trang/view tương ứng với quyền staff
+
+LAYER 4 — UI Student/User (Nếu học viên cần dùng)
+  [ ] Trang/view cho học viên
+
+LAYER 5 — Tích hợp hệ thống
+  [ ] Notification gửi đến user liên quan khi có action
+  [ ] Cập nhật seed.ts nếu cần test data
+  [ ] Link/button điều hướng từ các trang liên quan
+  [ ] Navigation sidebar được cập nhật nếu cần
+
+LAYER 6 — Validation & Security
+  [ ] Zod schema cho mọi input
+  [ ] requireRole() đúng cho mọi API route
+  [ ] Client-side validation khớp với server-side
+```
+
+### Ví Dụ Áp Dụng — Module "Shop"
+
+| Layer | Hạng mục | Trạng thái |
+|---|---|---|
+| API | GET/POST products | ✅ |
+| API | GET/POST/PATCH orders | ✅ |
+| Admin UI | Danh sách đơn hàng + duyệt | ✅ |
+| **Admin UI** | **Thêm/sửa/xoá sản phẩm** | ❌ **THIẾU** |
+| Student UI | Giỏ hàng + đặt hàng | ✅ |
+| Tích hợp | Notification khi duyệt đơn | ✅ |
+
+→ Module Shop **CHƯA DONE** vì thiếu Admin UI quản lý sản phẩm.
+
+---
+
+## 📊 COMPLETENESS MAP — Trạng Thái Thực Tế
+
+### Module: Authentication & Users
+| Hạng mục | Status |
+|---|---|
+| Login/logout | ✅ |
+| Middleware route protection | ✅ |
+| Role-based routing | ✅ |
+| Đăng ký tài khoản (học viên tự tạo) | ❌ Chưa có UI |
+| Reset mật khẩu | ❌ Chưa có flow |
+
+### Module: Học Viên (Students)
+| Hạng mục | Status |
+|---|---|
+| Admin: danh sách + filter + search | ✅ |
+| Admin: tạo học viên | ✅ |
+| Admin: chi tiết + sửa | ✅ |
+| Admin: đăng ký khoá học | ✅ |
+| Admin: tạo vé bơi | ✅ |
+| Staff: xem danh sách | ❌ Chưa có trang riêng |
+| Student: xem hồ sơ bản thân | ❌ Chưa có trang |
+| Student: yêu cầu cập nhật thông tin | ❌ Chưa có UI |
+
+### Module: Lịch Học & Điểm Danh
+| Hạng mục | Status |
+|---|---|
+| Admin: lịch tuần | ✅ |
+| Admin: tạo buổi học | ✅ |
+| Staff: duyệt đăng ký | ✅ |
+| Staff: điểm danh | ✅ |
+| Student: đăng ký buổi | ✅ |
+| Student: xem lịch của mình | ❌ Chưa có view cá nhân |
+| Huỷ ca + hoàn vé tự động | ✅ |
+
+### Module: Tài Chính
+| Hạng mục | Status |
+|---|---|
+| Admin: finance dashboard | ✅ |
+| Admin: ghi nhận thanh toán | ✅ (component) |
+| Admin: danh sách hoàn tiền | ❌ `/admin/finance/refunds` chưa có UI |
+| Admin: duyệt/xử lý hoàn tiền | ✅ (API) — ❌ (UI) |
+| Student: xem lịch sử thanh toán | ❌ Chưa có trang |
+| Export Excel doanh thu | ❌ Chưa implement |
+
+### Module: Đánh Giá Kỹ Năng
+| Hạng mục | Status |
+|---|---|
+| Staff: form đánh giá quick/detailed | ✅ |
+| Staff: pre-fill từ buổi trước | ✅ |
+| Student: xem tiến độ + radar chart | ✅ |
+| Admin: heatmap kỹ năng yếu lớp | ❌ Chưa có UI |
+| Tự đánh giá của học viên (buổi 5,9) | ❌ Chưa có UI |
+
+### Module: Shop
+| Hạng mục | Status |
+|---|---|
+| Student: duyệt + đặt hàng | ✅ |
+| Admin: duyệt/xử lý đơn hàng | ✅ |
+| **Admin: thêm/sửa/xoá sản phẩm** | **❌ THIẾU** |
+| Seed sản phẩm mẫu | ❌ Chưa có |
+
+### Module: Thông Báo & Communication
+| Hạng mục | Status |
+|---|---|
+| Notification center (xem + đánh dấu đọc) | ✅ |
+| Admin: broadcast toàn lớp | ✅ |
+| Push notification (Web Push API) | ❌ Chưa implement |
+| Email gửi tự động (Resend) | ❌ Templates chưa có |
+
+### Module: Blog & Nội Dung
+| Hạng mục | Status |
+|---|---|
+| Public blog listing + detail | ✅ |
+| API tạo bài viết | ✅ |
+| **Admin: UI tạo/sửa bài viết** | **❌ THIẾU** |
+| Quiz API | ✅ |
+| **Student: UI làm quiz** | **❌ THIẾU** |
+| Events UI | ❌ Chưa có |
+| Challenges UI | ❌ Chưa có |
+
+### Module: AI & Analytics
+| Hạng mục | Status |
+|---|---|
+| AI dropout prediction + UI | ✅ |
+| Staff stats (thống kê giảng dạy) | ✅ |
+| Export Excel báo cáo | ❌ Chưa implement |
+| Reconciliation report hàng ngày | ❌ Chưa implement |
+
+### Module: UI/UX
+| Hạng mục | Status |
+|---|---|
+| Sidebar navigation | ✅ |
+| Theme A/B/D switcher | ✅ |
+| Design system (shadows, cards, badges) | ✅ globals.css |
+| Applied to: dashboard, students list | ✅ |
+| Applied to: finance, schedule, pulse, other pages | ❌ Chưa áp dụng |
+| Mobile responsive audit | ❌ Chưa test |
+| Loading states (skeleton) | ❌ Chưa implement |
+| Error boundaries | ❌ Chưa implement |
+
+---
+
+## 🔴 DANH SÁCH ƯU TIÊN — Việc Cần Làm Tiếp
+
+Theo thứ tự quan trọng:
+
+1. **Admin: Quản lý sản phẩm Shop** (`/admin/shop/products`) — thiếu hoàn toàn
+2. **Admin: UI hoàn tiền** (`/admin/finance/refunds`) — API có, UI không
+3. **Admin: UI tạo/sửa blog** (`/admin/blog/new`) — API có, UI không
+4. **Student: UI làm quiz** (`/student/quiz/[id]`) — API có, UI không
+5. **Áp dụng design system** cho tất cả trang còn lại
+6. **Deploy Vercel** + trỏ domain poolane.vn
+7. **Email templates** với Resend
+8. **Trang hồ sơ học viên** (`/student/profile`) — chưa có
+
+---
+
+---
+
 ## MỤC LỤC
 
 1. [Tổng Quan](#1-tổng-quan-dự-án)
