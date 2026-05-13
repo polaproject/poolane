@@ -363,6 +363,21 @@ model AssessmentScore {
   @@map("assessment_scores")
 }
 
+model SelfAssessment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId     String @map("student_id")
+  courseId      String @map("course_id")
+  sessionNumber Int    @map("session_number")
+  scoresJson    Json   @map("scores_json")
+  notes         String?
+
+  @@map("self_assessments")
+  @@unique([studentId, courseId, sessionNumber])
+  @@index([studentId])
+}
+
 model ObjectiveMetric {
   id           String @id @default(uuid())
   assessmentId String @map("assessment_id")
@@ -838,6 +853,37 @@ model ProfileChangeRequest {
   student Student @relation(fields: [studentId], references: [id])
 
   @@map("profile_change_requests")
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  userId   String @map("user_id")
+  endpoint String @unique
+  keysP256 String @map("keys_p256")
+  keysAuth String @map("keys_auth")
+  userAgent String? @map("user_agent")
+
+  @@map("push_subscriptions")
+  @@index([userId])
+}
+
+model PasswordResetRequest {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  phone        String
+  fullNameHint String?  @map("full_name_hint")
+  status       String   @default("pending")
+  requestedAt  DateTime @default(now()) @map("requested_at")
+  processedAt  DateTime? @map("processed_at")
+  processedBy  String?   @map("processed_by")
+  ipAddress    String?   @map("ip_address")
+
+  @@map("password_reset_requests")
+  @@index([phone, status])
+  @@index([status, requestedAt])
 }
 
 model AuditLog {

@@ -109,13 +109,12 @@ export default function LoginPage() {
                   <Label htmlFor="password" className="text-[#1C2B4A] text-sm font-medium">
                     Mật khẩu
                   </Label>
-                  <button
-                    type="button"
+                  <a
+                    href="/forgot-password"
                     className="text-xs text-[#5B8E9F] hover:underline"
-                    onClick={() => toast.info('Liên hệ lớp để reset mật khẩu nhé!')}
                   >
                     Quên mật khẩu?
-                  </button>
+                  </a>
                 </div>
                 <Input
                   id="password"
@@ -147,10 +146,10 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-[#1C2B4A]/35 mt-6">
+        <p className="text-center text-sm text-[#1C2B4A]/50 mt-6">
           Chưa có tài khoản?{' '}
-          <a href="/courses" className="text-[#5B8E9F] hover:underline">
-            Tìm hiểu các khoá học
+          <a href="/register" className="text-[#5B8E9F] hover:underline font-semibold">
+            Tạo tài khoản mới
           </a>
         </p>
       </div>
