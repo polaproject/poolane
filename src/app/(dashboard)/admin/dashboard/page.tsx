@@ -128,7 +128,7 @@ export default async function AdminDashboard() {
           </div>
           <div className="flex gap-3 relative">
             {todaySessions.map(s => (
-              <Link key={s.id} href={`/staff/registrations?sessionId=${s.id}`}>
+              <Link key={s.id} href={`/admin/schedule/sessions/${s.id}`}>
                 <div
                   className="px-4 py-3 rounded-xl transition-all hover:scale-[1.03] cursor-pointer"
                   style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.08)' }}
@@ -186,8 +186,10 @@ export default async function AdminDashboard() {
               { label: '+ Thêm học viên', href: '/admin/students/new', primary: true },
               { label: '📅 Lịch học tuần này', href: '/admin/schedule', primary: false },
               { label: '💰 Tài chính', href: '/admin/finance', primary: false },
+              { label: '📊 Báo cáo & Đối chiếu', href: '/admin/reports', primary: false },
+              { label: '🎟️ Mã giảm giá', href: '/admin/vouchers', primary: false },
+              { label: '📝 Viết bài blog', href: '/admin/blog/new', primary: false },
               { label: '⚡ Pulse Check', href: '/admin/pulse', primary: false },
-              { label: '🤖 AI Dự Báo', href: '/admin/ai', primary: false },
             ].map(action => (
               <Link key={action.label} href={action.href} className={action.primary ? 'btn-pola-primary block px-4 py-2.5 text-sm text-center' : 'btn-pola-secondary block px-4 py-2.5 text-sm text-center'}>
                 {action.label}

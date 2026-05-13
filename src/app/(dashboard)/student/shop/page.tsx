@@ -10,6 +10,7 @@ import Link from 'next/link'
 type Product = {
   id: string; name: string; type: string; price: number
   stockQuantity: number | null; description: string | null; sessionsCount: number | null
+  photos: string[]
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -167,9 +168,13 @@ export default function ShopPage() {
             const isOutOfStock = p.type === 'physical' && p.stockQuantity !== null && p.stockQuantity <= 0
             return (
               <div key={p.id} className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-4 shadow-sm">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1 min-w-0 mr-3">
-                    <div className="flex items-center gap-2 mb-1">
+                <div className="flex justify-between items-start mb-2 gap-3">
+                  {p.photos && p.photos.length > 0 && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={p.photos[0]} alt="" className="w-20 h-20 rounded-xl object-cover flex-shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <p className="font-semibold text-[#1C2B4A] text-sm">{p.name}</p>
                       <Badge variant="outline" className="text-xs">{TYPE_LABELS[p.type] ?? p.type}</Badge>
                     </div>

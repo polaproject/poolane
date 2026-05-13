@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import { PublicHeader, PublicFooter } from '@/components/layouts/PublicHeader'
 
 export const metadata = {
   title: 'Blog — Poolane',
@@ -39,9 +40,9 @@ export default async function BlogPage({
 
   return (
     <div className="min-h-screen bg-[#F6F1EA]">
+      <PublicHeader />
       <div className="max-w-3xl mx-auto px-4 py-12">
         <div className="mb-8">
-          <Link href="/" className="text-sm text-[#5B8E9F] hover:underline mb-4 block">← Poolane</Link>
           <h1 className="font-heading text-4xl text-[#1C2B4A]">Blog</h1>
           <p className="text-[#1C2B4A]/60 mt-2">Kiến thức bơi lội từ Poolane</p>
         </div>
@@ -72,33 +73,43 @@ export default async function BlogPage({
           <div className="space-y-6">
             {posts.map(post => (
               <Link key={post.id} href={`/blog/${post.slug}`} className="block group">
-                <article className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-6 hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs text-[#1C2B4A]/40 uppercase tracking-wider">
-                      {CATEGORIES[post.category]?.emoji} {CATEGORIES[post.category]?.label ?? post.category}
-                    </span>
-                    {post.publishedAt && (
-                      <>
-                        <span className="text-[#1C2B4A]/20">·</span>
-                        <span className="text-xs text-[#1C2B4A]/40">
-                          {format(post.publishedAt, 'dd MMM yyyy', { locale: vi })}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                  <h2 className="font-heading text-xl text-[#1C2B4A] group-hover:text-[#5B8E9F] transition-colors mb-2">
-                    {post.title}
-                  </h2>
-                  {post.excerpt && (
-                    <p className="text-sm text-[#1C2B4A]/60 line-clamp-2">{post.excerpt}</p>
+                <article className="bg-white rounded-2xl border border-[#1C2B4A]/8 overflow-hidden hover:shadow-md transition-shadow">
+                  {post.coverImageUrl && (
+                    <div className="aspect-[16/9] bg-[#F6F1EA] overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={post.coverImageUrl} alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
                   )}
-                  <p className="text-xs text-[#5B8E9F] mt-3 group-hover:underline">Đọc tiếp →</p>
+                  <div className="p-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xs text-[#1C2B4A]/40 uppercase tracking-wider">
+                        {CATEGORIES[post.category]?.emoji} {CATEGORIES[post.category]?.label ?? post.category}
+                      </span>
+                      {post.publishedAt && (
+                        <>
+                          <span className="text-[#1C2B4A]/20">·</span>
+                          <span className="text-xs text-[#1C2B4A]/40">
+                            {format(post.publishedAt, 'dd MMM yyyy', { locale: vi })}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    <h2 className="font-heading text-xl text-[#1C2B4A] group-hover:text-[#5B8E9F] transition-colors mb-2">
+                      {post.title}
+                    </h2>
+                    {post.excerpt && (
+                      <p className="text-sm text-[#1C2B4A]/60 line-clamp-2">{post.excerpt}</p>
+                    )}
+                    <p className="text-xs text-[#5B8E9F] mt-3 group-hover:underline">Đọc tiếp →</p>
+                  </div>
                 </article>
               </Link>
             ))}
           </div>
         )}
       </div>
+      <PublicFooter />
     </div>
   )
 }

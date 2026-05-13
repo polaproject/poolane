@@ -64,8 +64,20 @@ export default async function AdminBlogPage() {
               {posts.map(p => (
                 <tr key={p.id} className="hover:bg-[#F6F1EA]/20">
                   <td className="px-5 py-3">
-                    <p className="font-semibold text-sm text-[#1C2B4A]">{p.title}</p>
-                    <p className="text-xs text-[#1C2B4A]/40 mt-0.5">/{p.slug}</p>
+                    <div className="flex items-center gap-3">
+                      {p.coverImageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={p.coverImageUrl} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-[#F6F1EA] flex items-center justify-center text-[#1C2B4A]/20 text-xs">
+                          —
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-semibold text-sm text-[#1C2B4A]">{p.title}</p>
+                        <p className="text-xs text-[#1C2B4A]/40 mt-0.5">/{p.slug}</p>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-5 py-3 text-xs text-[#1C2B4A]/70">
                     {CATEGORY_LABELS[p.category] ?? p.category}

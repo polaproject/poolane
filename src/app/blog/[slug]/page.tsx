@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import { PublicHeader, PublicFooter } from '@/components/layouts/PublicHeader'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -39,10 +40,18 @@ export default async function BlogPostPage({ params }: Params) {
 
   return (
     <div className="min-h-screen bg-[#F6F1EA]">
+      <PublicHeader />
       <div className="max-w-2xl mx-auto px-4 py-12">
         <Link href="/blog" className="text-sm text-[#5B8E9F] hover:underline mb-6 block">
           ← Về Blog
         </Link>
+
+        {post.coverImageUrl && (
+          <div className="aspect-[16/9] mb-6 rounded-2xl overflow-hidden bg-[#1C2B4A]/5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={post.coverImageUrl} alt={post.title} className="w-full h-full object-cover" />
+          </div>
+        )}
 
         {post.publishedAt && (
           <p className="text-xs text-[#1C2B4A]/40 uppercase tracking-wider mb-3">
@@ -65,11 +74,8 @@ export default async function BlogPostPage({ params }: Params) {
           ))}
         </div>
 
-        <div className="mt-12 pt-6 border-t border-[#1C2B4A]/10 text-center">
-          <p className="font-body font-bold text-sm tracking-[0.15em] text-[#1C2B4A]">POOLANE</p>
-          <p className="text-xs text-[#5B8E9F] mt-0.5">a Pola Project · "Dạy bơi không chỉ để bơi"</p>
-        </div>
       </div>
+      <PublicFooter />
     </div>
   )
 }
