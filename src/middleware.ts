@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 // Routes không cần đăng nhập
-const PUBLIC_ROUTES = ['/', '/login', '/register', '/courses', '/blog', '/faq', '/privacy', '/unauthorized']
+const PUBLIC_ROUTES = ['/', '/login', '/register', '/courses', '/blog', '/faq', '/privacy', '/unauthorized', '/api/health']
 const AUTH_ROUTES = ['/login', '/register']
 
 export async function middleware(request: NextRequest) {
@@ -52,7 +52,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Nếu chưa đăng nhập mà vào route protected → redirect login
-  const isPublic = PUBLIC_ROUTES.some(r => path === r || path.startsWith('/blog') || path.startsWith('/courses'))
+  const isPublic = PUBLIC_ROUTES.some(r => path === r || path.startsWith('/blog') || path.startsWith('/courses') || path.startsWith('/api/health'))
 
   if (!user && !isPublic) {
     return NextResponse.redirect(new URL('/login', request.url))
