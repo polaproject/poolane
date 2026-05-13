@@ -8,9 +8,21 @@ type Params = { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Params) {
   const { slug } = await params
-  const post = await prisma.blogPost.findUnique({ where: { slug }, select: { title: true, excerpt: true } })
+  const post = await prisma.blogPost.findUnique({
+    where: { slug },
+    select: { title: true, excerpt: true, coverImageUrl: true }
+  })
   if (!post) return {}
-  return { title: `${post.title} — Poolane`, description: post.excerpt }
+  return {
+    title: post.title,
+    description: post.excerpt ?? 'Bài viết từ Poolane',
+    openGraph: {
+      title: post.title,
+      description: post.excerpt ?? undefined,
+      images: post.coverImageUrl ? [post.coverImageUrl] : undefined,
+      type: 'article',
+    },
+  }
 }
 
 export default async function BlogPostPage({ params }: Params) {

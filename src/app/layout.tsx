@@ -20,10 +20,29 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'Poolane — Dạy bơi không chỉ để bơi',
-  description: 'Hệ thống quản lý lớp bơi Poolane — a Pola Project',
-  keywords: ['học bơi', 'lớp bơi', 'poolane', 'pola project', 'poolane.vn'],
+  title: {
+    default: 'Poolane — Dạy bơi không chỉ để bơi',
+    template: '%s · Poolane',
+  },
+  description: 'Lớp dạy bơi cho người lớn 16-40 tuổi. Bơi Ếch, Sải, Bướm — hệ thống đánh giá kỹ năng chuẩn hoá, theo dõi tiến độ trực quan.',
+  keywords: ['học bơi', 'lớp bơi', 'poolane', 'pola project', 'poolane.vn', 'bơi ếch', 'bơi sải', 'bơi bướm', 'lớp bơi người lớn'],
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://poolane.vn'),
+  openGraph: {
+    type: 'website',
+    locale: 'vi_VN',
+    siteName: 'Poolane',
+    title: 'Poolane — Dạy bơi không chỉ để bơi',
+    description: 'Học bơi cùng cộng đồng người lớn 16-40 tuổi · Bơi Ếch · Sải · Bướm',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Poolane',
+    description: 'Dạy bơi không chỉ để bơi — Pola Project',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({
