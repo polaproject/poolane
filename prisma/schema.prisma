@@ -475,6 +475,7 @@ model RefundRequest {
   requestedBy       String    @map("requested_by")
   processedAt       DateTime? @map("processed_at")
   processedBy       String?   @map("processed_by")
+  processedNotes    String?   @map("processed_notes")
   transferReference String?   @map("transfer_reference")
 
   student    Student     @relation(fields: [studentId], references: [id])

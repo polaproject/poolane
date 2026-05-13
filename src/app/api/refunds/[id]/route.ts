@@ -63,7 +63,6 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         processedAt: new Date(),
         processedBy: user.id,
         transferReference: action === 'transfer' ? transferReference : null,
-        // @ts-expect-error - field exists in schema but Prisma types lag
         processedNotes: processedNotes ?? null,
       }
     })
