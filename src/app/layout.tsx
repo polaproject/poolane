@@ -22,7 +22,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: 'Poolane — Dạy bơi không chỉ để bơi',
   description: 'Hệ thống quản lý lớp bơi Poolane — a Pola Project',
-  keywords: ['học bơi', 'lớp bơi', 'poolane', 'pola project'],
+  keywords: ['học bơi', 'lớp bơi', 'poolane', 'pola project', 'poolane.vn'],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://poolane.vn'),
 }
 
 export default function RootLayout({

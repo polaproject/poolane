@@ -68,17 +68,19 @@ POLA PROJECT (thương hiệu mẹ)
 
 ### Thông Tin Domain & Triển Khai
 
-**Domain hiện có:** `polaproject.com` (mua qua Matbao, chưa trỏ DNS)
-**Quyết định đã chốt:** `polaproject.com` dùng trực tiếp cho Poolane (lớp bơi) — không tách subdomain.
+**Domain Poolane:** `poolane.vn` (đã mua — domain riêng cho hệ thống quản lý lớp bơi)
+**Domain Pola Project:** `polaproject.com` (mua qua Matbao — dùng cho parent brand sau khi có đủ 3 sub-projects)
 
 ```
-polaproject.com  →  Toàn bộ hệ thống Poolane
+poolane.vn       →  Toàn bộ hệ thống Poolane
                     (landing + quản lý lớp bơi)
+
+polaproject.com  →  Trang parent brand (khi Polang/Polata ra mắt)
 ```
 
-Khi Polang / Polata ra mắt → mua domain riêng cho từng project (polang.vn, polata.vn...). Lúc đó mới xây trang parent brand.
+Khi Polang / Polata ra mắt → dùng subdomain hoặc mua thêm domain riêng.
 
-**Email gửi đi:** `support@polaproject.com` (cần setup Google Workspace)
+**Email gửi đi:** `support@poolane.vn` (cần setup Google Workspace hoặc Resend domain verify)
 
 ### Brand Essence
 
