@@ -1,0 +1,889 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────
+// USERS & PROFILES
+// ─────────────────────────────────────────
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  email    String  @unique
+  phone    String? @unique
+  fullName String  @map("full_name")
+  dob      DateTime?
+  gender   String?
+
+  ward     String?
+  district String?
+  province String?
+  addressStreet String? @map("address_street")
+
+  emergencyContactName  String? @map("emergency_contact_name")
+  emergencyContactPhone String? @map("emergency_contact_phone")
+  idCardNumber          String? @map("id_card_number")
+  occupation            String?
+  healthNotes           String? @map("health_notes")
+
+  role          UserRole      @default(student)
+  accountSource AccountSource @default(online_signup) @map("account_source")
+
+  photoConsentAt             DateTime? @map("photo_consent_at")
+  imageConsentMarketingAt    DateTime? @map("image_consent_marketing_at")
+  refundPolicyAcknowledgedAt DateTime? @map("refund_policy_acknowledged_at")
+  termsAcknowledgedAt        DateTime? @map("terms_acknowledged_at")
+
+  isActive    Boolean   @default(true) @map("is_active")
+  lastLoginAt DateTime? @map("last_login_at")
+
+  student              Student?
+  studentNotesCreated  StudentNote[]
+  auditLogs            AuditLog[]
+  notificationsReceived Notification[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  admin
+  staff
+  student
+
+  @@map("user_role")
+}
+
+enum AccountSource {
+  online_signup
+  walk_in
+  staff_created
+
+  @@map("account_source")
+}
+
+model Student {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userId      String @unique @map("user_id")
+  studentCode String @unique @map("student_code")
+
+  status             StudentStatus @default(prospect)
+  swimmingExperience String?       @map("swimming_experience")
+  learningGoal       String?       @map("learning_goal")
+  marketingSource    String?       @map("marketing_source")
+  lastAttendedAt     DateTime?     @map("last_attended_at")
+  notesSummary       String?       @map("notes_summary")
+
+  user                 User                  @relation(fields: [userId], references: [id])
+  enrollments          Enrollment[]
+  poolTickets          PoolTicket[]
+  sessionRegistrations SessionRegistration[]
+  attendances          Attendance[]
+  assessments          Assessment[]
+  payments             Payment[]
+  refundRequests       RefundRequest[]
+  notifications        Notification[]        @relation("StudentNotification")
+  practiceLogs         PracticeLog[]
+  skillGoals           SkillGoal[]
+  challengeProgress    ChallengeProgress[]
+  quizAttempts         QuizAttempt[]
+  studentNotes         StudentNote[]
+  profileChangeRequests ProfileChangeRequest[]
+  videoLinks           VideoLink[]
+
+  @@map("students")
+}
+
+enum StudentStatus {
+  prospect
+  enrolled
+  active
+  extension
+  completed
+  inactive
+  refunded
+
+  @@map("student_status")
+}
+
+// ─────────────────────────────────────────
+// COURSES & ENROLLMENTS
+// ─────────────────────────────────────────
+
+model Course {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  code          String  @unique
+  name          String
+  price         Int
+  sessionsCount Int     @default(10) @map("sessions_count")
+  description   String?
+  isActive      Boolean @default(true) @map("is_active")
+
+  enrollments          Enrollment[]
+  sessionRegistrations SessionRegistration[]
+  assessments          Assessment[]
+
+  @@map("courses")
+}
+
+model Enrollment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  studentId String @map("student_id")
+  courseId  String @map("course_id")
+
+  paymentPlan     PaymentPlan      @map("payment_plan")
+  depositAmount   Int              @default(0) @map("deposit_amount")
+  totalPaid       Int              @default(0) @map("total_paid")
+  paymentDeadline DateTime?        @map("payment_deadline")
+
+  status                EnrollmentStatus @default(active)
+  isViaShop             Boolean          @default(false) @map("is_via_shop")
+  voucherCodeUsed       String?          @map("voucher_code_used")
+  enrolledAt            DateTime         @default(now()) @map("enrolled_at")
+  startedAt             DateTime?        @map("started_at")
+  graduationDate        DateTime?        @map("graduation_date")
+  extensionSessionsUsed Int              @default(0) @map("extension_sessions_used")
+
+  student        Student         @relation(fields: [studentId], references: [id])
+  course         Course          @relation(fields: [courseId], references: [id])
+  refundRequests RefundRequest[]
+
+  @@map("enrollments")
+}
+
+enum PaymentPlan {
+  A_full
+  B_course_first
+  C_deposit
+
+  @@map("payment_plan")
+}
+
+enum EnrollmentStatus {
+  active
+  extension
+  completed
+  refunded
+  cancelled
+
+  @@map("enrollment_status")
+}
+
+// ─────────────────────────────────────────
+// POOL TICKETS
+// ─────────────────────────────────────────
+
+model PoolTicket {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  studentId     String    @map("student_id")
+  ticketType    String    @map("ticket_type")
+  totalSessions Int       @map("total_sessions")
+  maxSessions   Int       @map("max_sessions")
+  sessionsUsed  Int       @default(0) @map("sessions_used")
+  pricePaid     Int       @map("price_paid")
+  purchasedAt   DateTime  @default(now()) @map("purchased_at")
+  expiresAt     DateTime? @map("expires_at")
+  isActive      Boolean   @default(true) @map("is_active")
+
+  student        Student         @relation(fields: [studentId], references: [id])
+  refundRequests RefundRequest[]
+
+  @@map("pool_tickets")
+}
+
+// ─────────────────────────────────────────
+// SESSIONS & SCHEDULE
+// ─────────────────────────────────────────
+
+model ClassSession {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  date     DateTime
+  timeSlot TimeSlot @map("time_slot")
+  capacity Int
+
+  status          SessionStatus @default(scheduled)
+  cancelledReason String?       @map("cancelled_reason")
+  cancelledBy     String?       @map("cancelled_by")
+  cancelledAt     DateTime?     @map("cancelled_at")
+  notes           String?
+
+  registrations SessionRegistration[]
+  attendances   Attendance[]
+  assessments   Assessment[]
+  videoLinks    VideoLink[]
+  sessionPhotos SessionPhoto[]
+
+  @@map("class_sessions")
+}
+
+enum TimeSlot {
+  morning
+  evening
+
+  @@map("time_slot")
+}
+
+enum SessionStatus {
+  scheduled
+  in_progress
+  completed
+  cancelled
+
+  @@map("session_status")
+}
+
+model SessionRegistration {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sessionId String  @map("session_id")
+  studentId String  @map("student_id")
+  courseId  String? @map("course_id")
+
+  status             RegistrationStatus @default(pending)
+  rejectedReason     String?            @map("rejected_reason")
+  rejectedReasonText String?            @map("rejected_reason_text")
+  registeredAt       DateTime           @default(now()) @map("registered_at")
+  decidedAt          DateTime?          @map("decided_at")
+  decidedBy          String?            @map("decided_by")
+
+  session ClassSession  @relation(fields: [sessionId], references: [id])
+  student Student       @relation(fields: [studentId], references: [id])
+  course  Course?       @relation(fields: [courseId], references: [id])
+
+  @@unique([sessionId, studentId])
+  @@map("session_registrations")
+}
+
+enum RegistrationStatus {
+  pending
+  approved
+  rejected
+  waitlist
+  withdrawn
+
+  @@map("registration_status")
+}
+
+model Attendance {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sessionId     String           @map("session_id")
+  studentId     String           @map("student_id")
+  courseId      String?          @map("course_id")
+  status        AttendanceStatus @default(present)
+  markedBy      String           @map("marked_by")
+  markedAt      DateTime         @default(now()) @map("marked_at")
+  notes         String?
+  isOfflineSync Boolean          @default(false) @map("is_offline_sync")
+
+  session ClassSession @relation(fields: [sessionId], references: [id])
+  student Student      @relation(fields: [studentId], references: [id])
+
+  @@unique([sessionId, studentId])
+  @@map("attendance")
+}
+
+enum AttendanceStatus {
+  present
+  absent
+  walk_in
+
+  @@map("attendance_status")
+}
+
+// ─────────────────────────────────────────
+// ASSESSMENTS
+// ─────────────────────────────────────────
+
+model Assessment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId      String         @map("student_id")
+  courseId       String         @map("course_id")
+  sessionId      String?        @map("session_id")
+  sessionNumber  Int            @map("session_number")
+  type           AssessmentType
+  assessorId     String         @map("assessor_id")
+  assessmentDate DateTime       @default(now()) @map("assessment_date")
+  notes          String?
+  isVoiceNote    Boolean        @default(false) @map("is_voice_note")
+  voiceNoteUrl   String?        @map("voice_note_url")
+
+  student Student      @relation(fields: [studentId], references: [id])
+  course  Course       @relation(fields: [courseId], references: [id])
+  session ClassSession? @relation(fields: [sessionId], references: [id])
+  scores  AssessmentScore[]
+  metrics ObjectiveMetric[]
+
+  @@map("assessments")
+}
+
+enum AssessmentType {
+  initial
+  quick
+  detailed
+  graduation
+  improvement
+
+  @@map("assessment_type")
+}
+
+model AssessmentScore {
+  id           String @id @default(uuid())
+  assessmentId String @map("assessment_id")
+  skillKey     String @map("skill_key")
+  score        Int
+  note         String?
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+
+  @@map("assessment_scores")
+}
+
+model ObjectiveMetric {
+  id           String @id @default(uuid())
+  assessmentId String @map("assessment_id")
+  metricKey    String @map("metric_key")
+  value        Float
+  unit         String
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+
+  @@map("objective_metrics")
+}
+
+model SkillGoal {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId  String    @map("student_id")
+  goalText   String    @map("goal_text")
+  targetDate DateTime? @map("target_date")
+  status     String    @default("active")
+
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@map("skill_goals")
+}
+
+model PracticeLog {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId       String   @map("student_id")
+  date            DateTime
+  distanceMeters  Int?     @map("distance_meters")
+  durationMinutes Int?     @map("duration_minutes")
+  focusSkills     String?  @map("focus_skills")
+  selfFeeling     Int?     @map("self_feeling")
+  notes           String?
+
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@map("practice_logs")
+}
+
+// ─────────────────────────────────────────
+// FINANCIAL
+// ─────────────────────────────────────────
+
+model Payment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId       String        @map("student_id")
+  amount          Int
+  type            PaymentType
+  referenceType   String?       @map("reference_type")
+  referenceId     String?       @map("reference_id")
+  paymentMethod   PaymentMethod @map("payment_method")
+  referenceNumber String?       @map("reference_number")
+  recordedBy      String        @map("recorded_by")
+  recordedAt      DateTime      @default(now()) @map("recorded_at")
+  notes           String?
+  isReversal      Boolean       @default(false) @map("is_reversal")
+
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@map("payments")
+}
+
+enum PaymentType {
+  course_fee
+  pool_ticket
+  shop
+  refund
+  adjustment
+
+  @@map("payment_type")
+}
+
+enum PaymentMethod {
+  cash
+  bank_transfer
+  card
+  other
+
+  @@map("payment_method")
+}
+
+model RefundRequest {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId    String  @map("student_id")
+  enrollmentId String? @map("enrollment_id")
+  poolTicketId String? @map("pool_ticket_id")
+
+  includeCourseRefund    Boolean @default(false) @map("include_course_refund")
+  includeTicketRefund    Boolean @default(false) @map("include_ticket_refund")
+  courseSessionsAttended Int     @default(0) @map("course_sessions_attended")
+  courseRefundRate       Float   @default(0) @map("course_refund_rate")
+  courseRefundAmount     Int     @default(0) @map("course_refund_amount")
+  ticketSessionsUsed     Int     @default(0) @map("ticket_sessions_used")
+  ticketRefundAmount     Int     @default(0) @map("ticket_refund_amount")
+  totalRefundAmount      Int     @default(0) @map("total_refund_amount")
+
+  reason     String
+  reasonText String?      @map("reason_text")
+  status     RefundStatus @default(pending)
+
+  requestedAt       DateTime  @default(now()) @map("requested_at")
+  requestedBy       String    @map("requested_by")
+  processedAt       DateTime? @map("processed_at")
+  processedBy       String?   @map("processed_by")
+  transferReference String?   @map("transfer_reference")
+
+  student    Student     @relation(fields: [studentId], references: [id])
+  enrollment Enrollment? @relation(fields: [enrollmentId], references: [id])
+  poolTicket PoolTicket? @relation(fields: [poolTicketId], references: [id])
+
+  @@map("refund_requests")
+}
+
+enum RefundStatus {
+  pending
+  approved
+  transferred
+  rejected
+  cancelled
+
+  @@map("refund_status")
+}
+
+// ─────────────────────────────────────────
+// SHOP
+// ─────────────────────────────────────────
+
+model Product {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name              String
+  sku               String      @unique
+  type              ProductType
+  linkedCourseId    String?     @map("linked_course_id")
+  sessionsCount     Int?        @map("sessions_count")
+  price             Int
+  cost              Int?
+  stockQuantity     Int?        @map("stock_quantity")
+  lowStockThreshold Int?        @default(3) @map("low_stock_threshold")
+  photos            Json        @default("[]")
+  description       String?
+  isActive          Boolean     @default(true) @map("is_active")
+
+  orderItems OrderItem[]
+
+  @@map("products")
+}
+
+enum ProductType {
+  course
+  improvement_pack
+  service
+  physical
+
+  @@map("product_type")
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId       String      @map("student_id")
+  totalAmount     Int         @map("total_amount")
+  voucherCode     String?     @map("voucher_code")
+  discountAmount  Int         @default(0) @map("discount_amount")
+  finalAmount     Int         @map("final_amount")
+  status          OrderStatus @default(pending)
+  noteFromStudent String?     @map("note_from_student")
+  fulfillmentNote String?     @map("fulfillment_note")
+  paymentPlan     String?     @map("payment_plan")
+
+  approvedAt  DateTime? @map("approved_at")
+  approvedBy  String?   @map("approved_by")
+  fulfilledAt DateTime? @map("fulfilled_at")
+  fulfilledBy String?   @map("fulfilled_by")
+
+  orderItems OrderItem[]
+
+  @@map("orders")
+}
+
+enum OrderStatus {
+  pending
+  approved
+  paid
+  fulfilled
+  cancelled
+
+  @@map("order_status")
+}
+
+model OrderItem {
+  id        String @id @default(uuid())
+  orderId   String @map("order_id")
+  productId String @map("product_id")
+  quantity  Int
+  unitPrice Int    @map("unit_price")
+  lineTotal Int    @map("line_total")
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+// ─────────────────────────────────────────
+// VOUCHERS
+// ─────────────────────────────────────────
+
+model Voucher {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  code          String    @unique
+  description   String?
+  discountType  String    @map("discount_type")
+  discountValue Int       @map("discount_value")
+  appliesTo     String    @map("applies_to")
+  maxUses       Int?      @map("max_uses")
+  usedCount     Int       @default(0) @map("used_count")
+  validFrom     DateTime? @map("valid_from")
+  validUntil    DateTime? @map("valid_until")
+  isActive      Boolean   @default(true) @map("is_active")
+
+  usages VoucherUsage[]
+
+  @@map("vouchers")
+}
+
+model VoucherUsage {
+  id           String   @id @default(uuid())
+  voucherId    String   @map("voucher_id")
+  studentId    String   @map("student_id")
+  orderId      String?  @map("order_id")
+  enrollmentId String?  @map("enrollment_id")
+  usedAt       DateTime @default(now()) @map("used_at")
+
+  voucher Voucher @relation(fields: [voucherId], references: [id])
+
+  @@map("voucher_usages")
+}
+
+// ─────────────────────────────────────────
+// CONTENT
+// ─────────────────────────────────────────
+
+model BlogPost {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  title         String
+  slug          String     @unique
+  content       String
+  excerpt       String?
+  category      String
+  coverImageUrl String?    @map("cover_image_url")
+  authorId      String     @map("author_id")
+  status        PostStatus @default(draft)
+  publishedAt   DateTime?  @map("published_at")
+  scheduledAt   DateTime?  @map("scheduled_at")
+  viewCount     Int        @default(0) @map("view_count")
+
+  @@map("blog_posts")
+}
+
+enum PostStatus {
+  draft
+  published
+  scheduled
+
+  @@map("post_status")
+}
+
+model Quiz {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  title            String
+  description      String?
+  courseId         String? @map("course_id")
+  linkedSkill      String? @map("linked_skill")
+  createdBy        String  @map("created_by")
+  isPublished      Boolean @default(false) @map("is_published")
+  timeLimitMinutes Int?    @map("time_limit_minutes")
+
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id     String @id @default(uuid())
+  quizId String @map("quiz_id")
+
+  questionText  String @map("question_text")
+  type          String
+  options       Json   @default("[]")
+  correctAnswer String @map("correct_answer")
+  explanation   String?
+  orderIndex    Int    @map("order_index")
+
+  quiz Quiz @relation(fields: [quizId], references: [id])
+
+  @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  quizId      String    @map("quiz_id")
+  studentId   String    @map("student_id")
+  score       Int?
+  maxScore    Int?      @map("max_score")
+  answers     Json      @default("{}")
+  startedAt   DateTime  @default(now()) @map("started_at")
+  completedAt DateTime? @map("completed_at")
+
+  quiz    Quiz    @relation(fields: [quizId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@map("quiz_attempts")
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  name             String
+  date             DateTime
+  timeSlot         String?  @map("time_slot")
+  description      String?
+  participantCount Int?     @map("participant_count")
+  highlights       Json     @default("{}")
+  photos           Json     @default("[]")
+  createdBy        String   @map("created_by")
+
+  @@map("events")
+}
+
+model Challenge {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  name      String
+  goalValue Int      @map("goal_value")
+  unit      String
+  startDate DateTime @map("start_date")
+  endDate   DateTime @map("end_date")
+  isActive  Boolean  @default(true) @map("is_active")
+
+  progressItems ChallengeProgress[]
+
+  @@map("challenges")
+}
+
+model ChallengeProgress {
+  id          String   @id @default(uuid())
+  challengeId String   @map("challenge_id")
+  studentId   String   @map("student_id")
+  currentValue Int     @default(0) @map("current_value")
+  lastUpdated DateTime @default(now()) @map("last_updated")
+
+  challenge Challenge @relation(fields: [challengeId], references: [id])
+  student   Student   @relation(fields: [studentId], references: [id])
+
+  @@unique([challengeId, studentId])
+  @@map("challenge_progress")
+}
+
+model SessionPhoto {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sessionId  String? @map("session_id")
+  eventId    String? @map("event_id")
+  photoUrl   String  @map("photo_url")
+  caption    String?
+  visibleTo  String  @default("all_students") @map("visible_to")
+  uploadedBy String  @map("uploaded_by")
+
+  session ClassSession? @relation(fields: [sessionId], references: [id])
+
+  @@map("session_photos")
+}
+
+model VideoLink {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId String  @map("student_id")
+  sessionId String? @map("session_id")
+  driveUrl  String  @map("drive_url")
+  caption   String?
+  createdBy String  @map("created_by")
+
+  student Student      @relation(fields: [studentId], references: [id])
+  session ClassSession? @relation(fields: [sessionId], references: [id])
+
+  @@map("video_links")
+}
+
+// ─────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  userId    String  @map("user_id")
+  studentId String? @map("student_id")
+  senderId  String? @map("sender_id")
+  type      String
+  title     String
+  body      String
+  actionUrl String? @map("action_url")
+  readAt    DateTime? @map("read_at")
+  metadata  Json    @default("{}")
+
+  recipient User     @relation(fields: [userId], references: [id])
+  student   Student? @relation("StudentNotification", fields: [studentId], references: [id])
+
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+// ─────────────────────────────────────────
+// OPERATIONS & ADMIN
+// ─────────────────────────────────────────
+
+model StudentNote {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId String  @map("student_id")
+  note      String
+  isPrivate Boolean @default(true) @map("is_private")
+  createdBy String  @map("created_by")
+
+  student       Student @relation(fields: [studentId], references: [id])
+  createdByUser User    @relation(fields: [createdBy], references: [id])
+
+  @@map("student_notes")
+}
+
+model ProfileChangeRequest {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  studentId      String    @map("student_id")
+  fieldChanges   Json      @map("field_changes")
+  status         String    @default("pending")
+  requestedAt    DateTime  @default(now()) @map("requested_at")
+  processedAt    DateTime? @map("processed_at")
+  processedBy    String?   @map("processed_by")
+  processedNotes String?   @map("processed_notes")
+
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@map("profile_change_requests")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  userId     String? @map("user_id")
+  role       String?
+  action     String
+  entityType String  @map("entity_type")
+  entityId   String  @map("entity_id")
+  beforeData Json?   @map("before_data")
+  afterData  Json?   @map("after_data")
+  ipAddress  String? @map("ip_address")
+  userAgent  String? @map("user_agent")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([entityType, entityId, createdAt])
+  @@index([userId, createdAt])
+  @@map("audit_log")
+}
+
+model ErrorLog {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  context      String
+  userId       String?   @map("user_id")
+  errorMessage String    @map("error_message")
+  stackTrace   String?   @map("stack_trace")
+  inputData    Json?     @map("input_data")
+  severity     String    @default("error")
+  resolvedAt   DateTime? @map("resolved_at")
+  resolvedBy   String?   @map("resolved_by")
+
+  @@map("error_logs")
+}
+
+model Faq {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  question   String
+  answer     String
+  category   String?
+  orderIndex Int     @default(0) @map("order_index")
+  isActive   Boolean @default(true) @map("is_active")
+
+  @@map("faqs")
+}
