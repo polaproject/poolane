@@ -80,6 +80,25 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      <section className="max-w-5xl mx-auto px-4 py-16">
+        <h2 className="font-heading text-3xl text-[#1C2B4A] text-center mb-3">Hành trình của bạn</h2>
+        <p className="text-sm text-[#1C2B4A]/50 text-center mb-12">4 bước đơn giản để bắt đầu bơi cùng Poolane</p>
+        <div className="grid md:grid-cols-4 gap-6">
+          {[
+            { step: '01', title: 'Tạo tài khoản', desc: 'Đăng ký online trong 1 phút' },
+            { step: '02', title: 'Tư vấn miễn phí', desc: 'Lớp liên hệ qua Zalo để hiểu nhu cầu' },
+            { step: '03', title: 'Học 10 buổi chuẩn', desc: 'Có đánh giá kỹ năng và video kỹ thuật' },
+            { step: '04', title: 'Tốt nghiệp', desc: 'Bơi tự do, không lo nước' },
+          ].map(s => (
+            <div key={s.step} className="text-center">
+              <p className="font-heading text-5xl text-[#C8A84B]/60 mb-3">{s.step}</p>
+              <h3 className="font-semibold text-[#1C2B4A] mb-1">{s.title}</h3>
+              <p className="text-sm text-[#1C2B4A]/60">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="max-w-3xl mx-auto px-4 py-20 text-center">
         <Star className="w-8 h-8 text-[#C8A84B] mx-auto mb-4" />
         <p className="font-heading text-2xl md:text-3xl text-[#1C2B4A] leading-relaxed italic">
