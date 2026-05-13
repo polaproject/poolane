@@ -111,22 +111,32 @@ export default async function AdminDashboard() {
 
       {/* Today sessions */}
       {todaySessions.length > 0 && (
-        <div className="card-navy p-6 mb-6">
-          <div className="flex items-center gap-2 mb-4 relative z-10">
+        <div
+          className="p-6 mb-6 relative overflow-hidden rounded-2xl"
+          style={{
+            background: 'linear-gradient(135deg, #1C2B4A 0%, #162340 100%)',
+            boxShadow: '0 8px 32px rgba(28,43,74,0.22)',
+          }}
+        >
+          {/* Decorative orbs */}
+          <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full pointer-events-none" style={{ background: 'rgba(255,255,255,0.04)' }} />
+          <div className="absolute -bottom-6 -left-4 w-20 h-20 rounded-full pointer-events-none" style={{ background: 'rgba(200,168,75,0.07)' }} />
+
+          <div className="flex items-center gap-2 mb-4 relative">
             <Calendar className="w-4 h-4" style={{ color: 'rgba(246,241,234,0.6)' }} />
             <h2 className="font-semibold text-sm" style={{ color: 'rgba(246,241,234,0.8)' }}>Buổi học hôm nay</h2>
           </div>
-          <div className="flex gap-3 relative z-10">
+          <div className="flex gap-3 relative">
             {todaySessions.map(s => (
               <Link key={s.id} href={`/staff/registrations?sessionId=${s.id}`}>
                 <div
-                  className="px-4 py-3 rounded-xl transition-all hover:scale-105"
+                  className="px-4 py-3 rounded-xl transition-all hover:scale-[1.03] cursor-pointer"
                   style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.08)' }}
                 >
                   <p className="font-medium text-sm" style={{ color: '#F6F1EA' }}>
                     {s.timeSlot === 'morning' ? '☀️ 5:30' : '🌙 18:00'}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: 'rgba(246,241,234,0.5)' }}>
+                  <p className="text-xs mt-0.5" style={{ color: 'rgba(246,241,234,0.55)' }}>
                     {s.registrations.length}/{s.capacity} người
                   </p>
                 </div>
