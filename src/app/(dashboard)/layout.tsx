@@ -1,17 +1,24 @@
 import { requireAuth } from '@/lib/auth'
+import { DashboardShell } from '@/components/layouts/DashboardShell'
 
-// Layout cho toàn bộ dashboard — protected route
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // Bảo vệ tất cả route trong (dashboard)
-  await requireAuth()
+  const user = await requireAuth()
+
+  const initial = user.fullName
+    ? user.fullName.split(' ').pop()?.charAt(0)?.toUpperCase() ?? 'U'
+    : 'U'
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA]">
+    <DashboardShell
+      userRole={user.role}
+      userFullName={user.fullName}
+      userInitial={initial}
+    >
       {children}
-    </div>
+    </DashboardShell>
   )
 }

@@ -128,3 +128,60 @@
     @apply font-sans;
   }
 }
+
+/* ── Poolane Brand Theme Variables ──────────────────────── */
+:root,
+.theme-a {
+  /* Theme A: Đêm & Sao (Default) */
+  --pola-nav-bg:     #1C2B4A;
+  --pola-nav-text:   #F6F1EA;
+  --pola-nav-muted:  rgba(246,241,234,0.5);
+  --pola-nav-active: rgba(246,241,234,0.12);
+  --pola-nav-hover:  rgba(246,241,234,0.08);
+  --pola-accent:     #C8A84B;
+  --pola-teal:       #5B8E9F;
+  --pola-page-bg:    #F6F1EA;
+  --pola-card-bg:    #FFFFFF;
+  --pola-border:     rgba(28,43,74,0.10);
+  --pola-text:       #1C2B4A;
+  --pola-text-muted: rgba(28,43,74,0.50);
+}
+
+.theme-b {
+  /* Theme B: Bình Minh */
+  --pola-nav-bg:     #1A3F55;
+  --pola-nav-text:   #EEF4F7;
+  --pola-nav-muted:  rgba(238,244,247,0.5);
+  --pola-nav-active: rgba(238,244,247,0.12);
+  --pola-nav-hover:  rgba(238,244,247,0.08);
+  --pola-accent:     #E09850;
+  --pola-teal:       #6AACCF;
+  --pola-page-bg:    #EEF4F7;
+  --pola-card-bg:    #FFFFFF;
+  --pola-border:     rgba(26,63,85,0.10);
+  --pola-text:       #1A3F55;
+  --pola-text-muted: rgba(26,63,85,0.50);
+}
+
+.theme-d {
+  /* Theme D: Night Pool */
+  --pola-nav-bg:     #080E18;
+  --pola-nav-text:   #E5EDF8;
+  --pola-nav-muted:  rgba(229,237,248,0.45);
+  --pola-nav-active: rgba(0,229,200,0.12);
+  --pola-nav-hover:  rgba(229,237,248,0.06);
+  --pola-accent:     #00E5C8;
+  --pola-teal:       #C9A84B;
+  --pola-page-bg:    #0D1828;
+  --pola-card-bg:    #132035;
+  --pola-border:     rgba(229,237,248,0.08);
+  --pola-text:       #E5EDF8;
+  --pola-text-muted: rgba(229,237,248,0.45);
+}
+
+/* Utility classes for Poolane brand */
+.pola-nav    { background-color: var(--pola-nav-bg); color: var(--pola-nav-text); }
+.pola-page   { background-color: var(--pola-page-bg); color: var(--pola-text); }
+.pola-card   { background-color: var(--pola-card-bg); border-color: var(--pola-border); }
+.pola-accent { color: var(--pola-accent); }
+.pola-teal   { color: var(--pola-teal); }

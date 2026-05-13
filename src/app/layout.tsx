@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google'
 import { Toaster } from '@/components/ui/sonner'
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import './globals.css'
 
 const cormorantGaramond = Cormorant_Garamond({
@@ -34,8 +35,10 @@ export default function RootLayout({
       <body
         className={`${cormorantGaramond.variable} ${plusJakartaSans.variable} font-body antialiased`}
       >
-        {children}
-        <Toaster richColors position="top-right" />
+        <ThemeProvider>
+          {children}
+          <Toaster richColors position="top-right" />
+        </ThemeProvider>
       </body>
     </html>
   )
