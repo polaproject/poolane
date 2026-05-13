@@ -10,7 +10,7 @@ import {
   BellRing, Brain, ShoppingBag, CheckSquare, ClipboardList,
   Star, BarChart2, Calendar, TrendingUp, Target, BookOpen,
   ScrollText, Bell, LogOut, ChevronLeft, Menu, X,
-  Activity, UserCog, IdCard,
+  Activity, UserCog, IdCard, HelpCircle,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -26,13 +26,18 @@ const NAV_ITEMS: Record<UserRole, NavItem[]> = {
     { label: 'Dashboard',      href: '/admin/dashboard',    icon: LayoutDashboard },
     { label: 'Học viên',       href: '/admin/students',     icon: Users },
     { label: 'YC cập nhật',    href: '/admin/profile-requests', icon: UserCog },
+    { label: 'Reset MK',       href: '/admin/password-resets', icon: UserCog },
     { label: 'Lịch học',       href: '/admin/schedule',     icon: CalendarDays },
     { label: 'Tài chính',      href: '/admin/finance',      icon: DollarSign },
     { label: 'Hoàn tiền',      href: '/admin/finance/refunds', icon: DollarSign },
+    { label: 'Báo cáo',        href: '/admin/reports',       icon: BarChart2 },
     { label: 'Pulse Check',    href: '/admin/pulse',        icon: Zap },
     { label: 'AI Dự Báo',      href: '/admin/ai',           icon: Brain },
+    { label: 'Heatmap KN',     href: '/admin/skill-heatmap', icon: BarChart2 },
     { label: 'Sản phẩm',       href: '/admin/shop/products', icon: ShoppingBag },
     { label: 'Đơn hàng',       href: '/admin/shop/orders',  icon: ShoppingBag },
+    { label: 'Blog',           href: '/admin/blog',         icon: BookOpen },
+    { label: 'Sự kiện',        href: '/admin/events',       icon: Star },
     { label: 'Broadcast',      href: '/admin/broadcast',    icon: BellRing },
   ],
   staff: [
@@ -44,9 +49,15 @@ const NAV_ITEMS: Record<UserRole, NavItem[]> = {
   student: [
     { label: 'Hồ sơ',          href: '/student/profile',   icon: IdCard },
     { label: 'Đăng ký học',    href: '/student/schedule',  icon: Calendar },
+    { label: 'Lịch của tôi',   href: '/student/my-schedule', icon: Calendar },
+    { label: 'Thanh toán',     href: '/student/payments',  icon: DollarSign },
     { label: 'Tiến độ',        href: '/student/progress',  icon: TrendingUp },
+    { label: 'Tự đánh giá',    href: '/student/self-assessment', icon: ClipboardList },
     { label: 'Mục tiêu',       href: '/student/goals',     icon: Target },
     { label: 'Nhật ký',        href: '/student/log',       icon: Activity },
+    { label: 'Quiz',           href: '/student/quiz',      icon: HelpCircle },
+    { label: 'Sự kiện',        href: '/student/events',    icon: Star },
+    { label: 'Thử thách',      href: '/student/challenges', icon: Target },
     { label: 'Shop',           href: '/student/shop',      icon: ShoppingBag },
     { label: 'Thông báo',      href: '/shared/notifications', icon: Bell },
   ],
