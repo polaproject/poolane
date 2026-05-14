@@ -1,7 +1,7 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Undo2 } from 'lucide-react'
 import { NewRefundForm } from './NewRefundForm'
 
 type SearchParams = Promise<{ student?: string }>
@@ -12,13 +12,12 @@ export default async function NewRefundPage({ searchParams }: { searchParams: Se
   const params = await searchParams
   const preselectedStudentId = params.student
 
-  // Lấy danh sách HV có enrollment hoặc vé bơi active
   const students = await prisma.student.findMany({
     where: {
       OR: [
         { enrollments: { some: { status: { in: ['active', 'extension', 'completed'] } } } },
         { poolTickets: { some: { isActive: true } } },
-      ]
+      ],
     },
     select: {
       id: true,
@@ -29,7 +28,6 @@ export default async function NewRefundPage({ searchParams }: { searchParams: Se
     take: 200,
   })
 
-  // Nếu preselect → load chi tiết enrollments + vé
   let preselected = null
   if (preselectedStudentId) {
     preselected = await prisma.student.findUnique({
@@ -38,62 +36,66 @@ export default async function NewRefundPage({ searchParams }: { searchParams: Se
         user: { select: { fullName: true, phone: true } },
         enrollments: {
           where: { status: { in: ['active', 'extension', 'completed'] } },
-          include: { course: { select: { code: true, name: true, price: true } } }
+          include: { course: { select: { code: true, name: true, price: true } } },
         },
-        poolTickets: {
-          where: { isActive: true },
-          orderBy: { purchasedAt: 'desc' },
-          take: 1,
-        },
-      }
+        poolTickets: { where: { isActive: true }, orderBy: { purchasedAt: 'desc' }, take: 1 },
+      },
     })
   }
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <Link
-          href="/admin/finance/refunds"
-          className="inline-flex items-center gap-1 text-sm text-[#1C2B4A]/70 hover:text-[#1C2B4A]"
-        >
-          <ArrowLeft className="w-4 h-4" /> Danh sách hoàn tiền
-        </Link>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-warn/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto">
+          <Link
+            href="/admin/finance/refunds"
+            className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group"
+          >
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" strokeWidth={2.25} />
+            Danh sách hoàn tiền
+          </Link>
+          <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
+            <Undo2 className="h-3 w-3 text-accent" strokeWidth={1.75} /> Theo chính sách CLAUDE.md §7.5
+          </p>
+          <h1 className="font-heading text-3xl sm:text-4xl italic leading-tight">Tạo yêu cầu hoàn tiền</h1>
+          <p className="text-sm text-paper/65 mt-2 max-w-lg">
+            Số tiền hoàn được tính tự động theo chính sách (50% nếu 0 buổi, giảm dần theo số buổi đã học).
+          </p>
+        </div>
       </div>
 
-      <div className="mb-6">
-        <h1 className="font-heading text-3xl text-[#1C2B4A]">Tạo yêu cầu hoàn tiền</h1>
-        <p className="text-sm text-[#1C2B4A]/50 mt-1">
-          Số tiền hoàn được tính tự động theo chính sách (xem CLAUDE.md §7.5)
-        </p>
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto relative z-10">
+        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5 sm:p-6">
+          <NewRefundForm
+            students={students.map(s => ({
+              id: s.id,
+              studentCode: s.studentCode,
+              fullName: s.user.fullName,
+              phone: s.user.phone,
+            }))}
+            preselected={preselected ? {
+              id: preselected.id,
+              studentCode: preselected.studentCode,
+              fullName: preselected.user.fullName,
+              phone: preselected.user.phone,
+              enrollments: preselected.enrollments.map(e => ({
+                id: e.id,
+                courseCode: e.course.code,
+                courseName: e.course.name,
+                totalPaid: e.totalPaid,
+                status: e.status,
+              })),
+              activeTicket: preselected.poolTickets[0] ? {
+                id: preselected.poolTickets[0].id,
+                sessionsUsed: preselected.poolTickets[0].sessionsUsed,
+                totalSessions: preselected.poolTickets[0].totalSessions,
+                pricePaid: preselected.poolTickets[0].pricePaid,
+              } : null,
+            } : null}
+          />
+        </div>
       </div>
-
-      <NewRefundForm
-        students={students.map(s => ({
-          id: s.id,
-          studentCode: s.studentCode,
-          fullName: s.user.fullName,
-          phone: s.user.phone,
-        }))}
-        preselected={preselected ? {
-          id: preselected.id,
-          studentCode: preselected.studentCode,
-          fullName: preselected.user.fullName,
-          phone: preselected.user.phone,
-          enrollments: preselected.enrollments.map(e => ({
-            id: e.id,
-            courseCode: e.course.code,
-            courseName: e.course.name,
-            totalPaid: e.totalPaid,
-            status: e.status,
-          })),
-          activeTicket: preselected.poolTickets[0] ? {
-            id: preselected.poolTickets[0].id,
-            sessionsUsed: preselected.poolTickets[0].sessionsUsed,
-            totalSessions: preselected.poolTickets[0].totalSessions,
-            pricePaid: preselected.poolTickets[0].pricePaid,
-          } : null,
-        } : null}
-      />
     </div>
   )
 }

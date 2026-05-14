@@ -1,30 +1,25 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { Plus, Undo2, BookOpen, Ticket, ArrowRight, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import { Chip } from '@/components/ui/Chip'
 
 type SearchParams = Promise<{ status?: string }>
+type Variant = 'neutral' | 'accent' | 'mist' | 'success' | 'warn' | 'danger'
 
-const STATUS_TABS = [
-  { value: 'pending',     label: 'Chờ duyệt' },
-  { value: 'approved',    label: 'Đã duyệt — chờ chuyển' },
-  { value: 'transferred', label: 'Đã chuyển' },
-  { value: 'rejected',    label: 'Từ chối' },
+const STATUS_TABS: Array<{ value: string; label: string; variant: Variant }> = [
+  { value: 'pending',     label: 'Chờ duyệt',          variant: 'warn' },
+  { value: 'approved',    label: 'Chờ chuyển',         variant: 'mist' },
+  { value: 'transferred', label: 'Đã chuyển',          variant: 'success' },
+  { value: 'rejected',    label: 'Từ chối',            variant: 'danger' },
 ]
 
-const STATUS_COLORS: Record<string, string> = {
-  pending:     'bg-amber-50 text-amber-700 border-amber-200',
-  approved:    'bg-blue-50 text-blue-700 border-blue-200',
-  transferred: 'bg-green-50 text-green-700 border-green-200',
-  rejected:    'bg-red-50 text-red-700 border-red-200',
-}
-
 const REASON_LABELS: Record<string, string> = {
-  work:   'Công việc',
+  work: 'Công việc',
   health: 'Sức khoẻ',
-  other:  'Khác',
+  other: 'Khác',
 }
 
 function fmt(n: number) { return n.toLocaleString('vi-VN') + 'đ' }
@@ -39,14 +34,9 @@ export default async function RefundsPage({ searchParams }: { searchParams: Sear
     where: { status: status as 'pending' | 'approved' | 'transferred' | 'rejected' },
     orderBy: { requestedAt: 'desc' },
     include: {
-      student: {
-        select: {
-          studentCode: true,
-          user: { select: { fullName: true, phone: true } }
-        }
-      },
+      student: { select: { studentCode: true, user: { select: { fullName: true, phone: true } } } },
       enrollment: { include: { course: { select: { name: true, code: true } } } },
-    }
+    },
   })
 
   const totals = await prisma.refundRequest.groupBy({
@@ -58,149 +48,154 @@ export default async function RefundsPage({ searchParams }: { searchParams: Sear
   const sumPending = totals.find(t => t.status === 'pending')?._sum.totalRefundAmount ?? 0
   const sumApproved = totals.find(t => t.status === 'approved')?._sum.totalRefundAmount ?? 0
 
+  const currentTab = STATUS_TABS.find(t => t.value === status) ?? STATUS_TABS[0]
+
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="font-heading text-3xl text-[#1C2B4A]">Hoàn tiền</h1>
-          <p className="text-sm text-[#1C2B4A]/50 mt-1">{items.length} yêu cầu trong tab này</p>
-        </div>
-        <Link
-          href="/admin/finance/refunds/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg text-sm font-semibold hover:bg-[#1C2B4A]/90"
-        >
-          <Plus className="w-4 h-4" /> Tạo yêu cầu
-        </Link>
-      </div>
-
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <SummaryCard
-          label="Tổng cần xử lý"
-          count={totalByStatus.pending ?? 0}
-          amount={sumPending}
-          color="amber"
-        />
-        <SummaryCard
-          label="Tổng cần chuyển"
-          count={totalByStatus.approved ?? 0}
-          amount={sumApproved}
-          color="blue"
-        />
-      </div>
-
-      {/* Status tabs */}
-      <div className="flex gap-2 mb-5 flex-wrap">
-        {STATUS_TABS.map(tab => (
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-warn/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-6xl mx-auto flex items-end justify-between gap-3 flex-wrap">
+          <div>
+            <p className="eyebrow text-paper/55 mb-2">{items.length} yêu cầu · {currentTab.label.toLowerCase()}</p>
+            <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Hoàn tiền</h1>
+          </div>
           <Link
-            key={tab.value}
-            href={`/admin/finance/refunds?status=${tab.value}`}
-            className={`px-4 py-2 text-sm rounded-lg border transition-colors ${
-              status === tab.value
-                ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]'
-                : 'bg-white text-[#1C2B4A]/60 border-[#1C2B4A]/15 hover:border-[#1C2B4A]/40'
-            }`}
+            href="/admin/finance/refunds/new"
+            className="inline-flex items-center gap-1.5 bg-accent text-ink font-semibold px-4 py-2.5 rounded-pill text-sm hover:bg-accent/90 transition shadow-cta"
           >
-            {tab.label}
-            {totalByStatus[tab.value] != null && totalByStatus[tab.value] > 0 && (
-              <span className="ml-2 text-xs opacity-70">({totalByStatus[tab.value]})</span>
-            )}
+            <Plus className="h-4 w-4" strokeWidth={2.5} /> Tạo yêu cầu
           </Link>
-        ))}
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 overflow-hidden shadow-sm">
-        {items.length === 0 ? (
-          <div className="p-12 text-center text-[#1C2B4A]/40 text-sm">
-            Không có yêu cầu nào
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
+      <div className="px-4 sm:px-8 -mt-6 max-w-6xl mx-auto space-y-4 relative z-10">
+        {/* Summary */}
+        <div className="grid sm:grid-cols-2 gap-3">
+          <SummaryCard
+            label="Cần xử lý"
+            count={totalByStatus.pending ?? 0}
+            amount={sumPending}
+            tone="warn"
+            icon={AlertCircle}
+          />
+          <SummaryCard
+            label="Cần chuyển"
+            count={totalByStatus.approved ?? 0}
+            amount={sumApproved}
+            tone="mist"
+            icon={Undo2}
+          />
+        </div>
 
-          <table className="w-full min-w-[640px]">
-            <thead className="bg-[#F6F1EA]/40">
-              <tr className="text-left text-xs uppercase tracking-wider text-[#1C2B4A]/50">
-                <th className="px-5 py-3">Học viên</th>
-                <th className="px-5 py-3">Khoản hoàn</th>
-                <th className="px-5 py-3">Lý do</th>
-                <th className="px-5 py-3 text-right">Số tiền</th>
-                <th className="px-5 py-3">Trạng thái</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#1C2B4A]/5">
-              {items.map(r => (
-                <tr key={r.id} className="hover:bg-[#F6F1EA]/20">
-                  <td className="px-5 py-3">
-                    <p className="font-semibold text-sm text-[#1C2B4A]">{r.student.user.fullName}</p>
-                    <p className="text-xs text-[#1C2B4A]/40 mt-0.5">
-                      {r.student.studentCode} · {r.student.user.phone}
-                    </p>
-                  </td>
-                  <td className="px-5 py-3 text-sm">
-                    <div className="flex flex-col gap-0.5">
-                      {r.includeCourseRefund && (
-                        <span className="text-xs text-[#1C2B4A]/70">
-                          📚 {r.enrollment?.course.code ?? 'Học phí'} · {fmt(r.courseRefundAmount)} ({Math.round(r.courseRefundRate * 100)}%)
-                        </span>
-                      )}
-                      {r.includeTicketRefund && (
-                        <span className="text-xs text-[#1C2B4A]/70">
-                          🎟️ Vé bơi · {fmt(r.ticketRefundAmount)}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-5 py-3 text-sm text-[#1C2B4A]/70">
-                    {REASON_LABELS[r.reason] ?? r.reason}
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <p className="font-semibold text-sm text-[#1C2B4A]">{fmt(r.totalRefundAmount)}</p>
-                    <p className="text-xs text-[#1C2B4A]/40 mt-0.5">
-                      {format(r.requestedAt, 'dd/MM HH:mm', { locale: vi })}
-                    </p>
-                  </td>
-                  <td className="px-5 py-3">
-                    <span className={`px-2 py-0.5 text-xs rounded-full border ${STATUS_COLORS[r.status]}`}>
-                      {STATUS_TABS.find(t => t.value === r.status)?.label ?? r.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <Link
-                      href={`/admin/finance/refunds/${r.id}`}
-                      className="text-xs font-semibold text-[#1C2B4A] hover:underline"
-                    >
-                      Xem →
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-        )}
+        {/* Status tabs */}
+        <div className="flex gap-2 flex-wrap">
+          {STATUS_TABS.map(tab => (
+            <Link key={tab.value} href={`/admin/finance/refunds?status=${tab.value}`}>
+              <Chip asButton active={status === tab.value}>
+                {tab.label}
+                {totalByStatus[tab.value] != null && totalByStatus[tab.value] > 0 && (
+                  <span className="opacity-70">· {totalByStatus[tab.value]}</span>
+                )}
+              </Chip>
+            </Link>
+          ))}
+        </div>
+
+        {/* Table */}
+        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+          {items.length === 0 ? (
+            <div className="p-12 text-center">
+              <Undo2 className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+              <p className="font-heading italic text-2xl text-ink mb-1">Không có yêu cầu</p>
+              <p className="text-sm text-ink/55">Trong tab này chưa có yêu cầu hoàn tiền nào.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[700px]">
+                <thead className="bg-paper-tint/30 border-b border-ink/8">
+                  <tr>
+                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Học viên</th>
+                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Khoản hoàn</th>
+                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Lý do</th>
+                    <th className="text-right px-5 py-3 eyebrow text-ink/55">Số tiền</th>
+                    <th className="px-5 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map(r => {
+                    const tabCfg = STATUS_TABS.find(t => t.value === r.status) ?? STATUS_TABS[0]
+                    return (
+                      <tr key={r.id} className="border-b border-ink/5 last:border-b-0 hover:bg-paper-tint/20 transition group">
+                        <td className="px-5 py-3.5">
+                          <p className="text-sm font-medium text-ink">{r.student.user.fullName}</p>
+                          <p className="text-xs text-ink/45 font-mono mt-0.5">{r.student.studentCode} · {r.student.user.phone}</p>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <div className="flex flex-col gap-1">
+                            {r.includeCourseRefund && (
+                              <span className="text-xs text-ink/70 inline-flex items-center gap-1.5">
+                                <BookOpen className="h-3 w-3 text-accent" strokeWidth={1.75} />
+                                {r.enrollment?.course.code ?? 'Học phí'} · {fmt(r.courseRefundAmount)} ({Math.round(r.courseRefundRate * 100)}%)
+                              </span>
+                            )}
+                            {r.includeTicketRefund && (
+                              <span className="text-xs text-ink/70 inline-flex items-center gap-1.5">
+                                <Ticket className="h-3 w-3 text-mist" strokeWidth={1.75} />
+                                Vé bơi · {fmt(r.ticketRefundAmount)}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-5 py-3.5 text-sm text-ink/70">
+                          {REASON_LABELS[r.reason] ?? r.reason}
+                        </td>
+                        <td className="px-5 py-3.5 text-right">
+                          <p className="font-heading italic text-lg text-ink leading-none">{fmt(r.totalRefundAmount)}</p>
+                          <p className="text-xs text-ink/45 mt-1">{format(r.requestedAt, 'dd/MM HH:mm', { locale: vi })}</p>
+                        </td>
+                        <td className="px-5 py-3.5 text-right">
+                          <Link
+                            href={`/admin/finance/refunds/${r.id}`}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline"
+                          >
+                            <Chip variant={tabCfg.variant} active className="text-[10px] mr-1">{tabCfg.label}</Chip>
+                            <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
+                          </Link>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-function SummaryCard({ label, count, amount, color }: {
+function SummaryCard({
+  label, count, amount, tone, icon: Icon,
+}: {
   label: string
   count: number
   amount: number
-  color: 'amber' | 'blue'
+  tone: 'warn' | 'mist'
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
 }) {
-  const palette = color === 'amber'
-    ? 'border-amber-200 bg-amber-50/40'
-    : 'border-blue-200 bg-blue-50/40'
-  const labelColor = color === 'amber' ? 'text-amber-700' : 'text-blue-700'
-
   return (
-    <div className={`rounded-2xl border ${palette} p-5`}>
-      <p className={`text-xs uppercase tracking-wider font-semibold ${labelColor}`}>{label}</p>
-      <p className="font-heading text-3xl text-[#1C2B4A] mt-1">{count}</p>
-      <p className="text-sm text-[#1C2B4A]/60 mt-0.5">{fmt(amount)}</p>
+    <div className={`rounded-card-lg p-5 ring-1 backdrop-blur-sm ${
+      tone === 'warn' ? 'bg-warn/10 ring-warn/30' : 'bg-mist/10 ring-mist/30'
+    }`}>
+      <div className="flex items-start justify-between mb-3">
+        <p className={`eyebrow ${tone === 'warn' ? 'text-warn' : 'text-mist'}`}>{label}</p>
+        <div className={`grid place-items-center h-9 w-9 rounded-pill ${tone === 'warn' ? 'bg-warn/15' : 'bg-mist/15'}`}>
+          <Icon className={`h-4 w-4 ${tone === 'warn' ? 'text-warn' : 'text-mist'}`} strokeWidth={1.75} />
+        </div>
+      </div>
+      <p className="font-heading italic text-4xl text-ink leading-none">{count}</p>
+      <p className="text-sm text-ink/65 mt-2">{fmt(amount)}</p>
     </div>
   )
 }

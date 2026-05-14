@@ -2,31 +2,26 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, BookOpen, Ticket, CheckCircle2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { RefundActions } from './RefundActions'
+import { Chip } from '@/components/ui/Chip'
 
 type Params = { params: Promise<{ id: string }> }
+type Variant = 'neutral' | 'accent' | 'mist' | 'success' | 'warn' | 'danger'
 
-const STATUS_COLORS: Record<string, string> = {
-  pending:     'bg-amber-50 text-amber-700 border-amber-200',
-  approved:    'bg-blue-50 text-blue-700 border-blue-200',
-  transferred: 'bg-green-50 text-green-700 border-green-200',
-  rejected:    'bg-red-50 text-red-700 border-red-200',
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  pending:     'Chờ duyệt',
-  approved:    'Đã duyệt — chờ chuyển',
-  transferred: 'Đã chuyển',
-  rejected:    'Từ chối',
+const STATUS: Record<string, { label: string; variant: Variant }> = {
+  pending:     { label: 'Chờ duyệt',  variant: 'warn' },
+  approved:    { label: 'Chờ chuyển', variant: 'mist' },
+  transferred: { label: 'Đã chuyển',  variant: 'success' },
+  rejected:    { label: 'Từ chối',    variant: 'danger' },
 }
 
 const REASON_LABELS: Record<string, string> = {
-  work:   'Lý do công việc',
+  work: 'Lý do công việc',
   health: 'Lý do sức khoẻ',
-  other:  'Lý do khác',
+  other: 'Lý do khác',
 }
 
 function fmt(n: number) { return n.toLocaleString('vi-VN') + 'đ' }
@@ -38,136 +33,150 @@ export default async function RefundDetailPage({ params }: Params) {
   const refund = await prisma.refundRequest.findUnique({
     where: { id },
     include: {
-      student: {
-        include: { user: { select: { fullName: true, phone: true, email: true } } }
-      },
+      student: { include: { user: { select: { fullName: true, phone: true, email: true } } } },
       enrollment: { include: { course: { select: { name: true, code: true } } } },
       poolTicket: { select: { totalSessions: true, sessionsUsed: true, pricePaid: true, ticketType: true } },
-    }
+    },
   })
 
   if (!refund) notFound()
+  const cfg = STATUS[refund.status] ?? STATUS.pending
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <Link
-          href="/admin/finance/refunds"
-          className="inline-flex items-center gap-1 text-sm text-[#1C2B4A]/70 hover:text-[#1C2B4A]"
-        >
-          <ArrowLeft className="w-4 h-4" /> Danh sách hoàn tiền
-        </Link>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-warn/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto">
+          <Link
+            href="/admin/finance/refunds"
+            className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group"
+          >
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" strokeWidth={2.25} />
+            Danh sách hoàn tiền
+          </Link>
+          <p className="eyebrow text-paper/55 mb-2 font-mono normal-case tracking-[0.2em]">{refund.student.studentCode}</p>
+          <h1 className="font-heading text-3xl sm:text-4xl italic leading-tight">{refund.student.user.fullName}</h1>
+          <div className="mt-3 flex items-center gap-2 flex-wrap text-xs text-paper/65">
+            <Chip variant={cfg.variant} active>{cfg.label}</Chip>
+            <span>·</span>
+            <span>{refund.student.user.phone}</span>
+            {refund.student.user.email && (
+              <><span>·</span><span>{refund.student.user.email}</span></>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Header */}
-      <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 shadow-sm mb-4">
-        <div className="px-5 py-4 border-b border-[#1C2B4A]/8 flex items-center justify-between">
-          <div>
-            <h1 className="font-heading text-xl text-[#1C2B4A]">
-              {refund.student.user.fullName}
-            </h1>
-            <p className="text-xs text-[#1C2B4A]/50 mt-0.5">
-              {refund.student.studentCode} · {refund.student.user.phone}
-            </p>
-          </div>
-          <span className={`px-3 py-1 text-xs rounded-full border ${STATUS_COLORS[refund.status]}`}>
-            {STATUS_LABELS[refund.status]}
-          </span>
-        </div>
-
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
         {/* Breakdown */}
-        <div className="p-5 space-y-3">
+        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5 space-y-4">
           {refund.includeCourseRefund && (
-            <div className="border border-[#1C2B4A]/10 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-semibold text-[#1C2B4A]">
-                  📚 Hoàn học phí {refund.enrollment?.course.code ? `(${refund.enrollment.course.code})` : ''}
+            <div className="rounded-card ring-1 ring-ink/10 bg-paper-tint/40 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-ink inline-flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-accent" strokeWidth={1.75} />
+                  Hoàn học phí {refund.enrollment?.course.code && `(${refund.enrollment.course.code})`}
                 </p>
-                <p className="font-semibold text-[#1C2B4A]">{fmt(refund.courseRefundAmount)}</p>
+                <p className="font-heading italic text-xl text-ink">{fmt(refund.courseRefundAmount)}</p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs text-[#1C2B4A]/60">
+              <div className="grid grid-cols-3 gap-3 text-xs">
                 <div>
-                  <p className="text-[#1C2B4A]/40 uppercase tracking-wider">Đã học</p>
-                  <p className="mt-0.5 text-[#1C2B4A]">{refund.courseSessionsAttended} buổi</p>
+                  <p className="eyebrow text-ink/45">Đã học</p>
+                  <p className="text-ink mt-1 text-sm">{refund.courseSessionsAttended} buổi</p>
                 </div>
                 <div>
-                  <p className="text-[#1C2B4A]/40 uppercase tracking-wider">Tỉ lệ hoàn</p>
-                  <p className="mt-0.5 text-[#1C2B4A]">{Math.round(refund.courseRefundRate * 100)}%</p>
+                  <p className="eyebrow text-ink/45">Tỉ lệ</p>
+                  <p className="text-ink mt-1 text-sm">{Math.round(refund.courseRefundRate * 100)}%</p>
                 </div>
                 <div>
-                  <p className="text-[#1C2B4A]/40 uppercase tracking-wider">Khoá</p>
-                  <p className="mt-0.5 text-[#1C2B4A] truncate">{refund.enrollment?.course.name ?? '—'}</p>
+                  <p className="eyebrow text-ink/45">Khoá</p>
+                  <p className="text-ink mt-1 text-sm truncate">{refund.enrollment?.course.name ?? '—'}</p>
                 </div>
               </div>
             </div>
           )}
 
           {refund.includeTicketRefund && (
-            <div className="border border-[#1C2B4A]/10 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-semibold text-[#1C2B4A]">🎟️ Hoàn vé bơi</p>
-                <p className="font-semibold text-[#1C2B4A]">{fmt(refund.ticketRefundAmount)}</p>
+            <div className="rounded-card ring-1 ring-ink/10 bg-paper-tint/40 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-ink inline-flex items-center gap-2">
+                  <Ticket className="h-4 w-4 text-mist" strokeWidth={1.75} />
+                  Hoàn vé bơi
+                </p>
+                <p className="font-heading italic text-xl text-ink">{fmt(refund.ticketRefundAmount)}</p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs text-[#1C2B4A]/60">
+              <div className="grid grid-cols-3 gap-3 text-xs">
                 <div>
-                  <p className="text-[#1C2B4A]/40 uppercase tracking-wider">Đã dùng</p>
-                  <p className="mt-0.5 text-[#1C2B4A]">{refund.ticketSessionsUsed} buổi</p>
+                  <p className="eyebrow text-ink/45">Đã dùng</p>
+                  <p className="text-ink mt-1 text-sm">{refund.ticketSessionsUsed} buổi</p>
                 </div>
                 <div>
-                  <p className="text-[#1C2B4A]/40 uppercase tracking-wider">Còn lại</p>
-                  <p className="mt-0.5 text-[#1C2B4A]">
+                  <p className="eyebrow text-ink/45">Còn lại</p>
+                  <p className="text-ink mt-1 text-sm">
                     {Math.max(0, Math.min(refund.poolTicket?.totalSessions ?? 0, 10) - refund.ticketSessionsUsed)} buổi
                   </p>
                 </div>
                 <div>
-                  <p className="text-[#1C2B4A]/40 uppercase tracking-wider">Tỉ lệ</p>
-                  <p className="mt-0.5 text-[#1C2B4A]">80%</p>
+                  <p className="eyebrow text-ink/45">Tỉ lệ</p>
+                  <p className="text-ink mt-1 text-sm">80%</p>
                 </div>
               </div>
             </div>
           )}
 
           {/* Total */}
-          <div className="border-t border-[#1C2B4A]/10 pt-3 flex items-center justify-between">
-            <p className="text-sm uppercase tracking-wider text-[#1C2B4A]/50 font-semibold">
-              Tổng hoàn
-            </p>
-            <p className="font-heading text-2xl text-[#1C2B4A]">{fmt(refund.totalRefundAmount)}</p>
+          <div className="border-t border-ink/8 pt-4 flex items-center justify-between">
+            <p className="eyebrow text-ink/55">Tổng hoàn</p>
+            <p className="font-heading italic text-3xl text-warn leading-none">{fmt(refund.totalRefundAmount)}</p>
           </div>
 
           {/* Reason */}
-          <div className="px-4 py-3 bg-[#F6F1EA]/40 rounded-xl">
-            <p className="text-xs uppercase tracking-wider text-[#1C2B4A]/40 mb-1">
-              {REASON_LABELS[refund.reason] ?? refund.reason}
-            </p>
-            {refund.reasonText && (
-              <p className="text-sm text-[#1C2B4A]/80">{refund.reasonText}</p>
-            )}
+          <div className="rounded-card bg-mist/8 ring-1 ring-mist/20 px-4 py-3">
+            <p className="eyebrow text-mist mb-1">{REASON_LABELS[refund.reason] ?? refund.reason}</p>
+            {refund.reasonText && <p className="text-sm text-ink/80">{refund.reasonText}</p>}
           </div>
 
-          <p className="text-xs text-[#1C2B4A]/40">
-            Yêu cầu lúc {format(refund.requestedAt, 'HH:mm dd/MM/yyyy', { locale: vi })}
+          <p className="text-xs text-ink/45">
+            Yêu cầu lúc {format(refund.requestedAt, 'HH:mm · dd/MM/yyyy', { locale: vi })}
           </p>
         </div>
-      </div>
 
-      {/* Actions or processed info */}
-      {refund.status === 'pending' && <RefundActions id={refund.id} mode="pending" />}
-      {refund.status === 'approved' && <RefundActions id={refund.id} mode="approved" amount={refund.totalRefundAmount} />}
+        {/* Actions */}
+        {refund.status === 'pending' && (
+          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-accent/30 p-5">
+            <p className="eyebrow text-accent mb-3">Cần xử lý</p>
+            <RefundActions id={refund.id} mode="pending" />
+          </div>
+        )}
+        {refund.status === 'approved' && (
+          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-mist/30 p-5">
+            <p className="eyebrow text-mist mb-3">Đã duyệt — chuyển tiền + đánh dấu</p>
+            <RefundActions id={refund.id} mode="approved" amount={refund.totalRefundAmount} />
+          </div>
+        )}
 
-      {(refund.status === 'transferred' || refund.status === 'rejected') && (
-        <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 shadow-sm p-5">
-          <p className="text-xs uppercase tracking-wider text-[#1C2B4A]/40 mb-1">
-            Đã xử lý lúc {refund.processedAt ? format(refund.processedAt, 'HH:mm dd/MM/yyyy', { locale: vi }) : '—'}
-          </p>
-          {refund.transferReference && (
-            <p className="text-sm text-[#1C2B4A] mt-2">
-              <span className="text-[#1C2B4A]/50">Mã chuyển khoản:</span>{' '}
-              <code className="bg-[#1C2B4A]/8 px-2 py-0.5 rounded">{refund.transferReference}</code>
+        {(refund.status === 'transferred' || refund.status === 'rejected') && (
+          <div className={`rounded-card-lg bg-white shadow-soft ring-1 p-5 ${
+            refund.status === 'transferred' ? 'ring-success/30' : 'ring-danger/30'
+          }`}>
+            <p className={`eyebrow mb-2 inline-flex items-center gap-1.5 ${
+              refund.status === 'transferred' ? 'text-success' : 'text-danger'
+            }`}>
+              {refund.status === 'transferred' && <CheckCircle2 className="h-3 w-3" strokeWidth={2.25} />}
+              Đã xử lý
             </p>
-          )}
-        </div>
-      )}
+            <p className="text-sm text-ink/75">
+              Lúc {refund.processedAt ? format(refund.processedAt, 'HH:mm · dd/MM/yyyy', { locale: vi }) : '—'}
+            </p>
+            {refund.transferReference && (
+              <p className="text-sm mt-2 inline-flex items-center gap-2">
+                <span className="text-ink/55">Mã chuyển:</span>
+                <code className="bg-paper-tint/60 px-2 py-0.5 rounded font-mono text-ink">{refund.transferReference}</code>
+              </p>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
