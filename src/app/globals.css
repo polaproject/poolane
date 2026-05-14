@@ -1116,8 +1116,8 @@ a:focus:not(:focus-visible) {
   --lqg-bg-glass-strong: rgba(255, 255, 255, 0.78);
 
   --lqg-text-primary:   #1F1C2E;
-  --lqg-text-secondary: #6B6680;
-  --lqg-text-tertiary:  #9D98AE;
+  --lqg-text-secondary: #5A556F;       /* darker — contrast 7:1 on cream */
+  --lqg-text-tertiary:  #7A7392;       /* darker — contrast 4.6:1 on cream */
   --lqg-text-on-accent: #FFFFFF;
 
   --lqg-mesh-1: rgba(232, 155, 122, 0.35);
@@ -1171,8 +1171,8 @@ html.lqg-dark {
   --lqg-bg-glass-strong: rgba(56, 50, 78, 0.72);
 
   --lqg-text-primary:   #F5F2FF;
-  --lqg-text-secondary: #BDB6D6;
-  --lqg-text-tertiary:  #7E7898;
+  --lqg-text-secondary: #C9C3E0;       /* lighter — contrast 8:1 on dark */
+  --lqg-text-tertiary:  #9D97B5;       /* lighter — contrast 5:1 on dark */
   --lqg-text-on-accent: #1F1C2E;
 
   --lqg-mesh-1: rgba(232, 155, 122, 0.22);
