@@ -1,9 +1,13 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { Calendar, TrendingUp, Bell, ShoppingBag, ArrowRight, Ticket, BookOpen, Sparkles } from 'lucide-react'
-import { format, isFuture, isToday } from 'date-fns'
+import {
+  Calendar, TrendingUp, Bell, ShoppingBag, ArrowRight, Ticket,
+  BookOpen, Sparkles, Sunrise, Sunset,
+} from 'lucide-react'
+import { format, isToday } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import { Chip } from '@/components/ui/Chip'
 
 export default async function StudentDashboard() {
   const user = await requireRole(['student'])
@@ -22,10 +26,9 @@ export default async function StudentDashboard() {
         orderBy: { purchasedAt: 'desc' },
         take: 1,
       },
-    }
+    },
   })
 
-  // Next approved session
   const nextSession = student ? await prisma.sessionRegistration.findFirst({
     where: {
       studentId: student.id,
@@ -33,20 +36,19 @@ export default async function StudentDashboard() {
       session: { date: { gte: new Date(new Date().setHours(0, 0, 0, 0)) } },
     },
     orderBy: { session: { date: 'asc' } },
-    include: { session: { select: { date: true, timeSlot: true, status: true } } }
+    include: { session: { select: { date: true, timeSlot: true, status: true } } },
   }) : null
 
-  // Unread notifications count
   const unreadCount = await prisma.notification.count({
-    where: { userId: user.id, readAt: null }
+    where: { userId: user.id, readAt: null },
   })
 
-  // Latest assessment score for badge
   const latestAssessment = student ? await prisma.assessment.findFirst({
     where: { studentId: student.id },
     orderBy: { assessmentDate: 'desc' },
-    include: { scores: true }
+    include: { scores: true },
   }) : null
+
   const avgScore = latestAssessment && latestAssessment.scores.length > 0
     ? (latestAssessment.scores.reduce((s, x) => s + x.score, 0) / latestAssessment.scores.length).toFixed(1)
     : null
@@ -54,6 +56,7 @@ export default async function StudentDashboard() {
   const ticket = student?.poolTickets[0]
   const sessionsLeft = ticket ? ticket.maxSessions - ticket.sessionsUsed : null
   const ticketProgress = ticket ? Math.min(100, (ticket.sessionsUsed / ticket.maxSessions) * 100) : 0
+  const ticketLow = sessionsLeft !== null && sessionsLeft <= 2
 
   const greeting = (() => {
     const hour = new Date().getHours()
@@ -65,117 +68,147 @@ export default async function StudentDashboard() {
   })()
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] pb-10">
-      {/* Hero */}
-      <div className="bg-[#1C2B4A] px-5 pt-6 pb-10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/3 translate-x-1/4" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-[#C8A84B]/10 translate-y-1/4" />
-        <div className="relative z-10">
-          <p className="text-[#F6F1EA]/50 text-xs mb-1">{greeting}</p>
-          <h1 className="font-heading text-3xl text-[#F6F1EA]">{user.fullName} 🌊</h1>
+    <div className="min-h-screen bg-paper pb-12">
+      {/* ── HERO ─────────────────────────────────────────── */}
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-16 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-paper/5 -translate-y-1/3 translate-x-1/4 blur-2xl" />
+        <div className="absolute bottom-0 left-1/4 w-60 h-60 rounded-full bg-accent/15 translate-y-1/2 blur-3xl" />
+        <div className="absolute top-1/2 right-1/3 w-40 h-40 rounded-full bg-mist/10 blur-3xl" />
+
+        <div className="relative z-10 max-w-3xl mx-auto">
+          <p className="eyebrow text-paper/55 mb-3">{greeting}</p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">
+            {user.fullName}
+          </h1>
           {avgScore && (
-            <p className="text-xs text-[#C8A84B] mt-2 inline-flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> Điểm trung bình kỹ năng: <strong>{avgScore}/5</strong>
-            </p>
+            <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-pill bg-accent/15 ring-1 ring-accent/30 text-sm">
+              <Sparkles className="h-3.5 w-3.5 text-accent" strokeWidth={2.25} />
+              <span className="opacity-80">Điểm trung bình kỹ năng:</span>
+              <strong className="text-accent">{avgScore}/5</strong>
+            </div>
           )}
         </div>
       </div>
 
-      <div className="px-4 -mt-6 max-w-2xl mx-auto space-y-3">
-        {/* Pool ticket */}
-        <div className={`bg-white rounded-2xl p-5 shadow-sm border ${
-          sessionsLeft !== null && sessionsLeft <= 2 ? 'border-red-200' : 'border-[#1C2B4A]/8'
-        }`}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Ticket className="w-4 h-4 text-[#5B8E9F]" />
-              <p className="text-xs uppercase tracking-wider text-[#1C2B4A]/40 font-semibold">Vé bơi</p>
-            </div>
-            {sessionsLeft !== null && sessionsLeft <= 2 && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 font-semibold">
-                Sắp hết
-              </span>
-            )}
-          </div>
-          {ticket ? (
-            <>
-              <p className="font-heading text-4xl text-[#1C2B4A] mb-1">
-                {sessionsLeft} <span className="text-base font-body text-[#1C2B4A]/40">buổi còn lại</span>
-              </p>
-              <div className="h-1.5 bg-[#1C2B4A]/8 rounded-full mt-3 overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all ${
-                    ticketProgress > 80 ? 'bg-red-400' : ticketProgress > 60 ? 'bg-amber-400' : 'bg-[#5B8E9F]'
-                  }`}
-                  style={{ width: `${ticketProgress}%` }}
-                />
+      <div className="px-4 sm:px-8 -mt-10 max-w-3xl mx-auto space-y-4 relative z-10">
+        {/* ── TICKET + NEXT SESSION (2 col) ──────────────── */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          {/* Pool ticket */}
+          <div
+            className={`rounded-card-lg bg-white p-5 shadow-soft ring-1 transition ${
+              ticketLow ? 'ring-danger/30' : 'ring-ink/8'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Ticket className="h-4 w-4 text-mist" strokeWidth={1.75} />
+                <p className="eyebrow text-ink/55">Vé bơi</p>
               </div>
-              <p className="text-xs text-[#1C2B4A]/40 mt-1.5">
-                Đã dùng {ticket.sessionsUsed}/{ticket.maxSessions}
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="font-heading text-2xl text-[#1C2B4A]/40 mb-1">Chưa có vé</p>
-              <p className="text-xs text-[#1C2B4A]/50">Liên hệ lớp để mua vé bơi</p>
-            </>
-          )}
-        </div>
-
-        {/* Next session */}
-        <Link href="/student/my-schedule" className="block">
-          <div className="bg-[#1C2B4A] rounded-2xl p-5 hover:bg-[#1C2B4A]/95 transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs uppercase tracking-wider text-[#F6F1EA]/40 font-semibold inline-flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5" /> Buổi tiếp theo
-              </p>
-              <ArrowRight className="w-4 h-4 text-[#F6F1EA]/40" />
+              {ticketLow && <Chip variant="danger" active>Sắp hết</Chip>}
             </div>
-            {nextSession ? (
+
+            {ticket ? (
               <>
-                <p className="font-heading text-2xl text-[#F6F1EA]">
-                  {format(nextSession.session.date, 'EEEE, dd/MM', { locale: vi })}
-                  {isToday(nextSession.session.date) && <span className="ml-2 text-sm text-[#C8A84B]">HÔM NAY</span>}
+                <p className="font-heading italic text-5xl text-ink leading-none">
+                  {sessionsLeft}
+                  <span className="text-sm font-body not-italic text-ink/55 ml-2">buổi còn</span>
                 </p>
-                <p className="text-sm text-[#F6F1EA]/60 mt-1">
-                  {nextSession.session.timeSlot === 'morning' ? '🌅 5:30 – 7:30 sáng' : '🌆 18:00 – 20:00 chiều'}
+                <div className="h-1.5 bg-ink/8 rounded-full mt-4 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      ticketProgress > 80 ? 'bg-danger' : ticketProgress > 60 ? 'bg-warn' : 'bg-mist'
+                    }`}
+                    style={{ width: `${ticketProgress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-ink/55 mt-2">
+                  Đã dùng {ticket.sessionsUsed}/{ticket.maxSessions} buổi
                 </p>
               </>
             ) : (
               <>
-                <p className="font-heading text-xl text-[#F6F1EA]">Chưa có buổi sắp tới</p>
-                <p className="text-sm text-[#F6F1EA]/50 mt-1">Đăng ký ngay ở tab Đăng ký buổi học</p>
+                <p className="font-heading italic text-3xl text-ink/40">Chưa có vé</p>
+                <p className="text-sm text-ink/55 mt-1">Liên hệ lớp để mua vé bơi</p>
               </>
             )}
           </div>
-        </Link>
 
-        {/* Quick links */}
-        <div className="grid grid-cols-2 gap-3">
-          <QuickLink href="/student/schedule" icon={Calendar} label="Đăng ký buổi" color="#5B8E9F" />
-          <QuickLink href="/student/progress" icon={TrendingUp} label="Tiến độ" color="#C8A84B" />
-          <QuickLink
-            href="/shared/notifications" icon={Bell} label="Thông báo" color="#1C2B4A"
-            badge={unreadCount > 0 ? unreadCount : undefined}
-          />
-          <QuickLink href="/student/shop" icon={ShoppingBag} label="Cửa hàng" color="#5B8E9F" />
+          {/* Next session */}
+          <Link href="/student/my-schedule" className="group block">
+            <div className="rounded-card-lg bg-ink text-paper p-5 shadow-soft hover:shadow-glass transition-all duration-300 hover:-translate-y-0.5 h-full flex flex-col relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-accent/10 blur-2xl" />
+              <div className="relative flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-accent" strokeWidth={1.75} />
+                  <p className="eyebrow text-paper/55">Buổi tiếp theo</p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-paper/40 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
+              </div>
+
+              {nextSession ? (
+                <div className="relative flex-1">
+                  <p className="font-heading italic text-3xl leading-tight">
+                    {format(nextSession.session.date, 'EEEE', { locale: vi })}
+                  </p>
+                  <p className="font-heading text-2xl text-accent mt-1">
+                    {format(nextSession.session.date, 'dd/MM', { locale: vi })}
+                    {isToday(nextSession.session.date) && (
+                      <Chip variant="accent" active className="ml-2 align-middle text-[10px]">Hôm nay</Chip>
+                    )}
+                  </p>
+                  <p className="text-sm text-paper/70 mt-3 inline-flex items-center gap-1.5">
+                    {nextSession.session.timeSlot === 'morning' ? (
+                      <><Sunrise className="h-3.5 w-3.5 text-accent" strokeWidth={1.75} /> 5:30 – 7:30 sáng</>
+                    ) : (
+                      <><Sunset className="h-3.5 w-3.5 text-accent" strokeWidth={1.75} /> 18:00 – 20:00 chiều</>
+                    )}
+                  </p>
+                </div>
+              ) : (
+                <div className="relative flex-1">
+                  <p className="font-heading italic text-2xl">Chưa đăng ký</p>
+                  <p className="text-sm text-paper/65 mt-2">Đăng ký buổi học mới ở tab kế bên</p>
+                </div>
+              )}
+            </div>
+          </Link>
         </div>
 
-        {/* Active courses */}
+        {/* ── QUICK LINKS ────────────────────────────────── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <QuickLink href="/student/schedule" icon={Calendar} label="Đăng ký buổi" />
+          <QuickLink href="/student/progress" icon={TrendingUp} label="Tiến độ" />
+          <QuickLink href="/shared/notifications" icon={Bell} label="Thông báo" badge={unreadCount > 0 ? unreadCount : undefined} />
+          <QuickLink href="/student/shop" icon={ShoppingBag} label="Cửa hàng" />
+        </div>
+
+        {/* ── ACTIVE COURSES ─────────────────────────────── */}
         {student && student.enrollments.length > 0 && (
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#1C2B4A]/8">
-            <div className="flex items-center gap-2 mb-3">
-              <BookOpen className="w-4 h-4 text-[#C8A84B]" />
-              <p className="text-xs uppercase tracking-wider text-[#1C2B4A]/40 font-semibold">Khoá đang học</p>
+          <div className="rounded-card-lg bg-white p-5 shadow-soft ring-1 ring-ink/8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4 text-accent" strokeWidth={1.75} />
+                <p className="eyebrow text-ink/55">Khoá đang học</p>
+              </div>
+              <Link href="/student/progress" className="text-xs text-accent hover:underline inline-flex items-center gap-1">
+                Xem tiến độ <ArrowRight className="h-3 w-3" strokeWidth={2.25} />
+              </Link>
             </div>
             <div className="space-y-2">
               {student.enrollments.map(e => (
-                <div key={e.id} className="flex items-center justify-between py-2 border-b border-[#1C2B4A]/5 last:border-0">
-                  <span className="text-sm font-semibold text-[#1C2B4A]">{e.course.name}</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[#5B8E9F]/15 text-[#5B8E9F] font-semibold">
-                    {e.course.code}
-                  </span>
-                </div>
+                <Link
+                  key={e.id}
+                  href="/student/progress"
+                  className="flex items-center justify-between py-2.5 px-3 rounded-card bg-paper-tint/50 hover:bg-paper-tint transition group"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="font-heading italic text-lg text-ink">{e.course.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Chip variant="mist">{e.course.code}</Chip>
+                    <ArrowRight className="h-3.5 w-3.5 text-ink/40 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -185,25 +218,25 @@ export default async function StudentDashboard() {
   )
 }
 
-function QuickLink({ href, icon: Icon, label, color, badge }: {
+function QuickLink({
+  href, icon: Icon, label, badge,
+}: {
   href: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon: any
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
   label: string
-  color: string
   badge?: number
 }) {
   return (
-    <Link href={href}
-      className="bg-white rounded-2xl p-4 shadow-sm border border-[#1C2B4A]/8 hover:shadow-md transition-shadow flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${color}20` }}>
-          <Icon className="w-4 h-4" style={{ color }} />
-        </div>
-        <span className="text-sm font-semibold text-[#1C2B4A]">{label}</span>
+    <Link
+      href={href}
+      className="group bg-white rounded-card-lg p-4 shadow-soft ring-1 ring-ink/8 hover:ring-accent/40 hover:-translate-y-0.5 transition-all duration-300 flex flex-col gap-3 relative"
+    >
+      <div className="grid place-items-center h-10 w-10 rounded-pill bg-accent/12 group-hover:bg-accent/20 transition">
+        <Icon className="h-5 w-5 text-accent" strokeWidth={1.75} />
       </div>
-      {badge && (
-        <span className="bg-red-500 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+      <span className="text-sm font-medium text-ink">{label}</span>
+      {badge !== undefined && (
+        <span className="absolute top-3 right-3 bg-danger text-paper text-[10px] font-bold rounded-pill min-w-[20px] h-[20px] px-1.5 grid place-items-center">
           {badge > 9 ? '9+' : badge}
         </span>
       )}
