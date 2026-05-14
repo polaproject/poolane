@@ -60,12 +60,18 @@ export default async function StaffStudentDetailPage({ params }: Params) {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
         <Link
           href="/staff/students"
           className="inline-flex items-center gap-1 text-sm text-[#1C2B4A]/70 hover:text-[#1C2B4A]"
         >
           <ArrowLeft className="w-4 h-4" /> Danh sách
+        </Link>
+        <Link
+          href={`/staff/assign-practice/${student.id}`}
+          className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-[#1C2B4A] text-[#F6F1EA] hover:bg-[#1C2B4A]/90"
+        >
+          📚 Gán bài tập
         </Link>
       </div>
 
