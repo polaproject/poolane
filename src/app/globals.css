@@ -623,18 +623,25 @@ html, body {
   --shadow-lg-hover: 0 14px 44px rgba(15, 27, 51, 0.22);
 }
 
-/* Phase 10 — Sidebar glass (Apple Liquid Glass) */
+/* Phase 12 — Sidebar Liquid Glass (family.co) */
 .pola-nav    {
-  background: color-mix(in srgb, var(--nav-bg) 75%, transparent);
-  backdrop-filter: var(--lens-medium);
-  -webkit-backdrop-filter: var(--lens-medium);
-  color: var(--pola-nav-text);
-  border-right: 1px solid var(--glass-edge-light);
+  background: var(--lqg-bg-glass-strong);
+  backdrop-filter: var(--lqg-lens-medium);
+  -webkit-backdrop-filter: var(--lqg-lens-medium);
+  color: var(--lqg-text-primary);
+  border-right: 1px solid var(--lqg-edge-hi);
   position: relative;
   isolation: isolate;
-  transition: background-color var(--motion-cinema) var(--ease-out-quart),
-              color var(--motion-slow) var(--ease-out-quart),
-              border-color var(--motion-slow) var(--ease-out-quart);
+  transition: background 800ms var(--lqg-ease-soft),
+              color 400ms var(--lqg-ease-soft),
+              border-color 400ms var(--lqg-ease-soft);
+}
+/* Override legacy nav vars to use LQG tokens */
+:root, html.lqg-dark {
+  --pola-nav-text:   var(--lqg-text-primary);
+  --pola-nav-muted:  var(--lqg-text-secondary);
+  --pola-nav-active: color-mix(in srgb, var(--lqg-accent) 18%, transparent);
+  --pola-nav-hover:  color-mix(in srgb, var(--lqg-text-primary) 8%, transparent);
 }
 /* Subtle specular streak chéo qua sidebar */
 @media (prefers-reduced-motion: no-preference) {
@@ -937,19 +944,18 @@ html, body {
   50%      { filter: brightness(0.88); }
 }
 
-/* Glass card — utility class chuẩn Liquid Glass */
+/* Glass card — utility class chuẩn Liquid Glass (Phase 12 — uses LQG tokens) */
 .glass-card {
-  background: var(--glass-tint-2);
-  backdrop-filter: var(--lens-light);
-  -webkit-backdrop-filter: var(--lens-light);
-  border: 1px solid var(--glass-edge-light);
-  border-radius: var(--radius-glass-lg);
-  box-shadow:
-    inset 0 1px 0 0 var(--glass-edge-light),
-    var(--shadow-glass);
+  background: var(--lqg-bg-glass);
+  backdrop-filter: var(--lqg-lens-light);
+  -webkit-backdrop-filter: var(--lqg-lens-light);
+  border: 1px solid var(--lqg-edge-hi);
+  border-radius: var(--lqg-r-lg);
+  box-shadow: var(--lqg-shadow-card);
   position: relative;
   overflow: hidden;
   isolation: isolate;
+  color: var(--lqg-text-primary);
 }
 .glass-card > * {
   position: relative;
@@ -978,39 +984,37 @@ html, body {
   }
 }
 
-/* Hover lift + glow cho glass-card */
+/* Hover lift + glow cho glass-card (Phase 12 — LQG tokens) */
 .glass-card-hover {
   transition:
-    transform var(--motion-base) var(--ease-out-quart),
-    box-shadow var(--motion-base) var(--ease-out-quart),
-    background var(--motion-base) var(--ease-out-quart);
+    transform 350ms var(--lqg-ease-overshoot),
+    box-shadow 350ms var(--lqg-ease-soft),
+    background 350ms var(--lqg-ease-soft);
   will-change: transform;
 }
 .glass-card-hover:hover {
-  transform: translateY(-3px);
-  background: var(--glass-tint-3);
-  box-shadow:
-    inset 0 1px 0 0 var(--glass-edge-light),
-    var(--shadow-glass),
-    var(--shadow-glow-accent);
+  transform: translateY(-3px) scale(1.008);
+  background: var(--lqg-bg-glass-strong);
+  box-shadow: var(--lqg-shadow-lift);
 }
 
-/* Glass button base — apply lên shadcn Button qua class */
+/* Glass button base — apply lên shadcn Button qua class (Phase 12 — LQG tokens) */
 .glass-button {
-  background: var(--glass-tint-2);
-  backdrop-filter: var(--lens-light);
-  -webkit-backdrop-filter: var(--lens-light);
-  border: 1px solid var(--glass-edge-light);
+  background: var(--lqg-bg-glass);
+  backdrop-filter: var(--lqg-lens-light);
+  -webkit-backdrop-filter: var(--lqg-lens-light);
+  border: 1px solid var(--lqg-edge-hi);
   position: relative;
   overflow: hidden;
   isolation: isolate;
+  color: var(--lqg-text-primary);
 }
 .glass-button > * {
   position: relative;
   z-index: 1;
 }
 .glass-button:hover {
-  background: var(--glass-tint-3);
+  background: var(--lqg-bg-glass-strong);
 }
 .glass-button:active {
   animation: liquid-press 200ms ease-out;
@@ -1018,32 +1022,33 @@ html, body {
 
 /* Glass input — backdrop-blur cho input fields */
 .glass-input {
-  background: var(--glass-tint-1);
+  background: var(--lqg-bg-glass);
   backdrop-filter: blur(8px) saturate(120%);
   -webkit-backdrop-filter: blur(8px) saturate(120%);
-  border: 1px solid var(--glass-edge-light);
+  border: 1px solid var(--lqg-edge-hi);
+  color: var(--lqg-text-primary);
   transition:
-    background var(--motion-base) var(--ease-out-quart),
-    border-color var(--motion-base) var(--ease-out-quart),
-    box-shadow var(--motion-base) var(--ease-out-quart);
+    background 280ms var(--lqg-ease-soft),
+    border-color 280ms var(--lqg-ease-soft),
+    box-shadow 280ms var(--lqg-ease-overshoot);
 }
 .glass-input:focus,
 .glass-input:focus-visible {
-  background: var(--glass-tint-2);
-  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  background: var(--lqg-bg-glass-strong);
+  border-color: color-mix(in srgb, var(--lqg-accent) 60%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--lqg-accent) 18%, transparent);
   outline: none;
 }
 
 /* Glass table row */
 .glass-table-row {
-  transition: background var(--motion-base) var(--ease-out-quart);
+  transition: background 280ms var(--lqg-ease-soft);
 }
 .glass-table-row:nth-child(even) {
-  background: var(--glass-tint-1);
+  background: var(--lqg-bg-glass);
 }
 .glass-table-row:hover {
-  background: var(--glass-tint-3);
+  background: var(--lqg-bg-glass-strong);
 }
 
 /* 3D micro tilt — apply qua class + JS hook */
