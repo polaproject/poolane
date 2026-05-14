@@ -1,14 +1,16 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { Dumbbell, CheckCircle2, Clock } from 'lucide-react'
+import { Dumbbell, CheckCircle2, Clock, Video, ArrowLeft, XCircle } from 'lucide-react'
 import { format, isPast } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import Link from 'next/link'
+import { Chip } from '@/components/ui/Chip'
 import { AssignmentActions } from './AssignmentActions'
 
 export default async function MyExercisesPage() {
   const user = await requireRole(['student'])
   const student = await prisma.student.findFirst({ where: { userId: user.id }, select: { id: true } })
-  if (!student) return <div className="p-6 text-center text-[#1C2B4A]/40">Không tìm thấy hồ sơ</div>
+  if (!student) return <div className="p-8 text-center text-ink/55">Không tìm thấy hồ sơ</div>
 
   const items = await prisma.exerciseAssignment.findMany({
     where: { studentId: student.id },
@@ -21,31 +23,48 @@ export default async function MyExercisesPage() {
   const done = items.filter(i => i.status !== 'assigned')
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] pb-10">
-      <div className="bg-[#1C2B4A] px-5 pt-6 pb-8">
-        <h1 className="font-heading text-2xl text-[#F6F1EA]">Bài tập của tôi</h1>
-        <p className="text-[#F6F1EA]/50 text-xs mt-1">
-          {active.length} bài đang chờ · {done.length} đã hoàn tất
-        </p>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto">
+          <Link
+            href="/student/exercises"
+            className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group"
+          >
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" strokeWidth={2.25} />
+            Thư viện bài tập
+          </Link>
+          <p className="eyebrow text-paper/55 mb-2">
+            {active.length} cần làm · {done.length} đã xong
+          </p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Bài của tôi</h1>
+        </div>
       </div>
 
-      <div className="px-4 -mt-4 max-w-2xl mx-auto space-y-4">
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-6 relative z-10">
         {active.length === 0 && done.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
-            <Dumbbell className="w-10 h-10 text-[#1C2B4A]/20 mx-auto mb-3" />
-            <p className="text-sm text-[#1C2B4A]/50">Lớp chưa gán bài tập nào</p>
+          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
+            <Dumbbell className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-ink mb-1">Chưa được gán bài</p>
+            <p className="text-sm text-ink/55">Lớp sẽ gán bài tập sau khi đánh giá kỹ năng.</p>
           </div>
         ) : (
           <>
             {active.length > 0 && (
-              <Section title="Cần làm">
-                {active.map(a => <AssignmentRow key={a.id} a={a} canAct />)}
-              </Section>
+              <section>
+                <p className="eyebrow text-accent mb-3">Cần làm</p>
+                <div className="space-y-3">
+                  {active.map(a => <AssignmentCard key={a.id} a={a} canAct />)}
+                </div>
+              </section>
             )}
             {done.length > 0 && (
-              <Section title="Đã hoàn tất">
-                {done.map(a => <AssignmentRow key={a.id} a={a} />)}
-              </Section>
+              <section>
+                <p className="eyebrow text-ink/55 mb-3">Đã hoàn tất</p>
+                <div className="space-y-3">
+                  {done.map(a => <AssignmentCard key={a.id} a={a} />)}
+                </div>
+              </section>
             )}
           </>
         )}
@@ -54,65 +73,67 @@ export default async function MyExercisesPage() {
   )
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <h2 className="text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-2">{title}</h2>
-      <div className="space-y-3">{children}</div>
-    </div>
-  )
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function AssignmentRow({ a, canAct }: { a: any; canAct?: boolean }) {
+function AssignmentCard({ a, canAct }: { a: any; canAct?: boolean }) {
   const overdue = a.dueDate && a.status === 'assigned' && isPast(a.dueDate)
+  const isDone = a.status === 'completed'
+  const isSkipped = a.status === 'skipped'
+
   return (
-    <div className={`bg-white rounded-2xl shadow-sm border p-4 ${
-      a.status === 'completed' ? 'border-green-200 opacity-90' :
-      a.status === 'skipped' ? 'border-gray-200 opacity-60' :
-      overdue ? 'border-red-300' : 'border-[#1C2B4A]/8'
+    <div className={`rounded-card-lg bg-white shadow-soft p-5 transition ring-1 ${
+      isDone ? 'ring-success/30' :
+      isSkipped ? 'ring-ink/8 opacity-60' :
+      overdue ? 'ring-danger/40' : 'ring-ink/8'
     }`}>
-      <div className="flex items-start justify-between mb-2">
-        <h3 className="font-semibold text-[#1C2B4A]">{a.exercise.title}</h3>
-        {a.status === 'completed' ? (
-          <span className="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 inline-flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3" /> Đã làm
-          </span>
-        ) : a.status === 'skipped' ? (
-          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 border border-gray-200">Bỏ qua</span>
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <h3 className="font-heading italic text-xl text-ink leading-tight flex-1 min-w-0">{a.exercise.title}</h3>
+        {isDone ? (
+          <Chip variant="success" active><CheckCircle2 className="h-3 w-3" strokeWidth={2.25} /> Đã làm</Chip>
+        ) : isSkipped ? (
+          <Chip variant="neutral">Bỏ qua</Chip>
+        ) : overdue ? (
+          <Chip variant="danger" active><Clock className="h-3 w-3" strokeWidth={2.25} /> Quá hạn</Chip>
         ) : (
-          <span className={`text-xs px-2 py-0.5 rounded-full border inline-flex items-center gap-1 ${
-            overdue ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200'
-          }`}>
-            <Clock className="w-3 h-3" /> {overdue ? 'Quá hạn' : 'Cần làm'}
-          </span>
+          <Chip variant="warn" active><Clock className="h-3 w-3" strokeWidth={2.25} /> Cần làm</Chip>
         )}
       </div>
-      <p className="text-sm text-[#1C2B4A]/60 mb-2">{a.exercise.description}</p>
-      {a.dueDate && (
-        <p className="text-xs text-[#1C2B4A]/50">
-          Hạn: {format(a.dueDate, 'EEEE, dd/MM/yyyy', { locale: vi })}
-        </p>
-      )}
-      {a.exercise.videoUrl && (
-        <a href={a.exercise.videoUrl} target="_blank" rel="noopener"
-          className="text-xs text-[#5B8E9F] hover:underline mt-2 inline-block">
-          📹 Xem video minh hoạ →
-        </a>
-      )}
+      <p className="text-sm text-ink/70 leading-relaxed mb-3">{a.exercise.description}</p>
+      <div className="flex items-center gap-3 flex-wrap mb-3 text-xs">
+        {a.dueDate && (
+          <span className={`inline-flex items-center gap-1 ${overdue ? 'text-danger' : 'text-ink/55'}`}>
+            <Clock className="h-3 w-3" strokeWidth={1.75} /> Hạn {format(a.dueDate, 'dd/MM/yyyy', { locale: vi })}
+          </span>
+        )}
+        {a.exercise.videoUrl && (
+          <a
+            href={a.exercise.videoUrl}
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center gap-1 text-accent hover:underline font-medium"
+          >
+            <Video className="h-3 w-3" strokeWidth={1.75} /> Video minh hoạ
+          </a>
+        )}
+      </div>
       {Array.isArray(a.exercise.stepsJson) && a.exercise.stepsJson.length > 0 && (
-        <details className="mt-2">
-          <summary className="text-xs font-semibold text-[#5B8E9F] cursor-pointer">
-            Xem {a.exercise.stepsJson.length} bước thực hiện
+        <details className="group">
+          <summary className="cursor-pointer list-none text-xs font-medium text-accent inline-flex items-center gap-1">
+            <span className="group-open:rotate-90 transition-transform inline-block">▶</span>
+            {a.exercise.stepsJson.length} bước thực hiện
           </summary>
-          <ol className="mt-2 space-y-1 text-xs text-[#1C2B4A]/70 list-decimal pl-5">
+          <ol className="mt-2 space-y-1 text-sm text-ink/75 list-decimal pl-5 marker:text-accent">
             {(a.exercise.stepsJson as string[]).map((step: string, i: number) => (
               <li key={i}>{step}</li>
             ))}
           </ol>
         </details>
       )}
-      {canAct && <AssignmentActions id={a.id} />}
+      {canAct && <div className="mt-3 pt-3 border-t border-ink/8"><AssignmentActions id={a.id} /></div>}
+      {isSkipped && (
+        <p className="mt-2 text-xs text-ink/45 inline-flex items-center gap-1">
+          <XCircle className="h-3 w-3" strokeWidth={1.75} /> Đã bỏ qua
+        </p>
+      )}
     </div>
   )
 }

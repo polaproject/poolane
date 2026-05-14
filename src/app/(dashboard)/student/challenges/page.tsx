@@ -1,7 +1,8 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { Trophy, Target } from 'lucide-react'
+import { Trophy, Target, Users } from 'lucide-react'
 import { format, differenceInDays } from 'date-fns'
+import { Chip } from '@/components/ui/Chip'
 
 export default async function StudentChallengesPage() {
   const user = await requireRole(['student'])
@@ -17,17 +18,21 @@ export default async function StudentChallengesPage() {
   })
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] pb-10">
-      <div className="bg-[#1C2B4A] px-5 pt-6 pb-8">
-        <h1 className="font-heading text-2xl text-[#F6F1EA]">Thử thách</h1>
-        <p className="text-[#F6F1EA]/50 text-xs mt-1">Cùng nhau vượt giới hạn 🏆</p>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/15 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto">
+          <p className="eyebrow text-paper/55 mb-2">Thử thách · Cộng đồng</p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Cùng nhau vượt giới hạn</h1>
+        </div>
       </div>
 
-      <div className="px-4 -mt-4 max-w-2xl mx-auto space-y-3">
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
         {challenges.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
-            <Target className="w-10 h-10 text-[#1C2B4A]/20 mx-auto mb-3" />
-            <p className="text-sm text-[#1C2B4A]/50">Chưa có thử thách nào đang hoạt động</p>
+          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
+            <Target className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có thử thách</p>
+            <p className="text-sm text-ink/55">Khi admin tạo thử thách tháng, sẽ hiện ở đây.</p>
           </div>
         ) : (
           challenges.map(c => {
@@ -35,30 +40,38 @@ export default async function StudentChallengesPage() {
             const current = myProgress?.currentValue ?? 0
             const pct = Math.min(100, Math.round((current / c.goalValue) * 100))
             const daysLeft = Math.max(0, differenceInDays(c.endDate, new Date()))
+            const achieved = pct >= 100
             return (
-              <div key={c.id} className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h2 className="font-semibold text-[#1C2B4A]">{c.name}</h2>
-                    <p className="text-xs text-[#1C2B4A]/50">
+              <div key={c.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="min-w-0 flex-1">
+                    <h2 className="font-heading italic text-xl text-ink leading-tight">{c.name}</h2>
+                    <p className="text-xs text-ink/55 mt-1">
                       Đến {format(c.endDate, 'dd/MM/yyyy')} · còn {daysLeft} ngày
                     </p>
                   </div>
-                  <Trophy className="w-5 h-5 text-[#C8A84B]" />
-                </div>
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="text-[#1C2B4A]/60">{current}/{c.goalValue} {c.unit}</span>
-                    <span className="font-semibold text-[#1C2B4A]">{pct}%</span>
-                  </div>
-                  <div className="h-2 bg-[#1C2B4A]/8 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full transition-all ${pct >= 100 ? 'bg-green-500' : 'bg-[#5B8E9F]'}`}
-                      style={{ width: `${pct}%` }} />
+                  <div className="grid place-items-center h-10 w-10 rounded-pill bg-accent/15 shrink-0">
+                    <Trophy className="h-5 w-5 text-accent" strokeWidth={1.75} />
                   </div>
                 </div>
-                <p className="text-xs text-[#1C2B4A]/40 mt-2">
-                  👥 {c._count.progressItems} người đang tham gia
-                </p>
+                <div>
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <span className="text-ink/65">{current}/{c.goalValue} {c.unit}</span>
+                    <span className={`font-heading italic text-lg ${achieved ? 'text-success' : 'text-ink'}`}>{pct}%</span>
+                  </div>
+                  <div className="h-2 bg-ink/8 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${achieved ? 'bg-success' : 'bg-accent'}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <Chip variant="mist">
+                    <Users className="h-3 w-3" strokeWidth={2.25} /> {c._count.progressItems} đang tham gia
+                  </Chip>
+                  {achieved && <Chip variant="success" active>Đã đạt</Chip>}
+                </div>
               </div>
             )
           })

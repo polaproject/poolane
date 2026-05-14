@@ -1,10 +1,9 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { Video as VideoIcon } from 'lucide-react'
+import { Video as VideoIcon, ExternalLink, Sunrise, Sunset } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 
-// Convert Drive URL → embed URL
 function toEmbedUrl(url: string): string | null {
   const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/) ?? url.match(/[?&]id=([a-zA-Z0-9_-]+)/)
   return m ? `https://drive.google.com/file/d/${m[1]}/preview` : null
@@ -18,48 +17,64 @@ export default async function StudentVideosPage() {
     where: { studentId: student.id },
     orderBy: { createdAt: 'desc' },
     take: 30,
-    include: { session: { select: { date: true, timeSlot: true } } }
+    include: { session: { select: { date: true, timeSlot: true } } },
   }) : []
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] pb-10">
-      <div className="bg-[#1C2B4A] px-5 pt-6 pb-8">
-        <h1 className="font-heading text-2xl text-[#F6F1EA]">Video bơi của tôi</h1>
-        <p className="text-[#F6F1EA]/50 text-xs mt-1">Lớp gửi video phân tích kỹ thuật cho bạn xem 📹</p>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto">
+          <p className="eyebrow text-paper/55 mb-2">Phân tích kỹ thuật · {videos.length} video</p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Video bơi của tôi</h1>
+          <p className="text-sm text-paper/65 mt-2">Lớp gửi video kỹ thuật cho bạn xem và tự ngẫm.</p>
+        </div>
       </div>
 
-      <div className="px-4 -mt-4 max-w-3xl mx-auto space-y-4">
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
         {videos.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
-            <VideoIcon className="w-10 h-10 text-[#1C2B4A]/20 mx-auto mb-3" />
-            <p className="text-sm text-[#1C2B4A]/50">Chưa có video nào</p>
-            <p className="text-xs text-[#1C2B4A]/40 mt-1">Lớp sẽ gửi video sau buổi học nếu có ghi hình</p>
+          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
+            <VideoIcon className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có video</p>
+            <p className="text-sm text-ink/55">Lớp sẽ gửi video sau buổi học nếu có ghi hình.</p>
           </div>
         ) : (
           videos.map(v => {
             const embed = toEmbedUrl(v.driveUrl)
             return (
-              <div key={v.id} className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 overflow-hidden">
-                <div className="aspect-video bg-black">
+              <div key={v.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+                <div className="aspect-video bg-ink relative">
                   {embed ? (
                     <iframe src={embed} className="w-full h-full" allow="autoplay" />
                   ) : (
-                    <div className="flex items-center justify-center h-full text-white/60">
-                      <a href={v.driveUrl} target="_blank" rel="noopener" className="inline-flex items-center gap-2 underline">
-                        <VideoIcon className="w-5 h-5" /> Mở video trên Google Drive
+                    <div className="absolute inset-0 grid place-items-center text-paper/65">
+                      <a
+                        href={v.driveUrl}
+                        target="_blank"
+                        rel="noopener"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-pill bg-paper/10 ring-1 ring-paper/20 hover:bg-paper/15 transition"
+                      >
+                        <VideoIcon className="h-4 w-4" strokeWidth={1.75} />
+                        Mở trên Google Drive
+                        <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.75} />
                       </a>
                     </div>
                   )}
                 </div>
-                <div className="p-4">
+                <div className="p-5">
                   {v.session && (
-                    <p className="text-xs text-[#1C2B4A]/50 mb-1">
-                      Buổi {v.session.timeSlot === 'morning' ? 'sáng' : 'chiều'} ngày {format(v.session.date, 'dd/MM/yyyy', { locale: vi })}
+                    <p className="eyebrow text-ink/55 mb-2 inline-flex items-center gap-1.5">
+                      {v.session.timeSlot === 'morning' ? (
+                        <Sunrise className="h-3 w-3 text-accent" strokeWidth={1.75} />
+                      ) : (
+                        <Sunset className="h-3 w-3 text-accent" strokeWidth={1.75} />
+                      )}
+                      Buổi {v.session.timeSlot === 'morning' ? 'sáng' : 'chiều'} · {format(v.session.date, 'dd/MM/yyyy', { locale: vi })}
                     </p>
                   )}
-                  {v.caption && <p className="text-sm text-[#1C2B4A]">{v.caption}</p>}
-                  <p className="text-xs text-[#1C2B4A]/40 mt-1">
-                    Gửi {format(v.createdAt, 'dd/MM/yyyy HH:mm')}
+                  {v.caption && <p className="text-sm text-ink leading-relaxed">{v.caption}</p>}
+                  <p className="text-xs text-ink/45 mt-2">
+                    Gửi {format(v.createdAt, 'HH:mm · dd/MM/yyyy')}
                   </p>
                 </div>
               </div>

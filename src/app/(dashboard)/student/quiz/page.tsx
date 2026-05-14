@@ -1,7 +1,8 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { HelpCircle, Clock } from 'lucide-react'
+import { HelpCircle, Clock, ArrowRight } from 'lucide-react'
+import { Chip } from '@/components/ui/Chip'
 
 export default async function StudentQuizListPage() {
   const user = await requireRole(['student'])
@@ -13,21 +14,26 @@ export default async function StudentQuizListPage() {
     include: {
       _count: { select: { questions: true } },
       attempts: student ? { where: { studentId: student.id }, orderBy: { completedAt: 'desc' }, take: 1 } : false,
-    }
+    },
   })
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] pb-10">
-      <div className="bg-[#1C2B4A] px-5 pt-6 pb-8">
-        <h1 className="font-heading text-2xl text-[#F6F1EA]">Quiz</h1>
-        <p className="text-[#F6F1EA]/50 text-xs mt-1">Kiểm tra kiến thức của bạn 🎯</p>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto">
+          <p className="eyebrow text-paper/55 mb-2">Kiến thức · {quizzes.length} quiz</p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Quiz</h1>
+          <p className="text-sm text-paper/65 mt-2">Kiểm tra hiểu biết về kỹ thuật, an toàn, sức khoẻ.</p>
+        </div>
       </div>
 
-      <div className="px-4 -mt-4 max-w-2xl mx-auto space-y-3">
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
         {quizzes.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
-            <HelpCircle className="w-10 h-10 text-[#1C2B4A]/20 mx-auto mb-3" />
-            <p className="text-sm text-[#1C2B4A]/50">Chưa có quiz nào</p>
+          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
+            <HelpCircle className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có quiz</p>
+            <p className="text-sm text-ink/55">Lớp đang chuẩn bị bộ câu hỏi đầu tiên.</p>
           </div>
         ) : (
           quizzes.map(q => {
@@ -35,28 +41,36 @@ export default async function StudentQuizListPage() {
             const score = lastAttempt?.score ?? null
             const max = lastAttempt?.maxScore ?? q._count.questions
             const pct = score !== null && max > 0 ? Math.round((score / max) * 100) : null
+            const scoreTone = pct === null ? 'text-ink' : pct >= 80 ? 'text-success' : pct >= 60 ? 'text-warn' : 'text-danger'
             return (
-              <Link key={q.id} href={`/student/quiz/${q.id}`}
-                className="block bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-4 hover:border-[#1C2B4A]/20">
-                <div className="flex items-start justify-between">
+              <Link
+                key={q.id}
+                href={`/student/quiz/${q.id}`}
+                className="group block rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5 hover:ring-accent/40 hover:-translate-y-0.5 transition-all duration-300"
+              >
+                <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h2 className="font-semibold text-[#1C2B4A] text-sm">{q.title}</h2>
-                    {q.description && <p className="text-xs text-[#1C2B4A]/50 mt-0.5 line-clamp-2">{q.description}</p>}
-                    <div className="flex items-center gap-3 mt-2 text-xs text-[#1C2B4A]/50">
-                      <span>{q._count.questions} câu</span>
+                    <h2 className="font-heading italic text-xl text-ink leading-tight">{q.title}</h2>
+                    {q.description && <p className="text-sm text-ink/65 mt-1 line-clamp-2 leading-relaxed">{q.description}</p>}
+                    <div className="flex items-center gap-2 mt-3 flex-wrap text-xs">
+                      <Chip variant="mist">{q._count.questions} câu</Chip>
                       {q.timeLimitMinutes && (
-                        <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" /> {q.timeLimitMinutes} phút</span>
+                        <Chip variant="neutral">
+                          <Clock className="h-3 w-3" strokeWidth={2.25} /> {q.timeLimitMinutes} phút
+                        </Chip>
                       )}
-                      {q.linkedSkill && <span className="text-[#5B8E9F]">#{q.linkedSkill}</span>}
+                      {q.linkedSkill && (
+                        <Chip variant="accent">#{q.linkedSkill}</Chip>
+                      )}
                     </div>
                   </div>
-                  {pct !== null && (
-                    <div className="text-right ml-3">
-                      <p className={`font-heading text-2xl ${pct >= 80 ? 'text-green-600' : pct >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
-                        {pct}%
-                      </p>
-                      <p className="text-xs text-[#1C2B4A]/40">{score}/{max}</p>
+                  {pct !== null ? (
+                    <div className="text-right shrink-0">
+                      <p className={`font-heading italic text-3xl leading-none ${scoreTone}`}>{pct}%</p>
+                      <p className="text-xs text-ink/55 mt-1">{score}/{max}</p>
                     </div>
+                  ) : (
+                    <ArrowRight className="h-5 w-5 text-ink/40 group-hover:translate-x-0.5 group-hover:text-accent transition" strokeWidth={2.25} />
                   )}
                 </div>
               </Link>

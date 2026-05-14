@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { Plus, Check, X, Target, Loader2 } from 'lucide-react'
+import { Plus, Check, X, Target, Loader2, Calendar } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 
@@ -32,6 +31,7 @@ export default function GoalsPage() {
     finally { setLoading(false) }
   }, [])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadGoals() }, [loadGoals])
 
   async function handleAdd() {
@@ -58,96 +58,118 @@ export default function GoalsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     })
-    toast.success(status === 'achieved' ? '🎉 Đã đạt mục tiêu!' : 'Đã cập nhật')
+    toast.success(status === 'achieved' ? 'Đã đạt mục tiêu!' : 'Đã cập nhật')
     loadGoals()
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="font-heading text-2xl text-[#1C2B4A]">Mục tiêu cá nhân</h1>
-          <p className="text-xs text-[#1C2B4A]/50 mt-0.5">{goals.length} mục tiêu đang theo dõi</p>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/15 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">
+          <div>
+            <p className="eyebrow text-paper/55 mb-2">{goals.length} mục tiêu đang theo dõi</p>
+            <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Mục tiêu cá nhân</h1>
+          </div>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="inline-flex items-center gap-1.5 bg-accent text-ink font-semibold px-4 py-2.5 rounded-pill text-sm hover:bg-accent/90 transition shadow-cta"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2.5} /> Thêm mục tiêu
+          </button>
         </div>
-        <Button
-          size="sm"
-          className="bg-[#1C2B4A] text-[#F6F1EA]"
-          onClick={() => setShowForm(!showForm)}
-        >
-          <Plus className="w-4 h-4 mr-1" /> Thêm
-        </Button>
       </div>
 
-      {showForm && (
-        <div className="bg-white rounded-2xl border border-[#1C2B4A]/10 p-4 mb-4 shadow-sm">
-          <textarea
-            value={newGoal}
-            onChange={e => setNewGoal(e.target.value)}
-            placeholder="Mục tiêu của bạn... Ví dụ: Bơi được 50m liên tục không nghỉ"
-            rows={3}
-            className="w-full text-sm px-3 py-2 rounded-lg border border-[#1C2B4A]/15 resize-none focus:outline-none mb-3"
-          />
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <label className="text-xs text-[#1C2B4A]/50 mb-1 block">Hạn (tuỳ chọn)</label>
-              <input type="date" value={targetDate} onChange={e => setTargetDate(e.target.value)}
-                className="w-full h-8 px-3 text-sm rounded-lg border border-[#1C2B4A]/15 focus:outline-none" />
-            </div>
-            <div className="flex gap-2 items-end">
-              <Button variant="outline" size="sm" onClick={() => setShowForm(false)}>Huỷ</Button>
-              <Button size="sm" className="bg-[#1C2B4A] text-[#F6F1EA]"
-                disabled={adding || !newGoal.trim()} onClick={handleAdd}>
-                {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Lưu'}
-              </Button>
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
+        {showForm && (
+          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-accent/40 p-5">
+            <textarea
+              value={newGoal}
+              onChange={e => setNewGoal(e.target.value)}
+              placeholder="Mục tiêu của bạn... Ví dụ: Bơi được 50m liên tục không nghỉ"
+              rows={3}
+              className="w-full text-sm px-3 py-2 rounded-card bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none resize-none mb-3 transition"
+            />
+            <div className="flex gap-3 items-end flex-wrap">
+              <div className="flex-1 min-w-[150px]">
+                <label className="text-xs text-ink/55 mb-1.5 block">Hạn (tuỳ chọn)</label>
+                <input
+                  type="date"
+                  value={targetDate}
+                  onChange={e => setTargetDate(e.target.value)}
+                  className="w-full h-10 px-3 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none transition"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="px-4 h-10 rounded-pill ring-1 ring-ink/15 text-sm hover:bg-ink/5 transition"
+                >
+                  Huỷ
+                </button>
+                <button
+                  onClick={handleAdd}
+                  disabled={adding || !newGoal.trim()}
+                  className="px-4 h-10 rounded-pill bg-ink text-paper text-sm font-semibold hover:bg-ink/90 transition disabled:opacity-60 inline-flex items-center gap-1.5"
+                >
+                  {adding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Lưu'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#1C2B4A]/40" /></div>
-      ) : goals.length === 0 ? (
-        <div className="text-center py-12 text-[#1C2B4A]/40">
-          <Target className="w-8 h-8 mx-auto mb-3 opacity-30" />
-          <p>Chưa có mục tiêu nào</p>
-          <p className="text-xs mt-1">Đặt mục tiêu để theo dõi tiến độ của bạn</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {goals.map(goal => (
-            <div key={goal.id} className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-4 shadow-sm">
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-accent" strokeWidth={1.75} />
+          </div>
+        ) : goals.length === 0 ? (
+          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
+            <Target className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có mục tiêu</p>
+            <p className="text-sm text-ink/55">Đặt mục tiêu để theo dõi tiến độ và giữ động lực.</p>
+          </div>
+        ) : (
+          goals.map(goal => (
+            <div key={goal.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#5B8E9F]/15 flex items-center justify-center flex-shrink-0">
-                  <Target className="w-4 h-4 text-[#5B8E9F]" />
+                <div className="grid place-items-center h-10 w-10 rounded-pill bg-accent/15 shrink-0">
+                  <Target className="h-4 w-4 text-accent" strokeWidth={1.75} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-[#1C2B4A] leading-relaxed">{goal.goalText}</p>
-                  {goal.targetDate && (
-                    <p className="text-xs text-[#1C2B4A]/40 mt-1">
-                      🗓 Hạn: {format(new Date(goal.targetDate), 'dd/MM/yyyy')}
-                    </p>
-                  )}
-                  <p className="text-xs text-[#1C2B4A]/30 mt-0.5">
-                    Đặt ngày {format(new Date(goal.createdAt), 'dd/MM', { locale: vi })}
-                  </p>
+                  <p className="text-sm text-ink leading-relaxed">{goal.goalText}</p>
+                  <div className="flex items-center gap-3 mt-2 text-xs text-ink/55 flex-wrap">
+                    {goal.targetDate && (
+                      <span className="inline-flex items-center gap-1">
+                        <Calendar className="h-3 w-3" strokeWidth={1.75} /> Hạn {format(new Date(goal.targetDate), 'dd/MM/yyyy')}
+                      </span>
+                    )}
+                    <span className="text-ink/35">
+                      Đặt {format(new Date(goal.createdAt), 'dd/MM', { locale: vi })}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex gap-1.5 flex-shrink-0">
-                  <button onClick={() => updateStatus(goal.id, 'achieved')}
-                    className="w-7 h-7 rounded-lg bg-green-50 border border-green-200 flex items-center justify-center hover:bg-green-100"
-                    title="Đã đạt">
-                    <Check className="w-3.5 h-3.5 text-green-600" />
+                <div className="flex gap-1.5 shrink-0">
+                  <button
+                    onClick={() => updateStatus(goal.id, 'achieved')}
+                    className="h-8 w-8 rounded-pill bg-success/15 ring-1 ring-success/30 grid place-items-center hover:bg-success/25 transition"
+                    title="Đã đạt"
+                  >
+                    <Check className="h-4 w-4 text-success" strokeWidth={2.25} />
                   </button>
-                  <button onClick={() => updateStatus(goal.id, 'abandoned')}
-                    className="w-7 h-7 rounded-lg bg-[#F6F1EA] border border-[#1C2B4A]/10 flex items-center justify-center hover:bg-red-50"
-                    title="Bỏ qua">
-                    <X className="w-3.5 h-3.5 text-[#1C2B4A]/40" />
+                  <button
+                    onClick={() => updateStatus(goal.id, 'abandoned')}
+                    className="h-8 w-8 rounded-pill bg-ink/5 ring-1 ring-ink/10 grid place-items-center hover:bg-danger/10 hover:ring-danger/30 transition"
+                    title="Bỏ qua"
+                  >
+                    <X className="h-4 w-4 text-ink/55" strokeWidth={2.25} />
                   </button>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   )
 }

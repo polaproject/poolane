@@ -1,9 +1,10 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { Dumbbell, Video } from 'lucide-react'
+import { Dumbbell, Video, ArrowRight, Plus } from 'lucide-react'
 import { DIFFICULTY_LABELS, DIFFICULTY_LEVELS } from '@/lib/validations/exercise'
 import { COURSE_SKILLS } from '@/config/constants'
+import { Chip } from '@/components/ui/Chip'
 
 type SearchParams = Promise<{ difficulty?: string; skill?: string }>
 
@@ -13,6 +14,12 @@ const ALL_SKILLS = [
   ...COURSE_SKILLS.BUOM,
 ]
 const SKILL_LABELS = Object.fromEntries(ALL_SKILLS.map(s => [s.key, s.label]))
+
+const DIFF_VARIANT: Record<string, 'success' | 'warn' | 'danger'> = {
+  beginner: 'success',
+  intermediate: 'warn',
+  advanced: 'danger',
+}
 
 export default async function StudentExercisesPage({ searchParams }: { searchParams: SearchParams }) {
   await requireRole(['student'])
@@ -30,68 +37,80 @@ export default async function StudentExercisesPage({ searchParams }: { searchPar
   })
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] pb-10">
-      <div className="bg-[#1C2B4A] px-5 pt-6 pb-8">
-        <h1 className="font-heading text-2xl text-[#F6F1EA]">Thư viện bài tập</h1>
-        <p className="text-[#F6F1EA]/50 text-xs mt-1">Bài tập bơi chuẩn hoá từ Poolane 🏊</p>
-        <Link href="/student/exercises/my"
-          className="inline-block mt-3 px-3 py-1.5 bg-[#C8A84B] text-[#1C2B4A] rounded-lg text-xs font-semibold">
-          📋 Bài tập của tôi
-        </Link>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">
+          <div>
+            <p className="eyebrow text-paper/55 mb-2">Thư viện · {exercises.length} bài</p>
+            <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Bài tập</h1>
+            <p className="text-sm text-paper/65 mt-2">Bài tập bơi chuẩn hoá từ Poolane.</p>
+          </div>
+          <Link
+            href="/student/exercises/my"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-pill bg-accent text-ink text-sm font-semibold hover:bg-accent/90 transition shadow-cta"
+          >
+            Bài của tôi <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+          </Link>
+        </div>
       </div>
 
-      <div className="px-4 -mt-4 max-w-3xl mx-auto">
-        {/* Filters */}
-        <div className="flex gap-2 mb-4 flex-wrap">
-          <Link href="/student/exercises"
-            className={`px-3 py-1.5 text-xs rounded-full border ${!params.difficulty ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]' : 'bg-white text-[#1C2B4A]/60 border-[#1C2B4A]/15'}`}>
-            Tất cả
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
+        {/* Filter chips */}
+        <div className="flex gap-2 flex-wrap">
+          <Link href="/student/exercises">
+            <Chip asButton active={!params.difficulty}>Tất cả</Chip>
           </Link>
           {DIFFICULTY_LEVELS.map(d => (
-            <Link key={d} href={`/student/exercises?difficulty=${d}`}
-              className={`px-3 py-1.5 text-xs rounded-full border ${params.difficulty === d ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]' : 'bg-white text-[#1C2B4A]/60 border-[#1C2B4A]/15'}`}>
-              {DIFFICULTY_LABELS[d]}
+            <Link key={d} href={`/student/exercises?difficulty=${d}`}>
+              <Chip asButton active={params.difficulty === d}>{DIFFICULTY_LABELS[d]}</Chip>
             </Link>
           ))}
         </div>
 
         {exercises.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
-            <Dumbbell className="w-10 h-10 text-[#1C2B4A]/20 mx-auto mb-3" />
-            <p className="text-sm text-[#1C2B4A]/50">Chưa có bài tập nào</p>
+          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
+            <Dumbbell className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có bài tập</p>
+            <p className="text-sm text-ink/55">Thư viện đang được cập nhật.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {exercises.map(ex => (
-              <details key={ex.id} className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 overflow-hidden group">
-                <summary className="cursor-pointer px-5 py-4 list-none flex items-center justify-between hover:bg-[#F6F1EA]/30">
+              <details
+                key={ex.id}
+                className="group rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden transition open:ring-accent/30"
+              >
+                <summary className="cursor-pointer list-none px-5 py-4 flex items-start gap-3 hover:bg-paper-tint/40 transition">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-[#1C2B4A]">{ex.title}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-[#5B8E9F]">#{SKILL_LABELS[ex.skillTarget] ?? ex.skillTarget}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full border ${
-                        ex.difficulty === 'beginner' ? 'bg-green-50 text-green-700 border-green-200' :
-                        ex.difficulty === 'intermediate' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                        'bg-red-50 text-red-700 border-red-200'
-                      }`}>
+                    <h3 className="font-medium text-ink leading-tight">{ex.title}</h3>
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      <Chip variant="mist">#{SKILL_LABELS[ex.skillTarget] ?? ex.skillTarget}</Chip>
+                      <Chip variant={DIFF_VARIANT[ex.difficulty] ?? 'mist'} active>
                         {DIFFICULTY_LABELS[ex.difficulty as keyof typeof DIFFICULTY_LABELS] ?? ex.difficulty}
-                      </span>
+                      </Chip>
                     </div>
                   </div>
-                  <span className="text-[#1C2B4A]/40 group-open:rotate-45 transition-transform text-2xl ml-3">+</span>
+                  <span className="grid place-items-center h-7 w-7 rounded-pill bg-ink/5 group-open:bg-accent group-open:text-ink shrink-0 transition">
+                    <Plus className="h-4 w-4 group-open:rotate-45 transition-transform" strokeWidth={2.25} />
+                  </span>
                 </summary>
-                <div className="px-5 pb-4 text-sm text-[#1C2B4A]/70 space-y-3">
-                  <p>{ex.description}</p>
+                <div className="px-5 pb-5 text-sm text-ink/75 space-y-3 border-t border-ink/8 pt-4">
+                  <p className="leading-relaxed">{ex.description}</p>
                   {ex.videoUrl && (
-                    <a href={ex.videoUrl} target="_blank" rel="noopener"
-                      className="inline-flex items-center gap-1.5 text-[#5B8E9F] hover:underline text-xs font-semibold">
-                      <Video className="w-3.5 h-3.5" /> Xem video minh hoạ
+                    <a
+                      href={ex.videoUrl}
+                      target="_blank"
+                      rel="noopener"
+                      className="inline-flex items-center gap-1.5 text-accent hover:underline text-sm font-medium"
+                    >
+                      <Video className="h-4 w-4" strokeWidth={1.75} /> Xem video minh hoạ
                     </a>
                   )}
                   {Array.isArray(ex.stepsJson) && ex.stepsJson.length > 0 && (
                     <div>
-                      <p className="text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">Các bước</p>
-                      <ol className="space-y-1 list-decimal pl-5">
+                      <p className="eyebrow text-ink/55 mb-2">Các bước</p>
+                      <ol className="space-y-1.5 list-decimal pl-5 marker:text-accent marker:font-bold">
                         {(ex.stepsJson as string[]).map((step, i) => <li key={i}>{step}</li>)}
                       </ol>
                     </div>
