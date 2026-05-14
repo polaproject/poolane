@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { ArrowLeft, Check, X, UserPlus, Loader2 } from 'lucide-react'
+import { ArrowLeft, Check, X, UserPlus, Loader2, ClipboardCheck, Save } from 'lucide-react'
 import Link from 'next/link'
+import { Chip } from '@/components/ui/Chip'
 
 type AttendeeRec = {
   studentId: string
@@ -26,10 +25,8 @@ export default function AttendancePage() {
 
   const loadData = useCallback(async () => {
     try {
-      // Lấy danh sách đã được duyệt cho session này
       const res = await fetch(`/api/sessions/${sessionId}/registrations`)
       const data = await res.json()
-
       if (data.data) {
         const approved = data.data.filter((r: { status: string }) => r.status === 'approved')
         setAttendees(approved.map((r: { context: { fullName: string; phone: string }; studentId: string }) => ({
@@ -40,19 +37,15 @@ export default function AttendancePage() {
           notes: '',
         })))
       }
-    } catch {
-      toast.error('Không thể tải danh sách học viên')
-    } finally {
-      setLoading(false)
-    }
+    } catch { toast.error('Không thể tải danh sách') }
+    finally { setLoading(false) }
   }, [sessionId])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadData() }, [loadData])
 
   function setStatus(studentId: string, status: 'present' | 'absent') {
-    setAttendees(prev => prev.map(a =>
-      a.studentId === studentId ? { ...a, status } : a
-    ))
+    setAttendees(prev => prev.map(a => a.studentId === studentId ? { ...a, status } : a))
   }
 
   function addWalkIn() {
@@ -72,10 +65,9 @@ export default function AttendancePage() {
   async function handleSubmit() {
     const unmarked = attendees.filter(a => a.status === null)
     if (unmarked.length > 0) {
-      toast.error(`Còn ${unmarked.length} học viên chưa được điểm danh`)
+      toast.error(`Còn ${unmarked.length} học viên chưa điểm danh`)
       return
     }
-
     setSaving(true)
     try {
       const res = await fetch(`/api/sessions/${sessionId}/attendance`, {
@@ -84,115 +76,115 @@ export default function AttendancePage() {
         body: JSON.stringify({
           records: attendees
             .filter(a => !a.studentId.startsWith('walkin-'))
-            .map(a => ({ studentId: a.studentId, status: a.status!, notes: a.notes }))
+            .map(a => ({ studentId: a.studentId, status: a.status!, notes: a.notes })),
         }),
       })
-
       const data = await res.json()
-      if (!res.ok || data.error) {
-        toast.error(data.error?.message ?? 'Có lỗi xảy ra')
-        return
-      }
-
-      toast.success('Điểm danh hoàn tất! Vé bơi đã được cập nhật tự động.')
+      if (!res.ok || data.error) { toast.error(data.error?.message ?? 'Có lỗi'); return }
+      toast.success('Điểm danh hoàn tất! Vé bơi đã cập nhật.')
       router.push('/admin/schedule')
-
-    } catch {
-      toast.error('Không thể kết nối')
-    } finally {
-      setSaving(false)
-    }
+    } catch { toast.error('Không thể kết nối') }
+    finally { setSaving(false) }
   }
 
   const presentCount = attendees.filter(a => a.status === 'present' || a.status === 'walk_in').length
   const absentCount = attendees.filter(a => a.status === 'absent').length
+  const unmarkedCount = attendees.filter(a => a.status === null).length
 
   return (
-    <div className="p-4 max-w-lg mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/admin/schedule"><ArrowLeft className="w-4 h-4" /></Link>
-        </Button>
-        <div>
-          <h1 className="font-heading text-2xl text-[#1C2B4A]">Điểm danh</h1>
-          <p className="text-xs text-[#1C2B4A]/50">
-            {presentCount} có mặt · {absentCount} vắng · {attendees.filter(a => a.status === null).length} chưa đánh dấu
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-2xl mx-auto">
+          <Link
+            href="/admin/schedule"
+            className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group"
+          >
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" strokeWidth={2.25} />
+            Lịch tuần
+          </Link>
+          <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
+            <ClipboardCheck className="h-3 w-3 text-accent" strokeWidth={1.75} /> Điểm danh buổi
           </p>
+          <h1 className="font-heading text-3xl sm:text-4xl italic leading-tight">Đánh dấu có mặt</h1>
+          <div className="mt-3 flex items-center gap-2 flex-wrap">
+            <Chip variant="success" active>{presentCount} có mặt</Chip>
+            <Chip variant="danger" active>{absentCount} vắng</Chip>
+            {unmarkedCount > 0 && <Chip variant="warn" active>{unmarkedCount} chưa đánh dấu</Chip>}
+          </div>
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-[#1C2B4A]/40" />
-        </div>
-      ) : (
-        <>
-          {/* Attendance list */}
-          <div className="space-y-2 mb-4">
-            {attendees.map(a => (
-              <div key={a.studentId} className={`bg-white rounded-xl border p-3.5 flex items-center gap-3 transition-colors ${
-                a.status === 'present' || a.status === 'walk_in'
-                  ? 'border-green-200 bg-green-50/50'
-                  : a.status === 'absent'
-                    ? 'border-red-200 bg-red-50/50'
-                    : 'border-[#1C2B4A]/10'
-              }`}>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-[#1C2B4A] text-sm truncate">{a.fullName}</p>
-                  <p className="text-xs text-[#1C2B4A]/50">{a.phone}</p>
-                  {a.status === 'walk_in' && (
-                    <Badge variant="outline" className="text-xs mt-0.5">Phát sinh</Badge>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setStatus(a.studentId, 'absent')}
-                    className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-all ${
-                      a.status === 'absent'
-                        ? 'bg-red-500 border-red-500 text-white'
-                        : 'border-[#1C2B4A]/15 text-[#1C2B4A]/40 hover:border-red-300'
-                    }`}
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setStatus(a.studentId, 'present')}
-                    className={`w-9 h-9 rounded-lg border flex items-center justify-center transition-all ${
-                      a.status === 'present' || a.status === 'walk_in'
-                        ? 'bg-green-500 border-green-500 text-white'
-                        : 'border-[#1C2B4A]/15 text-[#1C2B4A]/40 hover:border-green-300'
-                    }`}
-                  >
-                    <Check className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+      <div className="px-4 sm:px-8 -mt-6 max-w-2xl mx-auto relative z-10">
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-accent" strokeWidth={1.75} />
           </div>
+        ) : (
+          <>
+            <div className="space-y-2 mb-4">
+              {attendees.map(a => (
+                <div
+                  key={a.studentId}
+                  className={`rounded-card-lg bg-white shadow-soft ring-1 p-4 flex items-center gap-3 transition ${
+                    a.status === 'present' || a.status === 'walk_in' ? 'ring-success/30 bg-success/5' :
+                    a.status === 'absent' ? 'ring-danger/30 bg-danger/5' : 'ring-ink/8'
+                  }`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-ink truncate">{a.fullName}</p>
+                    <p className="text-xs text-ink/55">{a.phone}</p>
+                    {a.status === 'walk_in' && <Chip variant="mist" className="mt-1">Phát sinh</Chip>}
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => setStatus(a.studentId, 'absent')}
+                      className={`grid place-items-center h-10 w-10 rounded-pill ring-1 transition ${
+                        a.status === 'absent'
+                          ? 'bg-danger ring-danger text-paper'
+                          : 'ring-ink/15 text-ink/40 hover:ring-danger/40 hover:text-danger'
+                      }`}
+                      aria-label="Vắng"
+                    >
+                      <X className="h-4 w-4" strokeWidth={2.25} />
+                    </button>
+                    <button
+                      onClick={() => setStatus(a.studentId, 'present')}
+                      className={`grid place-items-center h-10 w-10 rounded-pill ring-1 transition ${
+                        a.status === 'present' || a.status === 'walk_in'
+                          ? 'bg-success ring-success text-paper'
+                          : 'ring-ink/15 text-ink/40 hover:ring-success/40 hover:text-success'
+                      }`}
+                      aria-label="Có mặt"
+                    >
+                      <Check className="h-4 w-4" strokeWidth={2.25} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-          {/* Walk-in button */}
-          <button
-            onClick={addWalkIn}
-            className="w-full border border-dashed border-[#1C2B4A]/20 rounded-xl p-3 flex items-center justify-center gap-2 text-sm text-[#1C2B4A]/50 hover:border-[#1C2B4A]/40 hover:text-[#1C2B4A]/70 transition-all mb-6"
-          >
-            <UserPlus className="w-4 h-4" />
-            Thêm học viên phát sinh
-          </button>
+            <button
+              onClick={addWalkIn}
+              className="w-full rounded-card-lg ring-1 ring-dashed ring-ink/20 p-4 flex items-center justify-center gap-2 text-sm text-ink/60 hover:ring-accent/40 hover:text-ink hover:bg-paper-tint/30 transition mb-6"
+            >
+              <UserPlus className="h-4 w-4" strokeWidth={1.75} />
+              Thêm HV phát sinh
+            </button>
 
-          {/* Submit */}
-          <Button
-            className="w-full bg-[#1C2B4A] text-[#F6F1EA] hover:bg-[#1C2B4A]/90 h-12"
-            disabled={saving || attendees.length === 0}
-            onClick={handleSubmit}
-          >
-            {saving
-              ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Đang lưu...</>
-              : `Lưu điểm danh · ${presentCount} có mặt`
-            }
-          </Button>
-        </>
-      )}
+            <button
+              disabled={saving || attendees.length === 0}
+              onClick={handleSubmit}
+              className="w-full h-12 rounded-pill bg-ink text-paper font-semibold hover:bg-ink/90 transition disabled:opacity-60 inline-flex items-center justify-center gap-2 shadow-soft"
+            >
+              {saving
+                ? <><Loader2 className="h-4 w-4 animate-spin" /> Đang lưu...</>
+                : <><Save className="h-4 w-4 text-accent" strokeWidth={2} /> Lưu điểm danh · {presentCount} có mặt</>
+              }
+            </button>
+          </>
+        )}
+      </div>
     </div>
   )
 }

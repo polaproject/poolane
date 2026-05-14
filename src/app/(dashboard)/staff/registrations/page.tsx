@@ -2,12 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { Check, X, Loader2, Clock, Star, Ticket } from 'lucide-react'
+import { Check, X, Loader2, Star, Ticket, CheckSquare, AlertCircle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import { Chip } from '@/components/ui/Chip'
 
 type Registration = {
   id: string
@@ -48,13 +47,11 @@ export default function RegistrationsPage() {
       const res = await fetch(`/api/sessions/${sessionId}/registrations`)
       const data = await res.json()
       if (data.data) setRegistrations(data.data)
-    } catch {
-      toast.error('Không thể tải danh sách đăng ký')
-    } finally {
-      setLoading(false)
-    }
+    } catch { toast.error('Không thể tải danh sách') }
+    finally { setLoading(false) }
   }, [sessionId])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchRegistrations() }, [fetchRegistrations])
 
   async function handleDecide(regId: string, action: 'approve' | 'reject', reason?: string, reasonText?: string) {
@@ -66,151 +63,144 @@ export default function RegistrationsPage() {
         body: JSON.stringify({ action, rejectedReason: reason, rejectedReasonText: reasonText }),
       })
       const data = await res.json()
-
-      if (!res.ok || data.error) {
-        toast.error(data.error?.message ?? 'Có lỗi xảy ra')
-        return
-      }
-
-      toast.success(action === 'approve' ? '✓ Đã duyệt' : '✗ Đã từ chối')
+      if (!res.ok || data.error) { toast.error(data.error?.message ?? 'Có lỗi xảy ra'); return }
+      toast.success(action === 'approve' ? 'Đã duyệt' : 'Đã từ chối')
       setRejectModal(null)
       fetchRegistrations()
-
-    } catch {
-      toast.error('Không thể kết nối')
-    } finally {
-      setProcessing(null)
-    }
+    } catch { toast.error('Không thể kết nối') }
+    finally { setProcessing(null) }
   }
 
   if (!sessionId) {
     return (
-      <div className="p-6 text-center text-[#1C2B4A]/50">
-        Chọn một buổi học từ <a href="/admin/schedule" className="text-[#5B8E9F] underline">lịch học</a>
+      <div className="min-h-screen bg-paper grid place-items-center p-6">
+        <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-8 text-center max-w-md">
+          <CheckSquare className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+          <p className="font-heading italic text-2xl text-ink mb-1">Chưa chọn buổi</p>
+          <p className="text-sm text-ink/55 mb-4">Vào lịch học, click vào ô buổi → &ldquo;Xử lý đăng ký&rdquo;.</p>
+          <a href="/admin/schedule" className="inline-flex items-center gap-1.5 bg-ink text-paper font-semibold px-5 py-2.5 rounded-pill text-sm hover:bg-ink/90 transition">
+            Mở lịch học
+          </a>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <div className="mb-6">
-        <h1 className="font-heading text-3xl text-[#1C2B4A]">Duyệt đăng ký</h1>
-        <p className="text-sm text-[#1C2B4A]/50 mt-1">
-          {registrations.length} học viên đang chờ duyệt
-        </p>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-warn/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto">
+          <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
+            <CheckSquare className="h-3 w-3 text-accent" strokeWidth={1.75} /> {registrations.length} đăng ký chờ
+          </p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Duyệt đăng ký</h1>
+        </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-[#1C2B4A]/40" />
-        </div>
-      ) : registrations.length === 0 ? (
-        <div className="text-center py-12 text-[#1C2B4A]/40">
-          Không có đăng ký nào đang chờ duyệt
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {registrations.map(reg => {
-            const ctx = reg.context
-            return (
-              <div key={reg.id} className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-5 shadow-sm">
-                {/* Header */}
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <p className="font-semibold text-[#1C2B4A]">{ctx.fullName}</p>
-                    <p className="text-xs text-[#1C2B4A]/50">{ctx.phone}</p>
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto relative z-10">
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-accent" strokeWidth={1.75} />
+          </div>
+        ) : registrations.length === 0 ? (
+          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
+            <Check className="h-10 w-10 mx-auto mb-3 text-success" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-ink mb-1">Đã hết</p>
+            <p className="text-sm text-ink/55">Không có đăng ký nào đang chờ duyệt.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {registrations.map(reg => {
+              const ctx = reg.context
+              return (
+                <div key={reg.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
+                  <div className="flex justify-between items-start gap-3 mb-3">
+                    <div>
+                      <p className="text-sm font-medium text-ink">{ctx.fullName}</p>
+                      <p className="text-xs text-ink/55">{ctx.phone}</p>
+                    </div>
+                    <div className="text-right space-y-1">
+                      {ctx.avgSkill !== null && (
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-ink">
+                          <Star className="h-3.5 w-3.5 text-accent" strokeWidth={1.75} /> {ctx.avgSkill}
+                        </span>
+                      )}
+                      {reg.status === 'waitlist' && <Chip variant="mist">Chờ chỗ</Chip>}
+                    </div>
                   </div>
-                  <div className="text-right">
-                    {ctx.avgSkill !== null && (
-                      <div className="flex items-center gap-1 justify-end">
-                        <Star className="w-3 h-3 text-[#C8A84B]" />
-                        <span className="text-sm font-semibold text-[#1C2B4A]">{ctx.avgSkill}</span>
-                      </div>
+
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {ctx.lastAttendedAt && (
+                      <Chip variant="mist">{formatDistanceToNow(new Date(ctx.lastAttendedAt), { addSuffix: true, locale: vi })}</Chip>
                     )}
-                    {reg.status === 'waitlist' && (
-                      <Badge variant="outline" className="text-xs mt-1">Chờ chỗ trống</Badge>
+                    {ctx.activeEnrollments.map(e => (
+                      <Chip key={e.course.code} variant="neutral">{e.course.code}</Chip>
+                    ))}
+                    {ctx.sessionsLeft !== null && (
+                      <Chip variant={ctx.isLowTicket ? 'danger' : 'mist'} active={ctx.isLowTicket}>
+                        <Ticket className="h-3 w-3" strokeWidth={2.25} /> {ctx.sessionsLeft} buổi
+                      </Chip>
+                    )}
+                    {ctx.sessionsLeft === null && (
+                      <Chip variant="warn" active>
+                        <AlertCircle className="h-3 w-3" strokeWidth={2.25} /> Chưa có vé
+                      </Chip>
                     )}
                   </div>
-                </div>
 
-                {/* Context tags */}
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {ctx.lastAttendedAt && (
-                    <span className="text-xs bg-[#5B8E9F]/10 text-[#5B8E9F] px-2 py-0.5 rounded-full">
-                      {formatDistanceToNow(new Date(ctx.lastAttendedAt), { addSuffix: true, locale: vi })}
-                    </span>
-                  )}
-                  {ctx.activeEnrollments.map(e => (
-                    <span key={e.course.code} className="text-xs bg-[#1C2B4A]/8 text-[#1C2B4A] px-2 py-0.5 rounded-full font-medium">
-                      {e.course.code}
-                    </span>
-                  ))}
-                  {ctx.sessionsLeft !== null && (
-                    <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                      ctx.isLowTicket
-                        ? 'bg-red-50 text-red-600'
-                        : 'bg-[#1C2B4A]/8 text-[#1C2B4A]'
-                    }`}>
-                      <Ticket className="w-3 h-3" />
-                      {ctx.sessionsLeft} buổi vé
-                    </span>
-                  )}
-                  {ctx.sessionsLeft === null && (
-                    <span className="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full">
-                      Chưa có vé
-                    </span>
-                  )}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setRejectModal({ regId: reg.id, name: ctx.fullName })}
+                      disabled={processing === reg.id}
+                      className="flex-1 h-10 rounded-pill ring-1 ring-danger/30 text-danger text-sm hover:bg-danger/5 transition inline-flex items-center justify-center gap-1.5"
+                    >
+                      <X className="h-4 w-4" strokeWidth={2.25} /> Từ chối
+                    </button>
+                    <button
+                      onClick={() => handleDecide(reg.id, 'approve')}
+                      disabled={processing === reg.id}
+                      className="flex-[2] h-10 rounded-pill bg-ink text-paper text-sm font-semibold hover:bg-ink/90 transition inline-flex items-center justify-center gap-1.5"
+                    >
+                      {processing === reg.id
+                        ? <Loader2 className="h-4 w-4 animate-spin" />
+                        : <><Check className="h-4 w-4 text-accent" strokeWidth={2.5} /> Duyệt</>
+                      }
+                    </button>
+                  </div>
                 </div>
-
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    disabled={processing === reg.id}
-                    onClick={() => setRejectModal({ regId: reg.id, name: ctx.fullName })}
-                  >
-                    <X className="w-4 h-4 mr-1" /> Từ chối
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="flex-2 bg-[#1C2B4A] text-[#F6F1EA] hover:bg-[#1C2B4A]/90"
-                    style={{ flex: 2 }}
-                    disabled={processing === reg.id}
-                    onClick={() => handleDecide(reg.id, 'approve')}
-                  >
-                    {processing === reg.id
-                      ? <Loader2 className="w-4 h-4 animate-spin" />
-                      : <><Check className="w-4 h-4 mr-1" /> Duyệt</>
-                    }
-                  </Button>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
+              )
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Reject Modal */}
       {rejectModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
-            <h3 className="font-semibold text-[#1C2B4A] mb-1">Từ chối đăng ký</h3>
-            <p className="text-sm text-[#1C2B4A]/60 mb-4">{rejectModal.name}</p>
+        <div className="fixed inset-0 bg-ink/60 backdrop-blur-sm grid place-items-center z-50 p-4">
+          <div className="rounded-card-xl bg-white shadow-glass ring-1 ring-ink/8 p-6 w-full max-w-md">
+            <p className="eyebrow text-danger mb-1">Từ chối đăng ký</p>
+            <h3 className="font-heading italic text-2xl text-ink mb-4">{rejectModal.name}</h3>
 
             <div className="space-y-2 mb-4">
               {REJECT_REASONS.map(r => (
-                <label key={r.value} className="flex items-center gap-2 cursor-pointer">
+                <label
+                  key={r.value}
+                  className={`flex items-center gap-2 cursor-pointer rounded-card px-3 py-2 ring-1 transition ${
+                    rejectReason === r.value
+                      ? 'bg-paper-tint/60 ring-accent/30'
+                      : 'ring-ink/10 hover:bg-paper-tint/40'
+                  }`}
+                >
                   <input
                     type="radio"
                     name="reason"
                     value={r.value}
                     checked={rejectReason === r.value}
                     onChange={e => setRejectReason(e.target.value)}
-                    className="accent-[#1C2B4A]"
+                    className="accent-ink"
                   />
-                  <span className="text-sm">{r.label}</span>
+                  <span className="text-sm text-ink">{r.label}</span>
                 </label>
               ))}
             </div>
@@ -220,20 +210,23 @@ export default function RegistrationsPage() {
               value={rejectText}
               onChange={e => setRejectText(e.target.value)}
               rows={2}
-              className="w-full text-sm px-3 py-2 rounded-lg border border-[#1C2B4A]/15 mb-4 resize-none focus:outline-none"
+              className="w-full text-sm px-3 py-2 rounded-card bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none resize-none mb-4 transition"
             />
 
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => setRejectModal(null)}>
-                Huỷ
-              </Button>
-              <Button
-                className="flex-1 bg-red-600 text-white hover:bg-red-700"
-                disabled={processing === rejectModal.regId}
-                onClick={() => handleDecide(rejectModal.regId, 'reject', rejectReason, rejectText)}
+              <button
+                onClick={() => setRejectModal(null)}
+                className="flex-1 h-10 rounded-pill ring-1 ring-ink/15 text-sm hover:bg-ink/5 transition"
               >
-                {processing === rejectModal.regId ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Từ chối'}
-              </Button>
+                Huỷ
+              </button>
+              <button
+                onClick={() => handleDecide(rejectModal.regId, 'reject', rejectReason, rejectText)}
+                disabled={processing === rejectModal.regId}
+                className="flex-1 h-10 rounded-pill bg-danger text-paper text-sm font-semibold hover:bg-danger/90 transition disabled:opacity-60 inline-flex items-center justify-center"
+              >
+                {processing === rejectModal.regId ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Từ chối'}
+              </button>
             </div>
           </div>
         </div>
