@@ -62,14 +62,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setMounted(true)
   }, [])
 
-  // Áp dụng class vào html
+  // Áp dụng class vào html — DUAL CLASS:
+  //  - Phase 7-11 legacy: `theme-dark`/`theme-light` (for backward compat)
+  //  - Phase 12 LQG: `lqg-dark` (only when dark)
   useEffect(() => {
     if (!mounted) return
     const html = document.documentElement
+    const body = document.body
     // Xoá mọi class theme cũ
-    html.classList.remove('theme-a', 'theme-b', 'theme-d', 'theme-dark', 'theme-light')
+    html.classList.remove('theme-a', 'theme-b', 'theme-d', 'theme-dark', 'theme-light', 'lqg-dark')
     html.classList.add(THEME_CLASS[theme])
+    if (theme === 'dark') html.classList.add('lqg-dark')
     html.setAttribute('data-theme', theme)
+    // Body baseline for LQG (background + text adaptive)
+    body.classList.add('lqg-body')
   }, [theme, mounted])
 
   function setTheme(newTheme: ThemeKey) {
