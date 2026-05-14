@@ -2,6 +2,7 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { PhotoUploadForm } from './PhotoUploadForm'
 import { format } from 'date-fns'
+import { ImageIcon } from 'lucide-react'
 
 export default async function AdminPhotosPage() {
   await requireRole(['admin', 'staff'])
@@ -12,32 +13,44 @@ export default async function AdminPhotosPage() {
   })
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="font-heading text-3xl text-[#1C2B4A]">Album ảnh lớp</h1>
-        <p className="text-sm text-[#1C2B4A]/50 mt-1">Upload ảnh để học viên xem trong tab Cộng đồng</p>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-5xl mx-auto">
+          <p className="eyebrow text-paper/55 mb-2">Cộng đồng · {photos.length} ảnh</p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Album ảnh lớp</h1>
+          <p className="text-sm text-paper/65 mt-2">Upload ảnh để học viên xem trong tab Cộng đồng.</p>
+        </div>
       </div>
 
-      <PhotoUploadForm />
+      <div className="px-4 sm:px-8 -mt-6 max-w-5xl mx-auto space-y-6 relative z-10">
+        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5 sm:p-6">
+          <PhotoUploadForm />
+        </div>
 
-      <div className="mt-8">
-        <h2 className="font-semibold text-[#1C2B4A] mb-3">Album hiện có ({photos.length})</h2>
-        {photos.length === 0 ? (
-          <p className="text-sm text-[#1C2B4A]/40">Chưa có ảnh nào</p>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {photos.map(p => (
-              <div key={p.id} className="bg-white rounded-xl border border-[#1C2B4A]/8 overflow-hidden">
-                <div className="aspect-square bg-[#F6F1EA]/40">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.photoUrl} alt={p.caption ?? 'Ảnh lớp Poolane'} className="w-full h-full object-cover" />
+        <div>
+          <p className="eyebrow text-ink/55 mb-3">Album hiện có ({photos.length})</p>
+          {photos.length === 0 ? (
+            <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
+              <ImageIcon className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+              <p className="font-heading italic text-2xl text-ink mb-1">Chưa có ảnh</p>
+              <p className="text-sm text-ink/55">Upload ảnh đầu tiên qua form bên trên.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {photos.map(p => (
+                <div key={p.id} className="rounded-card overflow-hidden ring-1 ring-ink/8 bg-white shadow-soft">
+                  <div className="aspect-square bg-paper-tint overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.photoUrl} alt={p.caption ?? 'Ảnh lớp Poolane'} className="w-full h-full object-cover" />
+                  </div>
+                  {p.caption && <p className="text-xs text-ink/70 px-3 pt-2 line-clamp-2">{p.caption}</p>}
+                  <p className="text-[10px] text-ink/45 px-3 pb-2 pt-1">{format(p.createdAt, 'dd/MM/yyyy')}</p>
                 </div>
-                {p.caption && <p className="text-xs text-[#1C2B4A]/70 p-2 line-clamp-2">{p.caption}</p>}
-                <p className="text-[10px] text-[#1C2B4A]/40 px-2 pb-2">{format(p.createdAt, 'dd/MM/yyyy')}</p>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

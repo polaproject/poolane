@@ -1,26 +1,34 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { Loader2, RefreshCw } from 'lucide-react'
+import {
+  Loader2, RefreshCw, ShoppingBag, CheckCircle, X as XIcon,
+  DollarSign, Truck,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { ConfirmTransferButton } from '@/components/features/ConfirmTransferButton'
+import { Chip } from '@/components/ui/Chip'
 
 type Order = {
-  id: string; status: string; finalAmount: number; createdAt: string
+  id: string
+  status: string
+  finalAmount: number
+  createdAt: string
   noteFromStudent: string | null
   student: { user: { fullName: string } }
   orderItems: Array<{ quantity: number; product: { name: string; type: string } }>
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  pending:   { label: 'Chờ duyệt',     color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  approved:  { label: 'Đã duyệt',      color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  paid:      { label: 'Đã thanh toán', color: 'bg-green-50 text-green-700 border-green-200' },
-  fulfilled: { label: 'Hoàn thành',    color: 'bg-[#5B8E9F]/10 text-[#5B8E9F] border-[#5B8E9F]/20' },
-  cancelled: { label: 'Đã huỷ',        color: 'bg-red-50 text-red-700 border-red-200' },
+type Variant = 'neutral' | 'accent' | 'mist' | 'success' | 'warn' | 'danger'
+
+const STATUS_CONFIG: Record<string, { label: string; variant: Variant }> = {
+  pending:   { label: 'Chờ duyệt',     variant: 'warn' },
+  approved:  { label: 'Đã duyệt',      variant: 'mist' },
+  paid:      { label: 'Đã thanh toán', variant: 'success' },
+  fulfilled: { label: 'Hoàn thành',    variant: 'accent' },
+  cancelled: { label: 'Đã huỷ',        variant: 'danger' },
 }
 
 const PAYMENT_METHODS = [
@@ -51,6 +59,7 @@ export default function OrdersPage() {
     finally { setLoading(false) }
   }, [filter])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadOrders() }, [loadOrders])
 
   async function handleAction(orderId: string, action: string, extra?: Record<string, unknown>) {
@@ -59,15 +68,15 @@ export default function OrdersPage() {
       const res = await fetch(`/api/shop/orders/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, ...extra })
+        body: JSON.stringify({ action, ...extra }),
       })
       const data = await res.json()
       if (!res.ok || data.error) { toast.error(data.error?.message ?? 'Lỗi'); return }
-      const actionLabel = action === 'approve' ? 'duyệt' :
+      const label = action === 'approve' ? 'duyệt' :
         action === 'reject' ? 'từ chối' :
         action === 'pay' ? 'ghi nhận thanh toán' :
         action === 'fulfill' ? 'hoàn thành' : 'cập nhật'
-      toast.success(`Đã ${actionLabel} đơn hàng!`)
+      toast.success(`Đã ${label} đơn hàng`)
       if (action === 'pay') {
         setPayingOrderId(null)
         setReferenceNumber('')
@@ -75,12 +84,6 @@ export default function OrdersPage() {
       loadOrders()
     } catch { toast.error('Không thể kết nối') }
     finally { setProcessing(null) }
-  }
-
-  function startPay(orderId: string) {
-    setPayingOrderId(orderId)
-    setPaymentMethod('cash')
-    setReferenceNumber('')
   }
 
   function submitPay(orderId: string) {
@@ -95,167 +98,178 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-5">
-        <h1 className="font-heading text-3xl text-[#1C2B4A]">Đơn hàng Shop</h1>
-        <Button variant="outline" size="sm" onClick={loadOrders} disabled={loading}>
-          <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? 'animate-spin' : ''}`} /> Làm mới
-        </Button>
-      </div>
-
-      {/* Filter tabs */}
-      <div className="flex gap-2 mb-5 flex-wrap">
-        {Object.entries(STATUS_CONFIG).map(([status, cfg]) => (
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-5xl mx-auto flex items-end justify-between gap-3 flex-wrap">
+          <div>
+            <p className="eyebrow text-paper/55 mb-2">Duyệt · Thanh toán · Giao hàng</p>
+            <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Đơn hàng Shop</h1>
+          </div>
           <button
-            key={status}
-            onClick={() => setFilter(status)}
-            className={`px-3 py-1.5 text-xs rounded-full border transition-all ${
-              filter === status ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]' : 'bg-white text-[#1C2B4A]/60 border-[#1C2B4A]/15 hover:border-[#1C2B4A]/40'
-            }`}
+            onClick={loadOrders}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-pill ring-1 ring-paper/20 hover:bg-paper/5 transition text-sm disabled:opacity-60"
           >
-            {cfg.label}
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} strokeWidth={1.75} /> Làm mới
           </button>
-        ))}
+        </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#1C2B4A]/40" /></div>
-      ) : orders.length === 0 ? (
-        <div className="text-center py-12 text-[#1C2B4A]/40">Không có đơn hàng nào</div>
-      ) : (
-        <div className="space-y-3">
-          {orders.map(order => (
-            <div key={order.id} className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-5 shadow-sm">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <p className="font-semibold text-[#1C2B4A]">{order.student.user.fullName}</p>
-                  <p className="text-xs text-[#1C2B4A]/50 mt-0.5">
-                    {format(new Date(order.createdAt), 'HH:mm dd/MM/yyyy', { locale: vi })}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-[#1C2B4A]">{fmt(order.finalAmount)}</p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_CONFIG[order.status]?.color ?? ''}`}>
-                    {STATUS_CONFIG[order.status]?.label ?? order.status}
-                  </span>
-                </div>
-              </div>
-
-              {/* Items */}
-              <div className="space-y-1 mb-3">
-                {order.orderItems.map((item, i) => (
-                  <p key={i} className="text-sm text-[#1C2B4A]/70">
-                    {item.quantity}× {item.product.name}
-                    <span className="text-xs text-[#1C2B4A]/40 ml-1">({item.product.type})</span>
-                  </p>
-                ))}
-              </div>
-
-              {order.noteFromStudent && (
-                <p className="text-xs italic text-[#1C2B4A]/50 mb-3">&ldquo;{order.noteFromStudent}&rdquo;</p>
-              )}
-
-              {/* Inline payment form */}
-              {payingOrderId === order.id ? (
-                <div className="border-t border-[#1C2B4A]/8 pt-3 space-y-2">
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
-                      Phương thức thanh toán
-                    </label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
-                      {PAYMENT_METHODS.map(m => (
-                        <button
-                          key={m.value}
-                          type="button"
-                          onClick={() => setPaymentMethod(m.value)}
-                          className={`px-2 py-1.5 text-xs rounded-lg border ${
-                            paymentMethod === m.value
-                              ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]'
-                              : 'bg-white text-[#1C2B4A]/60 border-[#1C2B4A]/15'
-                          }`}
-                        >
-                          {m.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  {paymentMethod === 'bank_transfer' && (
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
-                        Mã giao dịch <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={referenceNumber}
-                        onChange={e => setReferenceNumber(e.target.value)}
-                        placeholder="VD: FT250513..."
-                        className="w-full px-3 py-1.5 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
-                      />
-                    </div>
-                  )}
-                  <div className="flex gap-2 pt-1">
-                    <Button
-                      size="sm"
-                      className="flex-1 bg-green-600 text-white hover:bg-green-700"
-                      disabled={processing === order.id}
-                      onClick={() => submitPay(order.id)}
-                    >
-                      {processing === order.id ? <Loader2 className="w-4 h-4 animate-spin" /> : `Xác nhận ${fmt(order.finalAmount)}`}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setPayingOrderId(null)}
-                      disabled={processing === order.id}
-                    >
-                      Huỷ
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                /* Actions */
-                <div className="flex gap-2">
-                  {order.status === 'pending' && (
-                    <>
-                      <Button size="sm" variant="outline" className="flex-1"
-                        disabled={processing === order.id}
-                        onClick={() => handleAction(order.id, 'reject')}>
-                        Từ chối
-                      </Button>
-                      <Button size="sm" className="bg-[#1C2B4A] text-[#F6F1EA]"
-                        style={{ flex: 2 }}
-                        disabled={processing === order.id}
-                        onClick={() => handleAction(order.id, 'approve')}>
-                        {processing === order.id ? <Loader2 className="w-4 h-4 animate-spin" /> : '✓ Duyệt'}
-                      </Button>
-                    </>
-                  )}
-                  {order.status === 'approved' && (
-                    <>
-                      <ConfirmTransferButton
-                        orderId={order.id}
-                        memo={`POLA${order.id.replace(/-/g, '').slice(0, 8).toUpperCase()}`}
-                        amount={order.finalAmount}
-                      />
-                      <Button size="sm" variant="outline" className="text-xs"
-                        onClick={() => startPay(order.id)}>
-                        💰 Tiền mặt/khác
-                      </Button>
-                    </>
-                  )}
-                  {order.status === 'paid' && (
-                    <Button size="sm" className="flex-1 bg-[#5B8E9F] text-white"
-                      disabled={processing === order.id}
-                      onClick={() => handleAction(order.id, 'fulfill')}>
-                      Hoàn thành giao hàng
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
+      <div className="px-4 sm:px-8 -mt-6 max-w-5xl mx-auto space-y-4 relative z-10">
+        <div className="flex gap-2 flex-wrap">
+          {Object.entries(STATUS_CONFIG).map(([status, cfg]) => (
+            <button key={status} onClick={() => setFilter(status)}>
+              <Chip asButton active={filter === status}>{cfg.label}</Chip>
+            </button>
           ))}
         </div>
-      )}
+
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-accent" strokeWidth={1.75} />
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
+            <ShoppingBag className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-ink mb-1">Không có đơn hàng</p>
+            <p className="text-sm text-ink/55">Tab này chưa có đơn nào.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {orders.map(order => {
+              const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending
+              return (
+                <div key={order.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
+                  <div className="flex justify-between items-start gap-3 mb-3 flex-wrap">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-ink">{order.student.user.fullName}</p>
+                      <p className="text-xs text-ink/55 mt-0.5">
+                        {format(new Date(order.createdAt), 'HH:mm · dd/MM/yyyy', { locale: vi })}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-heading italic text-2xl text-ink leading-none">{fmt(order.finalAmount)}</p>
+                      <Chip variant={cfg.variant} active className="text-[10px] mt-2">{cfg.label}</Chip>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 mb-3">
+                    {order.orderItems.map((item, i) => (
+                      <p key={i} className="text-sm text-ink/75">
+                        {item.quantity}× {item.product.name}
+                        <span className="text-xs text-ink/45 ml-1">({item.product.type})</span>
+                      </p>
+                    ))}
+                  </div>
+
+                  {order.noteFromStudent && (
+                    <p className="text-xs italic text-ink/55 mb-3 px-3 py-2 rounded-card bg-paper-tint/40">&ldquo;{order.noteFromStudent}&rdquo;</p>
+                  )}
+
+                  {payingOrderId === order.id ? (
+                    <div className="border-t border-ink/8 pt-3 space-y-3">
+                      <div>
+                        <p className="eyebrow text-ink/55 mb-2">Phương thức thanh toán</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                          {PAYMENT_METHODS.map(m => (
+                            <button
+                              key={m.value}
+                              type="button"
+                              onClick={() => setPaymentMethod(m.value)}
+                            >
+                              <Chip asButton active={paymentMethod === m.value} className="w-full justify-center">{m.label}</Chip>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      {paymentMethod === 'bank_transfer' && (
+                        <div>
+                          <p className="eyebrow text-ink/55 mb-1.5">Mã giao dịch <span className="text-danger">*</span></p>
+                          <input
+                            type="text"
+                            value={referenceNumber}
+                            onChange={e => setReferenceNumber(e.target.value)}
+                            placeholder="VD: FT250513..."
+                            className="w-full h-10 px-3 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none transition"
+                          />
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => submitPay(order.id)}
+                          disabled={processing === order.id}
+                          className="flex-1 h-10 rounded-pill bg-success text-paper text-sm font-semibold hover:bg-success/90 transition disabled:opacity-60 inline-flex items-center justify-center gap-1.5"
+                        >
+                          {processing === order.id
+                            ? <Loader2 className="h-4 w-4 animate-spin" />
+                            : <><CheckCircle className="h-4 w-4" strokeWidth={2} /> Xác nhận {fmt(order.finalAmount)}</>
+                          }
+                        </button>
+                        <button
+                          onClick={() => setPayingOrderId(null)}
+                          disabled={processing === order.id}
+                          className="px-4 h-10 rounded-pill ring-1 ring-ink/15 text-sm hover:bg-ink/5 transition"
+                        >
+                          Huỷ
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 flex-wrap">
+                      {order.status === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => handleAction(order.id, 'reject')}
+                            disabled={processing === order.id}
+                            className="flex-1 h-10 rounded-pill ring-1 ring-danger/30 text-danger text-sm hover:bg-danger/5 transition inline-flex items-center justify-center gap-1.5"
+                          >
+                            <XIcon className="h-4 w-4" strokeWidth={2.25} /> Từ chối
+                          </button>
+                          <button
+                            onClick={() => handleAction(order.id, 'approve')}
+                            disabled={processing === order.id}
+                            className="flex-[2] h-10 rounded-pill bg-ink text-paper text-sm font-semibold hover:bg-ink/90 transition inline-flex items-center justify-center gap-1.5"
+                          >
+                            {processing === order.id
+                              ? <Loader2 className="h-4 w-4 animate-spin" />
+                              : <><CheckCircle className="h-4 w-4" strokeWidth={2} /> Duyệt đơn</>
+                            }
+                          </button>
+                        </>
+                      )}
+                      {order.status === 'approved' && (
+                        <>
+                          <ConfirmTransferButton
+                            orderId={order.id}
+                            memo={`POLA${order.id.replace(/-/g, '').slice(0, 8).toUpperCase()}`}
+                            amount={order.finalAmount}
+                          />
+                          <button
+                            onClick={() => setPayingOrderId(order.id)}
+                            className="px-4 h-10 rounded-pill ring-1 ring-ink/15 text-sm hover:bg-ink/5 transition inline-flex items-center gap-1.5"
+                          >
+                            <DollarSign className="h-4 w-4 text-accent" strokeWidth={1.75} /> Tiền mặt/khác
+                          </button>
+                        </>
+                      )}
+                      {order.status === 'paid' && (
+                        <button
+                          onClick={() => handleAction(order.id, 'fulfill')}
+                          disabled={processing === order.id}
+                          className="flex-1 h-10 rounded-pill bg-mist text-paper text-sm font-semibold hover:bg-mist/90 transition inline-flex items-center justify-center gap-1.5"
+                        >
+                          <Truck className="h-4 w-4" strokeWidth={1.75} /> Hoàn thành giao hàng
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
