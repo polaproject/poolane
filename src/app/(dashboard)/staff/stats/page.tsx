@@ -43,7 +43,7 @@ export default async function StaffStatsPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-4xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
@@ -62,8 +62,8 @@ export default async function StaffStatsPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
-          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
-            <p className="eyebrow text-ink/55 mb-4">Phân bố học viên</p>
+          <div className="glass-card glass-card-hover p-5">
+            <p className="eyebrow text-foreground/55 mb-4">Phân bố học viên</p>
             <div className="space-y-3">
               {[
                 { label: 'Đang học', value: activeStudents, total: totalStudents, bar: 'bg-success' },
@@ -72,8 +72,8 @@ export default async function StaffStatsPage() {
               ].map(item => (
                 <div key={item.label}>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-ink/70">{item.label}</span>
-                    <span className="font-medium text-ink">{item.value}</span>
+                    <span className="text-foreground/70">{item.label}</span>
+                    <span className="font-medium text-foreground">{item.value}</span>
                   </div>
                   <div className="h-1.5 bg-ink/8 rounded-full overflow-hidden">
                     <div className={`h-full rounded-full ${item.bar}`} style={{ width: `${item.total > 0 ? (item.value / item.total) * 100 : 0}%` }} />
@@ -83,10 +83,10 @@ export default async function StaffStatsPage() {
             </div>
           </div>
 
-          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
-            <p className="eyebrow text-ink/55 mb-4">Kỹ năng yếu nhất</p>
+          <div className="glass-card glass-card-hover p-5">
+            <p className="eyebrow text-foreground/55 mb-4">Kỹ năng yếu nhất</p>
             {weakSkillsData.length === 0 ? (
-              <p className="text-sm text-ink/45">Chưa có dữ liệu đánh giá</p>
+              <p className="text-sm text-foreground/45">Chưa có dữ liệu đánh giá</p>
             ) : (
               <div className="space-y-3">
                 {weakSkillsData.map(sk => {
@@ -95,7 +95,7 @@ export default async function StaffStatsPage() {
                   return (
                     <div key={sk.skillKey}>
                       <div className="flex justify-between text-sm mb-1">
-                        <span className="text-ink/70">{SKILL_NAMES[sk.skillKey] ?? sk.skillKey}</span>
+                        <span className="text-foreground/70">{SKILL_NAMES[sk.skillKey] ?? sk.skillKey}</span>
                         <span className={`font-medium ${tone === 'danger' ? 'text-danger' : 'text-warn'}`}>
                           {avg.toFixed(1)}/5
                         </span>

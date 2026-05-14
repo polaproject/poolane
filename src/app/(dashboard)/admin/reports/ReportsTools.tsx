@@ -66,44 +66,44 @@ export function ReportsTools() {
   return (
     <div className="space-y-4">
       {/* Excel export */}
-      <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-5">
+      <div className="glass-card border border-foreground/8 p-5">
         <div className="flex items-center gap-2 mb-3">
           <Download className="w-5 h-5 text-[#5B8E9F]" />
-          <h2 className="font-semibold text-[#1C2B4A]">Xuất Excel doanh thu</h2>
+          <h2 className="font-semibold text-foreground">Xuất Excel doanh thu</h2>
         </div>
-        <p className="text-xs text-[#1C2B4A]/50 mb-3">File có 3 sheet: Tổng quan, Chi tiết, Theo loại</p>
+        <p className="text-xs text-foreground/50 mb-3">File có 3 sheet: Tổng quan, Chi tiết, Theo loại</p>
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
-            <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1">Từ</label>
+            <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1">Từ</label>
             <input type="date" value={from} onChange={e => setFrom(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+              className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1">Đến</label>
+            <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1">Đến</label>
             <input type="date" value={to} onChange={e => setTo(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+              className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
           </div>
         </div>
         <button onClick={downloadRevenue} disabled={downloading}
-          className="w-full bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-2.5 text-sm font-semibold hover:bg-[#1C2B4A]/90 disabled:opacity-50">
+          className="w-full bg-ink-soft text-paper rounded-lg py-2.5 text-sm font-semibold hover:bg-foreground/90 disabled:opacity-50">
           {downloading ? <span className="inline-flex items-center"><Loader2 className="w-4 h-4 animate-spin mr-2" />Đang tạo...</span> : '⬇ Tải xuống Excel'}
         </button>
       </div>
 
       {/* Reconciliation */}
-      <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-5">
+      <div className="glass-card border border-foreground/8 p-5">
         <div className="flex items-center gap-2 mb-3">
           <ShieldCheck className="w-5 h-5 text-[#C8A84B]" />
-          <h2 className="font-semibold text-[#1C2B4A]">Đối chiếu dữ liệu</h2>
+          <h2 className="font-semibold text-foreground">Đối chiếu dữ liệu</h2>
         </div>
-        <p className="text-xs text-[#1C2B4A]/50 mb-3">
+        <p className="text-xs text-foreground/50 mb-3">
           Kiểm tra: tổng thu, sức chứa buổi, vé bơi vs attendance, order đã thanh toán
         </p>
         <div className="flex gap-2 mb-3">
           <input type="date" value={reconDate} onChange={e => setReconDate(e.target.value)}
-            className="flex-1 px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+            className="flex-1 px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
           <button onClick={runReconciliation} disabled={reconLoading}
-            className="px-4 py-2 text-sm bg-[#1C2B4A] text-[#F6F1EA] rounded-lg hover:bg-[#1C2B4A]/90 disabled:opacity-50">
+            className="px-4 py-2 text-sm bg-ink-soft text-paper rounded-lg hover:bg-foreground/90 disabled:opacity-50">
             {reconLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Chạy'}
           </button>
         </div>
@@ -111,9 +111,9 @@ export function ReportsTools() {
         {recon && (
           <div className="mt-4 space-y-2">
             <div className={`rounded-xl border p-3 ${
-              recon.status === 'ok' ? 'bg-green-50 border-green-200 text-green-900' :
-              recon.status === 'warn' ? 'bg-amber-50 border-amber-200 text-amber-900' :
-              'bg-red-50 border-red-200 text-red-900'
+              recon.status === 'ok' ? 'bg-success/10 border-success/30 text-green-900' :
+              recon.status === 'warn' ? 'bg-warn/10 border-warn/30 text-amber-900' :
+              'bg-danger/10 border-danger/30 text-red-900'
             }`}>
               <div className="flex items-center gap-2 mb-1">
                 {recon.status === 'ok' ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
@@ -131,7 +131,7 @@ export function ReportsTools() {
             </div>
 
             {recon.issues.length > 0 && (
-              <div className="bg-[#F6F1EA]/40 rounded-xl p-3 space-y-1 max-h-48 overflow-y-auto">
+              <div className="bg-paper/40 rounded-xl p-3 space-y-1 max-h-48 overflow-y-auto">
                 {recon.issues.map((iss, i) => (
                   <div key={i} className="text-xs">
                     <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold uppercase mr-1.5 ${
@@ -139,7 +139,7 @@ export function ReportsTools() {
                     }`}>
                       {iss.severity}
                     </span>
-                    <span className="text-[#1C2B4A]/80">{iss.detail}</span>
+                    <span className="text-foreground/80">{iss.detail}</span>
                   </div>
                 ))}
               </div>
@@ -153,9 +153,9 @@ export function ReportsTools() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-[#F6F1EA]/40 rounded-lg px-3 py-2">
-      <p className="text-[10px] uppercase tracking-wider text-[#1C2B4A]/50 font-semibold">{label}</p>
-      <p className="font-heading text-lg text-[#1C2B4A]">{value}</p>
+    <div className="bg-paper/40 rounded-lg px-3 py-2">
+      <p className="text-[10px] uppercase tracking-wider text-foreground/50 font-semibold">{label}</p>
+      <p className="font-heading text-lg text-foreground">{value}</p>
     </div>
   )
 }

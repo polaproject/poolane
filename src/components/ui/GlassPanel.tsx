@@ -6,6 +6,21 @@ interface GlassPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   edge?: boolean
   /** Bo nhỏ hơn (card) thay vì card-xl */
   size?: 'sm' | 'md' | 'lg'
+  /**
+   * Multi-tier depth (Phase 8C — visionOS layering):
+   * 1 = base (subtle blur, dùng cho panel nền)
+   * 2 = mid (default, frosted glass chuẩn)
+   * 3 = top (deep blur + glow shadow, dùng cho modal, hero CTA)
+   */
+  layer?: 1 | 2 | 3
+  /** Hover state: lift + glow accent. Default TRUE (Phase 10 — Liquid Glass everywhere) */
+  interactive?: boolean
+  /**
+   * Specular shimmer overlay animation.
+   * Default TRUE (Phase 10 — Apple Liquid Glass mọi panel có vệt sáng trượt).
+   * Tắt nếu muốn glass tĩnh (vd quote card).
+   */
+  shimmer?: boolean
 }
 
 const SIZE_RADIUS = {
@@ -14,13 +29,23 @@ const SIZE_RADIUS = {
   lg: 'rounded-card-xl',
 }
 
+const LAYER_CLASS = {
+  1: 'glass-layer-1',
+  2: 'glass-panel',
+  3: 'glass-layer-3',
+}
+
 /**
- * Frosted glass panel — semi-transparent surface với blur + ring + soft shadow.
+ * Frosted glass panel — Apple Liquid Glass (Phase 10).
+ * Default: shimmer + interactive ON.
  * Đặt trên `.ambient-bg` để có hiệu ứng cinematic.
  */
 export function GlassPanel({
   edge = false,
   size = 'lg',
+  layer = 2,
+  interactive = true,
+  shimmer = true,
   className,
   children,
   ...rest
@@ -28,9 +53,12 @@ export function GlassPanel({
   return (
     <div
       className={cn(
-        'glass-panel',
+        LAYER_CLASS[layer],
         edge && 'glass-panel-edge',
+        interactive && 'glass-panel-hover',
+        shimmer && 'glass-card', /* dùng .glass-card class để hưởng specular animation */
         SIZE_RADIUS[size],
+        'relative isolate overflow-hidden',
         className
       )}
       {...rest}

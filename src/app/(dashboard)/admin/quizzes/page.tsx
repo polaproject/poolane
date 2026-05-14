@@ -16,7 +16,7 @@ export default async function AdminQuizzesPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-5xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -33,7 +33,7 @@ export default async function AdminQuizzesPage() {
       </div>
 
       <div className="px-4 sm:px-8 -mt-6 max-w-5xl mx-auto relative z-10">
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+        <div className="glass-card glass-card-hover overflow-hidden">
           {quizzes.length === 0 ? (
             <EmptyState
               icon={HelpCircle}
@@ -44,30 +44,30 @@ export default async function AdminQuizzesPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px]">
-                <thead className="bg-paper-tint/30 border-b border-ink/8">
+                <thead className="bg-paper-tint/30 border-b border-foreground/8">
                   <tr>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Tiêu đề</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Số câu</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Lượt làm</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Trạng thái</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Tạo</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Tiêu đề</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Số câu</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Lượt làm</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Trạng thái</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Tạo</th>
                   </tr>
                 </thead>
                 <tbody>
                   {quizzes.map(q => (
-                    <tr key={q.id} className="border-b border-ink/5 last:border-b-0 hover:bg-paper-tint/20 transition">
+                    <tr key={q.id} className="border-b border-foreground/5 last:border-b-0 hover:bg-paper-tint/20 transition glass-table-row">
                       <td className="px-5 py-3">
-                        <p className="font-medium text-sm text-ink">{q.title}</p>
-                        {q.description && <p className="text-xs text-ink/55 mt-0.5 line-clamp-1">{q.description}</p>}
+                        <p className="font-medium text-sm text-foreground">{q.title}</p>
+                        {q.description && <p className="text-xs text-foreground/55 mt-0.5 line-clamp-1">{q.description}</p>}
                       </td>
-                      <td className="px-5 py-3 text-sm text-ink">{q._count.questions}</td>
-                      <td className="px-5 py-3 text-sm text-ink">{q._count.attempts}</td>
+                      <td className="px-5 py-3 text-sm text-foreground">{q._count.questions}</td>
+                      <td className="px-5 py-3 text-sm text-foreground">{q._count.attempts}</td>
                       <td className="px-5 py-3">
                         <Chip variant={q.isPublished ? 'success' : 'neutral'} active>
                           {q.isPublished ? 'Đã đăng' : 'Nháp'}
                         </Chip>
                       </td>
-                      <td className="px-5 py-3 text-xs text-ink/55">{format(q.createdAt, 'dd/MM/yyyy')}</td>
+                      <td className="px-5 py-3 text-xs text-foreground/55">{format(q.createdAt, 'dd/MM/yyyy')}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -19,7 +19,7 @@ export default async function StudentChallengesPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/15 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">Thử thách · Cộng đồng</p>
@@ -29,10 +29,10 @@ export default async function StudentChallengesPage() {
 
       <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
         {challenges.length === 0 ? (
-          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
-            <Target className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có thử thách</p>
-            <p className="text-sm text-ink/55">Khi admin tạo thử thách tháng, sẽ hiện ở đây.</p>
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
+            <Target className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có thử thách</p>
+            <p className="text-sm text-foreground/55">Khi admin tạo thử thách tháng, sẽ hiện ở đây.</p>
           </div>
         ) : (
           challenges.map(c => {
@@ -42,11 +42,11 @@ export default async function StudentChallengesPage() {
             const daysLeft = Math.max(0, differenceInDays(c.endDate, new Date()))
             const achieved = pct >= 100
             return (
-              <div key={c.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
+              <div key={c.id} className="glass-card glass-card-hover p-5">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="min-w-0 flex-1">
-                    <h2 className="font-heading italic text-xl text-ink leading-tight">{c.name}</h2>
-                    <p className="text-xs text-ink/55 mt-1">
+                    <h2 className="font-heading italic text-xl text-foreground leading-tight">{c.name}</h2>
+                    <p className="text-xs text-foreground/55 mt-1">
                       Đến {format(c.endDate, 'dd/MM/yyyy')} · còn {daysLeft} ngày
                     </p>
                   </div>
@@ -56,8 +56,8 @@ export default async function StudentChallengesPage() {
                 </div>
                 <div>
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="text-ink/65">{current}/{c.goalValue} {c.unit}</span>
-                    <span className={`font-heading italic text-lg ${achieved ? 'text-success' : 'text-ink'}`}>{pct}%</span>
+                    <span className="text-foreground/65">{current}/{c.goalValue} {c.unit}</span>
+                    <span className={`font-heading italic text-lg ${achieved ? 'text-success' : 'text-foreground'}`}>{pct}%</span>
                   </div>
                   <div className="h-2 bg-ink/8 rounded-full overflow-hidden">
                     <div

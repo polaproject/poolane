@@ -33,7 +33,7 @@ export function DeactivateButton({ id }: { id: string }) {
     return (
       <button
         onClick={() => setConfirming(true)}
-        className="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold rounded-lg border border-red-300 text-red-700 hover:bg-red-50"
+        className="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold rounded-lg border border-danger/30 text-danger hover:bg-danger/10"
       >
         <Trash2 className="w-3.5 h-3.5" /> Ngừng bán
       </button>
@@ -42,7 +42,7 @@ export function DeactivateButton({ id }: { id: string }) {
 
   return (
     <div className="flex flex-col items-end gap-2">
-      <p className="text-xs text-red-700">Xác nhận ngừng bán?</p>
+      <p className="text-xs text-danger">Xác nhận ngừng bán?</p>
       <div className="flex gap-2">
         <button
           onClick={deactivate}
@@ -54,12 +54,12 @@ export function DeactivateButton({ id }: { id: string }) {
         <button
           onClick={() => { setConfirming(false); setError(null) }}
           disabled={submitting}
-          className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70 hover:bg-[#1C2B4A]/5"
+          className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-foreground/15 text-foreground/70 hover:bg-foreground/5"
         >
           Huỷ
         </button>
       </div>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-danger">{error}</p>}
     </div>
   )
 }

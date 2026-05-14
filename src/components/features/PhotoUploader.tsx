@@ -73,23 +73,23 @@ export function PhotoUploader({
           {current ? (
             <div className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={current} alt="" className="w-20 h-20 rounded-xl object-cover border border-[#1C2B4A]/15" />
+              <img src={current} alt="" className="w-20 h-20 rounded-xl object-cover border border-foreground/15" />
               <button type="button" onClick={() => removeAt(0)}
                 className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700">
                 <X className="w-3 h-3" />
               </button>
             </div>
           ) : (
-            <div className="w-20 h-20 rounded-xl border-2 border-dashed border-[#1C2B4A]/20 flex items-center justify-center bg-[#F6F1EA]/40">
-              <ImagePlus className="w-6 h-6 text-[#1C2B4A]/30" />
+            <div className="w-20 h-20 rounded-xl border-2 border-dashed border-foreground/20 flex items-center justify-center bg-paper/40">
+              <ImagePlus className="w-6 h-6 text-foreground/30" />
             </div>
           )}
           <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70 hover:bg-[#1C2B4A]/5 disabled:opacity-50">
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border border-foreground/15 text-foreground/70 hover:bg-foreground/5 disabled:opacity-50">
             {uploading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Đang tải...</> : <><Upload className="w-3.5 h-3.5" /> {current ? 'Đổi ảnh' : 'Chọn ảnh'}</>}
           </button>
         </div>
-        {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+        {error && <p className="text-xs text-danger mt-1">{error}</p>}
       </div>
     )
   }
@@ -101,7 +101,7 @@ export function PhotoUploader({
         {value.map((url, i) => (
           <div key={i} className="relative group aspect-square">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url} alt="" className="w-full h-full rounded-lg object-cover border border-[#1C2B4A]/10" />
+            <img src={url} alt="" className="w-full h-full rounded-lg object-cover border border-foreground/10" />
             <button type="button" onClick={() => removeAt(i)}
               className="absolute top-1 right-1 w-6 h-6 bg-red-600/90 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <X className="w-3.5 h-3.5" />
@@ -110,19 +110,19 @@ export function PhotoUploader({
         ))}
         {value.length < max && (
           <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading}
-            className="aspect-square rounded-lg border-2 border-dashed border-[#1C2B4A]/20 flex flex-col items-center justify-center bg-[#F6F1EA]/40 hover:border-[#1C2B4A]/40 hover:bg-[#F6F1EA]/60 disabled:opacity-50">
+            className="aspect-square rounded-lg border-2 border-dashed border-foreground/20 flex flex-col items-center justify-center bg-paper/40 hover:border-foreground/40 hover:bg-paper/60 disabled:opacity-50">
             {uploading
-              ? <Loader2 className="w-5 h-5 animate-spin text-[#1C2B4A]/40" />
+              ? <Loader2 className="w-5 h-5 animate-spin text-foreground/40" />
               : <>
-                  <ImagePlus className="w-5 h-5 text-[#1C2B4A]/40 mb-0.5" />
-                  <span className="text-xs text-[#1C2B4A]/50">Thêm ảnh</span>
+                  <ImagePlus className="w-5 h-5 text-foreground/40 mb-0.5" />
+                  <span className="text-xs text-foreground/50">Thêm ảnh</span>
                 </>
             }
           </button>
         )}
       </div>
-      {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
-      <p className="text-xs text-[#1C2B4A]/40 mt-1.5">
+      {error && <p className="text-xs text-danger mt-2">{error}</p>}
+      <p className="text-xs text-foreground/40 mt-1.5">
         Đã có {value.length}/{max} · Tối đa 5MB · JPG/PNG/WebP/GIF
       </p>
     </div>

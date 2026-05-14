@@ -19,7 +19,7 @@ export default async function StudentQuizListPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">Kiến thức · {quizzes.length} quiz</p>
@@ -30,10 +30,10 @@ export default async function StudentQuizListPage() {
 
       <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
         {quizzes.length === 0 ? (
-          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
-            <HelpCircle className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có quiz</p>
-            <p className="text-sm text-ink/55">Lớp đang chuẩn bị bộ câu hỏi đầu tiên.</p>
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
+            <HelpCircle className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có quiz</p>
+            <p className="text-sm text-foreground/55">Lớp đang chuẩn bị bộ câu hỏi đầu tiên.</p>
           </div>
         ) : (
           quizzes.map(q => {
@@ -41,17 +41,17 @@ export default async function StudentQuizListPage() {
             const score = lastAttempt?.score ?? null
             const max = lastAttempt?.maxScore ?? q._count.questions
             const pct = score !== null && max > 0 ? Math.round((score / max) * 100) : null
-            const scoreTone = pct === null ? 'text-ink' : pct >= 80 ? 'text-success' : pct >= 60 ? 'text-warn' : 'text-danger'
+            const scoreTone = pct === null ? 'text-foreground' : pct >= 80 ? 'text-success' : pct >= 60 ? 'text-warn' : 'text-danger'
             return (
               <Link
                 key={q.id}
                 href={`/student/quiz/${q.id}`}
-                className="group block rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5 hover:ring-accent/40 hover:-translate-y-0.5 transition-all duration-300"
+                className="group block glass-card glass-card-hover p-5 hover:ring-accent/40 hover:-translate-y-0.5 transition-all duration-300"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h2 className="font-heading italic text-xl text-ink leading-tight">{q.title}</h2>
-                    {q.description && <p className="text-sm text-ink/65 mt-1 line-clamp-2 leading-relaxed">{q.description}</p>}
+                    <h2 className="font-heading italic text-xl text-foreground leading-tight">{q.title}</h2>
+                    {q.description && <p className="text-sm text-foreground/65 mt-1 line-clamp-2 leading-relaxed">{q.description}</p>}
                     <div className="flex items-center gap-2 mt-3 flex-wrap text-xs">
                       <Chip variant="mist">{q._count.questions} câu</Chip>
                       {q.timeLimitMinutes && (
@@ -67,10 +67,10 @@ export default async function StudentQuizListPage() {
                   {pct !== null ? (
                     <div className="text-right shrink-0">
                       <p className={`font-heading italic text-3xl leading-none ${scoreTone}`}>{pct}%</p>
-                      <p className="text-xs text-ink/55 mt-1">{score}/{max}</p>
+                      <p className="text-xs text-foreground/55 mt-1">{score}/{max}</p>
                     </div>
                   ) : (
-                    <ArrowRight className="h-5 w-5 text-ink/40 group-hover:translate-x-0.5 group-hover:text-accent transition" strokeWidth={2.25} />
+                    <ArrowRight className="h-5 w-5 text-foreground/40 group-hover:translate-x-0.5 group-hover:text-accent transition" strokeWidth={2.25} />
                   )}
                 </div>
               </Link>

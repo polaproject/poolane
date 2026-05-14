@@ -45,7 +45,7 @@ export function RegisterButton({ sessionId, studentId, disabled, disabledReason,
 
   if (registered) {
     return (
-      <div className="text-center py-2 rounded-xl text-sm font-medium bg-amber-50 text-amber-700">
+      <div className="text-center py-2 rounded-xl text-sm font-medium bg-warn/10 text-warn">
         Đang chờ duyệt...
       </div>
     )
@@ -53,7 +53,7 @@ export function RegisterButton({ sessionId, studentId, disabled, disabledReason,
 
   return (
     <Button
-      className="w-full bg-[#1C2B4A] text-[#F6F1EA] hover:bg-[#1C2B4A]/90 h-9"
+      className="w-full bg-ink-soft text-paper hover:bg-foreground/90 h-9"
       disabled={disabled || loading}
       onClick={handleRegister}
       title={disabledReason}

@@ -39,7 +39,7 @@ export default async function AdminExercisesPage({ searchParams }: { searchParam
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-6xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -68,10 +68,10 @@ export default async function AdminExercisesPage({ searchParams }: { searchParam
         </div>
 
         {exercises.length === 0 ? (
-          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
-            <Dumbbell className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có bài tập</p>
-            <p className="text-sm text-ink/55">Thêm bài tập đầu tiên qua nút phía trên.</p>
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
+            <Dumbbell className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có bài tập</p>
+            <p className="text-sm text-foreground/55">Thêm bài tập đầu tiên qua nút phía trên.</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-3">
@@ -79,17 +79,17 @@ export default async function AdminExercisesPage({ searchParams }: { searchParam
               <Link
                 key={ex.id}
                 href={`/admin/exercises/${ex.id}/edit`}
-                className="block rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5 hover:-translate-y-0.5 hover:ring-accent/30 transition-all"
+                className="block glass-card glass-card-hover p-5 hover:-translate-y-0.5 hover:ring-accent/30 transition-all"
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <h2 className="font-medium text-ink flex-1 leading-tight">{ex.title}</h2>
+                  <h2 className="font-medium text-foreground flex-1 leading-tight">{ex.title}</h2>
                   <Chip variant={DIFF_VARIANT[ex.difficulty] ?? 'mist'} active className="shrink-0">
                     {DIFFICULTY_LABELS[ex.difficulty as keyof typeof DIFFICULTY_LABELS] ?? ex.difficulty}
                   </Chip>
                 </div>
                 <Chip variant="mist" className="mb-3">#{SKILL_LABELS[ex.skillTarget] ?? ex.skillTarget}</Chip>
-                <p className="text-sm text-ink/65 line-clamp-2 leading-relaxed">{ex.description}</p>
-                <div className="flex items-center justify-between mt-3 text-xs text-ink/45">
+                <p className="text-sm text-foreground/65 line-clamp-2 leading-relaxed">{ex.description}</p>
+                <div className="flex items-center justify-between mt-3 text-xs text-foreground/45">
                   <span>{Array.isArray(ex.stepsJson) ? (ex.stepsJson as unknown[]).length : 0} bước</span>
                   <span>{ex._count.assignments} HV đã gán</span>
                 </div>

@@ -44,7 +44,7 @@ export default async function StudentProfilePage() {
   return (
     <div className="min-h-screen bg-paper pb-12">
       {/* Hero */}
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="absolute bottom-0 left-1/4 w-48 h-48 rounded-full bg-mist/10 translate-y-1/2 blur-3xl" />
 
@@ -76,8 +76,8 @@ export default async function StudentProfilePage() {
               <AlertCircle className="h-4 w-4 text-warn" strokeWidth={1.75} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-ink">Có 1 yêu cầu cập nhật đang chờ duyệt</p>
-              <p className="text-xs text-ink/65 mt-0.5">
+              <p className="text-sm font-semibold text-foreground">Có 1 yêu cầu cập nhật đang chờ duyệt</p>
+              <p className="text-xs text-foreground/65 mt-0.5">
                 Gửi lúc {format(pendingRequest.requestedAt, 'dd/MM/yyyy HH:mm')} — chờ staff/admin xử lý
               </p>
             </div>
@@ -141,8 +141,8 @@ export default async function StudentProfilePage() {
             <ConsentRow label="Đồng ý hình ảnh dùng cho marketing" at={u.imageConsentMarketingAt} />
             <ConsentRow label="Đã đọc chính sách hoàn tiền" at={u.refundPolicyAcknowledgedAt} />
             <ConsentRow label="Đã đọc điều khoản sử dụng" at={u.termsAcknowledgedAt} />
-            <div className="pt-3 mt-3 border-t border-ink/8 flex items-center justify-between gap-3">
-              <span className="text-sm text-ink/75 inline-flex items-center gap-2">
+            <div className="pt-3 mt-3 border-t border-foreground/8 flex items-center justify-between gap-3">
+              <span className="text-sm text-foreground/75 inline-flex items-center gap-2">
                 <Bell className="h-4 w-4 text-accent" strokeWidth={1.75} /> Thông báo đẩy trình duyệt
               </span>
               <PushSubscribeButton />
@@ -165,20 +165,20 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
-      <header className="px-5 py-4 border-b border-ink/8 flex items-center justify-between">
+    <section className="glass-card glass-card-hover overflow-hidden">
+      <header className="px-5 py-4 border-b border-foreground/8 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-accent" strokeWidth={1.75} />
           <div>
-            <p className="eyebrow text-ink/55">{eyebrow}</p>
-            <h2 className="font-heading italic text-lg text-ink mt-0.5">{title}</h2>
+            <p className="eyebrow text-foreground/55">{eyebrow}</p>
+            <h2 className="font-heading italic text-lg text-foreground mt-0.5">{title}</h2>
           </div>
         </div>
         {action}
       </header>
       <div className="px-5 py-4 text-sm">{children}</div>
       {footnote && (
-        <p className="px-5 pb-4 text-xs text-ink/45">{footnote}</p>
+        <p className="px-5 pb-4 text-xs text-foreground/45">{footnote}</p>
       )}
     </section>
   )
@@ -187,8 +187,8 @@ function Section({
 function Field({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div>
-      <p className="text-xs text-ink/45 mb-1">{label}</p>
-      <p className="text-ink">{value || <span className="text-ink/30">—</span>}</p>
+      <p className="text-xs text-foreground/45 mb-1">{label}</p>
+      <p className="text-foreground">{value || <span className="text-foreground/30">—</span>}</p>
     </div>
   )
 }
@@ -196,14 +196,14 @@ function Field({ label, value }: { label: string; value: string | null | undefin
 function ConsentRow({ label, at }: { label: string; at: Date | null }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="text-sm text-ink/80">{label}</span>
+      <span className="text-sm text-foreground/80">{label}</span>
       {at ? (
         <Chip variant="success" active className="text-[10px]">
           <CheckCircle2 className="h-3 w-3" strokeWidth={2.25} />
           {format(at, 'dd/MM/yyyy')}
         </Chip>
       ) : (
-        <span className="text-xs text-ink/35">Chưa xác nhận</span>
+        <span className="text-xs text-foreground/35">Chưa xác nhận</span>
       )}
     </div>
   )

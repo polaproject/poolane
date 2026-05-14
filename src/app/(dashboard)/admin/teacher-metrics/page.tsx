@@ -58,7 +58,7 @@ export default async function TeacherMetricsPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-5xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">30 ngày · cập nhật {format(now, 'dd/MM/yyyy HH:mm', { locale: vi })}</p>
@@ -73,42 +73,42 @@ export default async function TeacherMetricsPage() {
           <StatCard label="Buổi đã chấm" value={metrics.reduce((s, m) => s + m.attendanceMarked, 0)} trendLabel="30 ngày qua" icon={Award} tone="dark" />
         </div>
 
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
-          <div className="px-5 py-4 border-b border-ink/8 flex items-center gap-2">
+        <div className="glass-card glass-card-hover overflow-hidden">
+          <div className="px-5 py-4 border-b border-foreground/8 flex items-center gap-2">
             <Award className="h-4 w-4 text-accent" strokeWidth={1.75} />
-            <p className="eyebrow text-ink/55">Theo giáo viên</p>
+            <p className="eyebrow text-foreground/55">Theo giáo viên</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px]">
-              <thead className="bg-paper-tint/30 border-b border-ink/8">
+              <thead className="bg-paper-tint/30 border-b border-foreground/8">
                 <tr>
-                  <th className="text-left px-5 py-3 eyebrow text-ink/55">Giáo viên</th>
-                  <th className="text-right px-5 py-3 eyebrow text-ink/55">Đánh giá</th>
-                  <th className="text-right px-5 py-3 eyebrow text-ink/55">HV chấm</th>
-                  <th className="text-right px-5 py-3 eyebrow text-ink/55">Điểm danh</th>
-                  <th className="text-right px-5 py-3 eyebrow text-ink/55">Lesson plan</th>
-                  <th className="text-right px-5 py-3 eyebrow text-ink/55">Điểm TB</th>
+                  <th className="text-left px-5 py-3 eyebrow text-foreground/55">Giáo viên</th>
+                  <th className="text-right px-5 py-3 eyebrow text-foreground/55">Đánh giá</th>
+                  <th className="text-right px-5 py-3 eyebrow text-foreground/55">HV chấm</th>
+                  <th className="text-right px-5 py-3 eyebrow text-foreground/55">Điểm danh</th>
+                  <th className="text-right px-5 py-3 eyebrow text-foreground/55">Lesson plan</th>
+                  <th className="text-right px-5 py-3 eyebrow text-foreground/55">Điểm TB</th>
                 </tr>
               </thead>
               <tbody>
                 {metrics.map(m => {
                   const tone = m.avgScore == null ? '' : m.avgScore >= 4 ? 'text-success' : m.avgScore >= 3 ? 'text-warn' : 'text-danger'
                   return (
-                    <tr key={m.teacher.id} className="border-b border-ink/5 last:border-b-0 hover:bg-paper-tint/20 transition">
+                    <tr key={m.teacher.id} className="border-b border-foreground/5 last:border-b-0 hover:bg-paper-tint/20 transition glass-table-row">
                       <td className="px-5 py-3">
-                        <p className="text-sm font-medium text-ink">{m.teacher.fullName}</p>
-                        <p className="text-xs text-ink/45 capitalize">
+                        <p className="text-sm font-medium text-foreground">{m.teacher.fullName}</p>
+                        <p className="text-xs text-foreground/45 capitalize">
                           {m.teacher.role === 'admin' ? 'Quản trị' : 'Trợ lý'}
                         </p>
                       </td>
-                      <td className="px-5 py-3 text-right text-sm text-ink">{m.assessmentsCount}</td>
-                      <td className="px-5 py-3 text-right text-sm text-ink">{m.studentsAssessed}</td>
-                      <td className="px-5 py-3 text-right text-sm text-ink">{m.attendanceMarked}</td>
-                      <td className="px-5 py-3 text-right text-sm text-ink">{m.lessonsPlanned}</td>
+                      <td className="px-5 py-3 text-right text-sm text-foreground">{m.assessmentsCount}</td>
+                      <td className="px-5 py-3 text-right text-sm text-foreground">{m.studentsAssessed}</td>
+                      <td className="px-5 py-3 text-right text-sm text-foreground">{m.attendanceMarked}</td>
+                      <td className="px-5 py-3 text-right text-sm text-foreground">{m.lessonsPlanned}</td>
                       <td className="px-5 py-3 text-right text-sm font-semibold">
                         {m.avgScore != null
                           ? <span className={tone}>{m.avgScore.toFixed(1)}/5</span>
-                          : <span className="text-ink/30">—</span>}
+                          : <span className="text-foreground/30">—</span>}
                       </td>
                     </tr>
                   )
@@ -118,7 +118,7 @@ export default async function TeacherMetricsPage() {
           </div>
         </div>
 
-        <p className="text-xs text-ink/55 max-w-2xl">
+        <p className="text-xs text-foreground/55 max-w-2xl">
           Retention = % HV active có buổi học trong 30 ngày. Tiến bộ = chênh lệch điểm TB giữa buổi 1 và buổi 7+.
         </p>
       </div>

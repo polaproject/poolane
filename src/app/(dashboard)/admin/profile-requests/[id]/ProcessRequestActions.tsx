@@ -42,9 +42,9 @@ export function ProcessRequestActions({ id }: { id: string }) {
 
   if (mode === 'rejecting') {
     return (
-      <div className="mt-5 border-t border-[#1C2B4A]/8 pt-5">
-        <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
-          Lý do từ chối <span className="text-red-500">*</span>
+      <div className="mt-5 border-t border-foreground/8 pt-5">
+        <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
+          Lý do từ chối <span className="text-danger">*</span>
         </label>
         <textarea
           rows={3}
@@ -52,10 +52,10 @@ export function ProcessRequestActions({ id }: { id: string }) {
           value={notes}
           onChange={e => setNotes(e.target.value)}
           placeholder="Giải thích lý do để học viên hiểu..."
-          className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 bg-white"
+          className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 bg-[var(--surface)]"
         />
         {error && (
-          <p className="text-sm text-red-600 mt-2">{error}</p>
+          <p className="text-sm text-danger mt-2">{error}</p>
         )}
         <div className="flex gap-3 mt-3">
           <button
@@ -68,7 +68,7 @@ export function ProcessRequestActions({ id }: { id: string }) {
           <button
             onClick={() => { setMode('idle'); setError(null) }}
             disabled={submitting}
-            className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70 hover:bg-[#1C2B4A]/5"
+            className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-foreground/15 text-foreground/70 hover:bg-foreground/5"
           >
             Huỷ
           </button>
@@ -78,25 +78,25 @@ export function ProcessRequestActions({ id }: { id: string }) {
   }
 
   return (
-    <div className="mt-5 border-t border-[#1C2B4A]/8 pt-5">
+    <div className="mt-5 border-t border-foreground/8 pt-5">
       <div className="flex gap-3">
         <button
           disabled={submitting}
           onClick={() => submit('approve')}
-          className="flex-1 bg-green-600 text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-green-700 disabled:opacity-50"
+          className="flex-1 bg-success text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-success disabled:opacity-50"
         >
           {submitting ? 'Đang duyệt...' : '✓ Duyệt & áp dụng thay đổi'}
         </button>
         <button
           onClick={() => setMode('rejecting')}
           disabled={submitting}
-          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-red-300 text-red-700 hover:bg-red-50"
+          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-danger/30 text-danger hover:bg-danger/10"
         >
           Từ chối
         </button>
       </div>
       {error && (
-        <p className="text-sm text-red-600 mt-2">{error}</p>
+        <p className="text-sm text-danger mt-2">{error}</p>
       )}
     </div>
   )

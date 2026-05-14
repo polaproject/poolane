@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { ProductForm } from '../ProductForm'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 export default async function NewProductPage() {
   await requireRole(['admin'])
@@ -14,22 +15,23 @@ export default async function NewProductPage() {
   })
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="ambient-bg min-h-screen">
+      <div className="p-6 max-w-3xl mx-auto">
         <Link
           href="/admin/shop/products"
-          className="inline-flex items-center gap-1 text-sm text-[#1C2B4A]/70 hover:text-[#1C2B4A]"
+          className="inline-flex items-center gap-1 text-sm text-foreground/70 hover:text-foreground mb-4"
         >
           <ArrowLeft className="w-4 h-4" /> Danh sách sản phẩm
         </Link>
+        <PageHeader
+          eyebrow="Shop"
+          title="Thêm sản phẩm mới"
+          description="Form sẽ thay đổi theo loại sản phẩm bạn chọn — khoá, pack cải thiện, dịch vụ, hoặc đồ vật lý."
+          display
+          className="mb-8"
+        />
+        <ProductForm courses={courses} mode="create" />
       </div>
-      <div className="mb-6">
-        <h1 className="font-heading text-3xl text-[#1C2B4A]">Thêm sản phẩm mới</h1>
-        <p className="text-sm text-[#1C2B4A]/50 mt-1">
-          Form sẽ thay đổi theo loại sản phẩm bạn chọn
-        </p>
-      </div>
-      <ProductForm courses={courses} mode="create" />
     </div>
   )
 }

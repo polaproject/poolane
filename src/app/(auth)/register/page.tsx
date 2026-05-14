@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
+import { PolarisStar } from '@/components/brand/PolarisStar'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -65,19 +66,19 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F6F1EA] p-4 py-10">
+    <div className="min-h-screen flex items-center justify-center bg-paper p-4 py-10">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-6">
-          <svg width="36" height="46" viewBox="0 0 52 68" fill="none" className="mb-2">
-            <path d="M26 2 C26 2 28.5 22 29.5 25.5 C33 26.5 50 26 50 26 C50 26 33 26 29.5 27.5 C28.5 31 26 50 26 50 C26 50 23.5 31 22.5 27.5 C19 26 2 26 2 26 C2 26 19 26 22.5 25.5 C23.5 22 26 2 26 2 Z" fill="#1C2B4A"/>
-          </svg>
-          <h1 className="font-body font-bold text-lg tracking-[0.18em] text-[#1C2B4A]">POOLANE</h1>
+          <span className="text-foreground mb-2">
+            <PolarisStar size={42} withReflection={false} animated glow />
+          </span>
+          <h1 className="font-body font-bold text-lg tracking-[0.18em] text-foreground">POOLANE</h1>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-6">
-          <h2 className="font-heading text-2xl text-[#1C2B4A] mb-1">Tạo tài khoản</h2>
-          <p className="text-sm text-[#1C2B4A]/50 mb-5">Bắt đầu hành trình bơi cùng Poolane 🌊</p>
+        <div className="glass-card glass-card-hover p-6">
+          <h2 className="font-heading text-2xl text-foreground mb-1">Tạo tài khoản</h2>
+          <p className="text-sm text-foreground/50 mb-5">Bắt đầu hành trình bơi cùng Poolane 🌊</p>
 
           <form onSubmit={onSubmit} className="space-y-3">
             <Field label="Họ và tên" required error={fieldErrors.fullName}>
@@ -131,27 +132,27 @@ export default function RegisterPage() {
               </Field>
             </div>
 
-            <div className="space-y-2 pt-2 border-t border-[#1C2B4A]/10">
-              <label className="flex items-start gap-2 text-xs text-[#1C2B4A]/70 cursor-pointer">
+            <div className="space-y-2 pt-2 border-t border-foreground/10">
+              <label className="flex items-start gap-2 text-xs text-foreground/70 cursor-pointer">
                 <input type="checkbox" checked={form.photoConsent} onChange={e => update('photoConsent', e.target.checked)} className="mt-0.5" />
-                <span>Tôi đồng ý cho lớp ghi hình kỹ thuật bơi của mình để dạy học. <span className="text-red-500">*</span></span>
+                <span>Tôi đồng ý cho lớp ghi hình kỹ thuật bơi của mình để dạy học. <span className="text-danger">*</span></span>
               </label>
-              <label className="flex items-start gap-2 text-xs text-[#1C2B4A]/70 cursor-pointer">
+              <label className="flex items-start gap-2 text-xs text-foreground/70 cursor-pointer">
                 <input type="checkbox" checked={form.termsAcknowledged} onChange={e => update('termsAcknowledged', e.target.checked)} className="mt-0.5" />
-                <span>Tôi đã đọc và đồng ý <a href="/privacy" target="_blank" className="text-[#5B8E9F] underline">chính sách bảo mật & điều khoản sử dụng</a>. <span className="text-red-500">*</span></span>
+                <span>Tôi đã đọc và đồng ý <a href="/privacy" target="_blank" className="text-[#5B8E9F] underline">chính sách bảo mật & điều khoản sử dụng</a>. <span className="text-danger">*</span></span>
               </label>
-              {fieldErrors.photoConsent && <p className="text-xs text-red-600">{fieldErrors.photoConsent}</p>}
-              {fieldErrors.termsAcknowledged && <p className="text-xs text-red-600">{fieldErrors.termsAcknowledged}</p>}
+              {fieldErrors.photoConsent && <p className="text-xs text-danger">{fieldErrors.photoConsent}</p>}
+              {fieldErrors.termsAcknowledged && <p className="text-xs text-danger">{fieldErrors.termsAcknowledged}</p>}
             </div>
 
             <button type="submit" disabled={submitting}
-              className="w-full bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-2.5 text-sm font-semibold hover:bg-[#1C2B4A]/90 disabled:opacity-50 mt-4">
+              className="w-full bg-ink-soft text-paper rounded-lg py-2.5 text-sm font-semibold hover:bg-foreground/90 disabled:opacity-50 mt-4">
               {submitting ? <span className="inline-flex items-center"><Loader2 className="w-4 h-4 animate-spin mr-2" />Đang tạo...</span> : 'Tạo tài khoản'}
             </button>
           </form>
         </div>
 
-        <p className="text-center text-xs text-[#1C2B4A]/50 mt-4">
+        <p className="text-center text-xs text-foreground/50 mt-4">
           Đã có tài khoản? <Link href="/login" className="text-[#5B8E9F] hover:underline font-semibold">Đăng nhập</Link>
         </p>
       </div>
@@ -181,11 +182,11 @@ function Field({ label, required, error, children }: {
 }) {
   return (
     <div>
-      <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1">
-        {label} {required && <span className="text-red-500">*</span>}
+      <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1">
+        {label} {required && <span className="text-danger">*</span>}
       </label>
       {children}
-      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+      {error && <p className="text-xs text-danger mt-1">{error}</p>}
     </div>
   )
 }

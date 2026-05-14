@@ -147,11 +147,11 @@ export function UnmatchedActions({ txId, amount }: Props) {
     return (
       <div className="flex gap-2">
         <button onClick={() => setMode('matching')}
-          className="inline-flex items-center gap-1 px-3 py-2 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg text-xs font-semibold">
+          className="inline-flex items-center gap-1 px-3 py-2 bg-ink-soft text-paper rounded-lg text-xs font-semibold">
           <Check className="w-3.5 h-3.5" /> Gán vào đơn/khoá
         </button>
         <button onClick={submitIgnore} disabled={submitting}
-          className="inline-flex items-center gap-1 px-3 py-2 border border-[#1C2B4A]/15 text-[#1C2B4A]/70 rounded-lg text-xs font-semibold hover:bg-[#1C2B4A]/5">
+          className="inline-flex items-center gap-1 px-3 py-2 border border-foreground/15 text-foreground/70 rounded-lg text-xs font-semibold hover:bg-foreground/5">
           <X className="w-3.5 h-3.5" /> Bỏ qua
         </button>
       </div>
@@ -159,17 +159,17 @@ export function UnmatchedActions({ txId, amount }: Props) {
   }
 
   return (
-    <div className="w-full bg-[#F6F1EA]/40 rounded-xl p-4 mt-2">
+    <div className="w-full bg-paper/40 rounded-xl p-4 mt-2">
       {/* Type toggle */}
       <div className="flex gap-2 mb-3">
         <button
           onClick={() => { setMatchType('order'); setResults([]); setSelectedId(''); setSearch('') }}
-          className={`px-3 py-1.5 text-xs rounded-lg ${matchType === 'order' ? 'bg-[#1C2B4A] text-[#F6F1EA]' : 'bg-white text-[#1C2B4A]/60 border border-[#1C2B4A]/15'}`}>
+          className={`px-3 py-1.5 text-xs rounded-lg ${matchType === 'order' ? 'bg-ink-soft text-paper' : 'bg-[var(--surface)] text-foreground/60 border border-foreground/15'}`}>
           🛒 Đơn shop
         </button>
         <button
           onClick={() => { setMatchType('enrollment'); setResults([]); setSelectedId(''); setSearch('') }}
-          className={`px-3 py-1.5 text-xs rounded-lg ${matchType === 'enrollment' ? 'bg-[#1C2B4A] text-[#F6F1EA]' : 'bg-white text-[#1C2B4A]/60 border border-[#1C2B4A]/15'}`}>
+          className={`px-3 py-1.5 text-xs rounded-lg ${matchType === 'enrollment' ? 'bg-ink-soft text-paper' : 'bg-[var(--surface)] text-foreground/60 border border-foreground/15'}`}>
           📚 Học phí
         </button>
       </div>
@@ -179,18 +179,18 @@ export function UnmatchedActions({ txId, amount }: Props) {
         value={search}
         onChange={e => doSearch(e.target.value)}
         placeholder={matchType === 'order' ? 'Tìm theo tên HV (đơn đã duyệt)...' : 'Tìm theo tên HV...'}
-        className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white mb-2"
+        className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)] mb-2"
       />
 
-      {searching && <p className="text-xs text-[#1C2B4A]/40">Đang tìm...</p>}
+      {searching && <p className="text-xs text-foreground/40">Đang tìm...</p>}
 
       {results.length > 0 && (
-        <div className="max-h-48 overflow-y-auto border border-[#1C2B4A]/10 rounded-lg bg-white divide-y divide-[#1C2B4A]/5 mb-2">
+        <div className="max-h-48 overflow-y-auto border border-foreground/10 rounded-lg bg-[var(--surface)] divide-y divide-foreground/5 mb-2">
           {results.map(r => (
             <button key={r.id} type="button" onClick={() => setSelectedId(r.id)}
-              className={`w-full text-left px-3 py-2 hover:bg-[#F6F1EA]/60 ${selectedId === r.id ? 'bg-[#5B8E9F]/10' : ''}`}>
-              <p className="text-sm font-semibold text-[#1C2B4A]">{r.label}</p>
-              <p className="text-xs text-[#1C2B4A]/50">{r.detail}</p>
+              className={`w-full text-left px-3 py-2 hover:bg-paper/60 ${selectedId === r.id ? 'bg-[#5B8E9F]/10' : ''}`}>
+              <p className="text-sm font-semibold text-foreground">{r.label}</p>
+              <p className="text-xs text-foreground/50">{r.detail}</p>
             </button>
           ))}
         </div>
@@ -198,24 +198,24 @@ export function UnmatchedActions({ txId, amount }: Props) {
 
       {matchType === 'enrollment' && selectedId && (
         <div className="mb-2">
-          <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1">
+          <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1">
             Số tiền ghi vào khoá (default = số tiền giao dịch)
           </label>
           <input type="number" value={customAmount} onChange={e => setCustomAmount(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+            className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
         </div>
       )}
 
-      {error && <p className="text-xs text-red-600 mb-2">{error}</p>}
+      {error && <p className="text-xs text-danger mb-2">{error}</p>}
 
       <div className="flex gap-2">
         <button onClick={submitMatch} disabled={submitting || !selectedId}
-          className="flex-1 bg-green-600 text-white rounded-lg py-2 text-xs font-semibold hover:bg-green-700 disabled:opacity-50">
+          className="flex-1 bg-success text-white rounded-lg py-2 text-xs font-semibold hover:bg-success disabled:opacity-50">
           {submitting ? <Loader2 className="w-4 h-4 animate-spin inline" /> : 'Xác nhận gán'}
         </button>
         <button onClick={() => { setMode('idle'); setError(null); setSelectedId(''); setResults([]); setSearch('') }}
           disabled={submitting}
-          className="px-3 py-2 text-xs font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70">
+          className="px-3 py-2 text-xs font-semibold rounded-lg border border-foreground/15 text-foreground/70">
           Huỷ
         </button>
       </div>

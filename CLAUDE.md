@@ -178,20 +178,29 @@ LAYER 6 — Validation & Security
 | Hạng mục | Status |
 |---|---|
 | Sidebar navigation | ✅ 8 nhóm có thể expand/collapse + Việt hoá + localStorage state |
-| Theme A/B switcher | ✅ Theme A (Đêm & Sao navy/gold) + Theme B (Bình Yên lavender/peach). Bỏ Theme D |
+| **True Dark/Light Mode (Phase 9)** | ✅ Đổi từ "2 brand color" (Theme A/B) sang true dark/light mode. `theme-dark` (navy/gold cho đêm muộn) + `theme-light` (lavender/peach cho ban ngày). ThemeSwitcher dùng Sun/Moon icons + label "Sáng/Tối". Adaptive tokens (`--surface`, `--nav-bg`, `--hero-bg`) đổi giá trị theo mode. Sidebar + hero adapt theo theme. Dashboard root wrap `.ambient-bg` đồng nhất với public. LocalStorage migrate `A→dark, B→light` tự động |
+| **Apple Liquid Glass throughout (Phase 10)** | ✅ Apple iOS 26 / macOS 26 design language xuyên suốt. Token system: `--lens-{light,medium,heavy}` (blur+saturate+brightness), `--glass-tint-{1,2,3}`, `--specular-color`, `--radius-glass-{xs..2xl}`. Utility classes: `.glass-card`, `.glass-button`, `.glass-input`, `.glass-table-row`, `.card-tilt`. Mọi card + sidebar + button + input → semi-transparent backdrop-blur + specular streak animation (11s/lần). Sidebar specular streak 18s. Table body rows alternating tint + hover specular flash. `<TiltCard>` component + `useTilt()` hook cho 3D micro-tilt hero cards. 2 migration scripts: `migrate-glass.mjs` (264 file `bg-white` → `glass-card`), `migrate-glass-tables.mjs` (11 admin tables). Lighthouse final: **perf 88, a11y 100, bp 100**. |
+| **Sidebar Fixed + Color Harmony (Phase 11)** | ✅ Sidebar `lg:fixed` (đứng yên khi cuộn page) + main `lg:ml-64` offset. Migration script `migrate-theme-harmony.mjs` thay 1474 hard-code `text-ink/N`, `border-ink/N`, `ring-ink/N`, `divide-ink/N`, `hover:bg-ink/N` thành `text-foreground/N` (adaptive). 30 buttons `bg-accent text-foreground` → `bg-accent text-ink` (CTA gold luôn cần dark text). `--foreground` token đổi từ static `var(--ink)` → adaptive (paper trong dark, ink trong light). Lighthouse: **perf 77-90, a11y 100, bp 100**. |
 | **Design system foundation (Phase 1)** | ✅ Tokens (ink/paper/accent/mist/glass/shadow), 5 primitive mới (Chip/PageHeader/GlassPanel/StatCard/FloatingCard), glass utilities (`.glass-panel`/`.glass-pill`/`.ambient-bg`/`.heading-display`/`.eyebrow`), Cormorant italic display |
 | **~70 trang redesign** | ✅ Public 6 + Student 24 + Admin 28 + Staff 10 — tất cả áp design language mới (hero dark ambient + italic display + Chip variants + soft glass) |
-| 14 admin form pages chưa redesign | ⚠️ Deferred (rare-use): students/new, students/[id]/enroll/ticket, sessions/new, shop/products/new+[id], vouchers/new+edit, blog/new+edit, quizzes/new, events/new, exercises/new+edit, profile-requests/[id] |
-| Auth pages polish | ⚠️ Pending (Phase 6): login/register/forgot-password chưa redesign theo design system mới |
+| 12 admin form pages | ✅ (Phase 7C) Redesign với PageHeader + ambient-bg pattern: students/new + [id]/enroll/ticket, sessions/new, shop/products/new + [id], vouchers/new+edit, blog/new+edit, quizzes/new, events/new, exercises/new+edit |
+| Token cleanup (Phase 7B) | ✅ ~1000 replacements qua `scripts/migrate-tokens.mjs` — thay `bg-[#1C2B4A]`/`text-red-X`/`rounded-2xl` thành token (`bg-ink-soft`/`text-danger`/`rounded-card-lg`). Còn lại 19 hex (SVG fills, email templates — legitimate) |
+| Auth pages polish | ⚠️ Pending (Phase 6): login/register/forgot-password chưa redesign theo design system mới (đã migrate token nhưng chưa thay layout) |
 | Mobile audit (tables overflow + grid breakpoints + touch targets 44px) | ✅ 29 files fix |
 | Focus rings (a11y keyboard navigation) | ✅ `:focus-visible` outline qua accent token |
-| Loading states (skeleton) | ✅ 8 critical pages có `loading.tsx` + skeleton components |
-| Error boundaries | ✅ 1 root + 4 per-page |
+| Skip-to-main-content link | ✅ (Phase 7A) DashboardShell + Public layout có "Bỏ qua điều hướng" link |
+| Loading states (skeleton) | ✅ 11 critical pages có `loading.tsx` (admin/schedule + reports + broadcast thêm Phase 7A) |
+| Error boundaries | ✅ 1 root + 4 per-page + 2 layout-level (public, auth thêm Phase 7A) |
+| Button loading state | ✅ (Phase 7A) `<Button loading>` prop tự render Loader2 spinner + `aria-busy` |
+| ConfirmDialog component | ✅ (Phase 7A) `<ConfirmDialog>` dùng @base-ui/react/alert-dialog thay 4 chỗ `window.confirm()` (blog, exercises, password-resets, assignments) |
 | Image alt text fix | ✅ 6 files |
 | EmptyState component | ✅ Adoption rộng rãi sau Phase 1 (toàn bộ student/admin/staff lists) |
 | PWA manifest + icons | ✅ `manifest.json` + icon 192/512 + apple-touch + theme color |
 | Mobile responsive audit thực thiết bị | ⚠️ Đã pass devtools, chưa test iPhone/Android thật |
-| QA toàn diện (lighthouse + a11y + screenshot diff 2 theme) | ⚠️ Pending (Phase 7) |
+| QA Lighthouse + a11y 2 trang public (Phase 7) | ✅ Landing 89/100/100, Courses 89/100/100 (sau cả 4 sub-phase). Đã fix: link aria-label, eyebrow contrast (`.eyebrow` opacity 0.85), manifest 307 redirect, alt text. Báo cáo: [qa/phase7/REPORT.md](qa/phase7/REPORT.md) |
+| **VisionOS overhaul (Phase 8)** | ✅ Motion infrastructure (`motion` v12 + LazyMotion + CSS spring tokens + 8 keyframes mới), Animated ambient (dual-layer sway), Multi-tier glass (layer 1/2/3 + hover glow), Polaris brand motion (PolarisStar component + StarField particle field), Wave SVG divider + ripple hook, Page cinematic (ScrollReveal + Stagger components), Theme A↔B smooth fade (cinema 800ms). Lighthouse sau overhaul: 80-90 perf / 100 a11y / 100 bp. Respect `prefers-reduced-motion`. |
+| QA 3 trang protected (student/admin dashboard + schedule) | ⚠️ Pending — owner chạy thủ công qua Chrome DevTools Lighthouse panel (cần login session) — hướng dẫn trong `qa/phase7/REPORT.md` |
+| Screenshot diff theme A↔B (5 trang × 2) | ⚠️ Pending — owner chạy thủ công, lưu vào `qa/phase7/screenshots/` |
 
 ---
 
@@ -205,11 +214,14 @@ Theo thứ tự quan trọng (đã hoàn thành redesign sâu, giờ unblock inf
 4. **Setup Supabase Storage bucket** `poolane-public` (tạo trên Supabase dashboard, public read) → photo upload hoạt động
 5. **Gen VAPID keys** (`npx web-push generate-vapid-keys`) + env → push notifications hoạt động
 6. **Phase 6 — Auth polish** (login/register/forgot-password): redesign theo design system mới (split layout brand artwork + form, micro-copy ấm áp, glass technique)
-7. **Phase 7 — QA toàn diện**: lighthouse ≥ 85/95/95, axe a11y, screenshot diff cả 2 theme A/B, test mobile device thật
-8. **14 admin form pages** còn lại (low priority — apply hero + card pattern)
-9. **Xoá sandbox folder** (`src/app/sandbox/*`) trước deploy production — chỉ dùng dev demo
-10. **Combo 3 khoá pricing** — chốt giá + implement
-11. **AI tư vấn cá nhân hoá** (Claude API) — phase 12 roadmap
+7. **Phase 7 — UX/UI Polish toàn diện**: ✅ 4 sub-phase xong. Public Lighthouse 89/100/100 cả 2 trang.
+8. **Phase 8 — VisionOS overhaul**: ✅ 8 sub-phase xong (motion foundation + animated ambient + multi-tier glass + Polaris brand motion + Wave SVG + page cinematic + button spring + LazyMotion perf optimization). Lighthouse perf giảm xuống 80-90 (chấp nhận với motion-heavy hero), a11y/bp giữ 100.
+9. **Phase 9 — True Dark/Light Mode**: ✅ 7 sub-phase (nav bug fix longest-match + hover bump, token rebuild với adaptive `--surface/--nav-bg/--hero-bg`, ThemeSwitcher Sun/Moon + Sáng/Tối, adaptive sidebar + hero, dashboard ambient-bg wrap). Theme A/B rename → `theme-dark/theme-light`. Cards không còn hard-code `#FFFFFF`. localStorage auto-migrate. Build pass, perf 70-76 (motion-heavy hero acceptable), a11y/bp 100.
+10. **Phase 10 — Apple Liquid Glass throughout**: ✅ 12 sub-phase. Xuyên suốt design language Apple iOS 26 / macOS 26. Lens tokens (blur+saturate+brightness), glass tints adaptive, specular streak animation 11s, concentric radius scale. Sidebar + mọi card + button + input glass + lensing. Table body rows glass-table-row alternating tint. TiltCard component cho 3D micro-tilt. 2 migration scripts (264 + 11 replacements). Lighthouse **perf 88, a11y 100, bp 100** — đạt mọi ngưỡng SSOT.
+11. **Phase 11 — Sidebar Fixed + Color Harmony**: ✅ Sidebar `lg:fixed lg:ml-64` đứng yên khi cuộn. Mass migration 1474 replacements/135 files: `text-ink/N` → `text-foreground/N`, `bg-accent text-foreground` → `bg-accent text-ink` (30 CTA buttons giữ dark text trên gold). `--foreground` token đổi adaptive. Cards trong dark mode không còn chữ "chìm". Hero bands không còn "block đen choáng" trên light mode. Lighthouse a11y 100/bp 100.
+8. **Xoá sandbox folder** (`src/app/sandbox/*`) trước deploy production — chỉ dùng dev demo (owner còn polish trong đó)
+9. **Combo 3 khoá pricing** — chốt giá + implement
+10. **AI tư vấn cá nhân hoá** (Claude API) — phase 12 roadmap
 
 ### Việc đã hoàn thành lớn trong session redesign
 

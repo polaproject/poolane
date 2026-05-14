@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PhotoUploader } from '@/components/features/PhotoUploader'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 const CATEGORIES = [
   { value: 'technique', label: '🏊 Kỹ thuật' },
@@ -95,27 +96,26 @@ export function BlogForm({ mode, initial }: Props) {
 
   async function onDelete() {
     if (!initial?.id) return
-    if (!confirm('Xoá bài viết này?')) return
     setSubmitting(true)
     try {
       const res = await fetch(`/api/blog/${initial.id}`, { method: 'DELETE' })
       if (!res.ok) {
         const j = await res.json()
-        setError(j.error?.message ?? 'Có lỗi')
+        setError(j.error?.message ?? 'Có lỗi xảy ra')
         setSubmitting(false)
         return
       }
       router.push('/admin/blog')
       router.refresh()
     } catch {
-      setError('Không thể kết nối')
+      setError('Không thể kết nối máy chủ')
       setSubmitting(false)
     }
   }
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5 space-y-4">
+      <div className="glass-card glass-card-hover p-5 space-y-4">
         <FormField label="Tiêu đề" required>
           <input type="text" maxLength={200} required
             value={form.title} onChange={e => updateTitle(e.target.value)}
@@ -171,27 +171,36 @@ export function BlogForm({ mode, initial }: Props) {
           <textarea required minLength={50} rows={16}
             value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
             className="input-blog font-mono text-sm" placeholder="# Tiêu đề chính&#10;&#10;Đoạn văn nội dung..." />
-          <p className="text-xs text-[#1C2B4A]/40 mt-1">Hỗ trợ Markdown. Tối thiểu 50 ký tự.</p>
+          <p className="text-xs text-foreground/40 mt-1">Hỗ trợ Markdown. Tối thiểu 50 ký tự.</p>
         </FormField>
       </div>
 
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>
+        <div className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-lg px-3 py-2">{error}</div>
       )}
 
       <div className="flex gap-3">
         <button type="submit" disabled={submitting}
-          className="flex-1 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-2.5 text-sm font-semibold hover:bg-[#1C2B4A]/90 disabled:opacity-50">
+          className="flex-1 bg-ink-soft text-paper rounded-lg py-2.5 text-sm font-semibold hover:bg-foreground/90 disabled:opacity-50">
           {submitting ? 'Đang lưu...' : (mode === 'create' ? 'Tạo bài viết' : 'Lưu thay đổi')}
         </button>
         {mode === 'edit' && (
-          <button type="button" onClick={onDelete} disabled={submitting}
-            className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-red-300 text-red-700 hover:bg-red-50">
-            Xoá
-          </button>
+          <ConfirmDialog
+            trigger={
+              <button type="button" disabled={submitting}
+                className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-danger/30 text-danger hover:bg-danger/10 disabled:opacity-50">
+                Xoá
+              </button>
+            }
+            title="Xoá bài viết này?"
+            description="Bài viết sẽ bị xoá khỏi blog. Hành động này không khôi phục được."
+            confirmLabel="Xoá bài viết"
+            variant="danger"
+            onConfirm={onDelete}
+          />
         )}
         <Link href="/admin/blog"
-          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70 hover:bg-[#1C2B4A]/5">
+          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-foreground/15 text-foreground/70 hover:bg-foreground/5">
           Huỷ
         </Link>
       </div>
@@ -219,8 +228,8 @@ export function BlogForm({ mode, initial }: Props) {
 function FormField({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
-        {label} {required && <span className="text-red-500">*</span>}
+      <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
+        {label} {required && <span className="text-danger">*</span>}
       </label>
       {children}
     </div>

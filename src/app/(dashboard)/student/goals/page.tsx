@@ -64,7 +64,7 @@ export default function GoalsPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/15 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -82,35 +82,35 @@ export default function GoalsPage() {
 
       <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
         {showForm && (
-          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-accent/40 p-5">
+          <div className="rounded-card-lg bg-[var(--surface)] shadow-soft ring-1 ring-accent/40 p-5">
             <textarea
               value={newGoal}
               onChange={e => setNewGoal(e.target.value)}
               placeholder="Mục tiêu của bạn... Ví dụ: Bơi được 50m liên tục không nghỉ"
               rows={3}
-              className="w-full text-sm px-3 py-2 rounded-card bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none resize-none mb-3 transition"
+              className="w-full text-sm px-3 py-2 rounded-card bg-paper-tint/40 ring-1 ring-foreground/10 focus:ring-accent/40 focus:outline-none resize-none mb-3 transition"
             />
             <div className="flex gap-3 items-end flex-wrap">
               <div className="flex-1 min-w-[150px]">
-                <label className="text-xs text-ink/55 mb-1.5 block">Hạn (tuỳ chọn)</label>
+                <label className="text-xs text-foreground/55 mb-1.5 block">Hạn (tuỳ chọn)</label>
                 <input
                   type="date"
                   value={targetDate}
                   onChange={e => setTargetDate(e.target.value)}
-                  className="w-full h-10 px-3 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none transition"
+                  className="w-full h-10 px-3 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-foreground/10 focus:ring-accent/40 focus:outline-none transition"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowForm(false)}
-                  className="px-4 h-10 rounded-pill ring-1 ring-ink/15 text-sm hover:bg-ink/5 transition"
+                  className="px-4 h-10 rounded-pill ring-1 ring-foreground/15 text-sm hover:bg-foreground/5 transition"
                 >
                   Huỷ
                 </button>
                 <button
                   onClick={handleAdd}
                   disabled={adding || !newGoal.trim()}
-                  className="px-4 h-10 rounded-pill bg-ink text-paper text-sm font-semibold hover:bg-ink/90 transition disabled:opacity-60 inline-flex items-center gap-1.5"
+                  className="px-4 h-10 rounded-pill bg-ink text-paper text-sm font-semibold hover:bg-foreground/90 transition disabled:opacity-60 inline-flex items-center gap-1.5"
                 >
                   {adding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Lưu'}
                 </button>
@@ -124,27 +124,27 @@ export default function GoalsPage() {
             <Loader2 className="h-6 w-6 animate-spin text-accent" strokeWidth={1.75} />
           </div>
         ) : goals.length === 0 ? (
-          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
-            <Target className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có mục tiêu</p>
-            <p className="text-sm text-ink/55">Đặt mục tiêu để theo dõi tiến độ và giữ động lực.</p>
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
+            <Target className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có mục tiêu</p>
+            <p className="text-sm text-foreground/55">Đặt mục tiêu để theo dõi tiến độ và giữ động lực.</p>
           </div>
         ) : (
           goals.map(goal => (
-            <div key={goal.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
+            <div key={goal.id} className="glass-card glass-card-hover p-5">
               <div className="flex gap-3">
                 <div className="grid place-items-center h-10 w-10 rounded-pill bg-accent/15 shrink-0">
                   <Target className="h-4 w-4 text-accent" strokeWidth={1.75} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-ink leading-relaxed">{goal.goalText}</p>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-ink/55 flex-wrap">
+                  <p className="text-sm text-foreground leading-relaxed">{goal.goalText}</p>
+                  <div className="flex items-center gap-3 mt-2 text-xs text-foreground/55 flex-wrap">
                     {goal.targetDate && (
                       <span className="inline-flex items-center gap-1">
                         <Calendar className="h-3 w-3" strokeWidth={1.75} /> Hạn {format(new Date(goal.targetDate), 'dd/MM/yyyy')}
                       </span>
                     )}
-                    <span className="text-ink/35">
+                    <span className="text-foreground/35">
                       Đặt {format(new Date(goal.createdAt), 'dd/MM', { locale: vi })}
                     </span>
                   </div>
@@ -159,10 +159,10 @@ export default function GoalsPage() {
                   </button>
                   <button
                     onClick={() => updateStatus(goal.id, 'abandoned')}
-                    className="h-8 w-8 rounded-pill bg-ink/5 ring-1 ring-ink/10 grid place-items-center hover:bg-danger/10 hover:ring-danger/30 transition"
+                    className="h-8 w-8 rounded-pill bg-ink/5 ring-1 ring-foreground/10 grid place-items-center hover:bg-danger/10 hover:ring-danger/30 transition"
                     title="Bỏ qua"
                   >
-                    <X className="h-4 w-4 text-ink/55" strokeWidth={2.25} />
+                    <X className="h-4 w-4 text-foreground/55" strokeWidth={2.25} />
                   </button>
                 </div>
               </div>

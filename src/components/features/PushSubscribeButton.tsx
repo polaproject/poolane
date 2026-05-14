@@ -100,7 +100,7 @@ export function PushSubscribeButton() {
 
   if (status === 'unsupported') {
     return (
-      <div className="flex items-center gap-2 text-xs text-[#1C2B4A]/40">
+      <div className="flex items-center gap-2 text-xs text-foreground/40">
         <BellOff className="w-3.5 h-3.5" /> Trình duyệt không hỗ trợ push, hoặc VAPID chưa setup
       </div>
     )
@@ -108,7 +108,7 @@ export function PushSubscribeButton() {
 
   if (status === 'denied') {
     return (
-      <div className="flex items-center gap-2 text-xs text-amber-700">
+      <div className="flex items-center gap-2 text-xs text-warn">
         <BellOff className="w-3.5 h-3.5" /> Bạn đã chặn thông báo. Mở cài đặt trình duyệt để cho phép lại.
       </div>
     )
@@ -118,7 +118,7 @@ export function PushSubscribeButton() {
     return (
       <div className="space-y-1">
         <button onClick={unsubscribe}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70 hover:bg-[#1C2B4A]/5">
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-foreground/15 text-foreground/70 hover:bg-foreground/5">
           <BellRing className="w-3.5 h-3.5" /> Đã bật · Tắt thông báo
         </button>
       </div>
@@ -128,10 +128,10 @@ export function PushSubscribeButton() {
   return (
     <div className="space-y-1">
       <button onClick={subscribe} disabled={status === 'loading'}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#1C2B4A] text-[#F6F1EA] hover:bg-[#1C2B4A]/90 disabled:opacity-50">
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-ink-soft text-paper hover:bg-foreground/90 disabled:opacity-50">
         <Bell className="w-3.5 h-3.5" /> Bật thông báo
       </button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-danger">{error}</p>}
     </div>
   )
 }

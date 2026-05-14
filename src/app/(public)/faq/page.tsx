@@ -61,7 +61,7 @@ export default async function FaqPage() {
                     >
                       <summary className="cursor-pointer list-none px-5 py-4 font-medium flex items-center justify-between gap-4 transition">
                         <span className="flex-1">{f.question}</span>
-                        <span className="grid place-items-center h-7 w-7 rounded-pill bg-current/8 group-open:bg-accent group-open:text-ink shrink-0 transition">
+                        <span className="grid place-items-center h-7 w-7 rounded-pill bg-current/8 group-open:bg-accent group-open:text-foreground shrink-0 transition">
                           <Plus className="h-4 w-4 group-open:rotate-45 transition-transform" strokeWidth={2.25} />
                         </span>
                       </summary>
@@ -91,7 +91,7 @@ export default async function FaqPage() {
           </div>
           <Link
             href="mailto:support@poolane.vn"
-            className="inline-flex items-center gap-2 bg-ink text-paper font-medium px-5 py-2.5 rounded-pill text-sm hover:bg-ink/90 transition"
+            className="inline-flex items-center gap-2 bg-ink text-paper font-medium px-5 py-2.5 rounded-pill text-sm hover:bg-foreground/90 transition"
           >
             support@poolane.vn <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
           </Link>

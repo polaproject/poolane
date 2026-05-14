@@ -12,7 +12,7 @@ export default async function SkillHeatmapPage({ searchParams }: { searchParams:
   const courseCode = (params.course ?? 'ECH') as keyof typeof COURSE_SKILLS
 
   const course = await prisma.course.findFirst({ where: { code: courseCode } })
-  if (!course) return <div className="min-h-screen grid place-items-center text-ink/55">Không tìm thấy khoá</div>
+  if (!course) return <div className="min-h-screen grid place-items-center text-foreground/55">Không tìm thấy khoá</div>
 
   const skills = COURSE_SKILLS[courseCode] ?? []
 
@@ -44,7 +44,7 @@ export default async function SkillHeatmapPage({ searchParams }: { searchParams:
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-5xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
@@ -66,17 +66,17 @@ export default async function SkillHeatmapPage({ searchParams }: { searchParams:
           ))}
         </div>
 
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+        <div className="glass-card glass-card-hover overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px]">
-              <thead className="bg-paper-tint/30 border-b border-ink/8">
+              <thead className="bg-paper-tint/30 border-b border-foreground/8">
                 <tr>
-                  <th className="text-left px-5 py-3 eyebrow text-ink/55">Kỹ năng</th>
-                  <th className="text-center px-5 py-3 eyebrow text-ink/55">TB lớp</th>
-                  <th className="text-center px-5 py-3 eyebrow text-ink/55">Số HV</th>
-                  <th className="text-center px-5 py-3 eyebrow text-ink/55">Yếu ≤2</th>
-                  <th className="text-center px-5 py-3 eyebrow text-ink/55">Mạnh ≥4</th>
-                  <th className="text-left px-5 py-3 eyebrow text-ink/55">Phân bố</th>
+                  <th className="text-left px-5 py-3 eyebrow text-foreground/55">Kỹ năng</th>
+                  <th className="text-center px-5 py-3 eyebrow text-foreground/55">TB lớp</th>
+                  <th className="text-center px-5 py-3 eyebrow text-foreground/55">Số HV</th>
+                  <th className="text-center px-5 py-3 eyebrow text-foreground/55">Yếu ≤2</th>
+                  <th className="text-center px-5 py-3 eyebrow text-foreground/55">Mạnh ≥4</th>
+                  <th className="text-left px-5 py-3 eyebrow text-foreground/55">Phân bố</th>
                 </tr>
               </thead>
               <tbody>
@@ -85,14 +85,14 @@ export default async function SkillHeatmapPage({ searchParams }: { searchParams:
                   const bgClass = tone === 'success' ? 'bg-success/12' : tone === 'warn' ? 'bg-warn/12' : 'bg-danger/12'
                   const textClass = tone === 'success' ? 'text-success' : tone === 'warn' ? 'text-warn' : 'text-danger'
                   return (
-                    <tr key={s.key} className={`border-b border-ink/5 last:border-b-0 hover:bg-paper-tint/20 transition ${s.count === 0 ? 'opacity-50' : ''}`}>
-                      <td className="px-5 py-3 text-sm font-medium text-ink">{s.label}</td>
+                    <tr key={s.key} className={`border-b border-foreground/5 last:border-b-0 hover:bg-paper-tint/20 transition ${s.count === 0 ? 'opacity-50' : ''}`}>
+                      <td className="px-5 py-3 text-sm font-medium text-foreground">{s.label}</td>
                       <td className="px-5 py-3 text-center">
                         <span className={`inline-block font-heading italic text-xl ${textClass} ${bgClass} px-3 py-1 rounded-pill`}>
                           {s.count > 0 ? s.avg.toFixed(1) : '—'}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-center text-sm text-ink/65">{s.count}</td>
+                      <td className="px-5 py-3 text-center text-sm text-foreground/65">{s.count}</td>
                       <td className="px-5 py-3 text-center text-sm text-danger font-medium">{s.weak > 0 ? s.weak : '—'}</td>
                       <td className="px-5 py-3 text-center text-sm text-success font-medium">{s.strong > 0 ? s.strong : '—'}</td>
                       <td className="px-5 py-3">
@@ -112,7 +112,7 @@ export default async function SkillHeatmapPage({ searchParams }: { searchParams:
           </div>
         </div>
 
-        <p className="text-xs text-ink/55 text-center">
+        <p className="text-xs text-foreground/55 text-center">
           <span className="inline-flex items-center gap-1 mr-3"><span className="h-2 w-2 rounded-pill bg-danger" /> &lt; 3 cần luyện</span>
           <span className="inline-flex items-center gap-1 mr-3"><span className="h-2 w-2 rounded-pill bg-warn" /> 3–4 trung bình</span>
           <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-pill bg-success" /> ≥4 vững</span>

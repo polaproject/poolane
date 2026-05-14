@@ -93,7 +93,7 @@ export default function AttendancePage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-2xl mx-auto">
           <Link
@@ -126,14 +126,14 @@ export default function AttendancePage() {
               {attendees.map(a => (
                 <div
                   key={a.studentId}
-                  className={`rounded-card-lg bg-white shadow-soft ring-1 p-4 flex items-center gap-3 transition ${
+                  className={`rounded-card-lg bg-[var(--surface)] shadow-soft ring-1 p-4 flex items-center gap-3 transition ${
                     a.status === 'present' || a.status === 'walk_in' ? 'ring-success/30 bg-success/5' :
-                    a.status === 'absent' ? 'ring-danger/30 bg-danger/5' : 'ring-ink/8'
+                    a.status === 'absent' ? 'ring-danger/30 bg-danger/5' : 'ring-foreground/8'
                   }`}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-ink truncate">{a.fullName}</p>
-                    <p className="text-xs text-ink/55">{a.phone}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{a.fullName}</p>
+                    <p className="text-xs text-foreground/55">{a.phone}</p>
                     {a.status === 'walk_in' && <Chip variant="mist" className="mt-1">Phát sinh</Chip>}
                   </div>
                   <div className="flex gap-2 shrink-0">
@@ -142,7 +142,7 @@ export default function AttendancePage() {
                       className={`grid place-items-center h-10 w-10 rounded-pill ring-1 transition ${
                         a.status === 'absent'
                           ? 'bg-danger ring-danger text-paper'
-                          : 'ring-ink/15 text-ink/40 hover:ring-danger/40 hover:text-danger'
+                          : 'ring-foreground/15 text-foreground/40 hover:ring-danger/40 hover:text-danger'
                       }`}
                       aria-label="Vắng"
                     >
@@ -153,7 +153,7 @@ export default function AttendancePage() {
                       className={`grid place-items-center h-10 w-10 rounded-pill ring-1 transition ${
                         a.status === 'present' || a.status === 'walk_in'
                           ? 'bg-success ring-success text-paper'
-                          : 'ring-ink/15 text-ink/40 hover:ring-success/40 hover:text-success'
+                          : 'ring-foreground/15 text-foreground/40 hover:ring-success/40 hover:text-success'
                       }`}
                       aria-label="Có mặt"
                     >
@@ -166,7 +166,7 @@ export default function AttendancePage() {
 
             <button
               onClick={addWalkIn}
-              className="w-full rounded-card-lg ring-1 ring-dashed ring-ink/20 p-4 flex items-center justify-center gap-2 text-sm text-ink/60 hover:ring-accent/40 hover:text-ink hover:bg-paper-tint/30 transition mb-6"
+              className="w-full rounded-card-lg ring-1 ring-dashed ring-foreground/20 p-4 flex items-center justify-center gap-2 text-sm text-foreground/60 hover:ring-accent/40 hover:text-foreground hover:bg-paper-tint/30 transition mb-6"
             >
               <UserPlus className="h-4 w-4" strokeWidth={1.75} />
               Thêm HV phát sinh
@@ -175,7 +175,7 @@ export default function AttendancePage() {
             <button
               disabled={saving || attendees.length === 0}
               onClick={handleSubmit}
-              className="w-full h-12 rounded-pill bg-ink text-paper font-semibold hover:bg-ink/90 transition disabled:opacity-60 inline-flex items-center justify-center gap-2 shadow-soft"
+              className="w-full h-12 rounded-pill bg-ink text-paper font-semibold hover:bg-foreground/90 transition disabled:opacity-60 inline-flex items-center justify-center gap-2 shadow-soft"
             >
               {saving
                 ? <><Loader2 className="h-4 w-4 animate-spin" /> Đang lưu...</>

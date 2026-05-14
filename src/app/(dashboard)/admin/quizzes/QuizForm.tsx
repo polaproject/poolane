@@ -130,19 +130,19 @@ export function QuizForm({ courses }: { courses: Course[] }) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       {/* Metadata */}
-      <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-5 space-y-4">
+      <div className="glass-card border border-foreground/8 p-5 space-y-4">
         <Field label="Tiêu đề" required>
           <input type="text" required maxLength={200} value={title} onChange={e => setTitle(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+            className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
         </Field>
         <Field label="Mô tả">
           <textarea rows={2} maxLength={1000} value={description} onChange={e => setDescription(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+            className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
         </Field>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           <Field label="Khoá học liên kết">
             <select value={courseId} onChange={e => setCourseId(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white">
+              className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]">
               <option value="">— Không liên kết —</option>
               {courses.map(c => <option key={c.id} value={c.id}>{c.code} · {c.name}</option>)}
             </select>
@@ -150,41 +150,41 @@ export function QuizForm({ courses }: { courses: Course[] }) {
           <Field label="Kỹ năng gắn">
             <input type="text" maxLength={100} value={linkedSkill} onChange={e => setLinkedSkill(e.target.value)}
               placeholder="VD: breathing"
-              className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+              className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
           </Field>
           <Field label="Thời gian (phút)">
             <input type="number" min={1} max={120} value={timeLimitMinutes}
               onChange={e => setTimeLimitMinutes(e.target.value)}
               placeholder="VD: 10"
-              className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+              className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
           </Field>
         </div>
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" checked={isPublished} onChange={e => setIsPublished(e.target.checked)} className="w-4 h-4" />
-          <span className="text-sm text-[#1C2B4A]">Đăng ngay (HV có thể làm bài)</span>
+          <span className="text-sm text-foreground">Đăng ngay (HV có thể làm bài)</span>
         </label>
       </div>
 
       {/* Questions */}
       <div className="space-y-3">
         {questions.map((q, qi) => (
-          <div key={qi} className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-5">
+          <div key={qi} className="glass-card border border-foreground/8 p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="font-semibold text-[#1C2B4A]">Câu {qi + 1}</p>
+              <p className="font-semibold text-foreground">Câu {qi + 1}</p>
               <div className="flex items-center gap-1">
                 <button type="button" onClick={() => moveQuestion(qi, -1)} disabled={qi === 0}
-                  className="p-1 hover:bg-[#1C2B4A]/5 rounded disabled:opacity-30"><ArrowUp className="w-3.5 h-3.5" /></button>
+                  className="p-1 hover:bg-foreground/5 rounded disabled:opacity-30"><ArrowUp className="w-3.5 h-3.5" /></button>
                 <button type="button" onClick={() => moveQuestion(qi, 1)} disabled={qi === questions.length - 1}
-                  className="p-1 hover:bg-[#1C2B4A]/5 rounded disabled:opacity-30"><ArrowDown className="w-3.5 h-3.5" /></button>
+                  className="p-1 hover:bg-foreground/5 rounded disabled:opacity-30"><ArrowDown className="w-3.5 h-3.5" /></button>
                 <button type="button" onClick={() => removeQuestion(qi)} disabled={questions.length <= 1}
-                  className="p-1 hover:bg-red-50 text-red-600 rounded disabled:opacity-30"><Trash2 className="w-3.5 h-3.5" /></button>
+                  className="p-1 hover:bg-danger/10 text-danger rounded disabled:opacity-30"><Trash2 className="w-3.5 h-3.5" /></button>
               </div>
             </div>
 
             <Field label="Nội dung câu hỏi" required>
               <textarea rows={2} required value={q.questionText}
                 onChange={e => updateQuestion(qi, { questionText: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+                className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
             </Field>
 
             <div className="grid grid-cols-2 gap-3 mt-3">
@@ -197,7 +197,7 @@ export function QuizForm({ courses }: { courses: Course[] }) {
                       : [],
                     correctAnswer: '',
                   })}
-                  className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white">
+                  className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]">
                   {QUESTION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
               </Field>
@@ -205,7 +205,7 @@ export function QuizForm({ courses }: { courses: Course[] }) {
 
             {q.type === 'multiple_choice' && (
               <div className="mt-3">
-                <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+                <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
                   Các lựa chọn
                 </label>
                 <div className="space-y-1.5">
@@ -222,9 +222,9 @@ export function QuizForm({ courses }: { courses: Course[] }) {
                           if (q.correctAnswer === opt) updateQuestion(qi, { correctAnswer: newVal })
                         }}
                         placeholder={`Lựa chọn ${oi + 1}`}
-                        className="flex-1 px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+                        className="flex-1 px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
                       <button type="button" onClick={() => removeOption(qi, oi)} disabled={q.options.length <= 2}
-                        className="p-2 hover:bg-red-50 text-red-600 rounded disabled:opacity-30">
+                        className="p-2 hover:bg-danger/10 text-danger rounded disabled:opacity-30">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -241,7 +241,7 @@ export function QuizForm({ courses }: { courses: Course[] }) {
               <Field label="Đáp án đúng">
                 <select value={q.correctAnswer}
                   onChange={e => updateQuestion(qi, { correctAnswer: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white">
+                  className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]">
                   <option value="">— Chọn —</option>
                   <option value="Đúng">Đúng</option>
                   <option value="Sai">Sai</option>
@@ -253,32 +253,32 @@ export function QuizForm({ courses }: { courses: Course[] }) {
               <Field label="Đáp án đúng (so sánh không phân biệt hoa thường)">
                 <input type="text" required value={q.correctAnswer}
                   onChange={e => updateQuestion(qi, { correctAnswer: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+                  className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
               </Field>
             )}
 
             <Field label="Giải thích (hiển thị khi HV trả lời sai)">
               <textarea rows={2} value={q.explanation}
                 onChange={e => updateQuestion(qi, { explanation: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+                className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
             </Field>
           </div>
         ))}
 
         <button type="button" onClick={addQuestion}
-          className="w-full py-3 border-2 border-dashed border-[#1C2B4A]/20 rounded-2xl text-sm font-semibold text-[#1C2B4A]/60 hover:border-[#1C2B4A]/40 hover:bg-[#F6F1EA]/30 inline-flex items-center justify-center gap-2">
+          className="w-full py-3 border-2 border-dashed border-foreground/20 rounded-card-lg text-sm font-semibold text-foreground/60 hover:border-foreground/40 hover:bg-paper/30 inline-flex items-center justify-center gap-2">
           <Plus className="w-4 h-4" /> Thêm câu hỏi
         </button>
       </div>
 
-      {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
+      {error && <div className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-lg px-3 py-2">{error}</div>}
 
       <div className="flex gap-3">
         <button type="submit" disabled={submitting}
-          className="flex-1 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-3 text-sm font-semibold disabled:opacity-50">
+          className="flex-1 bg-ink-soft text-paper rounded-lg py-3 text-sm font-semibold disabled:opacity-50">
           {submitting ? 'Đang tạo...' : 'Tạo quiz'}
         </button>
-        <Link href="/admin/quizzes" className="px-4 py-3 text-sm font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70">
+        <Link href="/admin/quizzes" className="px-4 py-3 text-sm font-semibold rounded-lg border border-foreground/15 text-foreground/70">
           Huỷ
         </Link>
       </div>
@@ -289,8 +289,8 @@ export function QuizForm({ courses }: { courses: Course[] }) {
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
-        {label} {required && <span className="text-red-500">*</span>}
+      <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
+        {label} {required && <span className="text-danger">*</span>}
       </label>
       {children}
     </div>

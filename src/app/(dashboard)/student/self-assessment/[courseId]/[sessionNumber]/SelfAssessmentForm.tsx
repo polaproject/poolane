@@ -58,8 +58,8 @@ export function SelfAssessmentForm({ courseId, sessionNumber, skills, initial }:
       </div>
 
       {skills.map(skill => (
-        <div key={skill.key} className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-4">
-          <p className="text-sm font-semibold text-[#1C2B4A] mb-3">{skill.label}</p>
+        <div key={skill.key} className="glass-card glass-card-hover p-4">
+          <p className="text-sm font-semibold text-foreground mb-3">{skill.label}</p>
           <div className="grid grid-cols-5 gap-2">
             {[1, 2, 3, 4, 5].map(v => {
               const selected = scores[skill.key] === v
@@ -70,8 +70,8 @@ export function SelfAssessmentForm({ courseId, sessionNumber, skills, initial }:
                   onClick={() => setScores(s => ({ ...s, [skill.key]: v }))}
                   className={`py-3 rounded-lg text-lg font-bold transition-colors ${
                     selected
-                      ? 'bg-[#1C2B4A] text-[#F6F1EA]'
-                      : 'bg-white text-[#1C2B4A]/60 border border-[#1C2B4A]/15 hover:border-[#1C2B4A]/40'
+                      ? 'bg-ink-soft text-paper'
+                      : 'bg-[var(--surface)] text-foreground/60 border border-foreground/15 hover:border-foreground/40'
                   }`}
                 >
                   {v}
@@ -80,30 +80,30 @@ export function SelfAssessmentForm({ courseId, sessionNumber, skills, initial }:
             })}
           </div>
           {scores[skill.key] != null && (
-            <p className="text-xs text-[#1C2B4A]/50 mt-2 italic">
+            <p className="text-xs text-foreground/50 mt-2 italic">
               {scores[skill.key]} — {SCALE_DESCRIPTIONS[scores[skill.key] as 1 | 2 | 3 | 4 | 5]}
             </p>
           )}
         </div>
       ))}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-4">
-        <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+      <div className="glass-card glass-card-hover p-4">
+        <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
           Ghi chú (tuỳ chọn)
         </label>
         <textarea rows={3} maxLength={500} value={notes} onChange={e => setNotes(e.target.value)}
           placeholder="Bạn cảm thấy điểm nào tự tin nhất? Điểm nào còn lo?"
-          className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white" />
+          className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/20 bg-[var(--surface)]" />
       </div>
 
-      {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
+      {error && <div className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-lg px-3 py-2">{error}</div>}
 
       <div className="flex gap-3">
         <button type="submit" disabled={submitting || !allRated}
-          className="flex-1 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-3 text-sm font-semibold hover:bg-[#1C2B4A]/90 disabled:opacity-50">
+          className="flex-1 bg-ink-soft text-paper rounded-lg py-3 text-sm font-semibold hover:bg-foreground/90 disabled:opacity-50">
           {submitting ? 'Đang lưu...' : 'Gửi đánh giá'}
         </button>
-        <Link href="/student/self-assessment" className="px-4 py-3 text-sm font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70 hover:bg-[#1C2B4A]/5">
+        <Link href="/student/self-assessment" className="px-4 py-3 text-sm font-semibold rounded-lg border border-foreground/15 text-foreground/70 hover:bg-foreground/5">
           Huỷ
         </Link>
       </div>

@@ -22,7 +22,7 @@ export default async function StaffVideosPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-4xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
@@ -34,40 +34,40 @@ export default async function StaffVideosPage() {
       </div>
 
       <div className="px-4 sm:px-8 -mt-6 max-w-4xl mx-auto space-y-6 relative z-10">
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5 sm:p-6">
+        <div className="glass-card glass-card-hover p-5 sm:p-6">
           <VideoForm
             students={students.map(s => ({ id: s.id, studentCode: s.studentCode, fullName: s.user.fullName, phone: s.user.phone }))}
           />
         </div>
 
         <div>
-          <p className="eyebrow text-ink/55 mb-3">Video đã gửi gần đây · {recent.length}</p>
+          <p className="eyebrow text-foreground/55 mb-3">Video đã gửi gần đây · {recent.length}</p>
           {recent.length === 0 ? (
-            <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
-              <VideoIcon className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-ink">Chưa có video</p>
+            <div className="glass-card glass-card-hover p-12 text-center">
+              <VideoIcon className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+              <p className="font-heading italic text-2xl text-foreground">Chưa có video</p>
             </div>
           ) : (
-            <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+            <div className="glass-card glass-card-hover overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px]">
-                  <thead className="bg-paper-tint/30 border-b border-ink/8">
+                  <thead className="bg-paper-tint/30 border-b border-foreground/8">
                     <tr>
-                      <th className="text-left px-5 py-3 eyebrow text-ink/55">Học viên</th>
-                      <th className="text-left px-5 py-3 eyebrow text-ink/55">Caption</th>
-                      <th className="text-left px-5 py-3 eyebrow text-ink/55">Ngày gửi</th>
+                      <th className="text-left px-5 py-3 eyebrow text-foreground/55">Học viên</th>
+                      <th className="text-left px-5 py-3 eyebrow text-foreground/55">Caption</th>
+                      <th className="text-left px-5 py-3 eyebrow text-foreground/55">Ngày gửi</th>
                       <th className="px-5 py-3"></th>
                     </tr>
                   </thead>
                   <tbody>
                     {recent.map(v => (
-                      <tr key={v.id} className="border-b border-ink/5 last:border-b-0 hover:bg-paper-tint/20 transition">
+                      <tr key={v.id} className="border-b border-foreground/5 last:border-b-0 hover:bg-paper-tint/20 transition glass-table-row">
                         <td className="px-5 py-3 text-sm">
-                          <p className="font-medium text-ink">{v.student.user.fullName}</p>
-                          <p className="text-xs text-ink/45 font-mono mt-0.5">{v.student.studentCode}</p>
+                          <p className="font-medium text-foreground">{v.student.user.fullName}</p>
+                          <p className="text-xs text-foreground/45 font-mono mt-0.5">{v.student.studentCode}</p>
                         </td>
-                        <td className="px-5 py-3 text-sm text-ink/70 max-w-md truncate">{v.caption ?? '—'}</td>
-                        <td className="px-5 py-3 text-xs text-ink/55">{format(v.createdAt, 'HH:mm · dd/MM/yyyy')}</td>
+                        <td className="px-5 py-3 text-sm text-foreground/70 max-w-md truncate">{v.caption ?? '—'}</td>
+                        <td className="px-5 py-3 text-xs text-foreground/55">{format(v.createdAt, 'HH:mm · dd/MM/yyyy')}</td>
                         <td className="px-5 py-3 text-right">
                           <a
                             href={v.driveUrl}

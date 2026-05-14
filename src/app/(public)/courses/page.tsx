@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { GlassPanel } from '@/components/ui/GlassPanel'
 import { Chip } from '@/components/ui/Chip'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { ScrollReveal } from '@/components/motion/ScrollReveal'
 import {
   COURSE_PRICES, COURSE_NAMES, COURSE_SESSIONS, POOL_TICKET,
   COURSE_SKILLS, CAPACITY,
@@ -74,7 +75,8 @@ export default function CoursesPage() {
           const skills = COURSE_SKILLS[c.code]
           const sessions = COURSE_SESSIONS[c.code]
           return (
-            <GlassPanel key={c.code} edge className="overflow-hidden">
+            <ScrollReveal key={c.code} delay={idx * 0.1} y={32}>
+            <GlassPanel edge interactive className="overflow-hidden">
               <div className="grid md:grid-cols-[1fr_1.5fr]">
                 {/* Left — name + price */}
                 <div className="bg-ink text-paper p-6 lg:p-8 relative">
@@ -134,7 +136,7 @@ export default function CoursesPage() {
                   <div className="flex gap-2 flex-wrap pt-2">
                     <Link
                       href="/register"
-                      className="inline-flex items-center gap-1.5 bg-ink text-paper font-semibold px-4 py-2.5 rounded-pill text-sm hover:bg-ink/90 transition"
+                      className="inline-flex items-center gap-1.5 bg-ink text-paper font-semibold px-4 py-2.5 rounded-pill text-sm hover:bg-foreground/90 transition"
                     >
                       Đăng ký tài khoản <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
                     </Link>
@@ -148,6 +150,7 @@ export default function CoursesPage() {
                 </div>
               </div>
             </GlassPanel>
+            </ScrollReveal>
           )
         })}
       </section>
@@ -166,7 +169,7 @@ export default function CoursesPage() {
 
       {/* ── CTA ──────────────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-4 pb-20">
-        <div className="rounded-card-xl bg-gradient-to-br from-accent to-accent-soft text-ink p-8 sm:p-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-cta">
+        <div className="rounded-card-xl bg-gradient-to-br from-accent to-accent-soft text-foreground p-8 sm:p-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-cta">
           <div className="max-w-xl">
             <p className="eyebrow mb-2 opacity-70">Sẵn sàng bắt đầu?</p>
             <h3 className="font-heading text-3xl sm:text-4xl italic leading-tight">
@@ -176,13 +179,13 @@ export default function CoursesPage() {
           <div className="flex items-center gap-3 flex-wrap">
             <Link
               href="/register"
-              className="inline-flex items-center gap-2 bg-ink text-paper font-semibold px-6 py-3.5 rounded-pill hover:bg-ink/90 transition"
+              className="inline-flex items-center gap-2 bg-ink text-paper font-semibold px-6 py-3.5 rounded-pill hover:bg-foreground/90 transition"
             >
               Đăng ký <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-pill ring-1 ring-ink/20 hover:bg-ink/5 transition"
+              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-pill ring-1 ring-foreground/20 hover:bg-foreground/5 transition"
             >
               <Waves className="h-4 w-4" strokeWidth={1.75} /> Về trang chính
             </Link>

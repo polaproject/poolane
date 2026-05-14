@@ -185,21 +185,21 @@ export function NewRefundForm({ students, preselected }: Props) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       {/* Student selector */}
-      <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5">
-        <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-2">
-          Học viên <span className="text-red-500">*</span>
+      <div className="glass-card glass-card-hover p-5">
+        <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-2">
+          Học viên <span className="text-danger">*</span>
         </label>
 
         {details ? (
-          <div className="flex items-center justify-between p-3 bg-[#F6F1EA]/40 rounded-xl">
+          <div className="flex items-center justify-between p-3 bg-paper/40 rounded-xl">
             <div>
-              <p className="text-sm font-semibold text-[#1C2B4A]">{details.fullName}</p>
-              <p className="text-xs text-[#1C2B4A]/50">{details.studentCode} · {details.phone}</p>
+              <p className="text-sm font-semibold text-foreground">{details.fullName}</p>
+              <p className="text-xs text-foreground/50">{details.studentCode} · {details.phone}</p>
             </div>
             <button
               type="button"
               onClick={() => { setDetails(null); setStudentId(''); setIncludeCourse(false); setIncludeTicket(false); setEnrollmentId('') }}
-              className="text-xs text-[#1C2B4A]/60 hover:text-[#1C2B4A] underline"
+              className="text-xs text-foreground/60 hover:text-foreground underline"
             >
               Đổi học viên
             </button>
@@ -207,27 +207,27 @@ export function NewRefundForm({ students, preselected }: Props) {
         ) : (
           <>
             <div className="relative mb-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1C2B4A]/40" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
               <input
                 value={studentSearch}
                 onChange={e => setStudentSearch(e.target.value)}
                 placeholder="Tìm tên, SĐT hoặc mã học viên..."
-                className="w-full pl-9 pr-4 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
+                className="w-full pl-9 pr-4 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/20 bg-[var(--surface)]"
               />
             </div>
-            <div className="max-h-64 overflow-y-auto border border-[#1C2B4A]/10 rounded-lg divide-y divide-[#1C2B4A]/5">
+            <div className="max-h-64 overflow-y-auto border border-foreground/10 rounded-lg divide-y divide-foreground/5">
               {filteredStudents.length === 0 ? (
-                <p className="p-4 text-sm text-[#1C2B4A]/40 text-center">Không tìm thấy</p>
+                <p className="p-4 text-sm text-foreground/40 text-center">Không tìm thấy</p>
               ) : (
                 filteredStudents.map(s => (
                   <button
                     key={s.id}
                     type="button"
                     onClick={() => selectStudent(s)}
-                    className="w-full text-left px-3 py-2.5 hover:bg-[#F6F1EA]/40 transition-colors"
+                    className="w-full text-left px-3 py-2.5 hover:bg-paper/40 transition-colors"
                   >
-                    <p className="text-sm font-semibold text-[#1C2B4A]">{s.fullName}</p>
-                    <p className="text-xs text-[#1C2B4A]/50">{s.studentCode} · {s.phone}</p>
+                    <p className="text-sm font-semibold text-foreground">{s.fullName}</p>
+                    <p className="text-xs text-foreground/50">{s.studentCode} · {s.phone}</p>
                   </button>
                 ))
               )}
@@ -235,19 +235,19 @@ export function NewRefundForm({ students, preselected }: Props) {
           </>
         )}
 
-        {loadingDetails && <p className="text-xs text-[#1C2B4A]/50 mt-2">Đang tải thông tin...</p>}
+        {loadingDetails && <p className="text-xs text-foreground/50 mt-2">Đang tải thông tin...</p>}
       </div>
 
       {/* Refund options */}
       {details && (
         <>
-          <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5">
-            <p className="text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-3">
+          <div className="glass-card glass-card-hover p-5">
+            <p className="text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-3">
               Chọn khoản muốn hoàn
             </p>
 
             {/* Course refund */}
-            <div className="border border-[#1C2B4A]/10 rounded-xl p-4 mb-3">
+            <div className="border border-foreground/10 rounded-xl p-4 mb-3">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
@@ -257,14 +257,14 @@ export function NewRefundForm({ students, preselected }: Props) {
                     if (!e.target.checked) setEnrollmentId('')
                   }}
                   disabled={details.enrollments.length === 0}
-                  className="mt-1 w-4 h-4 rounded border-[#1C2B4A]/30"
+                  className="mt-1 w-4 h-4 rounded border-foreground/30"
                 />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-[#1C2B4A]">📚 Hoàn học phí</p>
+                  <p className="text-sm font-semibold text-foreground">📚 Hoàn học phí</p>
                   {details.enrollments.length === 0 ? (
-                    <p className="text-xs text-[#1C2B4A]/40 mt-1">Học viên không có khoá nào đang hoạt động</p>
+                    <p className="text-xs text-foreground/40 mt-1">Học viên không có khoá nào đang hoạt động</p>
                   ) : (
-                    <p className="text-xs text-[#1C2B4A]/50 mt-0.5">
+                    <p className="text-xs text-foreground/50 mt-0.5">
                       Hoàn theo tỉ lệ trong CLAUDE.md §7.5 — số buổi đã học từ bảng attendance
                     </p>
                   )}
@@ -274,13 +274,13 @@ export function NewRefundForm({ students, preselected }: Props) {
               {includeCourse && (
                 <div className="pl-7 mt-3 space-y-3">
                   <div>
-                    <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+                    <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
                       Khoá học
                     </label>
                     <select
                       value={enrollmentId}
                       onChange={e => setEnrollmentId(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
+                      className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/20 bg-[var(--surface)]"
                     >
                       <option value="">— Chọn khoá —</option>
                       {details.enrollments.map(e => (
@@ -292,7 +292,7 @@ export function NewRefundForm({ students, preselected }: Props) {
                   </div>
 
                   <div>
-                    <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+                    <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
                       Số buổi đã học (ước tính để preview)
                     </label>
                     <input
@@ -301,9 +301,9 @@ export function NewRefundForm({ students, preselected }: Props) {
                       max={20}
                       value={estimatedSessionsAttended}
                       onChange={e => setEstimatedSessionsAttended(e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
+                      className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/20 bg-[var(--surface)]"
                     />
-                    <p className="text-xs text-[#1C2B4A]/40 mt-1">
+                    <p className="text-xs text-foreground/40 mt-1">
                       Hệ thống sẽ đếm từ bảng attendance khi tạo yêu cầu. Số này chỉ dùng để preview tỉ lệ.
                     </p>
                   </div>
@@ -312,21 +312,21 @@ export function NewRefundForm({ students, preselected }: Props) {
             </div>
 
             {/* Ticket refund */}
-            <div className="border border-[#1C2B4A]/10 rounded-xl p-4">
+            <div className="border border-foreground/10 rounded-xl p-4">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={includeTicket}
                   onChange={e => setIncludeTicket(e.target.checked)}
                   disabled={!details.activeTicket}
-                  className="mt-1 w-4 h-4 rounded border-[#1C2B4A]/30"
+                  className="mt-1 w-4 h-4 rounded border-foreground/30"
                 />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-[#1C2B4A]">🎟️ Hoàn vé bơi</p>
+                  <p className="text-sm font-semibold text-foreground">🎟️ Hoàn vé bơi</p>
                   {!details.activeTicket ? (
-                    <p className="text-xs text-[#1C2B4A]/40 mt-1">Học viên không có vé bơi hoạt động</p>
+                    <p className="text-xs text-foreground/40 mt-1">Học viên không có vé bơi hoạt động</p>
                   ) : (
-                    <p className="text-xs text-[#1C2B4A]/50 mt-0.5">
+                    <p className="text-xs text-foreground/50 mt-0.5">
                       Đã dùng {details.activeTicket.sessionsUsed}/{details.activeTicket.totalSessions} buổi.
                       Hoàn 80% giá trị buổi chưa dùng (chỉ tính 10 buổi gốc).
                     </p>
@@ -338,23 +338,23 @@ export function NewRefundForm({ students, preselected }: Props) {
 
           {/* Preview breakdown */}
           {(includeCourse || includeTicket) && (
-            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
+            <div className="bg-blue-50 border border-blue-200 rounded-card-lg p-5">
               <p className="text-xs uppercase tracking-wider text-blue-700 font-semibold mb-3">
                 Preview số tiền hoàn (tạm tính)
               </p>
               <div className="space-y-2 text-sm">
                 {includeCourse && selectedEnrollment && (
                   <div className="flex items-center justify-between">
-                    <span className="text-[#1C2B4A]/70">
+                    <span className="text-foreground/70">
                       📚 {selectedEnrollment.courseCode} · tỉ lệ {Math.round(previewCourseRate(previewSessions) * 100)}%
                     </span>
-                    <span className="font-semibold text-[#1C2B4A]">{fmt(previewCourseRefund)}</span>
+                    <span className="font-semibold text-foreground">{fmt(previewCourseRefund)}</span>
                   </div>
                 )}
                 {includeTicket && details.activeTicket && (
                   <div className="flex items-center justify-between">
-                    <span className="text-[#1C2B4A]/70">🎟️ Vé bơi</span>
-                    <span className="font-semibold text-[#1C2B4A]">{fmt(previewTicketRefund)}</span>
+                    <span className="text-foreground/70">🎟️ Vé bơi</span>
+                    <span className="font-semibold text-foreground">{fmt(previewTicketRefund)}</span>
                   </div>
                 )}
                 <div className="border-t border-blue-300 pt-2 flex items-center justify-between">
@@ -369,10 +369,10 @@ export function NewRefundForm({ students, preselected }: Props) {
           )}
 
           {/* Reason */}
-          <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5 space-y-3">
+          <div className="glass-card glass-card-hover p-5 space-y-3">
             <div>
-              <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
-                Lý do <span className="text-red-500">*</span>
+              <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
+                Lý do <span className="text-danger">*</span>
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 {REASON_OPTIONS.map(opt => (
@@ -382,8 +382,8 @@ export function NewRefundForm({ students, preselected }: Props) {
                     onClick={() => setReason(opt.value)}
                     className={`px-3 py-2 text-sm rounded-lg border ${
                       reason === opt.value
-                        ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]'
-                        : 'bg-white text-[#1C2B4A]/70 border-[#1C2B4A]/15 hover:border-[#1C2B4A]/40'
+                        ? 'bg-ink-soft text-paper border-ink'
+                        : 'bg-[var(--surface)] text-foreground/70 border-foreground/15 hover:border-foreground/40'
                     }`}
                   >
                     {opt.label}
@@ -392,8 +392,8 @@ export function NewRefundForm({ students, preselected }: Props) {
               </div>
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
-                Chi tiết {reason === 'other' && <span className="text-red-500">*</span>}
+              <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
+                Chi tiết {reason === 'other' && <span className="text-danger">*</span>}
               </label>
               <textarea
                 rows={2}
@@ -401,7 +401,7 @@ export function NewRefundForm({ students, preselected }: Props) {
                 value={reasonText}
                 onChange={e => setReasonText(e.target.value)}
                 placeholder="Ghi chú thêm..."
-                className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
+                className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/20 bg-[var(--surface)]"
               />
             </div>
           </div>
@@ -409,7 +409,7 @@ export function NewRefundForm({ students, preselected }: Props) {
       )}
 
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <div className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-lg px-3 py-2">
           {error}
         </div>
       )}
@@ -418,13 +418,13 @@ export function NewRefundForm({ students, preselected }: Props) {
         <button
           type="submit"
           disabled={submitting || !studentId}
-          className="flex-1 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-2.5 text-sm font-semibold hover:bg-[#1C2B4A]/90 disabled:opacity-50"
+          className="flex-1 bg-ink-soft text-paper rounded-lg py-2.5 text-sm font-semibold hover:bg-foreground/90 disabled:opacity-50"
         >
           {submitting ? 'Đang tạo...' : 'Tạo yêu cầu hoàn tiền'}
         </button>
         <Link
           href="/admin/finance/refunds"
-          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70 hover:bg-[#1C2B4A]/5"
+          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-foreground/15 text-foreground/70 hover:bg-foreground/5"
         >
           Huỷ
         </Link>

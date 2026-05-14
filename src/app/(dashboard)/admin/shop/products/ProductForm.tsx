@@ -129,7 +129,7 @@ export function ProductForm({ courses, mode, initial }: Props) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       {/* Type selector */}
-      <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5">
+      <div className="glass-card glass-card-hover p-5">
         <Label>Loại sản phẩm</Label>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
           {PRODUCT_TYPES.map(t => (
@@ -140,8 +140,8 @@ export function ProductForm({ courses, mode, initial }: Props) {
               onClick={() => update('type', t)}
               className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
                 form.type === t
-                  ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]'
-                  : 'bg-white text-[#1C2B4A]/70 border-[#1C2B4A]/15 hover:border-[#1C2B4A]/40 disabled:opacity-50'
+                  ? 'bg-ink-soft text-paper border-ink'
+                  : 'bg-[var(--surface)] text-foreground/70 border-foreground/15 hover:border-foreground/40 disabled:opacity-50'
               }`}
             >
               {PRODUCT_TYPE_LABELS[t]}
@@ -149,12 +149,12 @@ export function ProductForm({ courses, mode, initial }: Props) {
           ))}
         </div>
         {mode === 'edit' && (
-          <p className="text-xs text-[#1C2B4A]/40 mt-2">Không thể đổi loại sản phẩm sau khi tạo</p>
+          <p className="text-xs text-foreground/40 mt-2">Không thể đổi loại sản phẩm sau khi tạo</p>
         )}
       </div>
 
       {/* Basic info */}
-      <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5 space-y-4">
+      <div className="glass-card glass-card-hover p-5 space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label>Tên sản phẩm <Req /></Label>
@@ -195,7 +195,7 @@ export function ProductForm({ courses, mode, initial }: Props) {
             value={form.description}
             onChange={e => update('description', e.target.value)}
             placeholder="Mô tả ngắn về sản phẩm..."
-            className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
+            className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/20 bg-[var(--surface)]"
           />
         </div>
 
@@ -213,15 +213,15 @@ export function ProductForm({ courses, mode, initial }: Props) {
 
       {/* Type-specific fields */}
       {form.type === 'course' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5">
+        <div className="glass-card glass-card-hover p-5">
           <Label>Khoá học liên kết <Req /></Label>
-          <p className="text-xs text-[#1C2B4A]/50 mt-1 mb-2">
+          <p className="text-xs text-foreground/50 mt-1 mb-2">
             Khi học viên mua, hệ thống tự tạo enrollment với khoá này
           </p>
           <select
             value={form.linkedCourseId}
             onChange={e => update('linkedCourseId', e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
+            className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/20 bg-[var(--surface)]"
           >
             <option value="">— Chọn khoá học —</option>
             {courses.map(c => (
@@ -235,9 +235,9 @@ export function ProductForm({ courses, mode, initial }: Props) {
       )}
 
       {form.type === 'improvement_pack' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5">
+        <div className="glass-card glass-card-hover p-5">
           <Label>Số buổi cải thiện <Req /></Label>
-          <p className="text-xs text-[#1C2B4A]/50 mt-1 mb-2">
+          <p className="text-xs text-foreground/50 mt-1 mb-2">
             Pack sẽ chứa bao nhiêu buổi bơi lẻ để cải thiện kỹ năng
           </p>
           <Input type="number" value={form.sessionsCount} onChange={v => update('sessionsCount', v)} placeholder="VD: 5 hoặc 10" />
@@ -246,7 +246,7 @@ export function ProductForm({ courses, mode, initial }: Props) {
       )}
 
       {form.type === 'physical' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5 space-y-4">
+        <div className="glass-card glass-card-hover p-5 space-y-4">
           <div>
             <Label>Số lượng tồn kho <Req /></Label>
             <Input type="number" value={form.stockQuantity} onChange={v => update('stockQuantity', v)} placeholder="VD: 20" />
@@ -254,7 +254,7 @@ export function ProductForm({ courses, mode, initial }: Props) {
           </div>
           <div>
             <Label>Ngưỡng cảnh báo sắp hết</Label>
-            <p className="text-xs text-[#1C2B4A]/50 mt-0.5 mb-1">
+            <p className="text-xs text-foreground/50 mt-0.5 mb-1">
               Khi tồn kho ≤ giá trị này, hệ thống hiển thị cảnh báo
             </p>
             <Input type="number" value={form.lowStockThreshold} onChange={v => update('lowStockThreshold', v)} />
@@ -264,24 +264,24 @@ export function ProductForm({ courses, mode, initial }: Props) {
       )}
 
       {mode === 'edit' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5">
+        <div className="glass-card glass-card-hover p-5">
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={form.isActive}
               onChange={e => update('isActive', e.target.checked)}
-              className="w-4 h-4 rounded border-[#1C2B4A]/30"
+              className="w-4 h-4 rounded border-foreground/30"
             />
             <div>
-              <p className="text-sm font-semibold text-[#1C2B4A]">Đang bán</p>
-              <p className="text-xs text-[#1C2B4A]/50">Bỏ tick để ngừng bán sản phẩm này (không xoá)</p>
+              <p className="text-sm font-semibold text-foreground">Đang bán</p>
+              <p className="text-xs text-foreground/50">Bỏ tick để ngừng bán sản phẩm này (không xoá)</p>
             </div>
           </label>
         </div>
       )}
 
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <div className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-lg px-3 py-2">
           {error}
         </div>
       )}
@@ -290,13 +290,13 @@ export function ProductForm({ courses, mode, initial }: Props) {
         <button
           type="submit"
           disabled={submitting}
-          className="flex-1 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-2.5 text-sm font-semibold hover:bg-[#1C2B4A]/90 disabled:opacity-50"
+          className="flex-1 bg-ink-soft text-paper rounded-lg py-2.5 text-sm font-semibold hover:bg-foreground/90 disabled:opacity-50"
         >
           {submitting ? 'Đang lưu...' : mode === 'create' ? 'Tạo sản phẩm' : 'Lưu thay đổi'}
         </button>
         <Link
           href={mode === 'edit' && initial?.id ? `/admin/shop/products/${initial.id}` : '/admin/shop/products'}
-          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70 hover:bg-[#1C2B4A]/5"
+          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-foreground/15 text-foreground/70 hover:bg-foreground/5"
         >
           Huỷ
         </Link>
@@ -307,14 +307,14 @@ export function ProductForm({ courses, mode, initial }: Props) {
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+    <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
       {children}
     </label>
   )
 }
 
 function Req() {
-  return <span className="text-red-500">*</span>
+  return <span className="text-danger">*</span>
 }
 
 function Input({
@@ -334,12 +334,12 @@ function Input({
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
       maxLength={maxLength}
-      className={`w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white ${className ?? ''}`}
+      className={`w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/20 bg-[var(--surface)] ${className ?? ''}`}
     />
   )
 }
 
 function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null
-  return <p className="text-xs text-red-600 mt-1">{msg}</p>
+  return <p className="text-xs text-danger mt-1">{msg}</p>
 }

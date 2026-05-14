@@ -38,7 +38,7 @@ export default async function StudentExercisesPage({ searchParams }: { searchPar
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -69,21 +69,21 @@ export default async function StudentExercisesPage({ searchParams }: { searchPar
         </div>
 
         {exercises.length === 0 ? (
-          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
-            <Dumbbell className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có bài tập</p>
-            <p className="text-sm text-ink/55">Thư viện đang được cập nhật.</p>
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
+            <Dumbbell className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có bài tập</p>
+            <p className="text-sm text-foreground/55">Thư viện đang được cập nhật.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {exercises.map(ex => (
               <details
                 key={ex.id}
-                className="group rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden transition open:ring-accent/30"
+                className="group glass-card glass-card-hover overflow-hidden transition open:ring-accent/30"
               >
                 <summary className="cursor-pointer list-none px-5 py-4 flex items-start gap-3 hover:bg-paper-tint/40 transition">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-ink leading-tight">{ex.title}</h3>
+                    <h3 className="font-medium text-foreground leading-tight">{ex.title}</h3>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
                       <Chip variant="mist">#{SKILL_LABELS[ex.skillTarget] ?? ex.skillTarget}</Chip>
                       <Chip variant={DIFF_VARIANT[ex.difficulty] ?? 'mist'} active>
@@ -91,11 +91,11 @@ export default async function StudentExercisesPage({ searchParams }: { searchPar
                       </Chip>
                     </div>
                   </div>
-                  <span className="grid place-items-center h-7 w-7 rounded-pill bg-ink/5 group-open:bg-accent group-open:text-ink shrink-0 transition">
+                  <span className="grid place-items-center h-7 w-7 rounded-pill bg-ink/5 group-open:bg-accent group-open:text-foreground shrink-0 transition">
                     <Plus className="h-4 w-4 group-open:rotate-45 transition-transform" strokeWidth={2.25} />
                   </span>
                 </summary>
-                <div className="px-5 pb-5 text-sm text-ink/75 space-y-3 border-t border-ink/8 pt-4">
+                <div className="px-5 pb-5 text-sm text-foreground/75 space-y-3 border-t border-foreground/8 pt-4">
                   <p className="leading-relaxed">{ex.description}</p>
                   {ex.videoUrl && (
                     <a
@@ -109,7 +109,7 @@ export default async function StudentExercisesPage({ searchParams }: { searchPar
                   )}
                   {Array.isArray(ex.stepsJson) && ex.stepsJson.length > 0 && (
                     <div>
-                      <p className="eyebrow text-ink/55 mb-2">Các bước</p>
+                      <p className="eyebrow text-foreground/55 mb-2">Các bước</p>
                       <ol className="space-y-1.5 list-decimal pl-5 marker:text-accent marker:font-bold">
                         {(ex.stepsJson as string[]).map((step, i) => <li key={i}>{step}</li>)}
                       </ol>

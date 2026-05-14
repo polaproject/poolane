@@ -12,7 +12,7 @@ interface ChipProps extends React.HTMLAttributes<HTMLSpanElement> {
 const VARIANT_BG: Record<ChipVariant, string> = {
   neutral: 'bg-paper-tint text-ink',
   accent:  'bg-accent-soft text-ink',
-  mist:    'bg-mist/15 text-ink',
+  mist:    'bg-mist/15 text-foreground',
   success: 'bg-success/15 text-success',
   warn:    'bg-warn/15 text-warn',
   danger:  'bg-danger/15 text-danger',

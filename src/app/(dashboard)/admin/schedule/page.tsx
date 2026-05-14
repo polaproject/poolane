@@ -69,13 +69,13 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
         ? 'bg-mist/10 ring-mist/30'
         : isLow
           ? 'bg-warn/10 ring-warn/30'
-          : 'bg-white ring-ink/8'
+          : 'bg-[var(--surface)] ring-foreground/8'
 
     return (
       <Link href={`/admin/schedule/sessions/${session.id}`} className="block group">
         <div className={`rounded-card p-3 ring-1 hover:-translate-y-0.5 hover:shadow-soft transition-all min-h-[180px] flex flex-col ${tone}`}>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-ink/65">{slotLabel}</span>
+            <span className="text-xs font-medium text-foreground/65">{slotLabel}</span>
             <Chip variant={isFull ? 'mist' : isLow ? 'warn' : 'neutral'} className="text-[10px]">
               <Users className="h-2.5 w-2.5" strokeWidth={2.25} /> {approved.length}/{cap}
             </Chip>
@@ -89,7 +89,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
 
           <div className="flex-1 space-y-1 min-h-0">
             {approved.length === 0 && pending.length === 0 ? (
-              <p className="text-xs text-ink/30 italic">Chưa có HV</p>
+              <p className="text-xs text-foreground/30 italic">Chưa có HV</p>
             ) : (
               <>
                 {approved.map(r => (
@@ -97,7 +97,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
                     <div className="grid place-items-center h-5 w-5 rounded-pill bg-mist text-paper text-[9px] font-bold shrink-0">
                       {initials(r.student.user.fullName)}
                     </div>
-                    <span className="text-xs text-ink truncate flex-1">
+                    <span className="text-xs text-foreground truncate flex-1">
                       {r.student.user.fullName}
                     </span>
                     {r.course && (
@@ -110,7 +110,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
                     <div className="grid place-items-center h-5 w-5 rounded-pill ring-1 ring-dashed ring-accent text-accent text-[9px] font-bold shrink-0">
                       ?
                     </div>
-                    <span className="text-xs text-ink/70 truncate flex-1 italic">
+                    <span className="text-xs text-foreground/70 truncate flex-1 italic">
                       {r.student.user.fullName}
                     </span>
                     <span className="text-[9px] text-accent font-bold">CHỜ</span>
@@ -121,7 +121,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
           </div>
 
           {pending.length > 0 && (
-            <div className="text-xs text-accent mt-2 pt-2 border-t border-ink/8 inline-flex items-center gap-1 font-medium">
+            <div className="text-xs text-accent mt-2 pt-2 border-t border-foreground/8 inline-flex items-center gap-1 font-medium">
               <AlertCircle className="h-3 w-3" strokeWidth={2.25} /> {pending.length} chờ duyệt
             </div>
           )}
@@ -133,7 +133,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
   function EmptySlotLink({ date, slot }: { date: Date; slot: 'morning' | 'evening' }) {
     return (
       <Link href={`/admin/sessions/new?date=${format(date, 'yyyy-MM-dd')}&slot=${slot}`}>
-        <div className="rounded-card ring-1 ring-dashed ring-ink/15 p-3 min-h-[180px] flex flex-col items-center justify-center hover:ring-accent/40 hover:bg-paper-tint/30 transition-all cursor-pointer text-ink/30">
+        <div className="rounded-card ring-1 ring-dashed ring-foreground/15 p-3 min-h-[180px] flex flex-col items-center justify-center hover:ring-accent/40 hover:bg-paper-tint/30 transition-all cursor-pointer text-foreground/30">
           <Plus className="h-5 w-5 mb-1" strokeWidth={1.75} />
           <p className="text-xs">Tạo buổi</p>
         </div>
@@ -143,7 +143,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-7xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -188,7 +188,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
       </div>
 
       <div className="px-4 sm:px-8 -mt-6 max-w-7xl mx-auto relative z-10">
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-4 sm:p-5">
+        <div className="glass-card glass-card-hover p-4 sm:p-5">
           <div className="overflow-x-auto pb-2">
             <div className="min-w-[820px]">
               {/* Day headers */}
@@ -199,16 +199,16 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
                     <div
                       key={day.toISOString()}
                       className={`text-center pb-2 border-b ${
-                        isToday ? 'border-accent' : 'border-ink/10'
+                        isToday ? 'border-accent' : 'border-foreground/10'
                       }`}
                     >
                       <p className={`text-[10px] tracking-widest uppercase font-medium ${
-                        isToday ? 'text-accent' : 'text-ink/45'
+                        isToday ? 'text-accent' : 'text-foreground/45'
                       }`}>
                         {format(day, 'EEE', { locale: vi })}
                       </p>
                       <p className={`font-heading italic text-2xl mt-0.5 ${
-                        isToday ? 'text-ink' : 'text-ink/65'
+                        isToday ? 'text-foreground' : 'text-foreground/65'
                       }`}>
                         {format(day, 'd')}
                       </p>
@@ -218,7 +218,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
               </div>
 
               {/* Morning */}
-              <div className="eyebrow text-ink/55 mb-2 inline-flex items-center gap-1.5">
+              <div className="eyebrow text-foreground/55 mb-2 inline-flex items-center gap-1.5">
                 <Sunrise className="h-3 w-3 text-accent" strokeWidth={2.25} /> Ca sáng · 5:30 – 7:30
               </div>
               <div className="grid grid-cols-7 gap-2 mb-5">
@@ -235,7 +235,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
               </div>
 
               {/* Evening */}
-              <div className="eyebrow text-ink/55 mb-2 inline-flex items-center gap-1.5">
+              <div className="eyebrow text-foreground/55 mb-2 inline-flex items-center gap-1.5">
                 <Sunset className="h-3 w-3 text-accent" strokeWidth={2.25} /> Ca chiều · 18:00 – 20:00
               </div>
               <div className="grid grid-cols-7 gap-2">
@@ -255,7 +255,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
         </div>
 
         {/* Legend */}
-        <div className="mt-4 px-2 flex gap-4 text-xs text-ink/55 flex-wrap items-center">
+        <div className="mt-4 px-2 flex gap-4 text-xs text-foreground/55 flex-wrap items-center">
           <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-pill bg-warn" /> Ít HV</span>
           <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-pill bg-mist" /> Đủ chỗ</span>
           <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-pill bg-accent" /> Có chờ duyệt</span>

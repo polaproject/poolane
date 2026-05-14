@@ -112,22 +112,22 @@ export default function ShopPage() {
   if (ordered) {
     return (
       <div className="min-h-screen bg-paper grid place-items-center px-4">
-        <div className="rounded-card-xl bg-white shadow-glass ring-1 ring-ink/8 p-8 sm:p-12 text-center max-w-md">
+        <div className="rounded-card-xl bg-[var(--surface)] shadow-glass ring-1 ring-foreground/8 p-8 sm:p-12 text-center max-w-md">
           <div className="grid place-items-center h-16 w-16 rounded-pill bg-success/15 mx-auto mb-4">
             <CheckCircle className="h-8 w-8 text-success" strokeWidth={1.75} />
           </div>
-          <h2 className="font-heading italic text-3xl text-ink mb-2">Đặt hàng thành công!</h2>
-          <p className="text-sm text-ink/65 mb-6">Lớp sẽ duyệt đơn và liên hệ bạn sớm nhất.</p>
+          <h2 className="font-heading italic text-3xl text-foreground mb-2">Đặt hàng thành công!</h2>
+          <p className="text-sm text-foreground/65 mb-6">Lớp sẽ duyệt đơn và liên hệ bạn sớm nhất.</p>
           <div className="flex gap-2 justify-center flex-wrap">
             <button
               onClick={() => setOrdered(false)}
-              className="inline-flex items-center gap-1.5 bg-ink text-paper font-semibold px-5 py-2.5 rounded-pill text-sm hover:bg-ink/90 transition"
+              className="inline-flex items-center gap-1.5 bg-ink text-paper font-semibold px-5 py-2.5 rounded-pill text-sm hover:bg-foreground/90 transition"
             >
               Tiếp tục mua
             </button>
             <Link
               href="/student/shop/orders"
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-pill ring-1 ring-ink/15 text-sm font-medium hover:bg-ink/5 transition"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-pill ring-1 ring-foreground/15 text-sm font-medium hover:bg-foreground/5 transition"
             >
               Xem đơn của tôi <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.25} />
             </Link>
@@ -140,7 +140,7 @@ export default function ShopPage() {
   return (
     <div className="min-h-screen bg-paper pb-32">
       {/* Hero */}
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -160,12 +160,12 @@ export default function ShopPage() {
       <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto relative z-10 space-y-4">
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink/40" strokeWidth={1.75} />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" strokeWidth={1.75} />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Tìm sản phẩm..."
-            className="w-full pl-10 pr-4 py-3 text-sm rounded-pill bg-white ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none transition shadow-soft"
+            className="w-full pl-10 pr-4 py-3 text-sm rounded-pill bg-[var(--surface)] ring-1 ring-foreground/10 focus:ring-accent/40 focus:outline-none transition shadow-soft"
           />
         </div>
 
@@ -188,12 +188,12 @@ export default function ShopPage() {
             <Loader2 className="h-6 w-6 animate-spin text-accent" strokeWidth={1.75} />
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
-            <Package className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
+            <Package className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-foreground mb-1">
               {products.length === 0 ? 'Chưa có sản phẩm' : 'Không khớp tìm kiếm'}
             </p>
-            <p className="text-sm text-ink/55">
+            <p className="text-sm text-foreground/55">
               {products.length === 0 ? 'Cửa hàng đang cập nhật' : 'Thử từ khoá khác hoặc bỏ filter'}
             </p>
           </div>
@@ -205,11 +205,11 @@ export default function ShopPage() {
               const typeMeta = TYPE_META[p.type] ?? { label: p.type, Icon: Box }
               const TypeIcon = typeMeta.Icon
               return (
-                <div key={p.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-4 transition hover:ring-accent/30">
+                <div key={p.id} className="glass-card glass-card-hover p-4 transition hover:ring-accent/30">
                   <div className="flex gap-3">
                     {p.photos && p.photos.length > 0 ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={p.photos[0]} alt="" className="w-20 h-20 rounded-card object-cover shrink-0" />
+                      <img src={p.photos[0]} alt={p.name} className="w-20 h-20 rounded-card object-cover shrink-0" />
                     ) : (
                       <div className="w-20 h-20 rounded-card bg-paper-tint grid place-items-center shrink-0">
                         <TypeIcon className="h-7 w-7 text-accent opacity-70" strokeWidth={1.5} />
@@ -217,22 +217,22 @@ export default function ShopPage() {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className="font-medium text-ink text-sm leading-tight">{p.name}</p>
-                        <p className="font-heading text-base text-ink shrink-0">{fmt(p.price)}</p>
+                        <p className="font-medium text-foreground text-sm leading-tight">{p.name}</p>
+                        <p className="font-heading text-base text-foreground shrink-0">{fmt(p.price)}</p>
                       </div>
                       <div className="flex items-center gap-1.5 mb-1.5">
                         <Chip variant="mist" className="text-[10px]">
                           <TypeIcon className="h-2.5 w-2.5" strokeWidth={2.25} /> {typeMeta.label}
                         </Chip>
                         {p.sessionsCount && (
-                          <span className="text-[10px] text-ink/55">· {p.sessionsCount} buổi</span>
+                          <span className="text-[10px] text-foreground/55">· {p.sessionsCount} buổi</span>
                         )}
                       </div>
                       {p.description && (
-                        <p className="text-xs text-ink/55 line-clamp-2 leading-relaxed">{p.description}</p>
+                        <p className="text-xs text-foreground/55 line-clamp-2 leading-relaxed">{p.description}</p>
                       )}
                       {p.type === 'physical' && p.stockQuantity !== null && (
-                        <p className={`text-[10px] mt-1 ${p.stockQuantity <= 3 ? 'text-warn' : 'text-ink/45'}`}>
+                        <p className={`text-[10px] mt-1 ${p.stockQuantity <= 3 ? 'text-warn' : 'text-foreground/45'}`}>
                           Còn {p.stockQuantity} sp
                         </p>
                       )}
@@ -246,8 +246,8 @@ export default function ShopPage() {
                         disabled={isOutOfStock}
                         className={`w-full py-2.5 rounded-pill text-sm font-medium ring-1 transition ${
                           isOutOfStock
-                            ? 'ring-ink/8 text-ink/30 cursor-not-allowed'
-                            : 'ring-ink/20 text-ink hover:bg-ink hover:text-paper hover:ring-ink'
+                            ? 'ring-foreground/8 text-foreground/30 cursor-not-allowed'
+                            : 'ring-foreground/20 text-foreground hover:bg-ink hover:text-paper hover:ring-ink'
                         }`}
                       >
                         {isOutOfStock ? 'Hết hàng' : '+ Thêm vào giỏ'}
@@ -256,14 +256,14 @@ export default function ShopPage() {
                       <div className="flex items-center gap-3 justify-between bg-paper-tint rounded-pill px-2 py-1.5">
                         <button
                           onClick={() => removeFromCart(p.id)}
-                          className="h-8 w-8 rounded-pill bg-white ring-1 ring-ink/10 grid place-items-center hover:bg-danger/10 hover:ring-danger/30 transition"
+                          className="h-8 w-8 rounded-pill bg-[var(--surface)] ring-1 ring-foreground/10 grid place-items-center hover:bg-danger/10 hover:ring-danger/30 transition"
                         >
                           <Minus className="h-3.5 w-3.5" strokeWidth={2.25} />
                         </button>
-                        <span className="font-heading text-lg text-ink">{qty}</span>
+                        <span className="font-heading text-lg text-foreground">{qty}</span>
                         <button
                           onClick={() => addToCart(p.id)}
-                          className="h-8 w-8 rounded-pill bg-ink text-paper grid place-items-center hover:bg-ink/90 transition"
+                          className="h-8 w-8 rounded-pill bg-ink text-paper grid place-items-center hover:bg-foreground/90 transition"
                         >
                           <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
                         </button>

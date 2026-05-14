@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { COURSE_PRICES, COURSE_NAMES, PAYMENT_DEPOSIT_RATE } from '@/config/constants'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 type Course = { id: string; code: string; name: string; price: number }
 
@@ -97,19 +98,27 @@ export default function EnrollPage() {
   }
 
   return (
-    <div className="p-6 max-w-lg mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <Button variant="outline" size="sm" asChild>
-          <Link href={`/admin/students/${studentId}`}><ArrowLeft className="w-4 h-4 mr-1" /> Hồ sơ</Link>
-        </Button>
-        <h1 className="font-heading text-3xl text-[#1C2B4A]">Đăng ký khoá học</h1>
-      </div>
+    <div className="ambient-bg min-h-screen">
+      <div className="p-6 max-w-lg mx-auto">
+        <Link
+          href={`/admin/students/${studentId}`}
+          className="inline-flex items-center gap-1 text-sm text-foreground/70 hover:text-foreground mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" /> Hồ sơ học viên
+        </Link>
+        <PageHeader
+          eyebrow="Khoá học"
+          title="Đăng ký khoá học"
+          description="Chọn khoá học và phương án thanh toán cho học viên."
+          display
+          className="mb-8"
+        />
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Chọn khoá */}
-        <Card className="border-[#1C2B4A]/10 shadow-sm">
+        <Card className="border-foreground/10 shadow-sm">
           <CardHeader className="pb-2 pt-5 px-6">
-            <h2 className="font-semibold text-[#1C2B4A] text-sm">Chọn khoá học <span className="text-red-500">*</span></h2>
+            <h2 className="font-semibold text-foreground text-sm">Chọn khoá học <span className="text-danger">*</span></h2>
           </CardHeader>
           <CardContent className="px-6 pb-5 space-y-2">
             {[
@@ -126,18 +135,18 @@ export default function EnrollPage() {
                   onClick={() => setSelectedCourse(course)}
                   className={`w-full text-left p-4 rounded-xl border transition-all ${
                     isSelected
-                      ? 'bg-[#1C2B4A] border-[#1C2B4A] text-white'
-                      : 'border-[#1C2B4A]/15 hover:border-[#1C2B4A]/40'
+                      ? 'bg-ink-soft border-ink text-white'
+                      : 'border-foreground/15 hover:border-foreground/40'
                   }`}
                 >
                   <div className="flex justify-between">
                     <div>
                       <p className="font-semibold text-sm">{c.name}</p>
-                      <p className={`text-xs mt-0.5 ${isSelected ? 'text-white/60' : 'text-[#1C2B4A]/50'}`}>
+                      <p className={`text-xs mt-0.5 ${isSelected ? 'text-white/60' : 'text-foreground/50'}`}>
                         10 buổi
                       </p>
                     </div>
-                    <p className={`font-semibold ${isSelected ? 'text-white' : 'text-[#1C2B4A]'}`}>
+                    <p className={`font-semibold ${isSelected ? 'text-white' : 'text-foreground'}`}>
                       {fmt(c.price)}
                     </p>
                   </div>
@@ -148,16 +157,16 @@ export default function EnrollPage() {
         </Card>
 
         {/* Chọn phương án */}
-        <Card className="border-[#1C2B4A]/10 shadow-sm">
+        <Card className="border-foreground/10 shadow-sm">
           <CardHeader className="pb-2 pt-5 px-6">
-            <h2 className="font-semibold text-[#1C2B4A] text-sm">Phương án thanh toán <span className="text-red-500">*</span></h2>
+            <h2 className="font-semibold text-foreground text-sm">Phương án thanh toán <span className="text-danger">*</span></h2>
           </CardHeader>
           <CardContent className="px-6 pb-5 space-y-2">
             {PAYMENT_PLANS.map(plan => (
               <label key={plan.value} className={`flex gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
                 paymentPlan === plan.value
                   ? 'border-[#5B8E9F] bg-[#5B8E9F]/5'
-                  : 'border-[#1C2B4A]/15 hover:border-[#1C2B4A]/30'
+                  : 'border-foreground/15 hover:border-foreground/30'
               }`}>
                 <input
                   type="radio"
@@ -165,11 +174,11 @@ export default function EnrollPage() {
                   value={plan.value}
                   checked={paymentPlan === plan.value}
                   onChange={e => setPaymentPlan(e.target.value)}
-                  className="accent-[#1C2B4A] mt-0.5"
+                  className="accent-ink mt-0.5"
                 />
                 <div>
-                  <p className="text-sm font-medium text-[#1C2B4A]">{plan.label}</p>
-                  <p className="text-xs text-[#1C2B4A]/50 mt-0.5">{plan.desc}</p>
+                  <p className="text-sm font-medium text-foreground">{plan.label}</p>
+                  <p className="text-xs text-foreground/50 mt-0.5">{plan.desc}</p>
                 </div>
               </label>
             ))}
@@ -178,7 +187,7 @@ export default function EnrollPage() {
 
         {/* Summary */}
         {selectedCourse && (
-          <div className="bg-[#1C2B4A] rounded-2xl p-5 text-white">
+          <div className="bg-ink-soft rounded-card-lg p-5 text-white">
             <h3 className="font-semibold mb-3">Tóm tắt thanh toán</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
@@ -211,12 +220,13 @@ export default function EnrollPage() {
           <Button
             type="submit"
             disabled={loading || !selectedCourse}
-            className="flex-1 bg-[#1C2B4A] text-[#F6F1EA] hover:bg-[#1C2B4A]/90"
+            className="flex-1 bg-ink-soft text-paper hover:bg-foreground/90"
           >
             {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Đang đăng ký...</> : 'Xác nhận đăng ký'}
           </Button>
         </div>
       </form>
+      </div>
     </div>
   )
 }

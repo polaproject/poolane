@@ -60,7 +60,7 @@ export default async function StaffStudentsPage({ searchParams }: { searchParams
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-7xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">Read-only · {total} học viên</p>
@@ -69,18 +69,18 @@ export default async function StaffStudentsPage({ searchParams }: { searchParams
       </div>
 
       <div className="px-4 sm:px-8 -mt-6 max-w-7xl mx-auto space-y-4 relative z-10">
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-4 space-y-3">
+        <div className="glass-card glass-card-hover p-4 space-y-3">
           <form className="flex gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink/40" strokeWidth={1.75} />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" strokeWidth={1.75} />
               <input
                 name="search"
                 defaultValue={search}
                 placeholder="Tìm tên, SĐT, mã học viên..."
-                className="w-full pl-10 pr-4 h-10 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none transition"
+                className="w-full pl-10 pr-4 h-10 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-foreground/10 focus:ring-accent/40 focus:outline-none transition"
               />
             </div>
-            <button type="submit" className="px-5 h-10 text-sm bg-ink text-paper rounded-pill hover:bg-ink/90 transition font-medium">
+            <button type="submit" className="px-5 h-10 text-sm bg-ink text-paper rounded-pill hover:bg-foreground/90 transition font-medium">
               Tìm
             </button>
           </form>
@@ -93,26 +93,26 @@ export default async function StaffStudentsPage({ searchParams }: { searchParams
           </div>
         </div>
 
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+        <div className="glass-card glass-card-hover overflow-hidden">
           {students.length === 0 ? (
             <div className="p-12 text-center">
-              <Users className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-ink mb-1">
+              <Users className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+              <p className="font-heading italic text-2xl text-foreground mb-1">
                 {search || statusFilter ? 'Không khớp tìm kiếm' : 'Chưa có học viên'}
               </p>
-              <p className="text-sm text-ink/55">
+              <p className="text-sm text-foreground/55">
                 {search || statusFilter ? 'Thử bỏ filter hoặc đổi từ khoá' : 'Lớp chưa có ai đăng ký'}
               </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px]">
-                <thead className="bg-paper-tint/30 border-b border-ink/8">
+                <thead className="bg-paper-tint/30 border-b border-foreground/8">
                   <tr>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Học viên</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Khoá</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Vé bơi</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Lần cuối</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Học viên</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Khoá</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Vé bơi</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Lần cuối</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -121,15 +121,15 @@ export default async function StaffStudentsPage({ searchParams }: { searchParams
                     const sessionsLeft = ticket ? ticket.maxSessions - ticket.sessionsUsed : null
                     const isLow = sessionsLeft !== null && sessionsLeft <= 2
                     return (
-                      <tr key={s.id} className="border-b border-ink/5 last:border-b-0 hover:bg-paper-tint/20 transition group">
+                      <tr key={s.id} className="border-b border-foreground/5 last:border-b-0 hover:bg-paper-tint/20 transition group glass-table-row">
                         <td className="px-5 py-3.5">
                           <Link href={`/staff/students/${s.id}`} className="flex items-center gap-3">
                             <div className="grid place-items-center h-9 w-9 rounded-pill bg-mist/15 text-mist font-heading italic text-sm shrink-0">
                               {s.user.fullName.charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-ink group-hover:text-accent transition truncate">{s.user.fullName}</p>
-                              <p className="text-xs text-ink/45 font-mono">{s.studentCode} · {s.user.phone}</p>
+                              <p className="text-sm font-medium text-foreground group-hover:text-accent transition truncate">{s.user.fullName}</p>
+                              <p className="text-xs text-foreground/45 font-mono">{s.studentCode} · {s.user.phone}</p>
                             </div>
                           </Link>
                         </td>
@@ -138,19 +138,19 @@ export default async function StaffStudentsPage({ searchParams }: { searchParams
                             <div className="flex gap-1 flex-wrap">
                               {s.enrollments.map(e => <Chip key={e.id} variant="mist">{e.course.code}</Chip>)}
                             </div>
-                          ) : <span className="text-xs text-ink/30">—</span>}
+                          ) : <span className="text-xs text-foreground/30">—</span>}
                         </td>
                         <td className="px-5 py-3.5">
                           {sessionsLeft !== null ? (
-                            <span className={`text-sm inline-flex items-center gap-1 ${isLow ? 'text-danger font-semibold' : 'text-ink/65'}`}>
+                            <span className={`text-sm inline-flex items-center gap-1 ${isLow ? 'text-danger font-semibold' : 'text-foreground/65'}`}>
                               {isLow && <AlertCircle className="h-3 w-3" strokeWidth={2.25} />}
                               {sessionsLeft} buổi
                             </span>
                           ) : (
-                            <span className="text-xs text-ink/30">Chưa có vé</span>
+                            <span className="text-xs text-foreground/30">Chưa có vé</span>
                           )}
                         </td>
-                        <td className="px-5 py-3.5 text-xs text-ink/55">
+                        <td className="px-5 py-3.5 text-xs text-foreground/55">
                           {s.lastAttendedAt
                             ? formatDistanceToNow(s.lastAttendedAt, { addSuffix: true, locale: vi })
                             : '—'}
@@ -171,7 +171,7 @@ export default async function StaffStudentsPage({ searchParams }: { searchParams
                 key={p}
                 href={buildHref({ page: String(p) })}
                 className={`grid place-items-center h-9 w-9 rounded-pill text-sm font-medium transition ${
-                  p === page ? 'bg-ink text-paper' : 'ring-1 ring-ink/10 text-ink/65 hover:ring-ink/20 hover:bg-ink/5'
+                  p === page ? 'bg-ink text-paper' : 'ring-1 ring-foreground/10 text-foreground/65 hover:ring-foreground/20 hover:bg-foreground/5'
                 }`}
               >
                 {p}

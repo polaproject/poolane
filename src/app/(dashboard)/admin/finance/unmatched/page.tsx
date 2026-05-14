@@ -30,7 +30,7 @@ export default async function UnmatchedTransactionsPage({ searchParams }: { sear
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-warn/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-5xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">{items.length} giao dịch · {status}</p>
@@ -52,37 +52,37 @@ export default async function UnmatchedTransactionsPage({ searchParams }: { sear
         </div>
 
         {/* List */}
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+        <div className="glass-card glass-card-hover overflow-hidden">
           {items.length === 0 ? (
             <div className="p-12 text-center">
-              <AlertCircle className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-ink mb-1">Không có giao dịch</p>
-              <p className="text-sm text-ink/55">Tab này chưa có giao dịch nào.</p>
+              <AlertCircle className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+              <p className="font-heading italic text-2xl text-foreground mb-1">Không có giao dịch</p>
+              <p className="text-sm text-foreground/55">Tab này chưa có giao dịch nào.</p>
             </div>
           ) : (
-            <div className="divide-y divide-ink/5">
+            <div className="divide-y divide-foreground/5">
               {items.map(t => (
                 <div key={t.id} className="px-5 py-4">
                   <div className="flex items-start justify-between flex-wrap gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-2">
-                        <p className="font-heading italic text-2xl text-ink leading-none">{fmt(t.amount)}</p>
+                        <p className="font-heading italic text-2xl text-foreground leading-none">{fmt(t.amount)}</p>
                         {t.gateway && <Chip variant="mist">{t.gateway}</Chip>}
-                        <span className="text-xs text-ink/55">
+                        <span className="text-xs text-foreground/55">
                           {format(t.transactionDate, 'HH:mm · dd/MM/yyyy', { locale: vi })}
                         </span>
                       </div>
-                      <p className="text-xs text-ink/55 mb-1">
+                      <p className="text-xs text-foreground/55 mb-1">
                         <span className="eyebrow normal-case tracking-[0.2em]">Nội dung CK:</span>{' '}
-                        <code className="bg-paper-tint/60 px-2 py-0.5 rounded font-mono text-xs text-ink">{t.content}</code>
+                        <code className="bg-paper-tint/60 px-2 py-0.5 rounded font-mono text-xs text-foreground">{t.content}</code>
                       </p>
                       {t.referenceCode && (
-                        <p className="text-xs text-ink/45">
+                        <p className="text-xs text-foreground/45">
                           Mã GD: <code className="font-mono">{t.referenceCode}</code>
                         </p>
                       )}
                       {t.notes && (
-                        <p className="text-xs text-ink/45 italic mt-1">{t.notes}</p>
+                        <p className="text-xs text-foreground/45 italic mt-1">{t.notes}</p>
                       )}
                       {t.matchedToType && t.matchedToId && (
                         <p className="text-xs text-success mt-2 inline-flex items-center gap-1">

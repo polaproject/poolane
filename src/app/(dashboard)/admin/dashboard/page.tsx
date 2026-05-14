@@ -7,6 +7,9 @@ import {
 } from 'lucide-react'
 import { ABSENCE_ALERT_THRESHOLDS } from '@/config/constants'
 import { StatCard } from '@/components/ui/StatCard'
+import { StarField } from '@/components/brand/StarField'
+import { ScrollReveal } from '@/components/motion/ScrollReveal'
+import { Stagger } from '@/components/motion/Stagger'
 
 export default async function AdminDashboard() {
   const user = await requireRole(['admin'])
@@ -67,18 +70,19 @@ export default async function AdminDashboard() {
   ].filter(Boolean) as Array<{ label: string; href: string; tone: 'warn' | 'danger' }>
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       {/* Hero */}
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-accent/12 -translate-y-1/3 translate-x-1/4 blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 w-60 h-60 rounded-full bg-mist/10 translate-y-1/2 blur-3xl" />
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 rounded-full -translate-y-1/3 translate-x-1/4 blur-3xl motion-sway" style={{ background: 'var(--hero-overlay-1)' }} />
+        <div className="absolute bottom-0 left-1/4 w-60 h-60 rounded-full translate-y-1/2 blur-3xl motion-sway" style={{ background: 'var(--hero-overlay-2)', animationDelay: '-6s' }} />
+        <StarField density={18} maxSize={2} className="text-accent/50" />
 
         <div className="relative max-w-6xl mx-auto">
-          <p className="eyebrow text-paper/55 mb-2">Admin · Poolane</p>
-          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">
+          <p className="eyebrow opacity-65 mb-2">Admin · Poolane</p>
+          <h1 className="heading-display">
             Xin chào, {user.fullName}
           </h1>
-          <p className="text-sm text-paper/65 mt-3">
+          <p className="text-sm opacity-75 mt-3">
             Tổng quan vận hành — đăng ký, học viên, tài chính, lịch học.
           </p>
         </div>
@@ -103,20 +107,20 @@ export default async function AdminDashboard() {
                 }`}>
                   <AlertTriangle className={`h-4 w-4 ${alert.tone === 'danger' ? 'text-danger' : 'text-warn'}`} strokeWidth={1.75} />
                 </div>
-                <p className="text-sm font-medium text-ink flex-1">{alert.label}</p>
-                <ArrowRight className="h-4 w-4 text-ink/40 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
+                <p className="text-sm font-medium text-foreground flex-1">{alert.label}</p>
+                <ArrowRight className="h-4 w-4 text-foreground/40 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
               </Link>
             ))}
           </div>
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Stagger step={0.08} className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Link href="/admin/students"><StatCard label="Tổng học viên" value={totalStudents} icon={Users} /></Link>
           <Link href="/admin/students?status=active"><StatCard label="Đang học" value={activeStudents} icon={BookOpen} /></Link>
           <Link href="/admin/finance"><StatCard label="Thu tháng này" value={`${(monthSum / 1_000_000).toFixed(1)}M`} unit="đ" icon={DollarSign} tone="dark" /></Link>
           <Link href="/admin/students"><StatCard label="HV mới (7 ngày)" value={recentStudents.length} icon={TrendingUp} tone="accent" /></Link>
-        </div>
+        </Stagger>
 
         {/* Today sessions */}
         {todaySessions.length > 0 && (
@@ -158,23 +162,23 @@ export default async function AdminDashboard() {
         {/* 2-col: recent students + quick actions */}
         <div className="grid md:grid-cols-2 gap-4">
           {/* Recent students */}
-          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
-            <div className="px-5 py-4 border-b border-ink/8 flex items-center justify-between">
+          <div className="glass-card glass-card-hover overflow-hidden">
+            <div className="px-5 py-4 border-b border-foreground/8 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <UserPlus className="h-4 w-4 text-accent" strokeWidth={1.75} />
-                <p className="eyebrow text-ink/55">HV mới · 7 ngày</p>
+                <p className="eyebrow text-foreground/55">HV mới · 7 ngày</p>
               </div>
               <Link href="/admin/students" className="text-xs font-medium text-accent hover:underline inline-flex items-center gap-1">
                 Tất cả <ArrowRight className="h-3 w-3" strokeWidth={2.25} />
               </Link>
             </div>
             {recentStudents.length === 0 ? (
-              <div className="p-8 text-center text-ink/45">
+              <div className="p-8 text-center text-foreground/45">
                 <Users className="h-8 w-8 mx-auto mb-2 opacity-50" strokeWidth={1.5} />
                 <p className="text-sm">Chưa có học viên mới</p>
               </div>
             ) : (
-              <div className="divide-y divide-ink/5">
+              <div className="divide-y divide-foreground/5">
                 {recentStudents.map(s => (
                   <Link
                     key={s.id}
@@ -185,10 +189,10 @@ export default async function AdminDashboard() {
                       {s.user.fullName.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-ink truncate">{s.user.fullName}</p>
-                      <p className="text-xs text-ink/45 font-mono">{s.studentCode}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{s.user.fullName}</p>
+                      <p className="text-xs text-foreground/45 font-mono">{s.studentCode}</p>
                     </div>
-                    <ArrowRight className="h-3.5 w-3.5 text-ink/30 group-hover:translate-x-0.5 group-hover:text-accent transition" strokeWidth={2.25} />
+                    <ArrowRight className="h-3.5 w-3.5 text-foreground/30 group-hover:translate-x-0.5 group-hover:text-accent transition" strokeWidth={2.25} />
                   </Link>
                 ))}
               </div>
@@ -196,10 +200,10 @@ export default async function AdminDashboard() {
           </div>
 
           {/* Quick actions */}
-          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
-            <div className="px-5 py-4 border-b border-ink/8 flex items-center gap-2">
+          <div className="glass-card glass-card-hover overflow-hidden">
+            <div className="px-5 py-4 border-b border-foreground/8 flex items-center gap-2">
               <Zap className="h-4 w-4 text-accent" strokeWidth={1.75} />
-              <p className="eyebrow text-ink/55">Thao tác nhanh</p>
+              <p className="eyebrow text-foreground/55">Thao tác nhanh</p>
             </div>
             <div className="p-3 space-y-1.5">
               <ActionLink href="/admin/students/new" icon={UserPlus} label="Thêm học viên" primary />
@@ -231,13 +235,13 @@ function ActionLink({
       href={href}
       className={`group flex items-center gap-3 px-3 py-2.5 rounded-card transition ${
         primary
-          ? 'bg-ink text-paper hover:bg-ink/90 shadow-soft'
+          ? 'bg-ink text-paper hover:bg-foreground/90 shadow-soft'
           : 'hover:bg-paper-tint/50'
       }`}
     >
       <Icon className={`h-4 w-4 shrink-0 ${primary ? 'text-accent' : 'text-accent'}`} strokeWidth={1.75} />
-      <span className={`text-sm font-medium flex-1 ${primary ? 'text-paper' : 'text-ink'}`}>{label}</span>
-      <ArrowRight className={`h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform ${primary ? 'text-paper/60' : 'text-ink/30'}`} strokeWidth={2.25} />
+      <span className={`text-sm font-medium flex-1 ${primary ? 'text-paper' : 'text-foreground'}`}>{label}</span>
+      <ArrowRight className={`h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform ${primary ? 'text-paper/60' : 'text-foreground/30'}`} strokeWidth={2.25} />
     </Link>
   )
 }

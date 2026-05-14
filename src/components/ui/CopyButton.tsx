@@ -16,9 +16,9 @@ export function CopyButton({ text, className }: { text: string; className?: stri
     <button
       type="button"
       onClick={copy}
-      className={className ?? 'inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-[#1C2B4A]/8 text-[#1C2B4A]/60 hover:bg-[#1C2B4A]/15'}
+      className={className ?? 'inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded bg-ink/8 text-foreground/60 hover:bg-foreground/15'}
     >
-      {copied ? <><Check className="w-3 h-3 text-green-600" /> Đã copy</> : <><Copy className="w-3 h-3" /> Copy</>}
+      {copied ? <><Check className="w-3 h-3 text-success" /> Đã copy</> : <><Copy className="w-3 h-3" /> Copy</>}
     </button>
   )
 }

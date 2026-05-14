@@ -32,7 +32,7 @@ export default async function StudentOrdersPage() {
 
   const student = await prisma.student.findFirst({ where: { userId: user.id }, select: { id: true } })
   if (!student) {
-    return <div className="p-8 text-center text-ink/55">Không tìm thấy hồ sơ học viên</div>
+    return <div className="p-8 text-center text-foreground/55">Không tìm thấy hồ sơ học viên</div>
   }
 
   const orders = await prisma.order.findMany({
@@ -47,7 +47,7 @@ export default async function StudentOrdersPage() {
   return (
     <div className="min-h-screen bg-paper pb-12">
       {/* Hero */}
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto">
           <Link
@@ -64,13 +64,13 @@ export default async function StudentOrdersPage() {
 
       <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
         {orders.length === 0 ? (
-          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
-            <ShoppingBag className="h-10 w-10 text-ink/30 mx-auto mb-3" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có đơn hàng</p>
-            <p className="text-sm text-ink/55 mb-6">Hãy ghé Shop xem các sản phẩm.</p>
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
+            <ShoppingBag className="h-10 w-10 text-foreground/30 mx-auto mb-3" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có đơn hàng</p>
+            <p className="text-sm text-foreground/55 mb-6">Hãy ghé Shop xem các sản phẩm.</p>
             <Link
               href="/student/shop"
-              className="inline-flex items-center gap-1.5 bg-ink text-paper font-semibold px-5 py-2.5 rounded-pill text-sm hover:bg-ink/90 transition"
+              className="inline-flex items-center gap-1.5 bg-ink text-paper font-semibold px-5 py-2.5 rounded-pill text-sm hover:bg-foreground/90 transition"
             >
               Khám phá Shop <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.25} />
             </Link>
@@ -79,13 +79,13 @@ export default async function StudentOrdersPage() {
           orders.map(order => {
             const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending
             return (
-              <div key={order.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
+              <div key={order.id} className="glass-card glass-card-hover p-5">
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div>
-                    <p className="text-xs text-ink/55">
+                    <p className="text-xs text-foreground/55">
                       {format(order.createdAt, 'HH:mm · dd/MM/yyyy', { locale: vi })}
                     </p>
-                    <p className="font-mono text-[10px] text-ink/40 mt-0.5">
+                    <p className="font-mono text-[10px] text-foreground/40 mt-0.5">
                       #{order.id.slice(0, 8).toUpperCase()}
                     </p>
                   </div>
@@ -97,44 +97,44 @@ export default async function StudentOrdersPage() {
                     const Icon = PRODUCT_TYPE_ICON[item.product.type] ?? Box
                     return (
                       <div key={item.id} className="flex items-center justify-between text-sm gap-3">
-                        <span className="text-ink inline-flex items-center gap-2 min-w-0">
+                        <span className="text-foreground inline-flex items-center gap-2 min-w-0">
                           <Icon className="h-3.5 w-3.5 text-accent shrink-0" strokeWidth={1.75} />
                           <span className="truncate">{item.product.name}</span>
-                          {item.quantity > 1 && <span className="text-ink/55 shrink-0">× {item.quantity}</span>}
+                          {item.quantity > 1 && <span className="text-foreground/55 shrink-0">× {item.quantity}</span>}
                         </span>
-                        <span className="text-ink/65 shrink-0">{fmt(item.lineTotal)}</span>
+                        <span className="text-foreground/65 shrink-0">{fmt(item.lineTotal)}</span>
                       </div>
                     )
                   })}
                 </div>
 
-                <div className="border-t border-ink/8 pt-3 flex items-center justify-between gap-3">
+                <div className="border-t border-foreground/8 pt-3 flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     {order.discountAmount > 0 && (
                       <p className="text-xs text-success">Giảm {fmt(order.discountAmount)}</p>
                     )}
-                    <p className="text-xs text-ink/55 truncate">{cfg.desc}</p>
+                    <p className="text-xs text-foreground/55 truncate">{cfg.desc}</p>
                   </div>
-                  <p className="font-heading italic text-2xl text-ink shrink-0">{fmt(order.finalAmount)}</p>
+                  <p className="font-heading italic text-2xl text-foreground shrink-0">{fmt(order.finalAmount)}</p>
                 </div>
 
                 {order.status === 'approved' && (
-                  <div className="mt-3 pt-3 border-t border-ink/8">
+                  <div className="mt-3 pt-3 border-t border-foreground/8">
                     <VietQRPayButton orderId={order.id} />
                   </div>
                 )}
 
                 {order.noteFromStudent && (
-                  <div className="mt-3 pt-3 border-t border-ink/8">
-                    <p className="eyebrow text-ink/55 mb-1">Ghi chú của bạn</p>
-                    <p className="text-sm text-ink/75">{order.noteFromStudent}</p>
+                  <div className="mt-3 pt-3 border-t border-foreground/8">
+                    <p className="eyebrow text-foreground/55 mb-1">Ghi chú của bạn</p>
+                    <p className="text-sm text-foreground/75">{order.noteFromStudent}</p>
                   </div>
                 )}
 
                 {order.fulfillmentNote && (
-                  <div className="mt-3 pt-3 border-t border-ink/8">
+                  <div className="mt-3 pt-3 border-t border-foreground/8">
                     <p className="eyebrow text-accent mb-1">Phản hồi từ lớp</p>
-                    <p className="text-sm text-ink/75">{order.fulfillmentNote}</p>
+                    <p className="text-sm text-foreground/75">{order.fulfillmentNote}</p>
                   </div>
                 )}
               </div>

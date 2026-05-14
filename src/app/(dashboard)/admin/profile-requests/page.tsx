@@ -36,7 +36,7 @@ export default async function ProfileRequestsPage({ searchParams }: { searchPara
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-6xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
@@ -55,20 +55,20 @@ export default async function ProfileRequestsPage({ searchParams }: { searchPara
           ))}
         </div>
 
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+        <div className="glass-card glass-card-hover overflow-hidden">
           {items.length === 0 ? (
             <div className="p-12 text-center">
-              <UserCog className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-ink">Không có yêu cầu</p>
+              <UserCog className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+              <p className="font-heading italic text-2xl text-foreground">Không có yêu cầu</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px]">
-                <thead className="bg-paper-tint/30 border-b border-ink/8">
+                <thead className="bg-paper-tint/30 border-b border-foreground/8">
                   <tr>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Học viên</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Trường đổi</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Thời gian</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Học viên</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Trường đổi</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Thời gian</th>
                     <th className="px-5 py-3"></th>
                   </tr>
                 </thead>
@@ -79,17 +79,17 @@ export default async function ProfileRequestsPage({ searchParams }: { searchPara
                     const changes = (raw?.changes ?? {}) as Record<string, { old: string | null; new: string }>
                     const fields = Object.keys(changes) as ApprovalRequiredField[]
                     return (
-                      <tr key={req.id} className="border-b border-ink/5 last:border-b-0 hover:bg-paper-tint/20 transition group">
+                      <tr key={req.id} className="border-b border-foreground/5 last:border-b-0 hover:bg-paper-tint/20 transition group glass-table-row">
                         <td className="px-5 py-3">
-                          <p className="text-sm font-medium text-ink">{req.student.user.fullName}</p>
-                          <p className="text-xs text-ink/45 font-mono mt-0.5">{req.student.studentCode} · {req.student.user.phone}</p>
+                          <p className="text-sm font-medium text-foreground">{req.student.user.fullName}</p>
+                          <p className="text-xs text-foreground/45 font-mono mt-0.5">{req.student.studentCode} · {req.student.user.phone}</p>
                         </td>
                         <td className="px-5 py-3">
                           <div className="flex gap-1 flex-wrap">
                             {fields.map(f => <Chip key={f} variant="mist">{FIELD_LABELS[f] ?? f}</Chip>)}
                           </div>
                         </td>
-                        <td className="px-5 py-3 text-xs text-ink/55">{format(req.requestedAt, 'dd/MM/yyyy HH:mm')}</td>
+                        <td className="px-5 py-3 text-xs text-foreground/55">{format(req.requestedAt, 'dd/MM/yyyy HH:mm')}</td>
                         <td className="px-5 py-3 text-right">
                           <Link
                             href={`/admin/profile-requests/${req.id}`}
@@ -114,7 +114,7 @@ export default async function ProfileRequestsPage({ searchParams }: { searchPara
                 key={p}
                 href={`/admin/profile-requests?status=${status}&page=${p}`}
                 className={`grid place-items-center h-9 w-9 rounded-pill text-sm font-medium transition ${
-                  p === page ? 'bg-ink text-paper' : 'ring-1 ring-ink/10 text-ink/65 hover:ring-ink/20 hover:bg-ink/5'
+                  p === page ? 'bg-ink text-paper' : 'ring-1 ring-foreground/10 text-foreground/65 hover:ring-foreground/20 hover:bg-foreground/5'
                 }`}
               >
                 {p}

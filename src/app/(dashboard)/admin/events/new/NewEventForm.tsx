@@ -37,36 +37,36 @@ export function NewEventForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5 space-y-4">
+    <form onSubmit={onSubmit} className="glass-card glass-card-hover p-5 space-y-4">
       <div>
-        <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
-          Tên sự kiện <span className="text-red-500">*</span>
+        <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
+          Tên sự kiện <span className="text-danger">*</span>
         </label>
         <input type="text" required maxLength={200} value={name} onChange={e => setName(e.target.value)}
           placeholder="VD: Tiệc cuối năm Poolane 2026"
-          className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+          className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
       </div>
       <div>
-        <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
-          Ngày <span className="text-red-500">*</span>
+        <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
+          Ngày <span className="text-danger">*</span>
         </label>
         <input type="datetime-local" required value={date} onChange={e => setDate(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+          className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
       </div>
       <div>
-        <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+        <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
           Mô tả
         </label>
         <textarea rows={3} maxLength={2000} value={description} onChange={e => setDescription(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+          className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
       </div>
-      {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
+      {error && <div className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-lg px-3 py-2">{error}</div>}
       <div className="flex gap-3">
         <button type="submit" disabled={submitting}
-          className="flex-1 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-2.5 text-sm font-semibold disabled:opacity-50">
+          className="flex-1 bg-ink-soft text-paper rounded-lg py-2.5 text-sm font-semibold disabled:opacity-50">
           {submitting ? 'Đang tạo...' : 'Tạo sự kiện'}
         </button>
-        <Link href="/admin/events" className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70">
+        <Link href="/admin/events" className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-foreground/15 text-foreground/70">
           Huỷ
         </Link>
       </div>

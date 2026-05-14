@@ -120,12 +120,12 @@ export function LessonPlanForm({
       )}
 
       {courses.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-4">
-          <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+        <div className="glass-card glass-card-hover p-4">
+          <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
             Khoá chính của buổi
           </label>
           <select value={form.courseId} onChange={e => setForm(f => ({ ...f, courseId: e.target.value, focusSkills: [] }))}
-            className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white">
+            className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]">
             <option value="">— Chọn khoá —</option>
             {courses.map(c => (
               <option key={c.id} value={c.id}>{c.code} · {c.name} ({c.count} HV)</option>
@@ -135,8 +135,8 @@ export function LessonPlanForm({
       )}
 
       {skillsForCourse.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-4">
-          <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-2">
+        <div className="glass-card glass-card-hover p-4">
+          <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-2">
             Kỹ năng tập trung (tối đa 5)
           </label>
           <div className="flex gap-2 flex-wrap">
@@ -145,56 +145,56 @@ export function LessonPlanForm({
               return (
                 <button key={s.key} type="button" onClick={() => toggleSkill(s.key)}
                   className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-                    active ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]' : 'bg-white text-[#1C2B4A]/70 border-[#1C2B4A]/15 hover:border-[#1C2B4A]/40'
+                    active ? 'bg-ink-soft text-paper border-ink' : 'bg-[var(--surface)] text-foreground/70 border-foreground/15 hover:border-foreground/40'
                   }`}>
                   {s.label}
                 </button>
               )
             })}
           </div>
-          <p className="text-xs text-[#1C2B4A]/40 mt-2">Đã chọn {form.focusSkills.length}/5</p>
+          <p className="text-xs text-foreground/40 mt-2">Đã chọn {form.focusSkills.length}/5</p>
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-4 space-y-4">
+      <div className="glass-card glass-card-hover p-4 space-y-4">
         <Field label="Khởi động (warmup)">
           <textarea rows={2} maxLength={2000} value={form.warmupNotes}
             onChange={e => setForm(f => ({ ...f, warmupNotes: e.target.value }))}
             placeholder="VD: 5 phút bơi nhẹ + giãn cơ vai"
-            className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+            className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
         </Field>
 
         <Field label="Nội dung chính">
           <textarea rows={4} maxLength={2000} value={form.mainNotes}
             onChange={e => setForm(f => ({ ...f, mainNotes: e.target.value }))}
             placeholder="VD: Tập đạp chân ếch với phao mềm 3 set × 25m, sau đó kết hợp tay-chân-thở"
-            className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+            className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
         </Field>
 
         <Field label="Hồi phục (cooldown)">
           <textarea rows={2} maxLength={2000} value={form.cooldownNotes}
             onChange={e => setForm(f => ({ ...f, cooldownNotes: e.target.value }))}
             placeholder="VD: 3 phút bơi nhẹ + thở sâu"
-            className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+            className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
         </Field>
 
         <Field label="Đạo cụ cần chuẩn bị">
           <input type="text" maxLength={500} value={form.equipment}
             onChange={e => setForm(f => ({ ...f, equipment: e.target.value }))}
             placeholder="VD: 5 phao mềm + 3 phao dài + dây cản"
-            className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
+            className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
         </Field>
       </div>
 
-      {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
+      {error && <div className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-lg px-3 py-2">{error}</div>}
 
       <div className="flex gap-3">
         <button type="submit" disabled={submitting}
-          className="flex-1 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-2.5 text-sm font-semibold disabled:opacity-50">
+          className="flex-1 bg-ink-soft text-paper rounded-lg py-2.5 text-sm font-semibold disabled:opacity-50">
           {submitting ? 'Đang lưu...' : 'Lưu kế hoạch'}
         </button>
         <Link href={`/admin/schedule/sessions/${sessionId}`}
-          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70">
+          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-foreground/15 text-foreground/70">
           Huỷ
         </Link>
       </div>
@@ -205,7 +205,7 @@ export function LessonPlanForm({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+      <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
         {label}
       </label>
       {children}

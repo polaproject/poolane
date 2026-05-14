@@ -24,7 +24,7 @@ export default async function MySchedulePage() {
   const student = await prisma.student.findFirst({ where: { userId: user.id }, select: { id: true } })
   if (!student) {
     return (
-      <div className="p-8 text-center text-ink/55">Không tìm thấy hồ sơ học viên</div>
+      <div className="p-8 text-center text-foreground/55">Không tìm thấy hồ sơ học viên</div>
     )
   }
 
@@ -49,7 +49,7 @@ export default async function MySchedulePage() {
   return (
     <div className="min-h-screen bg-paper pb-12">
       {/* Hero */}
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/15 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">30 ngày · Buổi sắp tới + lịch sử</p>
@@ -128,21 +128,21 @@ function Section({
 }) {
   const hasChildren = Array.isArray(children) && children.length > 0
   return (
-    <section className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
-      <header className="px-5 py-4 border-b border-ink/8 flex items-center justify-between">
+    <section className="glass-card glass-card-hover overflow-hidden">
+      <header className="px-5 py-4 border-b border-foreground/8 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-accent" strokeWidth={1.75} />
           <div>
-            <p className="eyebrow text-ink/55">{eyebrow}</p>
-            <h2 className="font-heading italic text-lg text-ink mt-0.5">{title}</h2>
+            <p className="eyebrow text-foreground/55">{eyebrow}</p>
+            <h2 className="font-heading italic text-lg text-foreground mt-0.5">{title}</h2>
           </div>
         </div>
       </header>
       {hasChildren ? (
-        <div className="divide-y divide-ink/5">{children}</div>
+        <div className="divide-y divide-foreground/5">{children}</div>
       ) : (
         <div className="px-5 py-8 text-center">
-          <p className="text-sm text-ink/55 mb-2">{empty}</p>
+          <p className="text-sm text-foreground/55 mb-2">{empty}</p>
           {emptyAction}
         </div>
       )}
@@ -166,21 +166,21 @@ function RegRow({
   return (
     <div className={`px-5 py-4 flex items-start gap-3 ${past ? 'opacity-65' : ''}`}>
       <div className="text-center w-12 shrink-0 pt-0.5">
-        <div className="text-[10px] tracking-widest uppercase text-ink/45">
+        <div className="text-[10px] tracking-widest uppercase text-foreground/45">
           {format(date, 'EEE', { locale: vi })}
         </div>
-        <div className="font-heading italic text-2xl text-ink leading-none mt-0.5">
+        <div className="font-heading italic text-2xl text-foreground leading-none mt-0.5">
           {format(date, 'dd', { locale: vi })}
         </div>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-ink">
+        <p className="text-sm font-medium text-foreground">
           {format(date, 'EEEE, dd/MM/yyyy', { locale: vi })}
           {isToday(date) && (
             <Chip variant="accent" active className="ml-2 align-middle text-[10px]">Hôm nay</Chip>
           )}
         </p>
-        <p className="text-xs text-ink/55 mt-1 inline-flex items-center gap-1.5">
+        <p className="text-xs text-foreground/55 mt-1 inline-flex items-center gap-1.5">
           {isMorning ? (
             <><Sunrise className="h-3 w-3 text-accent" strokeWidth={1.75} /> 5:30 – 7:30 sáng</>
           ) : (

@@ -17,7 +17,7 @@ export default async function VouchersPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-5xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -34,7 +34,7 @@ export default async function VouchersPage() {
       </div>
 
       <div className="px-4 sm:px-8 -mt-6 max-w-5xl mx-auto relative z-10">
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+        <div className="glass-card glass-card-hover overflow-hidden">
           {vouchers.length === 0 ? (
             <EmptyState
               icon={Tag}
@@ -45,14 +45,14 @@ export default async function VouchersPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[700px]">
-                <thead className="bg-paper-tint/30 border-b border-ink/8">
+                <thead className="bg-paper-tint/30 border-b border-foreground/8">
                   <tr>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Mã</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Giảm</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Áp dụng</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Lượt dùng</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Hiệu lực</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Trạng thái</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Mã</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Giảm</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Áp dụng</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Lượt dùng</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Hiệu lực</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Trạng thái</th>
                     <th className="px-5 py-3"></th>
                   </tr>
                 </thead>
@@ -70,26 +70,26 @@ export default async function VouchersPage() {
                       : { variant: 'success' as const, label: 'Đang dùng' }
 
                     return (
-                      <tr key={v.id} className="border-b border-ink/5 last:border-b-0 hover:bg-paper-tint/20 transition">
+                      <tr key={v.id} className="border-b border-foreground/5 last:border-b-0 hover:bg-paper-tint/20 transition glass-table-row">
                         <td className="px-5 py-3">
-                          <code className="font-mono text-sm font-bold text-ink bg-accent/15 px-2.5 py-1 rounded-pill">{v.code}</code>
-                          {v.description && <p className="text-xs text-ink/55 mt-1">{v.description}</p>}
+                          <code className="font-mono text-sm font-bold text-foreground bg-accent/15 px-2.5 py-1 rounded-pill">{v.code}</code>
+                          {v.description && <p className="text-xs text-foreground/55 mt-1">{v.description}</p>}
                         </td>
-                        <td className="px-5 py-3 text-sm font-semibold text-ink">
+                        <td className="px-5 py-3 text-sm font-semibold text-foreground">
                           {v.discountType === 'percent' ? `${v.discountValue}%`
                             : v.discountType === 'fixed' ? fmt(v.discountValue)
                             : 'Vé miễn phí'}
                         </td>
-                        <td className="px-5 py-3 text-xs text-ink/65">
+                        <td className="px-5 py-3 text-xs text-foreground/65">
                           {v.appliesTo === 'any' ? 'Tất cả' : v.appliesTo === 'course_only' ? 'Khoá học' : 'Shop'}
                         </td>
-                        <td className="px-5 py-3 text-sm text-ink/75">
+                        <td className="px-5 py-3 text-sm text-foreground/75">
                           {v.usedCount}{v.maxUses != null ? `/${v.maxUses}` : ''}
                         </td>
-                        <td className="px-5 py-3 text-xs text-ink/60">
+                        <td className="px-5 py-3 text-xs text-foreground/60">
                           {v.validFrom && <p>Từ {format(v.validFrom, 'dd/MM/yyyy')}</p>}
                           {v.validUntil && <p>Đến {format(v.validUntil, 'dd/MM/yyyy')}</p>}
-                          {!v.validFrom && !v.validUntil && <span className="text-ink/30">Không giới hạn</span>}
+                          {!v.validFrom && !v.validUntil && <span className="text-foreground/30">Không giới hạn</span>}
                         </td>
                         <td className="px-5 py-3">
                           <Chip variant={chip.variant} active={usable || chip.variant !== 'neutral'}>{chip.label}</Chip>

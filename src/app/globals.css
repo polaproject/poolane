@@ -21,6 +21,12 @@
   --color-success: var(--success);
   --color-warn: var(--warn);
   --color-danger: var(--danger);
+  /* Phase 9 — adaptive tokens (đổi value theo theme-dark/light) */
+  --color-surface: var(--surface);
+  --color-surface-soft: var(--surface-soft);
+  --color-surface-fg: var(--surface-fg);
+  --color-nav-bg: var(--nav-bg);
+  --color-nav-fg: var(--nav-fg);
 
   /* shadcn tokens — pre-existing, kept for primitive compatibility */
   --color-background: var(--background);
@@ -176,8 +182,10 @@
  * ════════════════════════════════════════════════════════════ */
 
 :root,
-.theme-a {
-  /* ── Theme A — Đêm & Sao ─────────────────────────── */
+.theme-dark {
+  /* ── DARK MODE — Đêm & Sao ────────────────────────
+   * Dùng ban đêm muộn, ánh sáng yếu. Navy + gold.
+   * ─────────────────────────────────────────────── */
   --ink: #0F1B33;
   --ink-soft: #1C2B4A;
   --paper: #FBF7F0;
@@ -189,37 +197,93 @@
   --warn: #D89B3A;
   --danger: #B5483C;
 
+  /* Adaptive surface tokens — KEY của dark/light mode */
+  --surface:        var(--ink-soft);       /* card bg = navy đậm */
+  --surface-soft:   #243456;               /* hover/alt surface */
+  --surface-fg:     var(--paper);          /* text trên card */
+  --surface-ring:   rgba(251, 247, 240, 0.10);
+
+  --nav-bg:         var(--ink-soft);       /* sidebar = navy */
+  --nav-fg:         var(--paper);
+  --nav-muted:      rgba(251, 247, 240, 0.60);
+  --nav-active:     rgba(251, 247, 240, 0.14);
+  --nav-hover:      rgba(251, 247, 240, 0.10);
+
+  --hero-bg:        var(--ink);            /* hero pure dark */
+  --hero-fg:        var(--paper);
+  --hero-overlay-1: rgba(200, 168, 75, 0.12);
+  --hero-overlay-2: rgba(127, 168, 181, 0.10);
+
   /* Glass surface (semi-transparent paper trên ambient bg) */
   --glass-bg: rgba(251, 247, 240, 0.08);
   --glass-ring: rgba(255, 255, 255, 0.15);
   --glass-text: #FBF7F0;
 
-  /* Shadow tokens (tinted by ink) */
+  /* Shadow tokens (tinted by ink) — Phase 8 dual-layer cinematic */
   --shadow-soft:  0 4px 20px -8px rgba(15, 27, 51, 0.18);
-  --shadow-glass: 0 30px 80px -20px rgba(0, 0, 0, 0.55);
+  --shadow-glass:
+    0 8px 24px -8px rgba(0, 0, 0, 0.28),
+    0 30px 80px -20px rgba(0, 0, 0, 0.55);
   --shadow-cta:   0 12px 28px -8px rgba(200, 168, 75, 0.45);
+  --shadow-glow-accent:  0 0 28px -2px rgba(200, 168, 75, 0.35);
+  --shadow-glow-mist:    0 0 28px -2px rgba(127, 168, 181, 0.30);
+  --shadow-glow-success: 0 0 24px -2px rgba(92, 138, 110, 0.28);
 
-  /* Legacy --pola-* mapping (cho code cũ vẫn chạy) */
-  --pola-nav-bg:     var(--ink-soft);
-  --pola-nav-text:   var(--paper);
-  --pola-nav-muted:  rgba(251, 247, 240, 0.55);
-  --pola-nav-active: rgba(251, 247, 240, 0.12);
-  --pola-nav-hover:  rgba(251, 247, 240, 0.08);
+  /* Spring easing tokens (Phase 8) */
+  --ease-spring:       cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring-soft:  cubic-bezier(0.4, 0, 0.2, 1.4);
+  --ease-out-quart:    cubic-bezier(0.25, 1, 0.5, 1);
+  --motion-fast:    150ms;
+  --motion-base:    250ms;
+  --motion-slow:    450ms;
+  --motion-cinema:  800ms;
+
+  /* ═══════ Phase 10 — Liquid Glass tokens (Apple iOS 26 / macOS 26) ═══════ */
+  /* Concentric rounding scale */
+  --radius-glass-xs: 8px;
+  --radius-glass-sm: 12px;
+  --radius-glass-md: 16px;
+  --radius-glass-lg: 24px;
+  --radius-glass-xl: 28px;
+  --radius-glass-2xl: 36px;
+
+  /* Lensing — backdrop-filter compound (blur + saturate + brightness) */
+  --lens-light:  blur(20px) saturate(140%) brightness(108%);
+  --lens-medium: blur(32px) saturate(160%) brightness(112%);
+  --lens-heavy:  blur(48px) saturate(180%) brightness(115%);
+
+  /* Glass tints — DARK MODE base */
+  --glass-tint-1: rgba(251, 247, 240, 0.08);
+  --glass-tint-2: rgba(251, 247, 240, 0.12);
+  --glass-tint-3: rgba(251, 247, 240, 0.18);
+  --glass-edge-light: rgba(255, 255, 255, 0.20);
+  --glass-edge-dark:  rgba(0, 0, 0, 0.20);
+
+  /* Specular */
+  --specular-color: rgba(255, 255, 255, 0.22);
+  --specular-angle: 120deg;
+
+  /* Legacy --pola-* mapping (cho code cũ vẫn chạy) — map sang adaptive tokens */
+  --pola-nav-bg:     var(--nav-bg);
+  --pola-nav-text:   var(--nav-fg);
+  --pola-nav-muted:  var(--nav-muted);
+  --pola-nav-active: var(--nav-active);
+  --pola-nav-hover:  var(--nav-hover);
   --pola-accent:     var(--accent);
   --pola-teal:       var(--mist);
   --pola-page-bg:    var(--paper);
-  --pola-card-bg:    #FFFFFF;
+  --pola-card-bg:    var(--surface);
   --pola-border:     rgba(15, 27, 51, 0.10);
   --pola-text:       var(--ink);
   --pola-text-muted: rgba(15, 27, 51, 0.55);
 
-  /* shadcn override → Poolane palette */
-  --background: var(--paper);
-  --foreground: var(--ink);
-  --card: #FFFFFF;
-  --card-foreground: var(--ink);
-  --popover: #FFFFFF;
-  --popover-foreground: var(--ink);
+  /* shadcn override → adaptive surface — Phase 11: foreground theo theme */
+  --background: var(--ink);             /* dark mode page bg */
+  --foreground: var(--paper);           /* dark mode text light */
+  --card: var(--surface);
+  --card-foreground: var(--surface-fg);
+  --popover: var(--surface);
+  --popover-foreground: var(--surface-fg);
   --primary: var(--ink);
   --primary-foreground: var(--paper);
   --secondary: var(--paper-tint);
@@ -233,8 +297,10 @@
   --ring: var(--accent);
 }
 
-.theme-b {
-  /* ── Theme B — Bình Yên ─────────────────────────── */
+.theme-light {
+  /* ── LIGHT MODE — Bình Yên Ban Ngày ──────────────
+   * Dùng ban ngày, ánh sáng tốt. Lavender + peach pastel.
+   * ─────────────────────────────────────────────── */
   --ink: #2D2A4A;
   --ink-soft: #3A3463;
   --paper: #F4EFFB;
@@ -246,33 +312,63 @@
   --warn: #D89B3A;
   --danger: #C25A4A;
 
+  /* Adaptive surface tokens — LIGHT mode = white cards trên lavender bg */
+  --surface:        #FFFFFF;
+  --surface-soft:   #F8F4ED;
+  --surface-fg:     var(--ink);
+  --surface-ring:   rgba(45, 42, 74, 0.08);
+
+  --nav-bg:         var(--paper-tint);     /* sidebar light cream */
+  --nav-fg:         var(--ink);
+  --nav-muted:      rgba(45, 42, 74, 0.60);
+  --nav-active:     rgba(45, 42, 74, 0.10);
+  --nav-hover:      rgba(45, 42, 74, 0.07);
+
+  --hero-bg:        linear-gradient(135deg, var(--paper-tint) 0%, var(--accent-soft) 100%);
+  --hero-fg:        var(--ink);
+  --hero-overlay-1: rgba(232, 155, 122, 0.18);
+  --hero-overlay-2: rgba(155, 145, 214, 0.15);
+
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-ring: rgba(45, 42, 74, 0.08);
   --glass-text: var(--ink);
 
-  --shadow-soft:  0 4px 20px -8px rgba(45, 42, 74, 0.12);
-  --shadow-glass: 0 30px 70px -20px rgba(45, 42, 74, 0.22);
-  --shadow-cta:   0 12px 28px -8px rgba(232, 155, 122, 0.45);
+  /* Phase 10 — Liquid Glass tints LIGHT MODE override */
+  --glass-tint-1: rgba(255, 255, 255, 0.55);
+  --glass-tint-2: rgba(255, 255, 255, 0.70);
+  --glass-tint-3: rgba(255, 255, 255, 0.85);
+  --glass-edge-light: rgba(255, 255, 255, 0.85);
+  --glass-edge-dark:  rgba(45, 42, 74, 0.10);
+  --specular-color:   rgba(255, 255, 255, 0.55);
 
-  --pola-nav-bg:     var(--ink);
-  --pola-nav-text:   #FFFFFF;
-  --pola-nav-muted:  rgba(255, 255, 255, 0.55);
-  --pola-nav-active: rgba(255, 255, 255, 0.12);
-  --pola-nav-hover:  rgba(255, 255, 255, 0.08);
+  --shadow-soft:  0 4px 20px -8px rgba(45, 42, 74, 0.12);
+  --shadow-glass:
+    0 6px 20px -6px rgba(45, 42, 74, 0.14),
+    0 30px 70px -20px rgba(45, 42, 74, 0.22);
+  --shadow-cta:   0 12px 28px -8px rgba(232, 155, 122, 0.45);
+  --shadow-glow-accent:  0 0 28px -2px rgba(232, 155, 122, 0.40);
+  --shadow-glow-mist:    0 0 28px -2px rgba(155, 145, 214, 0.35);
+  --shadow-glow-success: 0 0 24px -2px rgba(92, 138, 110, 0.28);
+
+  --pola-nav-bg:     var(--nav-bg);
+  --pola-nav-text:   var(--nav-fg);
+  --pola-nav-muted:  var(--nav-muted);
+  --pola-nav-active: var(--nav-active);
+  --pola-nav-hover:  var(--nav-hover);
   --pola-accent:     var(--accent);
   --pola-teal:       var(--mist);
   --pola-page-bg:    var(--paper);
-  --pola-card-bg:    #FFFFFF;
+  --pola-card-bg:    var(--surface);
   --pola-border:     rgba(45, 42, 74, 0.10);
   --pola-text:       var(--ink);
   --pola-text-muted: rgba(45, 42, 74, 0.55);
 
   --background: var(--paper);
   --foreground: var(--ink);
-  --card: #FFFFFF;
-  --card-foreground: var(--ink);
-  --popover: #FFFFFF;
-  --popover-foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--surface-fg);
+  --popover: var(--surface);
+  --popover-foreground: var(--surface-fg);
   --primary: var(--ink);
   --primary-foreground: #FFFFFF;
   --secondary: var(--paper-tint);
@@ -286,6 +382,18 @@
   --ring: var(--accent);
 }
 
+/* Backward-compat: cho code cũ còn ref .theme-a / .theme-b */
+.theme-a { /* @deprecated dùng .theme-dark */ }
+.theme-b { /* @deprecated dùng .theme-light */ }
+
+/* Phase 9 — Hero block: transparent để blend với ambient-bg, không tạo "band cut".
+ * Text color inherit từ ambient-bg theme.
+ * Decorative blob + StarField vẫn render trong hero, tạo focus area phía trên page. */
+.hero-block {
+  background: transparent;
+  position: relative;
+}
+
 /* ════════════════════════════════════════════════════════════
  * AMBIENT BACKGROUND
  * .ambient-bg = nền theme-aware: dark blobs cho A, lavender mesh cho B.
@@ -294,29 +402,99 @@
 .ambient-bg {
   position: relative;
   background: var(--paper);
+  transition: background-color var(--motion-cinema) var(--ease-out-quart),
+              color var(--motion-slow) var(--ease-out-quart);
 }
-.ambient-bg::before {
+
+/* Smooth theme A↔B fade trên toàn page */
+html, body {
+  transition: background-color var(--motion-cinema) var(--ease-out-quart),
+              color var(--motion-slow) var(--ease-out-quart);
+}
+
+/* ═══ Phase 11 — Apple-style thin glass scrollbar ═══ */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--glass-edge-light) transparent;
+}
+
+/* WebKit / Blink (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--foreground) 22%, transparent);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background var(--motion-base) var(--ease-out-quart);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--foreground) 40%, transparent);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Sidebar nav scrollbar — nhẹ hơn nữa, gần như invisible khi không hover */
+.pola-nav nav::-webkit-scrollbar {
+  width: 6px;
+}
+.pola-nav nav::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--nav-fg) 15%, transparent);
+}
+.pola-nav nav:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--nav-fg) 35%, transparent);
+}
+.ambient-bg::before,
+.ambient-bg::after {
   content: '';
   position: fixed;
-  inset: 0;
+  inset: -10%;
   pointer-events: none;
   z-index: 0;
-  /* Pattern mặc định (light) cho Theme B + fallback */
-  background:
-    radial-gradient(circle at 12% 18%, rgba(155, 145, 214, 0.22), transparent 45%),
-    radial-gradient(circle at 88% 22%, rgba(252, 231, 224, 0.55), transparent 50%),
-    radial-gradient(circle at 50% 92%, rgba(232, 155, 122, 0.18), transparent 55%);
+  will-change: transform;
 }
-.theme-a .ambient-bg {
+
+/* Theme B (default) — lavender + peach mist */
+.ambient-bg::before {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(155, 145, 214, 0.28), transparent 45%),
+    radial-gradient(circle at 88% 22%, rgba(252, 231, 224, 0.60), transparent 50%);
+}
+.ambient-bg::after {
+  background:
+    radial-gradient(circle at 50% 92%, rgba(232, 155, 122, 0.22), transparent 55%),
+    radial-gradient(circle at 78% 70%, rgba(155, 145, 214, 0.18), transparent 50%);
+}
+
+.theme-dark .ambient-bg {
   background: var(--ink);
   color: var(--paper);
 }
-.theme-a .ambient-bg::before {
+.theme-dark .ambient-bg::before {
   background:
-    radial-gradient(circle at 10% 12%, rgba(28, 43, 74, 0.85), transparent 55%),
-    radial-gradient(circle at 88% 25%, rgba(127, 168, 181, 0.18), transparent 55%),
-    radial-gradient(circle at 50% 95%, rgba(200, 168, 75, 0.15), transparent 60%);
+    radial-gradient(circle at 10% 12%, rgba(28, 43, 74, 0.90), transparent 55%),
+    radial-gradient(circle at 88% 25%, rgba(127, 168, 181, 0.22), transparent 55%);
 }
+.theme-dark .ambient-bg::after {
+  background:
+    radial-gradient(circle at 50% 95%, rgba(200, 168, 75, 0.20), transparent 60%),
+    radial-gradient(circle at 22% 78%, rgba(127, 168, 181, 0.14), transparent 50%);
+}
+
+/* Sway motion — 2 lớp blob đu đưa lệch pha → cảm giác sống */
+@media (prefers-reduced-motion: no-preference) {
+  .ambient-bg::before { animation: pola-sway 18s ease-in-out infinite; }
+  .ambient-bg::after  { animation: pola-sway 22s ease-in-out -8s infinite reverse; }
+}
+
 .ambient-bg > * {
   position: relative;
   z-index: 1;
@@ -344,6 +522,48 @@
     height: 1px;
     background: linear-gradient(to right, transparent, var(--glass-ring), transparent);
     opacity: 0.8;
+  }
+  .glass-panel-edge::after {
+    content: '';
+    position: absolute;
+    inset-inline: 2.5rem;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, color-mix(in srgb, var(--ink) 14%, transparent), transparent);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  /* Glass hover lift + glow — apply cho card interactive */
+  .glass-panel-hover {
+    transition: transform var(--motion-base) var(--ease-out-quart),
+                box-shadow var(--motion-base) var(--ease-out-quart);
+    will-change: transform;
+  }
+  .glass-panel-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glass), var(--shadow-glow-accent);
+  }
+
+  /* Multi-tier glass — 3 layer depth */
+  .glass-layer-1 {
+    background: color-mix(in srgb, var(--glass-bg) 65%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid color-mix(in srgb, var(--glass-ring) 70%, transparent);
+  }
+  .glass-layer-2 {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-ring);
+  }
+  .glass-layer-3 {
+    background: color-mix(in srgb, var(--glass-bg) 140%, transparent);
+    backdrop-filter: blur(36px) saturate(140%);
+    -webkit-backdrop-filter: blur(36px) saturate(140%);
+    border: 1px solid color-mix(in srgb, var(--glass-ring) 130%, transparent);
+    box-shadow: var(--shadow-glass), var(--shadow-glow-accent);
   }
 
   /* Glass pill — cho sticky nav, chip nhóm */
@@ -379,7 +599,7 @@
     letter-spacing: 0.25em;
     text-transform: uppercase;
     font-weight: 500;
-    opacity: 0.65;
+    opacity: 0.85;
   }
 
   /* Pill — generic */
@@ -403,7 +623,42 @@
   --shadow-lg-hover: 0 14px 44px rgba(15, 27, 51, 0.22);
 }
 
-.pola-nav    { background-color: var(--pola-nav-bg); color: var(--pola-nav-text); }
+/* Phase 10 — Sidebar glass (Apple Liquid Glass) */
+.pola-nav    {
+  background: color-mix(in srgb, var(--nav-bg) 75%, transparent);
+  backdrop-filter: var(--lens-medium);
+  -webkit-backdrop-filter: var(--lens-medium);
+  color: var(--pola-nav-text);
+  border-right: 1px solid var(--glass-edge-light);
+  position: relative;
+  isolation: isolate;
+  transition: background-color var(--motion-cinema) var(--ease-out-quart),
+              color var(--motion-slow) var(--ease-out-quart),
+              border-color var(--motion-slow) var(--ease-out-quart);
+}
+/* Subtle specular streak chéo qua sidebar */
+@media (prefers-reduced-motion: no-preference) {
+  .pola-nav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      160deg,
+      transparent 30%,
+      var(--specular-color) 50%,
+      transparent 70%
+    );
+    background-size: 100% 220%;
+    pointer-events: none;
+    z-index: 0;
+    animation: liquid-specular 18s linear infinite;
+    opacity: 0.4;
+  }
+}
+.pola-nav > * {
+  position: relative;
+  z-index: 1;
+}
 .pola-page   { background-color: var(--pola-page-bg); color: var(--pola-text); }
 .pola-card   { background-color: var(--pola-card-bg); border-color: var(--pola-border); }
 .pola-accent { color: var(--pola-accent); }
@@ -606,6 +861,215 @@
   border-radius: 8px;
 }
 
+/* ── Phase 8 — VisionOS-style motion keyframes ─────────────── */
+@keyframes pola-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -6px, 0); }
+}
+
+@keyframes pola-sway {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  33%  { transform: translate3d(2%, -1.5%, 0) scale(1.03); }
+  66%  { transform: translate3d(-1.5%, 1%, 0) scale(0.98); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes pola-twinkle {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.18); }
+}
+
+@keyframes pola-ripple {
+  0%   { transform: scale(0);   opacity: 0.45; }
+  100% { transform: scale(2.6); opacity: 0;    }
+}
+
+@keyframes pola-wave {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes pola-glass-shimmer {
+  0%   { background-position: -150% 0; }
+  100% { background-position:  250% 0; }
+}
+
+@keyframes pola-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent),
+                         var(--shadow-glass); }
+  50%      { box-shadow: 0 0 36px 8px color-mix(in srgb, var(--accent) 22%, transparent),
+                         var(--shadow-glass); }
+}
+
+@keyframes pola-rotate-slow {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Motion utility classes — chỉ chạy khi user không prefer reduce */
+@media (prefers-reduced-motion: no-preference) {
+  .motion-float    { animation: pola-float 4s ease-in-out infinite; }
+  .motion-sway     { animation: pola-sway 14s ease-in-out infinite; }
+  .motion-twinkle  { animation: pola-twinkle 2.6s ease-in-out infinite; }
+  .motion-glow     { animation: pola-glow-pulse 3.4s ease-in-out infinite; }
+  .motion-wave     { animation: pola-wave 8s linear infinite; }
+  .motion-rotate-slow { animation: pola-rotate-slow 60s linear infinite; }
+
+  .motion-glass-shimmer {
+    background: linear-gradient(120deg,
+      transparent 35%,
+      color-mix(in srgb, var(--paper) 22%, transparent) 50%,
+      transparent 65%);
+    background-size: 220% 100%;
+    animation: pola-glass-shimmer 9s linear infinite;
+  }
+}
+
+/* ═══ Phase 10 — Liquid Glass keyframes + utility classes ═══ */
+@keyframes liquid-specular {
+  0%   { background-position: -150% 0; opacity: 0.55; }
+  50%  { opacity: 0.85; }
+  100% { background-position:  250% 0; opacity: 0.55; }
+}
+
+@keyframes liquid-press {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(0.88); }
+}
+
+/* Glass card — utility class chuẩn Liquid Glass */
+.glass-card {
+  background: var(--glass-tint-2);
+  backdrop-filter: var(--lens-light);
+  -webkit-backdrop-filter: var(--lens-light);
+  border: 1px solid var(--glass-edge-light);
+  border-radius: var(--radius-glass-lg);
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-edge-light),
+    var(--shadow-glass);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.glass-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Specular streak overlay — apply qua ::before */
+@media (prefers-reduced-motion: no-preference) {
+  .glass-card::before,
+  .glass-button::before,
+  .glass-pill::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      var(--specular-angle),
+      transparent 35%,
+      var(--specular-color) 50%,
+      transparent 65%
+    );
+    background-size: 220% 100%;
+    pointer-events: none;
+    animation: liquid-specular 11s linear infinite;
+    z-index: 0;
+    border-radius: inherit;
+  }
+}
+
+/* Hover lift + glow cho glass-card */
+.glass-card-hover {
+  transition:
+    transform var(--motion-base) var(--ease-out-quart),
+    box-shadow var(--motion-base) var(--ease-out-quart),
+    background var(--motion-base) var(--ease-out-quart);
+  will-change: transform;
+}
+.glass-card-hover:hover {
+  transform: translateY(-3px);
+  background: var(--glass-tint-3);
+  box-shadow:
+    inset 0 1px 0 0 var(--glass-edge-light),
+    var(--shadow-glass),
+    var(--shadow-glow-accent);
+}
+
+/* Glass button base — apply lên shadcn Button qua class */
+.glass-button {
+  background: var(--glass-tint-2);
+  backdrop-filter: var(--lens-light);
+  -webkit-backdrop-filter: var(--lens-light);
+  border: 1px solid var(--glass-edge-light);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.glass-button > * {
+  position: relative;
+  z-index: 1;
+}
+.glass-button:hover {
+  background: var(--glass-tint-3);
+}
+.glass-button:active {
+  animation: liquid-press 200ms ease-out;
+}
+
+/* Glass input — backdrop-blur cho input fields */
+.glass-input {
+  background: var(--glass-tint-1);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  border: 1px solid var(--glass-edge-light);
+  transition:
+    background var(--motion-base) var(--ease-out-quart),
+    border-color var(--motion-base) var(--ease-out-quart),
+    box-shadow var(--motion-base) var(--ease-out-quart);
+}
+.glass-input:focus,
+.glass-input:focus-visible {
+  background: var(--glass-tint-2);
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  outline: none;
+}
+
+/* Glass table row */
+.glass-table-row {
+  transition: background var(--motion-base) var(--ease-out-quart);
+}
+.glass-table-row:nth-child(even) {
+  background: var(--glass-tint-1);
+}
+.glass-table-row:hover {
+  background: var(--glass-tint-3);
+}
+
+/* 3D micro tilt — apply qua class + JS hook */
+.card-tilt {
+  transform: perspective(1000px)
+             rotateX(var(--tilt-y, 0deg))
+             rotateY(var(--tilt-x, 0deg));
+  transition: transform 200ms var(--ease-out-quart);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Ripple effect (cho button click) */
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-effect {
+  position: absolute;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--paper) 50%, transparent);
+  pointer-events: none;
+  transform: scale(0);
+  animation: pola-ripple 0.7s ease-out forwards;
+}
+
 /* ── Focus ring (a11y) ─────────────────────────────────── */
 .btn-pola-primary,
 .btn-pola-secondary,
@@ -631,4 +1095,145 @@ a:focus:not(:focus-visible) {
     font-size: 0.66rem;
     padding: 2px 6px;
   }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+ * PHASE 12 — LIQUID GLASS RESET (family.co reference)
+ * Namespace `.lqg-*` — isolated from Phase 7-11 tokens.
+ * Apply qua wrapper `.lqg-root` (sandbox only for now).
+ * ════════════════════════════════════════════════════════════ */
+.lqg-root {
+  /* LIGHT MODE (default — 1:1 family.co pastel) */
+  --lqg-bg-base:        #FAF7F2;
+  --lqg-bg-elevated:    rgba(255, 255, 255, 0.94);
+  --lqg-bg-glass:       rgba(255, 255, 255, 0.55);
+  --lqg-bg-glass-strong: rgba(255, 255, 255, 0.78);
+
+  --lqg-text-primary:   #1F1C2E;
+  --lqg-text-secondary: #6B6680;
+  --lqg-text-tertiary:  #9D98AE;
+  --lqg-text-on-accent: #FFFFFF;
+
+  --lqg-mesh-1: rgba(232, 155, 122, 0.35);
+  --lqg-mesh-2: rgba(187, 158, 232, 0.28);
+  --lqg-mesh-3: rgba(255, 230, 200, 0.45);
+
+  --lqg-accent:      #E89B7A;
+  --lqg-accent-deep: #C97758;
+  --lqg-accent-soft: #FCE7DD;
+
+  --lqg-edge-hi:    rgba(255, 255, 255, 0.85);
+  --lqg-edge-lo:    rgba(31, 28, 46, 0.06);
+  --lqg-shadow-card:
+    0 1px 0 var(--lqg-edge-hi) inset,
+    0 12px 32px -12px rgba(31, 28, 46, 0.18);
+  --lqg-shadow-glass:
+    0 1px 0 var(--lqg-edge-hi) inset,
+    0 30px 80px -20px rgba(31, 28, 46, 0.28);
+  --lqg-shadow-lift:
+    0 1px 0 var(--lqg-edge-hi) inset,
+    0 24px 48px -16px rgba(232, 155, 122, 0.30),
+    0 12px 24px -8px rgba(31, 28, 46, 0.18);
+
+  /* Lensing */
+  --lqg-lens-light:  blur(20px) saturate(140%) brightness(1.05);
+  --lqg-lens-medium: blur(32px) saturate(160%) brightness(1.08);
+  --lqg-lens-heavy:  blur(48px) saturate(180%) brightness(1.10);
+
+  /* Motion */
+  --lqg-ease-overshoot: cubic-bezier(0.34, 1.7, 0.64, 1);
+  --lqg-ease-soft:      cubic-bezier(0.4, 0, 0.2, 1);
+  --lqg-ease-snappy:    cubic-bezier(0.5, 0, 0, 1);
+
+  /* Radius (concentric) */
+  --lqg-r-xs: 8px;
+  --lqg-r-sm: 12px;
+  --lqg-r-md: 16px;
+  --lqg-r-lg: 24px;
+  --lqg-r-xl: 32px;
+  --lqg-r-2xl: 40px;
+  --lqg-r-pill: 9999px;
+
+  background: var(--lqg-bg-base);
+  color: var(--lqg-text-primary);
+  transition: background 800ms var(--lqg-ease-soft), color 400ms var(--lqg-ease-soft);
+}
+
+.lqg-root.lqg-dark {
+  --lqg-bg-base:        #0E0D14;
+  --lqg-bg-elevated:    rgba(26, 24, 37, 0.94);
+  --lqg-bg-glass:       rgba(40, 36, 56, 0.45);
+  --lqg-bg-glass-strong: rgba(56, 50, 78, 0.72);
+
+  --lqg-text-primary:   #F5F2FF;
+  --lqg-text-secondary: #BDB6D6;
+  --lqg-text-tertiary:  #7E7898;
+  --lqg-text-on-accent: #1F1C2E;
+
+  --lqg-mesh-1: rgba(232, 155, 122, 0.22);
+  --lqg-mesh-2: rgba(155, 145, 214, 0.20);
+  --lqg-mesh-3: rgba(80, 60, 110, 0.40);
+
+  --lqg-accent:      #F4A88A;
+  --lqg-accent-deep: #E89B7A;
+  --lqg-accent-soft: rgba(232, 155, 122, 0.15);
+
+  --lqg-edge-hi: rgba(255, 255, 255, 0.10);
+  --lqg-edge-lo: rgba(0, 0, 0, 0.40);
+  --lqg-shadow-card:
+    0 1px 0 var(--lqg-edge-hi) inset,
+    0 8px 24px -8px rgba(0, 0, 0, 0.55);
+  --lqg-shadow-glass:
+    0 1px 0 var(--lqg-edge-hi) inset,
+    0 30px 80px -20px rgba(0, 0, 0, 0.75);
+  --lqg-shadow-lift:
+    0 1px 0 var(--lqg-edge-hi) inset,
+    0 24px 48px -16px rgba(244, 168, 138, 0.35),
+    0 12px 24px -8px rgba(0, 0, 0, 0.65);
+}
+
+/* Specular streak — auto apply to .lqg-glass elements */
+@keyframes lqg-specular {
+  0%   { background-position: -150% 0; opacity: 0.5; }
+  50%  { opacity: 0.85; }
+  100% { background-position:  250% 0; opacity: 0.5; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lqg-specular::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      120deg,
+      transparent 30%,
+      var(--lqg-edge-hi) 50%,
+      transparent 70%
+    );
+    background-size: 220% 100%;
+    pointer-events: none;
+    animation: lqg-specular 8s linear infinite;
+    border-radius: inherit;
+    mix-blend-mode: overlay;
+    opacity: 0.6;
+  }
+}
+
+/* Heading display — Cormorant italic refined */
+.lqg-root .lqg-display {
+  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+  color: var(--lqg-text-primary);
+}
+
+.lqg-root .lqg-numeric {
+  font-family: var(--font-heading), 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-variant-numeric: oldstyle-nums;
+  letter-spacing: -0.01em;
 }

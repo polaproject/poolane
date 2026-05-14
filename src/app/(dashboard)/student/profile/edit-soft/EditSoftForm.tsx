@@ -47,7 +47,7 @@ export function EditSoftForm({ initial }: { initial: Initial }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5 space-y-4">
+    <form onSubmit={onSubmit} className="glass-card glass-card-hover p-5 space-y-4">
       <FormRow label="Nghề nghiệp">
         <input
           type="text"
@@ -93,12 +93,12 @@ export function EditSoftForm({ initial }: { initial: Initial }) {
       </FormRow>
 
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <div className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-lg px-3 py-2">
           {error}
         </div>
       )}
       {success && (
-        <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+        <div className="text-sm text-success bg-success/10 border border-success/30 rounded-lg px-3 py-2">
           Đã cập nhật. Đang chuyển về trang hồ sơ...
         </div>
       )}
@@ -107,13 +107,13 @@ export function EditSoftForm({ initial }: { initial: Initial }) {
         <button
           type="submit"
           disabled={submitting}
-          className="flex-1 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-2.5 text-sm font-semibold hover:bg-[#1C2B4A]/90 disabled:opacity-50"
+          className="flex-1 bg-ink-soft text-paper rounded-lg py-2.5 text-sm font-semibold hover:bg-foreground/90 disabled:opacity-50"
         >
           {submitting ? 'Đang lưu...' : 'Lưu thay đổi'}
         </button>
         <Link
           href="/student/profile"
-          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70 hover:bg-[#1C2B4A]/5"
+          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-foreground/15 text-foreground/70 hover:bg-foreground/5"
         >
           Huỷ
         </Link>
@@ -143,7 +143,7 @@ export function EditSoftForm({ initial }: { initial: Initial }) {
 function FormRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+      <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
         {label}
       </label>
       {children}

@@ -54,7 +54,7 @@ export default async function StaffStudentDetailPage({ params }: Params) {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-4xl mx-auto">
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
@@ -96,61 +96,61 @@ export default async function StaffStudentDetailPage({ params }: Params) {
       <div className="px-4 sm:px-8 -mt-6 max-w-4xl mx-auto space-y-4 relative z-10">
         {/* 3 stat cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className={`rounded-card-lg bg-white p-5 shadow-soft ring-1 ${isLow ? 'ring-danger/30' : 'ring-ink/8'}`}>
+          <div className={`rounded-card-lg bg-[var(--surface)] p-5 shadow-soft ring-1 ${isLow ? 'ring-danger/30' : 'ring-foreground/8'}`}>
             <div className="flex items-center gap-2 mb-3">
               <Ticket className="h-4 w-4 text-mist" strokeWidth={1.75} />
-              <p className="eyebrow text-ink/55">Vé bơi</p>
+              <p className="eyebrow text-foreground/55">Vé bơi</p>
             </div>
             {activeTicket ? (
               <>
-                <p className="font-heading italic text-4xl text-ink leading-none">
-                  {sessionsLeft}<span className="text-sm font-body not-italic text-ink/55 ml-1.5">buổi</span>
+                <p className="font-heading italic text-4xl text-foreground leading-none">
+                  {sessionsLeft}<span className="text-sm font-body not-italic text-foreground/55 ml-1.5">buổi</span>
                 </p>
                 <div className="h-1.5 bg-ink/8 rounded-full mt-3 overflow-hidden">
                   <div className={`h-full rounded-full ${isLow ? 'bg-danger' : 'bg-mist'}`} style={{ width: `${(activeTicket.sessionsUsed / activeTicket.maxSessions) * 100}%` }} />
                 </div>
-                <p className="text-xs text-ink/55 mt-2">Đã dùng {activeTicket.sessionsUsed}/{activeTicket.maxSessions}</p>
+                <p className="text-xs text-foreground/55 mt-2">Đã dùng {activeTicket.sessionsUsed}/{activeTicket.maxSessions}</p>
               </>
-            ) : <p className="text-sm text-ink/45">Chưa có vé</p>}
+            ) : <p className="text-sm text-foreground/45">Chưa có vé</p>}
           </div>
 
-          <div className="rounded-card-lg bg-white p-5 shadow-soft ring-1 ring-ink/8">
+          <div className="rounded-card-lg bg-[var(--surface)] p-5 shadow-soft ring-1 ring-foreground/8">
             <div className="flex items-center gap-2 mb-3">
               <BookOpen className="h-4 w-4 text-accent" strokeWidth={1.75} />
-              <p className="eyebrow text-ink/55">Khoá học</p>
+              <p className="eyebrow text-foreground/55">Khoá học</p>
             </div>
-            <p className="font-heading italic text-4xl text-ink leading-none">
-              {activeEnr.length}<span className="text-sm font-body not-italic text-ink/55 ml-1.5">đang học</span>
+            <p className="font-heading italic text-4xl text-foreground leading-none">
+              {activeEnr.length}<span className="text-sm font-body not-italic text-foreground/55 ml-1.5">đang học</span>
             </p>
-            <p className="text-xs text-ink/55 mt-2">{student.enrollments.length} tổng khoá</p>
+            <p className="text-xs text-foreground/55 mt-2">{student.enrollments.length} tổng khoá</p>
           </div>
 
-          <div className="rounded-card-lg bg-white p-5 shadow-soft ring-1 ring-ink/8">
+          <div className="rounded-card-lg bg-[var(--surface)] p-5 shadow-soft ring-1 ring-foreground/8">
             <div className="flex items-center gap-2 mb-3">
-              <Calendar className="h-4 w-4 text-ink/55" strokeWidth={1.75} />
-              <p className="eyebrow text-ink/55">Lần cuối</p>
+              <Calendar className="h-4 w-4 text-foreground/55" strokeWidth={1.75} />
+              <p className="eyebrow text-foreground/55">Lần cuối</p>
             </div>
             {student.lastAttendedAt
-              ? <p className="font-heading italic text-4xl text-ink leading-none">{format(student.lastAttendedAt, 'dd/MM')}</p>
-              : <p className="text-sm text-ink/45">Chưa đi học</p>}
+              ? <p className="font-heading italic text-4xl text-foreground leading-none">{format(student.lastAttendedAt, 'dd/MM')}</p>
+              : <p className="text-sm text-foreground/45">Chưa đi học</p>}
           </div>
         </div>
 
         {/* Enrollments */}
         {student.enrollments.length > 0 && (
-          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
-            <div className="px-5 py-4 border-b border-ink/8 flex items-center gap-2">
+          <div className="glass-card glass-card-hover overflow-hidden">
+            <div className="px-5 py-4 border-b border-foreground/8 flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-accent" strokeWidth={1.75} />
-              <p className="eyebrow text-ink/55">Khoá học đã đăng ký</p>
+              <p className="eyebrow text-foreground/55">Khoá học đã đăng ký</p>
             </div>
-            <div className="divide-y divide-ink/5">
+            <div className="divide-y divide-foreground/5">
               {student.enrollments.map(e => {
                 const ecfg = ENR_STATUS[e.status] ?? ENR_STATUS.active
                 return (
                   <div key={e.id} className="px-5 py-3.5 flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm font-medium text-ink">{e.course.name}</p>
-                      <p className="text-xs text-ink/55 mt-0.5">Đăng ký {format(e.enrolledAt, 'dd/MM/yyyy')}</p>
+                      <p className="text-sm font-medium text-foreground">{e.course.name}</p>
+                      <p className="text-xs text-foreground/55 mt-0.5">Đăng ký {format(e.enrolledAt, 'dd/MM/yyyy')}</p>
                     </div>
                     <Chip variant={ecfg.variant} active>{ecfg.label}</Chip>
                   </div>
@@ -161,10 +161,10 @@ export default async function StaffStudentDetailPage({ params }: Params) {
         )}
 
         {/* Personal */}
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
-          <div className="px-5 py-4 border-b border-ink/8 flex items-center gap-2">
+        <div className="glass-card glass-card-hover overflow-hidden">
+          <div className="px-5 py-4 border-b border-foreground/8 flex items-center gap-2">
             <FileText className="h-4 w-4 text-accent" strokeWidth={1.75} />
-            <p className="eyebrow text-ink/55">Thông tin cá nhân</p>
+            <p className="eyebrow text-foreground/55">Thông tin cá nhân</p>
           </div>
           <div className="px-5 py-4 grid grid-cols-2 gap-4 text-sm">
             {[
@@ -179,8 +179,8 @@ export default async function StaffStudentDetailPage({ params }: Params) {
             ].map(item => (
               item.value ? (
                 <div key={item.label}>
-                  <p className="text-xs text-ink/45 mb-1">{item.label}</p>
-                  <p className="text-ink">{item.value}</p>
+                  <p className="text-xs text-foreground/45 mb-1">{item.label}</p>
+                  <p className="text-foreground">{item.value}</p>
                 </div>
               ) : null
             ))}
@@ -189,16 +189,16 @@ export default async function StaffStudentDetailPage({ params }: Params) {
 
         {/* Public notes */}
         {student.studentNotes.length > 0 && (
-          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
-            <div className="px-5 py-4 border-b border-ink/8 flex items-center gap-2">
+          <div className="glass-card glass-card-hover overflow-hidden">
+            <div className="px-5 py-4 border-b border-foreground/8 flex items-center gap-2">
               <MessageCircle className="h-4 w-4 text-accent" strokeWidth={1.75} />
-              <p className="eyebrow text-ink/55">Ghi chú</p>
+              <p className="eyebrow text-foreground/55">Ghi chú</p>
             </div>
-            <div className="divide-y divide-ink/5">
+            <div className="divide-y divide-foreground/5">
               {student.studentNotes.map(n => (
                 <div key={n.id} className="px-5 py-3 text-sm">
-                  <p className="text-ink">{n.note}</p>
-                  <p className="text-xs text-ink/45 mt-1">{format(n.createdAt, 'dd/MM/yyyy')}</p>
+                  <p className="text-foreground">{n.note}</p>
+                  <p className="text-xs text-foreground/45 mt-1">{format(n.createdAt, 'dd/MM/yyyy')}</p>
                 </div>
               ))}
             </div>

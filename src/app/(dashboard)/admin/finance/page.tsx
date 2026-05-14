@@ -72,7 +72,7 @@ export default async function FinancePage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="absolute bottom-0 left-1/4 w-48 h-48 rounded-full bg-mist/10 translate-y-1/2 blur-3xl" />
         <div className="relative max-w-6xl mx-auto flex items-end justify-between gap-3 flex-wrap">
@@ -110,14 +110,14 @@ export default async function FinancePage() {
 
         <div className="grid md:grid-cols-3 gap-4">
           {/* Breakdown */}
-          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
+          <div className="glass-card glass-card-hover p-5">
             <div className="flex items-center gap-2 mb-4">
               <BarChart2 className="h-4 w-4 text-accent" strokeWidth={1.75} />
-              <p className="eyebrow text-ink/55">Thu theo loại · tháng này</p>
+              <p className="eyebrow text-foreground/55">Thu theo loại · tháng này</p>
             </div>
             <div className="space-y-3">
               {breakdown.length === 0 ? (
-                <p className="text-sm text-ink/45">Chưa có giao dịch</p>
+                <p className="text-sm text-foreground/45">Chưa có giao dịch</p>
               ) : breakdown.map(b => {
                 const meta = TYPE_META[b.type] ?? { label: b.type, Icon: DollarSign }
                 const amt = b._sum.amount ?? 0
@@ -126,10 +126,10 @@ export default async function FinancePage() {
                 return (
                   <div key={b.type}>
                     <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-ink/75 inline-flex items-center gap-1.5">
+                      <span className="text-foreground/75 inline-flex items-center gap-1.5">
                         <Icon className="h-3.5 w-3.5 text-accent" strokeWidth={1.75} /> {meta.label}
                       </span>
-                      <span className="font-medium text-ink">{fmt(amt)}</span>
+                      <span className="font-medium text-foreground">{fmt(amt)}</span>
                     </div>
                     <div className="h-1 bg-ink/8 rounded-full overflow-hidden">
                       <div className="h-full rounded-full bg-accent" style={{ width: `${pct}%` }} />
@@ -141,17 +141,17 @@ export default async function FinancePage() {
           </div>
 
           {/* Recent payments */}
-          <div className="md:col-span-2 rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
-            <div className="px-5 py-4 border-b border-ink/8 flex items-center justify-between">
+          <div className="md:col-span-2 glass-card glass-card-hover overflow-hidden">
+            <div className="px-5 py-4 border-b border-foreground/8 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Receipt className="h-4 w-4 text-accent" strokeWidth={1.75} />
-                <p className="eyebrow text-ink/55">Giao dịch gần đây</p>
+                <p className="eyebrow text-foreground/55">Giao dịch gần đây</p>
               </div>
             </div>
             {recentPayments.length === 0 ? (
-              <p className="px-5 py-8 text-sm text-ink/45 text-center">Chưa có giao dịch</p>
+              <p className="px-5 py-8 text-sm text-foreground/45 text-center">Chưa có giao dịch</p>
             ) : (
-              <div className="divide-y divide-ink/5">
+              <div className="divide-y divide-foreground/5">
                 {recentPayments.slice(0, 8).map(p => {
                   const meta = TYPE_META[p.type] ?? { label: p.type, Icon: DollarSign }
                   const Icon = meta.Icon
@@ -163,8 +163,8 @@ export default async function FinancePage() {
                           <Icon className="h-3.5 w-3.5" strokeWidth={1.75} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-ink truncate">{p.student.user.fullName}</p>
-                          <p className="text-xs text-ink/55">
+                          <p className="text-sm font-medium text-foreground truncate">{p.student.user.fullName}</p>
+                          <p className="text-xs text-foreground/55">
                             {meta.label} · {format(p.recordedAt, 'HH:mm · dd/MM')}
                           </p>
                         </div>
@@ -182,22 +182,22 @@ export default async function FinancePage() {
 
         {/* Debt list */}
         {debtors.length > 0 && (
-          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-danger/20 overflow-hidden">
+          <div className="rounded-card-lg bg-[var(--surface)] shadow-soft ring-1 ring-danger/20 overflow-hidden">
             <div className="px-5 py-4 border-b border-danger/15 bg-danger/5 flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-danger" strokeWidth={1.75} />
               <div>
                 <p className="eyebrow text-danger">Còn nợ học phí</p>
-                <p className="text-sm font-medium text-ink mt-0.5">{debtors.length} học viên</p>
+                <p className="text-sm font-medium text-foreground mt-0.5">{debtors.length} học viên</p>
               </div>
             </div>
-            <div className="divide-y divide-ink/5">
+            <div className="divide-y divide-foreground/5">
               {debtors.map(e => (
                 <div key={e.id} className="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-paper-tint/30 transition group">
                   <div className="min-w-0 flex-1">
-                    <Link href={`/admin/students/${e.studentId}`} className="text-sm font-medium text-ink hover:text-accent transition">
+                    <Link href={`/admin/students/${e.studentId}`} className="text-sm font-medium text-foreground hover:text-accent transition">
                       {e.student.user.fullName}
                     </Link>
-                    <p className="text-xs text-ink/55 mt-0.5">
+                    <p className="text-xs text-foreground/55 mt-0.5">
                       <Chip variant="mist" className="text-[10px] mr-1">{e.course.code}</Chip>
                       Đã đóng {fmt(e.totalPaid)} / {fmt(e.course.price)}
                       {e.paymentDeadline && (
@@ -207,7 +207,7 @@ export default async function FinancePage() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="font-heading italic text-lg text-danger leading-none">{fmt(e.remaining)}</p>
-                    <p className="text-xs text-ink/45 mt-0.5">còn nợ</p>
+                    <p className="text-xs text-foreground/45 mt-0.5">còn nợ</p>
                   </div>
                 </div>
               ))}
@@ -219,24 +219,24 @@ export default async function FinancePage() {
         <div className="grid sm:grid-cols-3 gap-3">
           <Link
             href="/admin/finance/refunds"
-            className="inline-flex items-center justify-between px-4 py-3 rounded-pill ring-1 ring-ink/15 text-sm font-medium hover:bg-ink/5 transition group"
+            className="inline-flex items-center justify-between px-4 py-3 rounded-pill ring-1 ring-foreground/15 text-sm font-medium hover:bg-foreground/5 transition group"
           >
             <span className="inline-flex items-center gap-2"><Undo2 className="h-4 w-4 text-accent" strokeWidth={1.75} /> Hoàn tiền</span>
-            <ArrowRight className="h-3.5 w-3.5 text-ink/30 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
+            <ArrowRight className="h-3.5 w-3.5 text-foreground/30 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
           </Link>
           <Link
             href="/admin/finance/unmatched"
-            className="inline-flex items-center justify-between px-4 py-3 rounded-pill ring-1 ring-ink/15 text-sm font-medium hover:bg-ink/5 transition group"
+            className="inline-flex items-center justify-between px-4 py-3 rounded-pill ring-1 ring-foreground/15 text-sm font-medium hover:bg-foreground/5 transition group"
           >
             <span className="inline-flex items-center gap-2"><Receipt className="h-4 w-4 text-accent" strokeWidth={1.75} /> GD chưa khớp</span>
-            <ArrowRight className="h-3.5 w-3.5 text-ink/30 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
+            <ArrowRight className="h-3.5 w-3.5 text-foreground/30 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
           </Link>
           <Link
             href="/admin/reports"
-            className="inline-flex items-center justify-between px-4 py-3 rounded-pill ring-1 ring-ink/15 text-sm font-medium hover:bg-ink/5 transition group"
+            className="inline-flex items-center justify-between px-4 py-3 rounded-pill ring-1 ring-foreground/15 text-sm font-medium hover:bg-foreground/5 transition group"
           >
             <span className="inline-flex items-center gap-2"><BarChart2 className="h-4 w-4 text-accent" strokeWidth={1.75} /> Báo cáo</span>
-            <ArrowRight className="h-3.5 w-3.5 text-ink/30 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
+            <ArrowRight className="h-3.5 w-3.5 text-foreground/30 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
           </Link>
         </div>
       </div>

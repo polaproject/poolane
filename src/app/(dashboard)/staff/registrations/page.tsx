@@ -74,11 +74,11 @@ export default function RegistrationsPage() {
   if (!sessionId) {
     return (
       <div className="min-h-screen bg-paper grid place-items-center p-6">
-        <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-8 text-center max-w-md">
-          <CheckSquare className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-          <p className="font-heading italic text-2xl text-ink mb-1">Chưa chọn buổi</p>
-          <p className="text-sm text-ink/55 mb-4">Vào lịch học, click vào ô buổi → &ldquo;Xử lý đăng ký&rdquo;.</p>
-          <a href="/admin/schedule" className="inline-flex items-center gap-1.5 bg-ink text-paper font-semibold px-5 py-2.5 rounded-pill text-sm hover:bg-ink/90 transition">
+        <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-8 text-center max-w-md">
+          <CheckSquare className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+          <p className="font-heading italic text-2xl text-foreground mb-1">Chưa chọn buổi</p>
+          <p className="text-sm text-foreground/55 mb-4">Vào lịch học, click vào ô buổi → &ldquo;Xử lý đăng ký&rdquo;.</p>
+          <a href="/admin/schedule" className="inline-flex items-center gap-1.5 bg-ink text-paper font-semibold px-5 py-2.5 rounded-pill text-sm hover:bg-foreground/90 transition">
             Mở lịch học
           </a>
         </div>
@@ -88,7 +88,7 @@ export default function RegistrationsPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-warn/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
@@ -104,25 +104,25 @@ export default function RegistrationsPage() {
             <Loader2 className="h-6 w-6 animate-spin text-accent" strokeWidth={1.75} />
           </div>
         ) : registrations.length === 0 ? (
-          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <Check className="h-10 w-10 mx-auto mb-3 text-success" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">Đã hết</p>
-            <p className="text-sm text-ink/55">Không có đăng ký nào đang chờ duyệt.</p>
+            <p className="font-heading italic text-2xl text-foreground mb-1">Đã hết</p>
+            <p className="text-sm text-foreground/55">Không có đăng ký nào đang chờ duyệt.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {registrations.map(reg => {
               const ctx = reg.context
               return (
-                <div key={reg.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
+                <div key={reg.id} className="glass-card glass-card-hover p-5">
                   <div className="flex justify-between items-start gap-3 mb-3">
                     <div>
-                      <p className="text-sm font-medium text-ink">{ctx.fullName}</p>
-                      <p className="text-xs text-ink/55">{ctx.phone}</p>
+                      <p className="text-sm font-medium text-foreground">{ctx.fullName}</p>
+                      <p className="text-xs text-foreground/55">{ctx.phone}</p>
                     </div>
                     <div className="text-right space-y-1">
                       {ctx.avgSkill !== null && (
-                        <span className="inline-flex items-center gap-1 text-sm font-medium text-ink">
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-foreground">
                           <Star className="h-3.5 w-3.5 text-accent" strokeWidth={1.75} /> {ctx.avgSkill}
                         </span>
                       )}
@@ -160,7 +160,7 @@ export default function RegistrationsPage() {
                     <button
                       onClick={() => handleDecide(reg.id, 'approve')}
                       disabled={processing === reg.id}
-                      className="flex-[2] h-10 rounded-pill bg-ink text-paper text-sm font-semibold hover:bg-ink/90 transition inline-flex items-center justify-center gap-1.5"
+                      className="flex-[2] h-10 rounded-pill bg-ink text-paper text-sm font-semibold hover:bg-foreground/90 transition inline-flex items-center justify-center gap-1.5"
                     >
                       {processing === reg.id
                         ? <Loader2 className="h-4 w-4 animate-spin" />
@@ -178,9 +178,9 @@ export default function RegistrationsPage() {
       {/* Reject Modal */}
       {rejectModal && (
         <div className="fixed inset-0 bg-ink/60 backdrop-blur-sm grid place-items-center z-50 p-4">
-          <div className="rounded-card-xl bg-white shadow-glass ring-1 ring-ink/8 p-6 w-full max-w-md">
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-glass ring-1 ring-foreground/8 p-6 w-full max-w-md">
             <p className="eyebrow text-danger mb-1">Từ chối đăng ký</p>
-            <h3 className="font-heading italic text-2xl text-ink mb-4">{rejectModal.name}</h3>
+            <h3 className="font-heading italic text-2xl text-foreground mb-4">{rejectModal.name}</h3>
 
             <div className="space-y-2 mb-4">
               {REJECT_REASONS.map(r => (
@@ -189,7 +189,7 @@ export default function RegistrationsPage() {
                   className={`flex items-center gap-2 cursor-pointer rounded-card px-3 py-2 ring-1 transition ${
                     rejectReason === r.value
                       ? 'bg-paper-tint/60 ring-accent/30'
-                      : 'ring-ink/10 hover:bg-paper-tint/40'
+                      : 'ring-foreground/10 hover:bg-paper-tint/40'
                   }`}
                 >
                   <input
@@ -200,7 +200,7 @@ export default function RegistrationsPage() {
                     onChange={e => setRejectReason(e.target.value)}
                     className="accent-ink"
                   />
-                  <span className="text-sm text-ink">{r.label}</span>
+                  <span className="text-sm text-foreground">{r.label}</span>
                 </label>
               ))}
             </div>
@@ -210,13 +210,13 @@ export default function RegistrationsPage() {
               value={rejectText}
               onChange={e => setRejectText(e.target.value)}
               rows={2}
-              className="w-full text-sm px-3 py-2 rounded-card bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none resize-none mb-4 transition"
+              className="w-full text-sm px-3 py-2 rounded-card bg-paper-tint/40 ring-1 ring-foreground/10 focus:ring-accent/40 focus:outline-none resize-none mb-4 transition"
             />
 
             <div className="flex gap-2">
               <button
                 onClick={() => setRejectModal(null)}
-                className="flex-1 h-10 rounded-pill ring-1 ring-ink/15 text-sm hover:bg-ink/5 transition"
+                className="flex-1 h-10 rounded-pill ring-1 ring-foreground/15 text-sm hover:bg-foreground/5 transition"
               >
                 Huỷ
               </button>

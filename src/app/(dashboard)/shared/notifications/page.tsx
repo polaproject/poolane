@@ -67,10 +67,10 @@ export default function NotificationsPage() {
     <div className="p-4 max-w-lg mx-auto">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <Bell className="w-5 h-5 text-[#1C2B4A]" />
-          <h1 className="font-heading text-2xl text-[#1C2B4A]">Thông báo</h1>
+          <Bell className="w-5 h-5 text-foreground" />
+          <h1 className="font-heading text-2xl text-foreground">Thông báo</h1>
           {unreadCount > 0 && (
-            <span className="bg-[#1C2B4A] text-[#F6F1EA] text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="bg-ink-soft text-paper text-xs font-bold px-2 py-0.5 rounded-full">
               {unreadCount}
             </span>
           )}
@@ -89,10 +89,10 @@ export default function NotificationsPage() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="w-5 h-5 animate-spin text-[#1C2B4A]/40" />
+          <Loader2 className="w-5 h-5 animate-spin text-foreground/40" />
         </div>
       ) : notifications.length === 0 ? (
-        <div className="text-center py-16 text-[#1C2B4A]/40">
+        <div className="text-center py-16 text-foreground/40">
           <Bell className="w-8 h-8 mx-auto mb-3 opacity-30" />
           <p>Chưa có thông báo nào</p>
         </div>
@@ -101,10 +101,10 @@ export default function NotificationsPage() {
           {notifications.map(n => (
             <div
               key={n.id}
-              className={`bg-white rounded-2xl border p-4 transition-colors ${
+              className={`glass-card border p-4 transition-colors ${
                 !n.readAt
-                  ? 'border-[#1C2B4A]/20 bg-[#1C2B4A]/2'
-                  : 'border-[#1C2B4A]/8 opacity-75'
+                  ? 'border-foreground/20 bg-ink/2'
+                  : 'border-foreground/8 opacity-75'
               }`}
             >
               <div className="flex gap-3">
@@ -113,20 +113,20 @@ export default function NotificationsPage() {
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-2">
-                    <p className={`text-sm font-semibold ${!n.readAt ? 'text-[#1C2B4A]' : 'text-[#1C2B4A]/60'}`}>
+                    <p className={`text-sm font-semibold ${!n.readAt ? 'text-foreground' : 'text-foreground/60'}`}>
                       {n.title}
                     </p>
                     {!n.readAt && (
                       <button
                         onClick={() => markRead(n.id)}
-                        className="flex-shrink-0 p-1 hover:bg-[#1C2B4A]/8 rounded-lg transition-colors"
+                        className="flex-shrink-0 p-1 hover:bg-foreground/8 rounded-lg transition-colors"
                       >
                         <Check className="w-3.5 h-3.5 text-[#5B8E9F]" />
                       </button>
                     )}
                   </div>
-                  <p className="text-sm text-[#1C2B4A]/60 mt-0.5 leading-relaxed">{n.body}</p>
-                  <p className="text-xs text-[#1C2B4A]/35 mt-2">
+                  <p className="text-sm text-foreground/60 mt-0.5 leading-relaxed">{n.body}</p>
+                  <p className="text-xs text-foreground/35 mt-2">
                     {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: vi })}
                   </p>
                 </div>

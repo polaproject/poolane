@@ -99,7 +99,7 @@ export default function OrdersPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-5xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -130,47 +130,47 @@ export default function OrdersPage() {
             <Loader2 className="h-6 w-6 animate-spin text-accent" strokeWidth={1.75} />
           </div>
         ) : orders.length === 0 ? (
-          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
-            <ShoppingBag className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">Không có đơn hàng</p>
-            <p className="text-sm text-ink/55">Tab này chưa có đơn nào.</p>
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
+            <ShoppingBag className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-foreground mb-1">Không có đơn hàng</p>
+            <p className="text-sm text-foreground/55">Tab này chưa có đơn nào.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {orders.map(order => {
               const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending
               return (
-                <div key={order.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
+                <div key={order.id} className="glass-card glass-card-hover p-5">
                   <div className="flex justify-between items-start gap-3 mb-3 flex-wrap">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-ink">{order.student.user.fullName}</p>
-                      <p className="text-xs text-ink/55 mt-0.5">
+                      <p className="text-sm font-medium text-foreground">{order.student.user.fullName}</p>
+                      <p className="text-xs text-foreground/55 mt-0.5">
                         {format(new Date(order.createdAt), 'HH:mm · dd/MM/yyyy', { locale: vi })}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-heading italic text-2xl text-ink leading-none">{fmt(order.finalAmount)}</p>
+                      <p className="font-heading italic text-2xl text-foreground leading-none">{fmt(order.finalAmount)}</p>
                       <Chip variant={cfg.variant} active className="text-[10px] mt-2">{cfg.label}</Chip>
                     </div>
                   </div>
 
                   <div className="space-y-1 mb-3">
                     {order.orderItems.map((item, i) => (
-                      <p key={i} className="text-sm text-ink/75">
+                      <p key={i} className="text-sm text-foreground/75">
                         {item.quantity}× {item.product.name}
-                        <span className="text-xs text-ink/45 ml-1">({item.product.type})</span>
+                        <span className="text-xs text-foreground/45 ml-1">({item.product.type})</span>
                       </p>
                     ))}
                   </div>
 
                   {order.noteFromStudent && (
-                    <p className="text-xs italic text-ink/55 mb-3 px-3 py-2 rounded-card bg-paper-tint/40">&ldquo;{order.noteFromStudent}&rdquo;</p>
+                    <p className="text-xs italic text-foreground/55 mb-3 px-3 py-2 rounded-card bg-paper-tint/40">&ldquo;{order.noteFromStudent}&rdquo;</p>
                   )}
 
                   {payingOrderId === order.id ? (
-                    <div className="border-t border-ink/8 pt-3 space-y-3">
+                    <div className="border-t border-foreground/8 pt-3 space-y-3">
                       <div>
-                        <p className="eyebrow text-ink/55 mb-2">Phương thức thanh toán</p>
+                        <p className="eyebrow text-foreground/55 mb-2">Phương thức thanh toán</p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                           {PAYMENT_METHODS.map(m => (
                             <button
@@ -185,13 +185,13 @@ export default function OrdersPage() {
                       </div>
                       {paymentMethod === 'bank_transfer' && (
                         <div>
-                          <p className="eyebrow text-ink/55 mb-1.5">Mã giao dịch <span className="text-danger">*</span></p>
+                          <p className="eyebrow text-foreground/55 mb-1.5">Mã giao dịch <span className="text-danger">*</span></p>
                           <input
                             type="text"
                             value={referenceNumber}
                             onChange={e => setReferenceNumber(e.target.value)}
                             placeholder="VD: FT250513..."
-                            className="w-full h-10 px-3 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none transition"
+                            className="w-full h-10 px-3 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-foreground/10 focus:ring-accent/40 focus:outline-none transition"
                           />
                         </div>
                       )}
@@ -209,7 +209,7 @@ export default function OrdersPage() {
                         <button
                           onClick={() => setPayingOrderId(null)}
                           disabled={processing === order.id}
-                          className="px-4 h-10 rounded-pill ring-1 ring-ink/15 text-sm hover:bg-ink/5 transition"
+                          className="px-4 h-10 rounded-pill ring-1 ring-foreground/15 text-sm hover:bg-foreground/5 transition"
                         >
                           Huỷ
                         </button>
@@ -229,7 +229,7 @@ export default function OrdersPage() {
                           <button
                             onClick={() => handleAction(order.id, 'approve')}
                             disabled={processing === order.id}
-                            className="flex-[2] h-10 rounded-pill bg-ink text-paper text-sm font-semibold hover:bg-ink/90 transition inline-flex items-center justify-center gap-1.5"
+                            className="flex-[2] h-10 rounded-pill bg-ink text-paper text-sm font-semibold hover:bg-foreground/90 transition inline-flex items-center justify-center gap-1.5"
                           >
                             {processing === order.id
                               ? <Loader2 className="h-4 w-4 animate-spin" />
@@ -247,7 +247,7 @@ export default function OrdersPage() {
                           />
                           <button
                             onClick={() => setPayingOrderId(order.id)}
-                            className="px-4 h-10 rounded-pill ring-1 ring-ink/15 text-sm hover:bg-ink/5 transition inline-flex items-center gap-1.5"
+                            className="px-4 h-10 rounded-pill ring-1 ring-foreground/15 text-sm hover:bg-foreground/5 transition inline-flex items-center gap-1.5"
                           >
                             <DollarSign className="h-4 w-4 text-accent" strokeWidth={1.75} /> Tiền mặt/khác
                           </button>

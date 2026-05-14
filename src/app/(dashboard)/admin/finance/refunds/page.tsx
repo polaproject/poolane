@@ -52,7 +52,7 @@ export default async function RefundsPage({ searchParams }: { searchParams: Sear
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-warn/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-6xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -102,22 +102,22 @@ export default async function RefundsPage({ searchParams }: { searchParams: Sear
         </div>
 
         {/* Table */}
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+        <div className="glass-card glass-card-hover overflow-hidden">
           {items.length === 0 ? (
             <div className="p-12 text-center">
-              <Undo2 className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-ink mb-1">Không có yêu cầu</p>
-              <p className="text-sm text-ink/55">Trong tab này chưa có yêu cầu hoàn tiền nào.</p>
+              <Undo2 className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+              <p className="font-heading italic text-2xl text-foreground mb-1">Không có yêu cầu</p>
+              <p className="text-sm text-foreground/55">Trong tab này chưa có yêu cầu hoàn tiền nào.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[700px]">
-                <thead className="bg-paper-tint/30 border-b border-ink/8">
+                <thead className="bg-paper-tint/30 border-b border-foreground/8">
                   <tr>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Học viên</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Khoản hoàn</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Lý do</th>
-                    <th className="text-right px-5 py-3 eyebrow text-ink/55">Số tiền</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Học viên</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Khoản hoàn</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Lý do</th>
+                    <th className="text-right px-5 py-3 eyebrow text-foreground/55">Số tiền</th>
                     <th className="px-5 py-3"></th>
                   </tr>
                 </thead>
@@ -125,33 +125,33 @@ export default async function RefundsPage({ searchParams }: { searchParams: Sear
                   {items.map(r => {
                     const tabCfg = STATUS_TABS.find(t => t.value === r.status) ?? STATUS_TABS[0]
                     return (
-                      <tr key={r.id} className="border-b border-ink/5 last:border-b-0 hover:bg-paper-tint/20 transition group">
+                      <tr key={r.id} className="border-b border-foreground/5 last:border-b-0 hover:bg-paper-tint/20 transition group glass-table-row">
                         <td className="px-5 py-3.5">
-                          <p className="text-sm font-medium text-ink">{r.student.user.fullName}</p>
-                          <p className="text-xs text-ink/45 font-mono mt-0.5">{r.student.studentCode} · {r.student.user.phone}</p>
+                          <p className="text-sm font-medium text-foreground">{r.student.user.fullName}</p>
+                          <p className="text-xs text-foreground/45 font-mono mt-0.5">{r.student.studentCode} · {r.student.user.phone}</p>
                         </td>
                         <td className="px-5 py-3.5">
                           <div className="flex flex-col gap-1">
                             {r.includeCourseRefund && (
-                              <span className="text-xs text-ink/70 inline-flex items-center gap-1.5">
+                              <span className="text-xs text-foreground/70 inline-flex items-center gap-1.5">
                                 <BookOpen className="h-3 w-3 text-accent" strokeWidth={1.75} />
                                 {r.enrollment?.course.code ?? 'Học phí'} · {fmt(r.courseRefundAmount)} ({Math.round(r.courseRefundRate * 100)}%)
                               </span>
                             )}
                             {r.includeTicketRefund && (
-                              <span className="text-xs text-ink/70 inline-flex items-center gap-1.5">
+                              <span className="text-xs text-foreground/70 inline-flex items-center gap-1.5">
                                 <Ticket className="h-3 w-3 text-mist" strokeWidth={1.75} />
                                 Vé bơi · {fmt(r.ticketRefundAmount)}
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="px-5 py-3.5 text-sm text-ink/70">
+                        <td className="px-5 py-3.5 text-sm text-foreground/70">
                           {REASON_LABELS[r.reason] ?? r.reason}
                         </td>
                         <td className="px-5 py-3.5 text-right">
-                          <p className="font-heading italic text-lg text-ink leading-none">{fmt(r.totalRefundAmount)}</p>
-                          <p className="text-xs text-ink/45 mt-1">{format(r.requestedAt, 'dd/MM HH:mm', { locale: vi })}</p>
+                          <p className="font-heading italic text-lg text-foreground leading-none">{fmt(r.totalRefundAmount)}</p>
+                          <p className="text-xs text-foreground/45 mt-1">{format(r.requestedAt, 'dd/MM HH:mm', { locale: vi })}</p>
                         </td>
                         <td className="px-5 py-3.5 text-right">
                           <Link
@@ -194,8 +194,8 @@ function SummaryCard({
           <Icon className={`h-4 w-4 ${tone === 'warn' ? 'text-warn' : 'text-mist'}`} strokeWidth={1.75} />
         </div>
       </div>
-      <p className="font-heading italic text-4xl text-ink leading-none">{count}</p>
-      <p className="text-sm text-ink/65 mt-2">{fmt(amount)}</p>
+      <p className="font-heading italic text-4xl text-foreground leading-none">{count}</p>
+      <p className="text-sm text-foreground/65 mt-2">{fmt(amount)}</p>
     </div>
   )
 }

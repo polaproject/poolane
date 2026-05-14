@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Copy, Check } from 'lucide-react'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 export function ResetActionButton({ id }: { id: string }) {
   const router = useRouter()
@@ -34,7 +35,6 @@ export function ResetActionButton({ id }: { id: string }) {
   }
 
   async function doReject() {
-    if (!confirm('Từ chối yêu cầu này?')) return
     setSubmitting(true)
     try {
       const res = await fetch('/api/auth/reset-password', {
@@ -70,25 +70,25 @@ export function ResetActionButton({ id }: { id: string }) {
   if (result) {
     return (
       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full">
-          <h3 className="font-heading text-xl text-[#1C2B4A] mb-2">Mật khẩu mới của {result.userFullName}</h3>
-          <p className="text-sm text-[#1C2B4A]/60 mb-4">
-            Copy mật khẩu này và gửi cho học viên qua Zalo. <strong className="text-red-600">Hệ thống không lưu lại</strong> — chỉ hiển thị 1 lần.
+        <div className="glass-card shadow-xl p-6 max-w-md w-full">
+          <h3 className="font-heading text-xl text-foreground mb-2">Mật khẩu mới của {result.userFullName}</h3>
+          <p className="text-sm text-foreground/60 mb-4">
+            Copy mật khẩu này và gửi cho học viên qua Zalo. <strong className="text-danger">Hệ thống không lưu lại</strong> — chỉ hiển thị 1 lần.
           </p>
           <div className="flex gap-2 mb-4">
-            <code className="flex-1 px-4 py-3 bg-[#F6F1EA] rounded-lg font-mono text-lg text-[#1C2B4A] select-all">
+            <code className="flex-1 px-4 py-3 bg-paper rounded-lg font-mono text-lg text-foreground select-all">
               {result.tempPassword}
             </code>
             <button
               onClick={copyPassword}
-              className="px-3 rounded-lg bg-[#1C2B4A] text-[#F6F1EA] hover:bg-[#1C2B4A]/90"
+              className="px-3 rounded-lg bg-ink-soft text-paper hover:bg-foreground/90"
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             </button>
           </div>
           <button
             onClick={close}
-            className="w-full bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-2.5 text-sm font-semibold"
+            className="w-full bg-ink-soft text-paper rounded-lg py-2.5 text-sm font-semibold"
           >
             Đã gửi cho học viên
           </button>
@@ -99,21 +99,29 @@ export function ResetActionButton({ id }: { id: string }) {
 
   return (
     <div className="flex gap-2 justify-end">
-      <button
-        onClick={doReject}
-        disabled={submitting}
-        className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50"
-      >
-        Từ chối
-      </button>
+      <ConfirmDialog
+        trigger={
+          <button
+            disabled={submitting}
+            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-danger/30 text-danger hover:bg-danger/10 disabled:opacity-50"
+          >
+            Từ chối
+          </button>
+        }
+        title="Từ chối yêu cầu reset?"
+        description="Học viên sẽ không nhận được mật khẩu mới và phải gửi lại yêu cầu nếu cần."
+        confirmLabel="Từ chối"
+        variant="danger"
+        onConfirm={doReject}
+      />
       <button
         onClick={doReset}
         disabled={submitting}
-        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#1C2B4A] text-[#F6F1EA] hover:bg-[#1C2B4A]/90 disabled:opacity-50"
+        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-ink-soft text-paper hover:bg-foreground/90 disabled:opacity-50"
       >
         {submitting ? 'Đang reset...' : '🔑 Reset mật khẩu'}
       </button>
-      {error && <p className="text-xs text-red-600 ml-2">{error}</p>}
+      {error && <p className="text-xs text-danger ml-2">{error}</p>}
     </div>
   )
 }

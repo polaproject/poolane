@@ -4,6 +4,10 @@ import { getCurrentUser, getDashboardPath } from '@/lib/auth'
 import { GlassPanel } from '@/components/ui/GlassPanel'
 import { FloatingCard } from '@/components/ui/FloatingCard'
 import { Chip } from '@/components/ui/Chip'
+import { StarField } from '@/components/brand/StarField'
+import { ScrollReveal } from '@/components/motion/ScrollReveal'
+import { Stagger } from '@/components/motion/Stagger'
+import { TiltCard } from '@/components/ui/TiltCard'
 import { COURSE_PRICES, COURSE_NAMES, POOL_TICKET } from '@/config/constants'
 import {
   ArrowRight, Sparkles, Star, Users, ShieldCheck, Compass,
@@ -58,7 +62,9 @@ export default async function LandingPage() {
     <>
       {/* ── HERO ─────────────────────────────────────────── */}
       <section className="relative mx-auto max-w-6xl px-4 pt-16 pb-20 lg:pt-24">
-        <div className="grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-14 items-center">
+        {/* Star field — chỉ render trong vùng hero */}
+        <StarField density={28} className="text-accent/60" />
+        <div className="relative grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-14 items-center">
           {/* Left — copy */}
           <div className="space-y-7">
             <div className="inline-flex items-center gap-2 text-xs tracking-[0.25em] uppercase px-3 py-1.5 rounded-pill glass-pill">
@@ -123,7 +129,7 @@ export default async function LandingPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium">{s.course}</div>
-                      <div className="text-xs opacity-60">{s.time}</div>
+                      <div className="text-xs opacity-75">{s.time}</div>
                     </div>
                     <ArrowRight className="h-4 w-4 opacity-50" strokeWidth={1.75} />
                   </div>
@@ -146,21 +152,24 @@ export default async function LandingPage() {
 
       {/* ── 3 KHOÁ ───────────────────────────────────────── */}
       <section className="relative mx-auto max-w-6xl px-4 pb-20">
-        <div className="flex items-end justify-between mb-8">
-          <div>
-            <p className="eyebrow mb-2">3 hành trình</p>
-            <h2 className="font-heading text-3xl sm:text-4xl italic">Chọn khoá hợp với bạn</h2>
+        <ScrollReveal>
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <p className="eyebrow mb-2">3 hành trình</p>
+              <h2 className="font-heading text-3xl sm:text-4xl italic">Chọn khoá hợp với bạn</h2>
+            </div>
+            <Link href="/courses" className="hidden sm:inline-flex items-center gap-1.5 text-sm opacity-80 hover:opacity-100">
+              Xem chi tiết <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.25} />
+            </Link>
           </div>
-          <Link href="/courses" className="hidden sm:inline-flex items-center gap-1.5 text-sm opacity-80 hover:opacity-100">
-            Xem chi tiết <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.25} />
-          </Link>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid md:grid-cols-3 gap-5">
+        <Stagger step={0.12} className="grid md:grid-cols-3 gap-5">
           {COURSES.map((c, i) => (
             <GlassPanel
               key={c.code}
-              className="group relative p-6 hover:-translate-y-0.5 transition-all duration-300"
+              interactive
+              className="group relative p-6"
             >
               <div className="absolute top-5 right-5">
                 <Chip variant="accent">{c.tag}</Chip>
@@ -180,7 +189,7 @@ export default async function LandingPage() {
               <div className="flex items-end justify-between pt-4 border-t border-current/10">
                 <div>
                   <div className="font-heading text-2xl">{fmt(COURSE_PRICES[c.code])}</div>
-                  <div className="text-xs opacity-60">10 buổi · vé bơi {fmt(POOL_TICKET.FIRST_PRICE)}</div>
+                  <div className="text-xs opacity-75">10 buổi · vé bơi {fmt(POOL_TICKET.FIRST_PRICE)}</div>
                 </div>
                 <Link
                   href="/courses"
@@ -192,16 +201,18 @@ export default async function LandingPage() {
               </div>
             </GlassPanel>
           ))}
-        </div>
+        </Stagger>
       </section>
 
       {/* ── VÌ SAO CHỌN POOLANE ──────────────────────────── */}
       <section className="relative mx-auto max-w-6xl px-4 pb-20">
-        <div className="text-center mb-12">
-          <p className="eyebrow mb-2">Vì sao chọn Poolane</p>
-          <h2 className="font-heading text-3xl sm:text-4xl italic">Không chỉ là một lớp học bơi</h2>
-        </div>
-        <div className="grid md:grid-cols-3 gap-5">
+        <ScrollReveal>
+          <div className="text-center mb-12">
+            <p className="eyebrow mb-2">Vì sao chọn Poolane</p>
+            <h2 className="font-heading text-3xl sm:text-4xl italic">Không chỉ là một lớp học bơi</h2>
+          </div>
+        </ScrollReveal>
+        <Stagger step={0.1} className="grid md:grid-cols-3 gap-5">
           <Feature
             icon={Users}
             title="Lớp nhỏ, tận tâm"
@@ -217,40 +228,47 @@ export default async function LandingPage() {
             title="Cam kết tốt nghiệp"
             desc="Chưa đạt sau buổi 10? Bạn được học thêm — chỉ trả vé bơi, không tốn thêm học phí."
           />
-        </div>
+        </Stagger>
       </section>
 
       {/* ── HÀNH TRÌNH ───────────────────────────────────── */}
       <section className="relative mx-auto max-w-6xl px-4 pb-20">
-        <div className="text-center mb-12">
-          <p className="eyebrow mb-2">Hành trình của bạn</p>
-          <h2 className="font-heading text-3xl sm:text-4xl italic">4 bước để bắt đầu bơi cùng Poolane</h2>
-        </div>
-        <div className="grid md:grid-cols-4 gap-4">
+        <ScrollReveal>
+          <div className="text-center mb-12">
+            <p className="eyebrow mb-2">Hành trình của bạn</p>
+            <h2 className="font-heading text-3xl sm:text-4xl italic">4 bước để bắt đầu bơi cùng Poolane</h2>
+          </div>
+        </ScrollReveal>
+        <Stagger step={0.08} className="grid md:grid-cols-4 gap-4">
           {JOURNEY.map((s) => (
-            <div key={s.step} className="rounded-card-lg bg-current/5 ring-1 ring-current/10 p-5 backdrop-blur-sm">
+            <div key={s.step} className="rounded-card-lg bg-current/5 ring-1 ring-current/10 p-5 backdrop-blur-sm transition-all duration-300 [transition-timing-function:var(--ease-spring-soft)] hover:-translate-y-1 hover:bg-current/10">
               <p className="font-heading italic text-5xl text-accent leading-none mb-3">{s.step}</p>
               <h3 className="font-semibold mb-1.5">{s.title}</h3>
               <p className="text-sm opacity-70 leading-relaxed">{s.desc}</p>
             </div>
           ))}
-        </div>
+        </Stagger>
       </section>
 
       {/* ── TRIẾT LÝ ─────────────────────────────────────── */}
       <section className="relative mx-auto max-w-4xl px-4 pb-24">
-        <GlassPanel edge className="p-8 sm:p-12 text-center">
-          <Star className="h-6 w-6 mx-auto mb-5 text-accent" strokeWidth={1.5} fill="currentColor" />
-          <blockquote className="font-heading italic text-2xl sm:text-3xl leading-snug max-w-3xl mx-auto mb-4">
-            “Pola = Polaris — ngôi sao Bắc Đẩu, đứng yên giữa bầu trời, dẫn đường cho người lênh đênh trên biển khơi tìm đúng hướng đi.”
-          </blockquote>
-          <p className="text-sm opacity-60">Triết lý của Pola Project</p>
-        </GlassPanel>
+        <ScrollReveal y={32} duration={0.7}>
+          <TiltCard maxTilt={4}>
+            <GlassPanel edge shimmer className="p-8 sm:p-12 text-center">
+              <Star className="h-6 w-6 mx-auto mb-5 text-accent motion-twinkle" strokeWidth={1.5} fill="currentColor" />
+              <blockquote className="font-heading italic text-2xl sm:text-3xl leading-snug max-w-3xl mx-auto mb-4">
+                "Pola = Polaris — ngôi sao Bắc Đẩu, đứng yên giữa bầu trời, dẫn đường cho người lênh đênh trên biển khơi tìm đúng hướng đi."
+              </blockquote>
+              <p className="text-sm opacity-70">Triết lý của Pola Project</p>
+            </GlassPanel>
+          </TiltCard>
+        </ScrollReveal>
       </section>
 
       {/* ── CTA BAND ─────────────────────────────────────── */}
       <section className="relative mx-auto max-w-6xl px-4 pb-20">
-        <div className="rounded-card-xl bg-gradient-to-br from-accent to-accent-soft text-ink p-8 sm:p-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-cta">
+        <ScrollReveal y={20}>
+        <div className="rounded-card-xl bg-gradient-to-br from-accent to-accent-soft text-foreground p-8 sm:p-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-cta">
           <div className="max-w-xl">
             <p className="eyebrow mb-2 opacity-70">Bắt đầu từ buổi tư vấn miễn phí</p>
             <h3 className="font-heading text-3xl sm:text-4xl italic leading-tight">
@@ -260,18 +278,19 @@ export default async function LandingPage() {
           <div className="flex items-center gap-3 flex-wrap">
             <Link
               href="/register"
-              className="inline-flex items-center gap-2 bg-ink text-paper font-semibold px-6 py-3.5 rounded-pill hover:bg-ink/90 transition"
+              className="inline-flex items-center gap-2 bg-ink text-paper font-semibold px-6 py-3.5 rounded-pill hover:bg-foreground/90 transition"
             >
               Đặt lịch tư vấn <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
             <Link
               href="/blog"
-              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-pill ring-1 ring-ink/20 hover:bg-ink/5 transition"
+              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-pill ring-1 ring-foreground/20 hover:bg-foreground/5 transition"
             >
               <BookOpen className="h-4 w-4" strokeWidth={1.75} /> Đọc blog
             </Link>
           </div>
         </div>
+        </ScrollReveal>
       </section>
     </>
   )

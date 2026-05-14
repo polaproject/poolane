@@ -92,7 +92,7 @@ export default function AssessPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-28">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-2xl mx-auto">
           <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group">
@@ -117,10 +117,10 @@ export default function AssessPage() {
           const changed = current !== prev && prev > 0
 
           return (
-            <div key={skill.key} className={`rounded-card-lg bg-white p-5 shadow-soft ring-1 ${isLow ? 'ring-danger/30' : 'ring-ink/8'}`}>
+            <div key={skill.key} className={`rounded-card-lg bg-[var(--surface)] p-5 shadow-soft ring-1 ${isLow ? 'ring-danger/30' : 'ring-foreground/8'}`}>
               <div className="flex justify-between items-center mb-3 gap-2">
                 <div className="flex items-center gap-2 flex-wrap min-w-0">
-                  <p className="font-medium text-ink text-sm">{skill.label}</p>
+                  <p className="font-medium text-foreground text-sm">{skill.label}</p>
                   {isKey && <Chip variant="accent" active className="text-[10px]"><Star className="h-2.5 w-2.5" strokeWidth={2.25} /> Quan trọng</Chip>}
                   {isLow && (
                     <span className="text-xs text-danger inline-flex items-center gap-1">
@@ -129,12 +129,12 @@ export default function AssessPage() {
                   )}
                 </div>
                 {prev > 0 && changed && (
-                  <span className={`text-xs font-medium shrink-0 ${current > prev ? 'text-success' : current < prev ? 'text-danger' : 'text-ink/40'}`}>
+                  <span className={`text-xs font-medium shrink-0 ${current > prev ? 'text-success' : current < prev ? 'text-danger' : 'text-foreground/40'}`}>
                     {prev} → {current}
                   </span>
                 )}
                 {prev > 0 && !changed && current > 0 && (
-                  <span className="text-xs text-ink/30 shrink-0">={prev}</span>
+                  <span className="text-xs text-foreground/30 shrink-0">={prev}</span>
                 )}
               </div>
 
@@ -155,38 +155,38 @@ export default function AssessPage() {
               </div>
 
               {current > 0 && (
-                <p className="text-xs text-ink/55 mt-2">{SCALE_DESCRIPTIONS[current as keyof typeof SCALE_DESCRIPTIONS]}</p>
+                <p className="text-xs text-foreground/55 mt-2">{SCALE_DESCRIPTIONS[current as keyof typeof SCALE_DESCRIPTIONS]}</p>
               )}
             </div>
           )
         })}
 
         {/* Metrics */}
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+        <div className="glass-card glass-card-hover overflow-hidden">
           <button
             onClick={() => setShowMetrics(!showMetrics)}
-            className="w-full px-5 py-4 flex justify-between items-center text-sm font-medium text-ink hover:bg-paper-tint/30 transition"
+            className="w-full px-5 py-4 flex justify-between items-center text-sm font-medium text-foreground hover:bg-paper-tint/30 transition"
           >
             Chỉ số khách quan (tuỳ chọn)
             <ChevronRight className={`h-4 w-4 transition-transform ${showMetrics ? 'rotate-90' : ''}`} strokeWidth={2} />
           </button>
           {showMetrics && (
-            <div className="px-5 pb-5 space-y-3 border-t border-ink/8 pt-4">
+            <div className="px-5 pb-5 space-y-3 border-t border-foreground/8 pt-4">
               {[
                 { key: 'meters', label: 'Mét bơi liên tục', unit: 'm', placeholder: '25' },
                 { key: 'time25m', label: 'Thời gian 25m', unit: 'giây', placeholder: '35.5' },
                 { key: 'strokeCount', label: 'Nhịp/chiều hồ', unit: 'nhịp', placeholder: '22' },
               ].map(m => (
                 <div key={m.key} className="flex items-center gap-3">
-                  <label className="text-xs text-ink/55 w-32 shrink-0">{m.label}</label>
+                  <label className="text-xs text-foreground/55 w-32 shrink-0">{m.label}</label>
                   <input
                     type="number"
                     placeholder={m.placeholder}
                     value={metrics[m.key as keyof typeof metrics]}
                     onChange={e => setMetrics(prev => ({ ...prev, [m.key]: e.target.value }))}
-                    className="flex-1 h-10 px-3 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none transition"
+                    className="flex-1 h-10 px-3 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-foreground/10 focus:ring-accent/40 focus:outline-none transition"
                   />
-                  <span className="text-xs text-ink/45 w-10">{m.unit}</span>
+                  <span className="text-xs text-foreground/45 w-10">{m.unit}</span>
                 </div>
               ))}
             </div>
@@ -194,14 +194,14 @@ export default function AssessPage() {
         </div>
 
         {mode !== 'quick' && (
-          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
-            <p className="eyebrow text-ink/55 mb-2">Ghi chú</p>
+          <div className="glass-card glass-card-hover p-5">
+            <p className="eyebrow text-foreground/55 mb-2">Ghi chú</p>
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
               rows={3}
               placeholder="Nhận xét buổi học, điểm cần chú ý..."
-              className="w-full text-sm px-3 py-2 rounded-card bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none resize-none transition"
+              className="w-full text-sm px-3 py-2 rounded-card bg-paper-tint/40 ring-1 ring-foreground/10 focus:ring-accent/40 focus:outline-none resize-none transition"
             />
           </div>
         )}
@@ -212,7 +212,7 @@ export default function AssessPage() {
           onClick={handleSubmit}
           disabled={loading || completedCount === 0}
           className={`w-full h-12 rounded-pill font-semibold text-base inline-flex items-center justify-center gap-2 transition shadow-soft disabled:opacity-60 ${
-            mode === 'graduation' ? 'bg-accent text-ink hover:bg-accent/90' : 'bg-ink text-paper hover:bg-ink/90'
+            mode === 'graduation' ? 'bg-accent text-ink hover:bg-accent/90' : 'bg-ink text-paper hover:bg-foreground/90'
           }`}
         >
           {loading

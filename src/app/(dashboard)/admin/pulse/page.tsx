@@ -39,17 +39,17 @@ function StudentCard({ student, variant }: { student: PulseStudent; variant: Var
   }
 
   return (
-    <div className={`rounded-card-lg bg-white shadow-soft ring-1 p-5 ${
+    <div className={`rounded-card-lg bg-[var(--surface)] shadow-soft ring-1 p-5 ${
       variant === 'danger' ? 'ring-danger/30' :
       variant === 'warn' ? 'ring-warn/30' :
       variant === 'mist' ? 'ring-mist/30' : 'ring-accent/30'
     }`}>
       <div className="flex justify-between items-start mb-3 gap-3">
         <div>
-          <Link href={`/admin/students/${student.id}`} className="text-sm font-medium text-ink hover:text-accent transition">
+          <Link href={`/admin/students/${student.id}`} className="text-sm font-medium text-foreground hover:text-accent transition">
             {student.fullName}
           </Link>
-          <p className="text-xs text-ink/55 mt-0.5">{student.phone}</p>
+          <p className="text-xs text-foreground/55 mt-0.5">{student.phone}</p>
         </div>
         <div className="text-right space-y-1">
           {student.daysSince !== undefined && (
@@ -76,13 +76,13 @@ function StudentCard({ student, variant }: { student: PulseStudent; variant: Var
         </div>
       )}
 
-      <div className="rounded-card bg-paper-tint/40 p-3 text-sm text-ink/80 italic mb-3">
+      <div className="rounded-card bg-paper-tint/40 p-3 text-sm text-foreground/80 italic mb-3">
         &ldquo;{student.suggestedMessage}&rdquo;
       </div>
 
       <button
         onClick={copyMessage}
-        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-pill ring-1 ring-ink/15 text-sm font-medium text-ink hover:bg-ink/5 transition"
+        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-pill ring-1 ring-foreground/15 text-sm font-medium text-foreground hover:bg-foreground/5 transition"
       >
         {copied
           ? <><Check className="h-3.5 w-3.5 text-success" strokeWidth={2.25} /> Đã copy</>
@@ -133,7 +133,7 @@ export default function PulsePage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-warn/15 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -178,7 +178,7 @@ export default function PulsePage() {
                     section.variant === 'warn' ? 'text-warn' :
                     section.variant === 'mist' ? 'text-mist' : 'text-accent'
                   }`}>{section.title}</p>
-                  <p className="text-sm font-medium text-ink mt-0.5">{section.subtitle} · {section.students.length} người</p>
+                  <p className="text-sm font-medium text-foreground mt-0.5">{section.subtitle} · {section.students.length} người</p>
                 </div>
               </header>
               <div className="space-y-3">
@@ -193,8 +193,8 @@ export default function PulsePage() {
         {total === 0 && (
           <div className="rounded-card-xl bg-success/8 ring-1 ring-success/30 p-12 text-center">
             <Check className="h-12 w-12 mx-auto mb-3 text-success" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">Tuần này yên bình</p>
-            <p className="text-sm text-ink/65">Không có học viên nào cần follow-up đặc biệt.</p>
+            <p className="font-heading italic text-2xl text-foreground mb-1">Tuần này yên bình</p>
+            <p className="text-sm text-foreground/65">Không có học viên nào cần follow-up đặc biệt.</p>
           </div>
         )}
       </div>

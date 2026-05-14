@@ -8,6 +8,8 @@ import {
 import { format, isToday } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { Chip } from '@/components/ui/Chip'
+import { StarField } from '@/components/brand/StarField'
+import { Stagger } from '@/components/motion/Stagger'
 
 export default async function StudentDashboard() {
   const user = await requireRole(['student'])
@@ -68,16 +70,17 @@ export default async function StudentDashboard() {
   })()
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       {/* ── HERO ─────────────────────────────────────────── */}
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-16 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-paper/5 -translate-y-1/3 translate-x-1/4 blur-2xl" />
-        <div className="absolute bottom-0 left-1/4 w-60 h-60 rounded-full bg-accent/15 translate-y-1/2 blur-3xl" />
-        <div className="absolute top-1/2 right-1/3 w-40 h-40 rounded-full bg-mist/10 blur-3xl" />
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-16 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 rounded-full -translate-y-1/3 translate-x-1/4 blur-2xl motion-sway" style={{ background: 'var(--hero-overlay-1)' }} />
+        <div className="absolute bottom-0 left-1/4 w-60 h-60 rounded-full translate-y-1/2 blur-3xl motion-sway" style={{ background: 'var(--hero-overlay-2)', animationDelay: '-7s' }} />
+        <div className="absolute top-1/2 right-1/3 w-40 h-40 rounded-full blur-3xl motion-sway" style={{ background: 'var(--hero-overlay-1)', animationDelay: '-12s' }} />
+        <StarField density={22} maxSize={2} className="text-accent/55" />
 
         <div className="relative z-10 max-w-3xl mx-auto">
-          <p className="eyebrow text-paper/55 mb-3">{greeting}</p>
-          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">
+          <p className="eyebrow opacity-65 mb-3">{greeting}</p>
+          <h1 className="heading-display">
             {user.fullName}
           </h1>
           {avgScore && (
@@ -95,23 +98,23 @@ export default async function StudentDashboard() {
         <div className="grid sm:grid-cols-2 gap-4">
           {/* Pool ticket */}
           <div
-            className={`rounded-card-lg bg-white p-5 shadow-soft ring-1 transition ${
-              ticketLow ? 'ring-danger/30' : 'ring-ink/8'
+            className={`rounded-card-lg bg-[var(--surface)] p-5 shadow-soft ring-1 transition ${
+              ticketLow ? 'ring-danger/30' : 'ring-foreground/8'
             }`}
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Ticket className="h-4 w-4 text-mist" strokeWidth={1.75} />
-                <p className="eyebrow text-ink/55">Vé bơi</p>
+                <p className="eyebrow text-foreground/55">Vé bơi</p>
               </div>
               {ticketLow && <Chip variant="danger" active>Sắp hết</Chip>}
             </div>
 
             {ticket ? (
               <>
-                <p className="font-heading italic text-5xl text-ink leading-none">
+                <p className="font-heading italic text-5xl text-foreground leading-none">
                   {sessionsLeft}
-                  <span className="text-sm font-body not-italic text-ink/55 ml-2">buổi còn</span>
+                  <span className="text-sm font-body not-italic text-foreground/55 ml-2">buổi còn</span>
                 </p>
                 <div className="h-1.5 bg-ink/8 rounded-full mt-4 overflow-hidden">
                   <div
@@ -121,14 +124,14 @@ export default async function StudentDashboard() {
                     style={{ width: `${ticketProgress}%` }}
                   />
                 </div>
-                <p className="text-xs text-ink/55 mt-2">
+                <p className="text-xs text-foreground/55 mt-2">
                   Đã dùng {ticket.sessionsUsed}/{ticket.maxSessions} buổi
                 </p>
               </>
             ) : (
               <>
-                <p className="font-heading italic text-3xl text-ink/40">Chưa có vé</p>
-                <p className="text-sm text-ink/55 mt-1">Liên hệ lớp để mua vé bơi</p>
+                <p className="font-heading italic text-3xl text-foreground/40">Chưa có vé</p>
+                <p className="text-sm text-foreground/55 mt-1">Liên hệ lớp để mua vé bơi</p>
               </>
             )}
           </div>
@@ -175,20 +178,20 @@ export default async function StudentDashboard() {
         </div>
 
         {/* ── QUICK LINKS ────────────────────────────────── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Stagger step={0.07} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <QuickLink href="/student/schedule" icon={Calendar} label="Đăng ký buổi" />
           <QuickLink href="/student/progress" icon={TrendingUp} label="Tiến độ" />
           <QuickLink href="/shared/notifications" icon={Bell} label="Thông báo" badge={unreadCount > 0 ? unreadCount : undefined} />
           <QuickLink href="/student/shop" icon={ShoppingBag} label="Cửa hàng" />
-        </div>
+        </Stagger>
 
         {/* ── ACTIVE COURSES ─────────────────────────────── */}
         {student && student.enrollments.length > 0 && (
-          <div className="rounded-card-lg bg-white p-5 shadow-soft ring-1 ring-ink/8">
+          <div className="rounded-card-lg bg-[var(--surface)] p-5 shadow-soft ring-1 ring-foreground/8">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-accent" strokeWidth={1.75} />
-                <p className="eyebrow text-ink/55">Khoá đang học</p>
+                <p className="eyebrow text-foreground/55">Khoá đang học</p>
               </div>
               <Link href="/student/progress" className="text-xs text-accent hover:underline inline-flex items-center gap-1">
                 Xem tiến độ <ArrowRight className="h-3 w-3" strokeWidth={2.25} />
@@ -202,11 +205,11 @@ export default async function StudentDashboard() {
                   className="flex items-center justify-between py-2.5 px-3 rounded-card bg-paper-tint/50 hover:bg-paper-tint transition group"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="font-heading italic text-lg text-ink">{e.course.name}</span>
+                    <span className="font-heading italic text-lg text-foreground">{e.course.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Chip variant="mist">{e.course.code}</Chip>
-                    <ArrowRight className="h-3.5 w-3.5 text-ink/40 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
+                    <ArrowRight className="h-3.5 w-3.5 text-foreground/40 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
                   </div>
                 </Link>
               ))}
@@ -229,12 +232,12 @@ function QuickLink({
   return (
     <Link
       href={href}
-      className="group bg-white rounded-card-lg p-4 shadow-soft ring-1 ring-ink/8 hover:ring-accent/40 hover:-translate-y-0.5 transition-all duration-300 flex flex-col gap-3 relative"
+      className="group glass-card p-4 shadow-soft ring-1 ring-foreground/8 hover:ring-accent/40 hover:-translate-y-1 hover:shadow-[var(--shadow-glow-accent)] transition-[transform,box-shadow,ring] duration-300 [transition-timing-function:var(--ease-spring-soft)] flex flex-col gap-3 relative"
     >
-      <div className="grid place-items-center h-10 w-10 rounded-pill bg-accent/12 group-hover:bg-accent/20 transition">
+      <div className="grid place-items-center h-10 w-10 rounded-pill bg-accent/12 group-hover:bg-accent/20 group-hover:scale-110 transition-transform duration-300 [transition-timing-function:var(--ease-spring)]">
         <Icon className="h-5 w-5 text-accent" strokeWidth={1.75} />
       </div>
-      <span className="text-sm font-medium text-ink">{label}</span>
+      <span className="text-sm font-medium text-foreground">{label}</span>
       {badge !== undefined && (
         <span className="absolute top-3 right-3 bg-danger text-paper text-[10px] font-bold rounded-pill min-w-[20px] h-[20px] px-1.5 grid place-items-center">
           {badge > 9 ? '9+' : badge}

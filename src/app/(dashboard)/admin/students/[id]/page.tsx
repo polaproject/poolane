@@ -68,7 +68,7 @@ export default async function StudentDetailPage({ params }: Params) {
   return (
     <div className="min-h-screen bg-paper pb-12">
       {/* Hero */}
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="absolute bottom-0 left-1/4 w-48 h-48 rounded-full bg-mist/10 translate-y-1/2 blur-3xl" />
         <div className="relative max-w-4xl mx-auto">
@@ -109,16 +109,16 @@ export default async function StudentDetailPage({ params }: Params) {
         {/* 3 stat cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Pool ticket */}
-          <div className={`rounded-card-lg bg-white p-5 shadow-soft ring-1 ${isLow ? 'ring-danger/30' : 'ring-ink/8'}`}>
+          <div className={`rounded-card-lg bg-[var(--surface)] p-5 shadow-soft ring-1 ${isLow ? 'ring-danger/30' : 'ring-foreground/8'}`}>
             <div className="flex items-center gap-2 mb-3">
               <Ticket className="h-4 w-4 text-mist" strokeWidth={1.75} />
-              <p className="eyebrow text-ink/55">Vé bơi</p>
+              <p className="eyebrow text-foreground/55">Vé bơi</p>
             </div>
             {activeTicket ? (
               <>
-                <p className="font-heading italic text-4xl text-ink leading-none">
+                <p className="font-heading italic text-4xl text-foreground leading-none">
                   {sessionsLeft}
-                  <span className="text-sm font-body not-italic text-ink/55 ml-1.5">buổi</span>
+                  <span className="text-sm font-body not-italic text-foreground/55 ml-1.5">buổi</span>
                 </p>
                 <div className="h-1.5 bg-ink/8 rounded-full mt-3 overflow-hidden">
                   <div
@@ -126,51 +126,51 @@ export default async function StudentDetailPage({ params }: Params) {
                     style={{ width: `${(activeTicket.sessionsUsed / activeTicket.maxSessions) * 100}%` }}
                   />
                 </div>
-                <p className="text-xs text-ink/55 mt-2">Đã dùng {activeTicket.sessionsUsed}/{activeTicket.maxSessions}</p>
+                <p className="text-xs text-foreground/55 mt-2">Đã dùng {activeTicket.sessionsUsed}/{activeTicket.maxSessions}</p>
               </>
             ) : (
-              <p className="text-sm text-ink/45">Chưa có vé</p>
+              <p className="text-sm text-foreground/45">Chưa có vé</p>
             )}
           </div>
 
           {/* Enrollments */}
-          <div className="rounded-card-lg bg-white p-5 shadow-soft ring-1 ring-ink/8">
+          <div className="rounded-card-lg bg-[var(--surface)] p-5 shadow-soft ring-1 ring-foreground/8">
             <div className="flex items-center gap-2 mb-3">
               <BookOpen className="h-4 w-4 text-accent" strokeWidth={1.75} />
-              <p className="eyebrow text-ink/55">Khoá học</p>
+              <p className="eyebrow text-foreground/55">Khoá học</p>
             </div>
-            <p className="font-heading italic text-4xl text-ink leading-none">
+            <p className="font-heading italic text-4xl text-foreground leading-none">
               {activeEnrollments.length}
-              <span className="text-sm font-body not-italic text-ink/55 ml-1.5">đang học</span>
+              <span className="text-sm font-body not-italic text-foreground/55 ml-1.5">đang học</span>
             </p>
-            <p className="text-xs text-ink/55 mt-2">{student.enrollments.length} tổng khoá</p>
+            <p className="text-xs text-foreground/55 mt-2">{student.enrollments.length} tổng khoá</p>
           </div>
 
           {/* Last attended */}
-          <div className="rounded-card-lg bg-white p-5 shadow-soft ring-1 ring-ink/8">
+          <div className="rounded-card-lg bg-[var(--surface)] p-5 shadow-soft ring-1 ring-foreground/8">
             <div className="flex items-center gap-2 mb-3">
-              <Calendar className="h-4 w-4 text-ink/55" strokeWidth={1.75} />
-              <p className="eyebrow text-ink/55">Lần cuối</p>
+              <Calendar className="h-4 w-4 text-foreground/55" strokeWidth={1.75} />
+              <p className="eyebrow text-foreground/55">Lần cuối</p>
             </div>
             {student.lastAttendedAt ? (
               <>
-                <p className="font-heading italic text-4xl text-ink leading-none">{format(student.lastAttendedAt, 'dd/MM')}</p>
-                <p className="text-xs text-ink/55 mt-2">{format(student.lastAttendedAt, 'yyyy', { locale: vi })}</p>
+                <p className="font-heading italic text-4xl text-foreground leading-none">{format(student.lastAttendedAt, 'dd/MM')}</p>
+                <p className="text-xs text-foreground/55 mt-2">{format(student.lastAttendedAt, 'yyyy', { locale: vi })}</p>
               </>
             ) : (
-              <p className="text-sm text-ink/45">Chưa đi học</p>
+              <p className="text-sm text-foreground/45">Chưa đi học</p>
             )}
           </div>
         </div>
 
         {/* Enrollments */}
         {student.enrollments.length > 0 && (
-          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
-            <div className="px-5 py-4 border-b border-ink/8 flex items-center gap-2">
+          <div className="glass-card glass-card-hover overflow-hidden">
+            <div className="px-5 py-4 border-b border-foreground/8 flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-accent" strokeWidth={1.75} />
-              <p className="eyebrow text-ink/55">Khoá học đã đăng ký</p>
+              <p className="eyebrow text-foreground/55">Khoá học đã đăng ký</p>
             </div>
-            <div className="divide-y divide-ink/5">
+            <div className="divide-y divide-foreground/5">
               {student.enrollments.map(e => {
                 const remaining = e.course.price - e.totalPaid
                 const memo = `POLAE${e.id.replace(/-/g, '').slice(0, 8).toUpperCase()}`
@@ -180,15 +180,15 @@ export default async function StudentDetailPage({ params }: Params) {
                     <div className="flex items-start justify-between gap-3 flex-wrap">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className="font-heading italic text-lg text-ink">{e.course.name}</span>
+                          <span className="font-heading italic text-lg text-foreground">{e.course.name}</span>
                           <Chip variant={enrCfg.variant} active className="text-[10px]">{enrCfg.label}</Chip>
                         </div>
-                        <p className="text-xs text-ink/55">
+                        <p className="text-xs text-foreground/55">
                           {PLAN_LABELS[e.paymentPlan]} · Đăng ký {format(e.enrolledAt, 'dd/MM/yyyy')}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-sm font-medium text-ink">{fmt(e.totalPaid)}</p>
+                        <p className="text-sm font-medium text-foreground">{fmt(e.totalPaid)}</p>
                         {remaining > 0 && (
                           <p className="text-xs text-danger inline-flex items-center gap-1 mt-0.5">
                             <AlertCircle className="h-3 w-3" strokeWidth={2.25} /> Còn nợ {fmt(remaining)}
@@ -197,7 +197,7 @@ export default async function StudentDetailPage({ params }: Params) {
                       </div>
                     </div>
                     {remaining > 0 && e.status !== 'cancelled' && e.status !== 'refunded' && (
-                      <div className="mt-3 pt-3 border-t border-ink/5">
+                      <div className="mt-3 pt-3 border-t border-foreground/5">
                         <ConfirmEnrollmentTransferButton
                           enrollmentId={e.id}
                           memo={memo}
@@ -214,10 +214,10 @@ export default async function StudentDetailPage({ params }: Params) {
         )}
 
         {/* User info detail */}
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
-          <div className="px-5 py-4 border-b border-ink/8 flex items-center gap-2">
+        <div className="glass-card glass-card-hover overflow-hidden">
+          <div className="px-5 py-4 border-b border-foreground/8 flex items-center gap-2">
             <Mail className="h-4 w-4 text-accent" strokeWidth={1.75} />
-            <p className="eyebrow text-ink/55">Thông tin cá nhân</p>
+            <p className="eyebrow text-foreground/55">Thông tin cá nhân</p>
           </div>
           <div className="px-5 py-4 grid grid-cols-2 gap-4 text-sm">
             {[
@@ -234,8 +234,8 @@ export default async function StudentDetailPage({ params }: Params) {
             ].map(item => (
               item.value ? (
                 <div key={item.label}>
-                  <p className="text-xs text-ink/45 mb-1">{item.label}</p>
-                  <p className="text-ink">{item.value}</p>
+                  <p className="text-xs text-foreground/45 mb-1">{item.label}</p>
+                  <p className="text-foreground">{item.value}</p>
                 </div>
               ) : null
             ))}
@@ -246,13 +246,13 @@ export default async function StudentDetailPage({ params }: Params) {
         <div className="grid sm:grid-cols-3 gap-3">
           <Link
             href={`/admin/students/${id}/enroll`}
-            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-pill bg-ink text-paper font-semibold text-sm hover:bg-ink/90 transition shadow-soft"
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-pill bg-ink text-paper font-semibold text-sm hover:bg-foreground/90 transition shadow-soft"
           >
             <BookOpen className="h-4 w-4 text-accent" strokeWidth={1.75} /> Đăng ký khoá học
           </Link>
           <Link
             href={`/admin/students/${id}/ticket`}
-            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-pill ring-1 ring-ink/15 text-sm font-medium text-ink hover:bg-ink/5 transition"
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-pill ring-1 ring-foreground/15 text-sm font-medium text-foreground hover:bg-foreground/5 transition"
           >
             <Ticket className="h-4 w-4 text-mist" strokeWidth={1.75} /> Tạo vé bơi
           </Link>

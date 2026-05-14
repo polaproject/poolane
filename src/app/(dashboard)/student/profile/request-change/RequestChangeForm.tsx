@@ -85,14 +85,14 @@ export function RequestChangeForm({ current }: { current: Current }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#1C2B4A]/8">
-          <h2 className="font-semibold text-[#1C2B4A] text-sm">Chọn trường muốn cập nhật</h2>
-          <p className="text-xs text-[#1C2B4A]/50 mt-0.5">
+      <div className="glass-card glass-card-hover overflow-hidden">
+        <div className="px-5 py-4 border-b border-foreground/8">
+          <h2 className="font-semibold text-foreground text-sm">Chọn trường muốn cập nhật</h2>
+          <p className="text-xs text-foreground/50 mt-0.5">
             Tick để mở input, nhập giá trị mới bên phải
           </p>
         </div>
-        <div className="divide-y divide-[#1C2B4A]/5">
+        <div className="divide-y divide-foreground/5">
           {APPROVAL_REQUIRED_FIELDS.map(field => {
             const isSelected = selected.has(field)
             return (
@@ -102,12 +102,12 @@ export function RequestChangeForm({ current }: { current: Current }) {
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => toggleField(field)}
-                    className="mt-1 w-4 h-4 rounded border-[#1C2B4A]/30"
+                    className="mt-1 w-4 h-4 rounded border-foreground/30"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#1C2B4A]">{FIELD_LABELS[field]}</p>
-                    <p className="text-xs text-[#1C2B4A]/50 mt-0.5 truncate">
-                      Hiện tại: {current[field] || <em className="text-[#1C2B4A]/30">chưa có</em>}
+                    <p className="text-sm font-semibold text-foreground">{FIELD_LABELS[field]}</p>
+                    <p className="text-xs text-foreground/50 mt-0.5 truncate">
+                      Hiện tại: {current[field] || <em className="text-foreground/30">chưa có</em>}
                     </p>
                   </div>
                 </label>
@@ -119,7 +119,7 @@ export function RequestChangeForm({ current }: { current: Current }) {
                       value={values[field]}
                       onChange={e => setValues(v => ({ ...v, [field]: e.target.value }))}
                       placeholder={`Giá trị mới của ${FIELD_LABELS[field].toLowerCase()}`}
-                      className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
+                      className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/20 bg-[var(--surface)]"
                     />
                   </div>
                 )}
@@ -129,8 +129,8 @@ export function RequestChangeForm({ current }: { current: Current }) {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-5">
-        <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+      <div className="glass-card glass-card-hover p-5">
+        <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
           Lý do (không bắt buộc)
         </label>
         <textarea
@@ -139,17 +139,17 @@ export function RequestChangeForm({ current }: { current: Current }) {
           value={reason}
           onChange={e => setReason(e.target.value)}
           placeholder="VD: Tôi vừa chuyển nhà..."
-          className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
+          className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/20 bg-[var(--surface)]"
         />
       </div>
 
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <div className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-lg px-3 py-2">
           {error}
         </div>
       )}
       {success && (
-        <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+        <div className="text-sm text-success bg-success/10 border border-success/30 rounded-lg px-3 py-2">
           Đã gửi yêu cầu. Đang chuyển về trang hồ sơ...
         </div>
       )}
@@ -158,13 +158,13 @@ export function RequestChangeForm({ current }: { current: Current }) {
         <button
           type="submit"
           disabled={submitting || selected.size === 0}
-          className="flex-1 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-2.5 text-sm font-semibold hover:bg-[#1C2B4A]/90 disabled:opacity-50"
+          className="flex-1 bg-ink-soft text-paper rounded-lg py-2.5 text-sm font-semibold hover:bg-foreground/90 disabled:opacity-50"
         >
           {submitting ? 'Đang gửi...' : `Gửi yêu cầu (${selected.size} trường)`}
         </button>
         <Link
           href="/student/profile"
-          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70 hover:bg-[#1C2B4A]/5"
+          className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-foreground/15 text-foreground/70 hover:bg-foreground/5"
         >
           Huỷ
         </Link>

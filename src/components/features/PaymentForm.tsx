@@ -82,7 +82,7 @@ export function PaymentForm({ studentId, enrollmentId, defaultAmount, defaultTyp
           <select
             value={type}
             onChange={e => setType(e.target.value)}
-            className="w-full h-9 px-3 text-sm rounded-lg border border-[#1C2B4A]/15 bg-background focus:outline-none"
+            className="w-full h-9 px-3 text-sm rounded-lg border border-foreground/15 bg-background focus:outline-none"
           >
             {PAYMENT_TYPES.map(t => (
               <option key={t.value} value={t.value}>{t.label}</option>
@@ -94,7 +94,7 @@ export function PaymentForm({ studentId, enrollmentId, defaultAmount, defaultTyp
           <select
             value={method}
             onChange={e => setMethod(e.target.value)}
-            className="w-full h-9 px-3 text-sm rounded-lg border border-[#1C2B4A]/15 bg-background focus:outline-none"
+            className="w-full h-9 px-3 text-sm rounded-lg border border-foreground/15 bg-background focus:outline-none"
           >
             {PAYMENT_METHODS.map(m => (
               <option key={m.value} value={m.value}>{m.label}</option>
@@ -111,7 +111,7 @@ export function PaymentForm({ studentId, enrollmentId, defaultAmount, defaultTyp
           value={amount}
           onChange={e => setAmount(e.target.value)}
           required
-          className="w-full h-9 px-3 text-sm rounded-lg border border-[#1C2B4A]/15 bg-background focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20"
+          className="w-full h-9 px-3 text-sm rounded-lg border border-foreground/15 bg-background focus:outline-none focus:ring-2 focus:ring-foreground/20"
         />
       </div>
 
@@ -123,7 +123,7 @@ export function PaymentForm({ studentId, enrollmentId, defaultAmount, defaultTyp
             placeholder="Số tham chiếu chuyển khoản"
             value={refNum}
             onChange={e => setRefNum(e.target.value)}
-            className="w-full h-9 px-3 text-sm rounded-lg border border-[#1C2B4A]/15 bg-background focus:outline-none"
+            className="w-full h-9 px-3 text-sm rounded-lg border border-foreground/15 bg-background focus:outline-none"
           />
         </div>
       )}
@@ -135,14 +135,14 @@ export function PaymentForm({ studentId, enrollmentId, defaultAmount, defaultTyp
           placeholder="Tuỳ chọn"
           value={notes}
           onChange={e => setNotes(e.target.value)}
-          className="w-full h-9 px-3 text-sm rounded-lg border border-[#1C2B4A]/15 bg-background focus:outline-none"
+          className="w-full h-9 px-3 text-sm rounded-lg border border-foreground/15 bg-background focus:outline-none"
         />
       </div>
 
       <Button
         type="submit"
         disabled={loading}
-        className="w-full bg-[#1C2B4A] text-[#F6F1EA] hover:bg-[#1C2B4A]/90"
+        className="w-full bg-ink-soft text-paper hover:bg-foreground/90"
       >
         {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Đang lưu...</> : 'Ghi nhận thanh toán'}
       </Button>

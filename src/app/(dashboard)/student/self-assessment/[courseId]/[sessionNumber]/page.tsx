@@ -28,7 +28,7 @@ export default async function SelfAssessmentPage({ params }: Params) {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-2xl mx-auto">
           <Link
@@ -49,7 +49,7 @@ export default async function SelfAssessmentPage({ params }: Params) {
       </div>
 
       <div className="px-4 sm:px-8 -mt-6 max-w-2xl mx-auto relative z-10">
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5 sm:p-6">
+        <div className="glass-card glass-card-hover p-5 sm:p-6">
           <SelfAssessmentForm
             courseId={courseId}
             sessionNumber={sn}

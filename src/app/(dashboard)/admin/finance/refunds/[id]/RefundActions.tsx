@@ -59,9 +59,9 @@ export function RefundActions({ id, mode, amount }: { id: string; mode: Mode; am
   if (mode === 'pending') {
     if (state === 'rejecting') {
       return (
-        <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 shadow-sm p-5">
-          <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
-            Lý do từ chối <span className="text-red-500">*</span>
+        <div className="glass-card border border-foreground/8 shadow-sm p-5">
+          <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
+            Lý do từ chối <span className="text-danger">*</span>
           </label>
           <textarea
             rows={3}
@@ -69,9 +69,9 @@ export function RefundActions({ id, mode, amount }: { id: string; mode: Mode; am
             value={notes}
             onChange={e => setNotes(e.target.value)}
             placeholder="Giải thích lý do để học viên hiểu..."
-            className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 bg-white"
+            className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 bg-[var(--surface)]"
           />
-          {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+          {error && <p className="text-sm text-danger mt-2">{error}</p>}
           <div className="flex gap-3 mt-3">
             <button
               disabled={submitting}
@@ -83,7 +83,7 @@ export function RefundActions({ id, mode, amount }: { id: string; mode: Mode; am
             <button
               onClick={() => { setState('idle'); setError(null) }}
               disabled={submitting}
-              className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70 hover:bg-[#1C2B4A]/5"
+              className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-foreground/15 text-foreground/70 hover:bg-foreground/5"
             >
               Huỷ
             </button>
@@ -93,25 +93,25 @@ export function RefundActions({ id, mode, amount }: { id: string; mode: Mode; am
     }
 
     return (
-      <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 shadow-sm p-5">
+      <div className="glass-card border border-foreground/8 shadow-sm p-5">
         <div className="flex gap-3">
           <button
             disabled={submitting}
             onClick={() => submit('approve')}
-            className="flex-1 bg-green-600 text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-green-700 disabled:opacity-50"
+            className="flex-1 bg-success text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-success disabled:opacity-50"
           >
             {submitting ? 'Đang duyệt...' : '✓ Duyệt yêu cầu hoàn tiền'}
           </button>
           <button
             onClick={() => setState('rejecting')}
             disabled={submitting}
-            className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-red-300 text-red-700 hover:bg-red-50"
+            className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-danger/30 text-danger hover:bg-danger/10"
           >
             Từ chối
           </button>
         </div>
-        {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
-        <p className="text-xs text-[#1C2B4A]/40 mt-3">
+        {error && <p className="text-sm text-danger mt-2">{error}</p>}
+        <p className="text-xs text-foreground/40 mt-3">
           Duyệt sẽ chuyển trạng thái sang &ldquo;Chờ chuyển&rdquo;. Bạn cần chuyển tiền thật rồi quay lại đây đánh dấu &ldquo;Đã chuyển&rdquo;.
         </p>
       </div>
@@ -121,13 +121,13 @@ export function RefundActions({ id, mode, amount }: { id: string; mode: Mode; am
   // Approved → transfer
   if (state === 'transferring') {
     return (
-      <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 shadow-sm p-5">
-        <p className="text-sm text-[#1C2B4A]/70 mb-3">
-          Xác nhận đã chuyển <span className="font-semibold text-[#1C2B4A]">{fmt(amount ?? 0)}</span> về tài khoản học viên?
+      <div className="glass-card border border-foreground/8 shadow-sm p-5">
+        <p className="text-sm text-foreground/70 mb-3">
+          Xác nhận đã chuyển <span className="font-semibold text-foreground">{fmt(amount ?? 0)}</span> về tài khoản học viên?
         </p>
 
-        <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
-          Mã giao dịch / Tham chiếu <span className="text-red-500">*</span>
+        <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
+          Mã giao dịch / Tham chiếu <span className="text-danger">*</span>
         </label>
         <input
           type="text"
@@ -135,10 +135,10 @@ export function RefundActions({ id, mode, amount }: { id: string; mode: Mode; am
           value={transferRef}
           onChange={e => setTransferRef(e.target.value)}
           placeholder="VD: FT250514XYZ..."
-          className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white mb-3"
+          className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/20 bg-[var(--surface)] mb-3"
         />
 
-        <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
+        <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">
           Ghi chú (tuỳ chọn)
         </label>
         <textarea
@@ -146,23 +146,23 @@ export function RefundActions({ id, mode, amount }: { id: string; mode: Mode; am
           maxLength={300}
           value={notes}
           onChange={e => setNotes(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
+          className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-foreground/20 bg-[var(--surface)]"
         />
 
-        {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+        {error && <p className="text-sm text-danger mt-2">{error}</p>}
 
         <div className="flex gap-3 mt-3">
           <button
             disabled={submitting}
             onClick={() => submit('transfer')}
-            className="flex-1 bg-green-600 text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-green-700 disabled:opacity-50"
+            className="flex-1 bg-success text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-success disabled:opacity-50"
           >
             {submitting ? 'Đang xác nhận...' : 'Xác nhận đã chuyển tiền'}
           </button>
           <button
             onClick={() => { setState('idle'); setError(null) }}
             disabled={submitting}
-            className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A]/70 hover:bg-[#1C2B4A]/5"
+            className="px-4 py-2.5 text-sm font-semibold rounded-lg border border-foreground/15 text-foreground/70 hover:bg-foreground/5"
           >
             Huỷ
           </button>
@@ -172,14 +172,14 @@ export function RefundActions({ id, mode, amount }: { id: string; mode: Mode; am
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 shadow-sm p-5">
+    <div className="glass-card border border-foreground/8 shadow-sm p-5">
       <button
         onClick={() => setState('transferring')}
-        className="w-full bg-[#1C2B4A] text-[#F6F1EA] rounded-lg py-2.5 text-sm font-semibold hover:bg-[#1C2B4A]/90"
+        className="w-full bg-ink-soft text-paper rounded-lg py-2.5 text-sm font-semibold hover:bg-foreground/90"
       >
         💸 Đánh dấu đã chuyển tiền
       </button>
-      <p className="text-xs text-[#1C2B4A]/40 mt-3 text-center">
+      <p className="text-xs text-foreground/40 mt-3 text-center">
         Sau khi chuyển khoản thật cho học viên, bấm để ghi nhận vào hệ thống
       </p>
     </div>

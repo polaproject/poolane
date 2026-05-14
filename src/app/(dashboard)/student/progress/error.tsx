@@ -21,19 +21,19 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 
   return (
     <div className="p-6 max-w-md mx-auto text-center mt-12">
-      <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
-        <AlertTriangle className="w-8 h-8 text-red-600" />
+      <div className="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
+        <AlertTriangle className="w-8 h-8 text-danger" />
       </div>
-      <h1 className="font-heading text-xl text-[#1C2B4A] mb-2">Có lỗi xảy ra ở trang này</h1>
-      <p className="text-sm text-[#1C2B4A]/60 mb-4">
+      <h1 className="font-heading text-xl text-foreground mb-2">Có lỗi xảy ra ở trang này</h1>
+      <p className="text-sm text-foreground/60 mb-4">
         Trang &ldquo;Tiến độ kỹ năng&rdquo; gặp sự cố. Lớp đã ghi nhận và sẽ kiểm tra.
       </p>
-      {error.digest && <p className="text-xs text-[#1C2B4A]/40 font-mono mb-4">Mã: {error.digest}</p>}
+      {error.digest && <p className="text-xs text-foreground/40 font-mono mb-4">Mã: {error.digest}</p>}
       <div className="flex gap-2 justify-center">
-        <button onClick={reset} className="px-4 py-2 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg text-sm font-semibold">
+        <button onClick={reset} className="px-4 py-2 bg-ink-soft text-paper rounded-lg text-sm font-semibold">
           Thử lại
         </button>
-        <Link href="/" className="px-4 py-2 border border-[#1C2B4A]/15 text-[#1C2B4A]/70 rounded-lg text-sm font-semibold">
+        <Link href="/" className="px-4 py-2 border border-foreground/15 text-foreground/70 rounded-lg text-sm font-semibold">
           Về trang chủ
         </Link>
       </div>

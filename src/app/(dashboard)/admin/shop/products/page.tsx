@@ -41,7 +41,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-7xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -58,18 +58,18 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
       </div>
 
       <div className="px-4 sm:px-8 -mt-6 max-w-7xl mx-auto space-y-4 relative z-10">
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-4 space-y-3">
+        <div className="glass-card glass-card-hover p-4 space-y-3">
           <form className="flex gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink/40" strokeWidth={1.75} />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" strokeWidth={1.75} />
               <input
                 name="search"
                 defaultValue={search}
                 placeholder="Tìm tên hoặc SKU..."
-                className="w-full pl-10 pr-4 h-10 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none transition"
+                className="w-full pl-10 pr-4 h-10 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-foreground/10 focus:ring-accent/40 focus:outline-none transition"
               />
             </div>
-            <button type="submit" className="px-5 h-10 text-sm bg-ink text-paper rounded-pill hover:bg-ink/90 transition font-medium">
+            <button type="submit" className="px-5 h-10 text-sm bg-ink text-paper rounded-pill hover:bg-foreground/90 transition font-medium">
               Tìm
             </button>
           </form>
@@ -85,27 +85,27 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           </div>
         </div>
 
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+        <div className="glass-card glass-card-hover overflow-hidden">
           {products.length === 0 ? (
             <div className="p-12 text-center">
-              <Package className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-ink mb-1">
+              <Package className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+              <p className="font-heading italic text-2xl text-foreground mb-1">
                 {search || typeFilter ? 'Không khớp tìm kiếm' : 'Chưa có sản phẩm'}
               </p>
-              <p className="text-sm text-ink/55">
+              <p className="text-sm text-foreground/55">
                 {search || typeFilter ? 'Thử filter khác' : 'Bấm "Thêm sản phẩm" để bắt đầu'}
               </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[700px]">
-                <thead className="bg-paper-tint/30 border-b border-ink/8">
+                <thead className="bg-paper-tint/30 border-b border-foreground/8">
                   <tr>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Sản phẩm</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Loại</th>
-                    <th className="text-right px-5 py-3 eyebrow text-ink/55">Giá</th>
-                    <th className="text-right px-5 py-3 eyebrow text-ink/55">Tồn kho</th>
-                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Trạng thái</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Sản phẩm</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Loại</th>
+                    <th className="text-right px-5 py-3 eyebrow text-foreground/55">Giá</th>
+                    <th className="text-right px-5 py-3 eyebrow text-foreground/55">Tồn kho</th>
+                    <th className="text-left px-5 py-3 eyebrow text-foreground/55">Trạng thái</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -113,7 +113,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                     const isLowStock = p.type === 'physical' && p.stockQuantity !== null &&
                       p.lowStockThreshold !== null && p.stockQuantity <= (p.lowStockThreshold ?? 3)
                     return (
-                      <tr key={p.id} className="border-b border-ink/5 last:border-b-0 hover:bg-paper-tint/20 transition group">
+                      <tr key={p.id} className="border-b border-foreground/5 last:border-b-0 hover:bg-paper-tint/20 transition group glass-table-row">
                         <td className="px-5 py-3">
                           <Link href={`/admin/shop/products/${p.id}`} className="flex items-center gap-3">
                             {Array.isArray(p.photos) && p.photos.length > 0 ? (
@@ -121,25 +121,25 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                               <img src={(p.photos as string[])[0]} alt={p.name} className="w-10 h-10 rounded-card object-cover shrink-0" />
                             ) : (
                               <div className="w-10 h-10 rounded-card bg-paper-tint grid place-items-center shrink-0">
-                                <Package className="h-4 w-4 text-ink/30" strokeWidth={1.75} />
+                                <Package className="h-4 w-4 text-foreground/30" strokeWidth={1.75} />
                               </div>
                             )}
                             <div className="min-w-0">
-                              <p className="font-medium text-sm text-ink group-hover:text-accent transition truncate">{p.name}</p>
-                              <p className="text-xs text-ink/45 font-mono mt-0.5">{p.sku}</p>
+                              <p className="font-medium text-sm text-foreground group-hover:text-accent transition truncate">{p.name}</p>
+                              <p className="text-xs text-foreground/45 font-mono mt-0.5">{p.sku}</p>
                             </div>
                           </Link>
                         </td>
                         <td className="px-5 py-3"><Chip variant="mist">{PRODUCT_TYPE_LABELS[p.type]}</Chip></td>
-                        <td className="px-5 py-3 text-right text-sm font-medium text-ink">{fmt(p.price)}</td>
+                        <td className="px-5 py-3 text-right text-sm font-medium text-foreground">{fmt(p.price)}</td>
                         <td className="px-5 py-3 text-right text-sm">
                           {p.type === 'physical' ? (
-                            <span className={`inline-flex items-center gap-1 ${isLowStock ? 'text-danger font-semibold' : 'text-ink/65'}`}>
+                            <span className={`inline-flex items-center gap-1 ${isLowStock ? 'text-danger font-semibold' : 'text-foreground/65'}`}>
                               {isLowStock && <AlertCircle className="h-3 w-3" strokeWidth={2.25} />}
                               {p.stockQuantity ?? 0}
                             </span>
                           ) : (
-                            <span className="text-ink/30">—</span>
+                            <span className="text-foreground/30">—</span>
                           )}
                         </td>
                         <td className="px-5 py-3">
@@ -163,7 +163,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                 key={p}
                 href={buildHref({ page: String(p) })}
                 className={`grid place-items-center h-9 w-9 rounded-pill text-sm font-medium transition ${
-                  p === page ? 'bg-ink text-paper' : 'ring-1 ring-ink/10 text-ink/65 hover:ring-ink/20 hover:bg-ink/5'
+                  p === page ? 'bg-ink text-paper' : 'ring-1 ring-foreground/10 text-foreground/65 hover:ring-foreground/20 hover:bg-foreground/5'
                 }`}
               >
                 {p}

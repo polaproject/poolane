@@ -33,7 +33,7 @@ export default async function StudentPaymentsPage() {
 
   const student = await prisma.student.findFirst({ where: { userId: user.id }, select: { id: true } })
   if (!student) {
-    return <div className="p-8 text-center text-ink/55">Không tìm thấy hồ sơ</div>
+    return <div className="p-8 text-center text-foreground/55">Không tìm thấy hồ sơ</div>
   }
 
   const [payments, pendingEnrollments] = await Promise.all([
@@ -67,7 +67,7 @@ export default async function StudentPaymentsPage() {
   return (
     <div className="min-h-screen bg-paper pb-12">
       {/* Hero */}
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">Tài chính · {payments.length} giao dịch</p>
@@ -81,15 +81,15 @@ export default async function StudentPaymentsPage() {
           <div className="rounded-card-lg bg-warn/10 ring-1 ring-warn/30 overflow-hidden backdrop-blur-sm">
             <div className="px-5 py-3 border-b border-warn/30 flex items-center gap-2 bg-warn/5">
               <AlertCircle className="h-4 w-4 text-warn" strokeWidth={2} />
-              <h2 className="font-semibold text-sm text-ink">Khoản cần đóng ({debtEnrollments.length})</h2>
+              <h2 className="font-semibold text-sm text-foreground">Khoản cần đóng ({debtEnrollments.length})</h2>
             </div>
             <div className="divide-y divide-warn/20">
               {debtEnrollments.map(e => (
                 <div key={e.id} className="px-5 py-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="font-heading italic text-xl text-ink leading-tight">{e.courseName}</p>
-                      <p className="text-xs text-ink/65 mt-1">
+                      <p className="font-heading italic text-xl text-foreground leading-tight">{e.courseName}</p>
+                      <p className="text-xs text-foreground/65 mt-1">
                         Đã đóng {fmt(e.totalPaid)} / {fmt(e.coursePrice)}
                       </p>
                       {e.deadline && (
@@ -102,7 +102,7 @@ export default async function StudentPaymentsPage() {
                   </div>
                   <Link
                     href={`/student/payments/enrollment/${e.id}/pay`}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-ink text-paper rounded-pill text-sm font-semibold hover:bg-ink/90 transition shadow-soft"
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-ink text-paper rounded-pill text-sm font-semibold hover:bg-foreground/90 transition shadow-soft"
                   >
                     <QrCode className="h-4 w-4" strokeWidth={1.75} /> Thanh toán qua chuyển khoản
                   </Link>
@@ -120,19 +120,19 @@ export default async function StudentPaymentsPage() {
         </div>
 
         {/* Transactions */}
-        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
-          <div className="px-5 py-4 border-b border-ink/8 flex items-center justify-between">
-            <p className="eyebrow text-ink/55">Tất cả giao dịch</p>
-            <span className="text-xs text-ink/55">{payments.length} mục</span>
+        <div className="glass-card glass-card-hover overflow-hidden">
+          <div className="px-5 py-4 border-b border-foreground/8 flex items-center justify-between">
+            <p className="eyebrow text-foreground/55">Tất cả giao dịch</p>
+            <span className="text-xs text-foreground/55">{payments.length} mục</span>
           </div>
           {payments.length === 0 ? (
             <div className="p-12 text-center">
-              <Wallet className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-xl text-ink mb-1">Chưa có giao dịch</p>
-              <p className="text-sm text-ink/55">Khi có thanh toán, sẽ hiện ở đây.</p>
+              <Wallet className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+              <p className="font-heading italic text-xl text-foreground mb-1">Chưa có giao dịch</p>
+              <p className="text-sm text-foreground/55">Khi có thanh toán, sẽ hiện ở đây.</p>
             </div>
           ) : (
-            <div className="divide-y divide-ink/5">
+            <div className="divide-y divide-foreground/5">
               {payments.map(p => {
                 const cfg = TYPE_CONFIG[p.type] ?? { label: p.type, Icon: Wallet }
                 const isNegative = p.amount < 0
@@ -145,18 +145,18 @@ export default async function StudentPaymentsPage() {
                         <cfg.Icon className="h-4 w-4" strokeWidth={1.75} />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-ink inline-flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-medium text-foreground inline-flex items-center gap-2 flex-wrap">
                           {cfg.label}
                           {p.isReversal && <Chip variant="warn" className="text-[10px]">Bút toán đảo</Chip>}
                         </p>
-                        <p className="text-xs text-ink/55 mt-0.5">
+                        <p className="text-xs text-foreground/55 mt-0.5">
                           {format(p.recordedAt, 'HH:mm · dd/MM/yyyy', { locale: vi })} · {METHOD_LABEL[p.paymentMethod] ?? p.paymentMethod}
                         </p>
                         {p.referenceNumber && (
-                          <p className="text-[10px] text-ink/45 mt-0.5 font-mono">{p.referenceNumber}</p>
+                          <p className="text-[10px] text-foreground/45 mt-0.5 font-mono">{p.referenceNumber}</p>
                         )}
                         {p.notes && (
-                          <p className="text-xs text-ink/65 mt-1 italic">{p.notes}</p>
+                          <p className="text-xs text-foreground/65 mt-1 italic">{p.notes}</p>
                         )}
                       </div>
                     </div>
@@ -170,7 +170,7 @@ export default async function StudentPaymentsPage() {
           )}
         </div>
 
-        <p className="text-xs text-ink/55 text-center px-4">
+        <p className="text-xs text-foreground/55 text-center px-4">
           Liên hệ lớp qua Zalo nếu có khoản nào không khớp.
         </p>
       </div>

@@ -18,7 +18,7 @@ interface FloatingCardProps {
 }
 
 const TONE: Record<'light' | 'dark', string> = {
-  light: 'bg-paper text-ink ring-1 ring-ink/8',
+  light: 'bg-paper text-foreground ring-1 ring-foreground/8',
   dark:  'bg-ink text-paper ring-1 ring-paper/12',
 }
 
@@ -63,7 +63,7 @@ export function FloatingCard({
         <div
           className={cn(
             'mt-3 pt-3 flex items-center justify-between text-xs gap-2',
-            tone === 'light' ? 'border-t border-ink/8' : 'border-t border-paper/12'
+            tone === 'light' ? 'border-t border-foreground/8' : 'border-t border-paper/12'
           )}
         >
           {meta && <span className="opacity-70 min-w-0 truncate">{meta}</span>}

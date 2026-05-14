@@ -22,7 +22,7 @@ export default async function StudentVideosPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">Phân tích kỹ thuật · {videos.length} video</p>
@@ -33,16 +33,16 @@ export default async function StudentVideosPage() {
 
       <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
         {videos.length === 0 ? (
-          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
-            <VideoIcon className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có video</p>
-            <p className="text-sm text-ink/55">Lớp sẽ gửi video sau buổi học nếu có ghi hình.</p>
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
+            <VideoIcon className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có video</p>
+            <p className="text-sm text-foreground/55">Lớp sẽ gửi video sau buổi học nếu có ghi hình.</p>
           </div>
         ) : (
           videos.map(v => {
             const embed = toEmbedUrl(v.driveUrl)
             return (
-              <div key={v.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+              <div key={v.id} className="glass-card glass-card-hover overflow-hidden">
                 <div className="aspect-video bg-ink relative">
                   {embed ? (
                     <iframe src={embed} className="w-full h-full" allow="autoplay" />
@@ -63,7 +63,7 @@ export default async function StudentVideosPage() {
                 </div>
                 <div className="p-5">
                   {v.session && (
-                    <p className="eyebrow text-ink/55 mb-2 inline-flex items-center gap-1.5">
+                    <p className="eyebrow text-foreground/55 mb-2 inline-flex items-center gap-1.5">
                       {v.session.timeSlot === 'morning' ? (
                         <Sunrise className="h-3 w-3 text-accent" strokeWidth={1.75} />
                       ) : (
@@ -72,8 +72,8 @@ export default async function StudentVideosPage() {
                       Buổi {v.session.timeSlot === 'morning' ? 'sáng' : 'chiều'} · {format(v.session.date, 'dd/MM/yyyy', { locale: vi })}
                     </p>
                   )}
-                  {v.caption && <p className="text-sm text-ink leading-relaxed">{v.caption}</p>}
-                  <p className="text-xs text-ink/45 mt-2">
+                  {v.caption && <p className="text-sm text-foreground leading-relaxed">{v.caption}</p>}
+                  <p className="text-xs text-foreground/45 mt-2">
                     Gửi {format(v.createdAt, 'HH:mm · dd/MM/yyyy')}
                   </p>
                 </div>

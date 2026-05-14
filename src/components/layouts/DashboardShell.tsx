@@ -13,7 +13,8 @@ import {
   ChevronDown, ChevronRight, FileText, Video, Image as ImageIcon,
   ReceiptText, Award, Tags, ShoppingCart,
 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { PolarisStar } from '@/components/brand/PolarisStar'
+import { useState, useEffect, useMemo } from 'react'
 
 interface NavItem {
   label: string
@@ -204,8 +205,21 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
   const groups = NAV_GROUPS[userRole] ?? []
   const bottomItems = BOTTOM_NAV[userRole] ?? []
 
+  // Longest-match wins: ở /admin/finance/refunds chỉ /admin/finance/refunds active,
+  // không phải cả /admin/finance lẫn child.
+  const activeHref = useMemo(() => {
+    const all = [
+      ...groups.flatMap(g => g.items.map(i => i.href)),
+      ...bottomItems.map(i => i.href),
+    ]
+    const matches = all.filter(
+      href => pathname === href || pathname.startsWith(href + '/')
+    )
+    return matches.sort((a, b) => b.length - a.length)[0] ?? null
+  }, [pathname, groups, bottomItems])
+
   function isActive(href: string) {
-    return pathname === href || pathname.startsWith(href + '/')
+    return href === activeHref
   }
 
   function isGroupActive(group: NavGroup) {
@@ -242,26 +256,32 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
   }
 
   async function handleLogout() {
-    await fetch('/api/auth/logout')
-    router.push('/login')
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch {
+      // ignore — vẫn redirect dù API fail
+    }
+    // Hard redirect để clear toàn bộ client cache + session state
+    window.location.href = '/login'
   }
 
-  const logoSvg = (
-    <svg width="22" height="28" viewBox="0 0 52 68" fill="none">
-      <path d="M26 2 C26 2 28.5 22 29.5 25.5 C33 26.5 50 26 50 26 C50 26 33 26 29.5 27.5 C28.5 31 26 50 26 50 C26 50 23.5 31 22.5 27.5 C19 26 2 26 2 26 C2 26 19 26 22.5 25.5 C23.5 22 26 2 26 2 Z" fill="currentColor" />
-      <line x1="8" y1="58" x2="44" y2="58" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M26 62 C26 62 26.8 65.5 27.1 66.2 C27.8 66.4 31 66 31 66 C31 66 27.8 66 27.1 66.8 C26.8 67.5 26 71 26 71 C26 71 25.2 67.5 24.9 66.8 C24.2 66 21 66 21 66 C21 66 24.2 66 24.9 66.2 C25.2 65.5 26 62 26 62 Z" fill="currentColor" opacity="0.3" />
-    </svg>
-  )
+  const logoSvg = <PolarisStar size={26} withReflection animated color="currentColor" />
 
   return (
-    <div className="pola-page min-h-screen flex">
-      {/* ── SIDEBAR (desktop) ── */}
+    <div className="pola-page min-h-screen lg:flex">
+      {/* Skip link cho keyboard user */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:px-4 focus:py-2 focus:bg-accent focus:text-foreground focus:rounded-pill focus:shadow-soft focus:font-medium focus:text-sm"
+      >
+        Bỏ qua điều hướng
+      </a>
+      {/* ── SIDEBAR (mobile drawer + desktop sticky) ── */}
       <aside
         className={`
           fixed inset-y-0 left-0 z-50 flex flex-col w-64 pola-nav
           transition-transform duration-200 ease-in-out
-          lg:translate-x-0 lg:static lg:flex
+          lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:flex lg:flex-shrink-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
@@ -297,7 +317,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
                   onClick={() => toggleGroup(group.key)}
                   aria-expanded={isOpen}
                   aria-label={`${isOpen ? 'Thu gọn' : 'Mở rộng'} nhóm ${group.label}`}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs uppercase tracking-wider font-semibold transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs uppercase tracking-wider font-semibold transition-colors hover:bg-[var(--pola-nav-hover)] hover:text-[var(--pola-nav-text)]"
                   style={{
                     color: 'var(--pola-nav-muted)',
                   }}
@@ -321,7 +341,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
                           key={item.href}
                           href={item.href}
                           onClick={() => setSidebarOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-lg mb-0.5 text-sm transition-all"
+                          className="group/nav flex items-center gap-2.5 px-3 py-2 rounded-lg mb-0.5 text-sm transition-all duration-200 [transition-timing-function:var(--ease-spring-soft)] hover:translate-x-1 hover:bg-[var(--pola-nav-hover)] hover:text-[var(--pola-nav-text)]"
                           style={{
                             background: active ? 'var(--pola-nav-active)' : 'transparent',
                             color: active ? 'var(--pola-nav-text)' : 'var(--pola-nav-muted)',
@@ -329,7 +349,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
                             fontWeight: active ? 600 : 400,
                           }}
                         >
-                          <ItemIcon className="w-4 h-4 flex-shrink-0" />
+                          <ItemIcon className="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover/nav:scale-110" />
                           <span className="flex-1 truncate">{item.label}</span>
                           {active && (
                             <span
@@ -391,7 +411,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
       )}
 
       {/* ── MAIN CONTENT ── */}
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-0">
+      <div className="flex-1 flex flex-col min-w-0 lg:min-h-screen">
         {/* Mobile header */}
         <header
           className="lg:hidden flex items-center gap-3 px-4 py-3 pola-nav sticky top-0 z-30"
@@ -406,9 +426,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
           </button>
           <div className="flex items-center gap-2">
             <span style={{ color: 'var(--pola-nav-text)' }}>
-              <svg width="16" height="20" viewBox="0 0 52 68" fill="none">
-                <path d="M26 2 C26 2 28.5 22 29.5 25.5 C33 26.5 50 26 50 26 C50 26 33 26 29.5 27.5 C28.5 31 26 50 26 50 C26 50 23.5 31 22.5 27.5 C19 26 2 26 2 26 C2 26 19 26 22.5 25.5 C23.5 22 26 2 26 2 Z" fill="currentColor" />
-              </svg>
+              <PolarisStar size={18} withReflection={false} animated color="currentColor" />
             </span>
             <span className="font-body font-bold text-sm tracking-[0.16em]" style={{ color: 'var(--pola-nav-text)' }}>
               POOLANE
@@ -432,7 +450,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
         </header>
 
         {/* Page content */}
-        <main className="flex-1 pb-20 lg:pb-0 overflow-x-hidden">
+        <main id="main-content" className="ambient-bg flex-1 pb-20 lg:pb-0 overflow-x-hidden">
           {children}
         </main>
 

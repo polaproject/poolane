@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { POOL_TICKET } from '@/config/constants'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 function fmt(n: number) { return n.toLocaleString('vi-VN') + 'đ' }
 
@@ -80,18 +81,26 @@ export default function CreateTicketPage() {
   }
 
   return (
-    <div className="p-6 max-w-lg mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <Button variant="outline" size="sm" asChild>
-          <Link href={`/admin/students/${studentId}`}><ArrowLeft className="w-4 h-4 mr-1" /> Hồ sơ</Link>
-        </Button>
-        <h1 className="font-heading text-3xl text-[#1C2B4A]">Tạo vé bơi</h1>
-      </div>
+    <div className="ambient-bg min-h-screen">
+      <div className="p-6 max-w-lg mx-auto">
+        <Link
+          href={`/admin/students/${studentId}`}
+          className="inline-flex items-center gap-1 text-sm text-foreground/70 hover:text-foreground mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" /> Hồ sơ học viên
+        </Link>
+        <PageHeader
+          eyebrow="Vé bơi"
+          title="Tạo vé bơi"
+          description="Vé lần đầu 1.3M (10 buổi) hoặc vé tự mua bên ngoài."
+          display
+          className="mb-8"
+        />
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        <Card className="border-[#1C2B4A]/10 shadow-sm">
+        <Card className="border-foreground/10 shadow-sm">
           <CardHeader className="pb-2 pt-5 px-6">
-            <h2 className="font-semibold text-[#1C2B4A] text-sm">Loại vé <span className="text-red-500">*</span></h2>
+            <h2 className="font-semibold text-foreground text-sm">Loại vé <span className="text-danger">*</span></h2>
           </CardHeader>
           <CardContent className="px-6 pb-5 space-y-2">
             {TICKET_TYPES.map(t => (
@@ -101,19 +110,19 @@ export default function CreateTicketPage() {
                 onClick={() => setTicketType(t.value)}
                 className={`w-full text-left p-4 rounded-xl border transition-all ${
                   ticketType === t.value
-                    ? 'bg-[#1C2B4A] border-[#1C2B4A] text-white'
-                    : 'border-[#1C2B4A]/15 hover:border-[#1C2B4A]/40'
+                    ? 'bg-ink-soft border-ink text-white'
+                    : 'border-foreground/15 hover:border-foreground/40'
                 }`}
               >
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-semibold text-sm">{t.label}</p>
-                    <p className={`text-xs mt-0.5 ${ticketType === t.value ? 'text-white/60' : 'text-[#1C2B4A]/50'}`}>
+                    <p className={`text-xs mt-0.5 ${ticketType === t.value ? 'text-white/60' : 'text-foreground/50'}`}>
                       {t.desc}
                     </p>
                   </div>
                   {t.price > 0 && (
-                    <p className={`font-semibold text-sm ml-3 ${ticketType === t.value ? 'text-white' : 'text-[#1C2B4A]'}`}>
+                    <p className={`font-semibold text-sm ml-3 ${ticketType === t.value ? 'text-white' : 'text-foreground'}`}>
                       {fmt(t.price)}
                     </p>
                   )}
@@ -125,10 +134,10 @@ export default function CreateTicketPage() {
 
         {/* Giá custom cho vé lẻ/tháng */}
         {ticketType !== 'first' && (
-          <Card className="border-[#1C2B4A]/10 shadow-sm">
+          <Card className="border-foreground/10 shadow-sm">
             <CardContent className="px-6 py-5">
-              <label className="text-sm font-medium text-[#1C2B4A] block mb-2">
-                Số tiền thực thu (VND) <span className="text-red-500">*</span>
+              <label className="text-sm font-medium text-foreground block mb-2">
+                Số tiền thực thu (VND) <span className="text-danger">*</span>
               </label>
               <input
                 type="number"
@@ -137,20 +146,20 @@ export default function CreateTicketPage() {
                 onChange={e => setCustomPrice(e.target.value)}
                 required={ticketType !== 'first'}
                 min={1}
-                className="w-full px-3 py-2 rounded-lg border border-[#1C2B4A]/15 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20"
+                className="w-full px-3 py-2 rounded-lg border border-foreground/15 text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
               />
             </CardContent>
           </Card>
         )}
 
         {/* Summary */}
-        <div className="bg-[#1C2B4A] rounded-2xl p-5 text-white">
+        <div className="bg-ink-soft rounded-card-lg p-5 text-white">
           <div className="flex justify-between items-center">
             <div>
               <p className="font-semibold">{selectedTicket.label}</p>
               <p className="text-xs text-white/60 mt-0.5">{selectedTicket.sessions} buổi</p>
             </div>
-            <p className="font-heading text-2xl text-[#C8A84B]">{price > 0 ? fmt(price) : '—'}</p>
+            <p className="font-heading text-2xl text-accent">{price > 0 ? fmt(price) : '—'}</p>
           </div>
         </div>
 
@@ -161,12 +170,13 @@ export default function CreateTicketPage() {
           <Button
             type="submit"
             disabled={loading || price <= 0}
-            className="flex-1 bg-[#1C2B4A] text-[#F6F1EA] hover:bg-[#1C2B4A]/90"
+            className="flex-1 bg-ink-soft text-paper hover:bg-foreground/90"
           >
             {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Đang tạo...</> : 'Tạo vé bơi'}
           </Button>
         </div>
       </form>
+      </div>
     </div>
   )
 }

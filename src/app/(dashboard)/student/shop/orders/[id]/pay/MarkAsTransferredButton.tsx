@@ -28,7 +28,7 @@ export function MarkAsTransferredButton({ orderId, memo }: { orderId: string; me
 
   if (submitted) {
     return (
-      <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+      <div className="flex items-center gap-2 text-sm text-success bg-success/10 border border-success/30 rounded-lg px-3 py-2">
         <CheckCircle2 className="w-4 h-4" />
         Đã ghi nhận yêu cầu — lớp sẽ xác nhận trong 24h
       </div>
@@ -39,7 +39,7 @@ export function MarkAsTransferredButton({ orderId, memo }: { orderId: string; me
     <button
       onClick={ping}
       disabled={submitting}
-      className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 border-2 border-[#1C2B4A] text-[#1C2B4A] rounded-lg text-sm font-semibold hover:bg-[#1C2B4A]/5 disabled:opacity-50"
+      className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 border-2 border-ink text-foreground rounded-lg text-sm font-semibold hover:bg-foreground/5 disabled:opacity-50"
     >
       <CheckCircle2 className="w-4 h-4" /> {submitting ? 'Đang gửi...' : 'Tôi đã chuyển — yêu cầu xác nhận'}
     </button>

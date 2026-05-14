@@ -19,9 +19,10 @@ interface StatCardProps {
 }
 
 const TONE_BG: Record<NonNullable<StatCardProps['tone']>, string> = {
-  surface: 'bg-white text-ink ring-1 ring-ink/8',
-  dark:    'bg-ink text-paper ring-1 ring-paper/12',
-  accent:  'bg-accent-soft text-ink ring-1 ring-accent/30',
+  /* Phase 10 — Liquid Glass: surface dùng glass-card có specular + lensing */
+  surface: 'glass-card glass-card-hover text-[var(--surface-fg)]',
+  dark:    'bg-ink/90 backdrop-blur-xl text-paper ring-1 ring-paper/15 glass-card-hover',
+  accent:  'bg-accent-soft/85 backdrop-blur-md text-foreground ring-1 ring-accent/40',
 }
 
 /**
@@ -49,7 +50,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'rounded-card-lg p-5 transition-all hover:-translate-y-0.5 hover:shadow-soft',
+        'rounded-card-lg p-5 transition-[transform,box-shadow] duration-300 [transition-timing-function:var(--ease-out-quart)]',
         TONE_BG[tone],
         className
       )}

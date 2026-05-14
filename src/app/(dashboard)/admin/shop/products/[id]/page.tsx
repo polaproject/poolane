@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react'
 import { ProductForm } from '../ProductForm'
 import { PRODUCT_TYPE_LABELS } from '@/lib/validations/product'
 import { DeactivateButton } from './DeactivateButton'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -33,28 +34,26 @@ export default async function ProductDetailPage({ params }: Params) {
   })
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="ambient-bg min-h-screen">
+      <div className="p-6 max-w-3xl mx-auto">
         <Link
           href="/admin/shop/products"
-          className="inline-flex items-center gap-1 text-sm text-[#1C2B4A]/70 hover:text-[#1C2B4A]"
+          className="inline-flex items-center gap-1 text-sm text-foreground/70 hover:text-foreground mb-4"
         >
           <ArrowLeft className="w-4 h-4" /> Danh sách sản phẩm
         </Link>
-      </div>
 
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="font-heading text-3xl text-[#1C2B4A]">{product.name}</h1>
-          <p className="text-sm text-[#1C2B4A]/50 mt-1">
-            {PRODUCT_TYPE_LABELS[product.type]} · SKU: <code className="bg-[#1C2B4A]/8 px-1.5 py-0.5 rounded">{product.sku}</code>
-          </p>
-        </div>
-        {product.isActive && <DeactivateButton id={product.id} />}
-      </div>
+        <PageHeader
+          eyebrow={PRODUCT_TYPE_LABELS[product.type]}
+          title={product.name}
+          description={<>SKU: <code className="bg-ink/8 px-1.5 py-0.5 rounded font-mono">{product.sku}</code></>}
+          actions={product.isActive ? <DeactivateButton id={product.id} /> : null}
+          display
+          className="mb-8"
+        />
 
       {product.orderItems.length > 0 && (
-        <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-900">
+        <div className="mb-4 px-4 py-3 bg-mist/15 border border-mist/30 rounded-card text-sm text-foreground/80">
           Sản phẩm đã có {product.orderItems.length} lần được đặt mua — không nên đổi SKU
         </div>
       )}
@@ -78,6 +77,7 @@ export default async function ProductDetailPage({ params }: Params) {
           photos: Array.isArray(product.photos) ? (product.photos as string[]) : [],
         }}
       />
+      </div>
     </div>
   )
 }

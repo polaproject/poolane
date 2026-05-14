@@ -40,55 +40,55 @@ export default async function MoMoReturnPage({ searchParams }: { searchParams: S
   }
 
   const Icon = gtStatus === 'success' ? CheckCircle2 : gtStatus === 'pending' ? Clock : XCircle
-  const iconColor = gtStatus === 'success' ? 'text-green-600' : gtStatus === 'pending' ? 'text-amber-600' : 'text-red-600'
-  const iconBg = gtStatus === 'success' ? 'bg-green-50' : gtStatus === 'pending' ? 'bg-amber-50' : 'bg-red-50'
+  const iconColor = gtStatus === 'success' ? 'text-success' : gtStatus === 'pending' ? 'text-warn' : 'text-danger'
+  const iconBg = gtStatus === 'success' ? 'bg-success/10' : gtStatus === 'pending' ? 'bg-warn/10' : 'bg-danger/10'
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-8 text-center">
+    <div className="min-h-screen bg-paper flex items-center justify-center p-4">
+      <div className="glass-card shadow-lg max-w-md w-full p-8 text-center">
         <div className={`w-20 h-20 rounded-full ${iconBg} flex items-center justify-center mx-auto mb-4`}>
           <Icon className={`w-10 h-10 ${iconColor}`} />
         </div>
 
-        <h1 className="font-heading text-2xl text-[#1C2B4A] mb-2">
+        <h1 className="font-heading text-2xl text-foreground mb-2">
           {TITLES[gtStatus]}
         </h1>
 
         {amount && (
-          <p className="font-heading text-3xl text-[#1C2B4A] mb-2">
+          <p className="font-heading text-3xl text-foreground mb-2">
             {amount.toLocaleString('vi-VN')}đ
           </p>
         )}
 
         {orderInfo && (
-          <p className="text-sm text-[#1C2B4A]/60 mb-4">{orderInfo}</p>
+          <p className="text-sm text-foreground/60 mb-4">{orderInfo}</p>
         )}
 
         {params.transId && gtStatus === 'success' && (
-          <p className="text-xs text-[#1C2B4A]/40 mb-4">
-            Mã giao dịch: <code className="bg-[#1C2B4A]/8 px-2 py-0.5 rounded">{params.transId}</code>
+          <p className="text-xs text-foreground/40 mb-4">
+            Mã giao dịch: <code className="bg-ink/8 px-2 py-0.5 rounded">{params.transId}</code>
           </p>
         )}
 
         {gtStatus === 'pending' && (
-          <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-4">
+          <p className="text-sm text-warn bg-warn/10 border border-warn/30 rounded-lg px-4 py-3 mb-4">
             Hệ thống đang xử lý. Bạn có thể refresh trang sau vài giây để kiểm tra.
           </p>
         )}
 
         {gtStatus === 'failed' && params.message && (
-          <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-4">
+          <p className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-lg px-4 py-3 mb-4">
             {params.message}
           </p>
         )}
 
         <div className="flex flex-col gap-2 mt-6">
           <Link href="/student/payments"
-            className="inline-flex items-center justify-center px-4 py-3 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg text-sm font-semibold hover:bg-[#1C2B4A]/90">
+            className="inline-flex items-center justify-center px-4 py-3 bg-ink-soft text-paper rounded-lg text-sm font-semibold hover:bg-foreground/90">
             Xem lịch sử thanh toán
           </Link>
           <Link href="/student/dashboard"
-            className="inline-flex items-center justify-center px-4 py-3 border border-[#1C2B4A]/15 text-[#1C2B4A]/70 rounded-lg text-sm font-semibold hover:bg-[#1C2B4A]/5">
+            className="inline-flex items-center justify-center px-4 py-3 border border-foreground/15 text-foreground/70 rounded-lg text-sm font-semibold hover:bg-foreground/5">
             Về trang chủ
           </Link>
         </div>

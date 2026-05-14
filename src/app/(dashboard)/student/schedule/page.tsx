@@ -49,7 +49,7 @@ export default async function StudentSchedulePage() {
   return (
     <div className="min-h-screen bg-paper pb-12">
       {/* Hero */}
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/15 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">2 tuần tới · Đăng ký buổi</p>
@@ -71,10 +71,10 @@ export default async function StudentSchedulePage() {
 
       <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto relative z-10">
         {sessions.length === 0 ? (
-          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
-            <Calendar className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có lịch</p>
-            <p className="text-sm text-ink/55">Lớp chưa tạo buổi cho 2 tuần tới.</p>
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
+            <Calendar className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có lịch</p>
+            <p className="text-sm text-foreground/55">Lớp chưa tạo buổi cho 2 tuần tới.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -88,25 +88,25 @@ export default async function StudentSchedulePage() {
                 : `${SESSION_TIMES.EVENING.start} – ${SESSION_TIMES.EVENING.end}`
 
               return (
-                <div key={session.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                <div key={session.id} className="glass-card glass-card-hover p-5 flex flex-col sm:flex-row sm:items-center gap-4">
                   {/* Date block */}
                   <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                     <div className="text-center w-14 shrink-0">
-                      <div className="text-[10px] tracking-widest uppercase text-ink/45">
+                      <div className="text-[10px] tracking-widest uppercase text-foreground/45">
                         {format(session.date, 'EEE', { locale: vi })}
                       </div>
-                      <div className="font-heading italic text-3xl text-ink leading-none mt-0.5">
+                      <div className="font-heading italic text-3xl text-foreground leading-none mt-0.5">
                         {format(session.date, 'dd', { locale: vi })}
                       </div>
-                      <div className="text-[10px] text-ink/40 mt-0.5">
+                      <div className="text-[10px] text-foreground/40 mt-0.5">
                         {format(session.date, 'MM', { locale: vi })}
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-ink text-sm">
+                      <p className="font-medium text-foreground text-sm">
                         {format(session.date, 'EEEE, dd/MM', { locale: vi })}
                       </p>
-                      <p className="text-xs text-ink/60 mt-0.5 inline-flex items-center gap-1.5">
+                      <p className="text-xs text-foreground/60 mt-0.5 inline-flex items-center gap-1.5">
                         {isMorning ? (
                           <><Sunrise className="h-3 w-3 text-accent" strokeWidth={1.75} /> {timeLabel}</>
                         ) : (
@@ -144,7 +144,7 @@ export default async function StudentSchedulePage() {
                         enrollmentId={student.enrollments[0]?.courseId}
                       />
                     ) : (
-                      <p className="text-xs text-center text-ink/45">Chưa có hồ sơ</p>
+                      <p className="text-xs text-center text-foreground/45">Chưa có hồ sơ</p>
                     )}
                   </div>
                 </div>

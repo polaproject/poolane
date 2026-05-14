@@ -67,7 +67,7 @@ export default function PracticeLogPage() {
   const totalMeters = logs.reduce((sum, l) => sum + (l.distanceMeters ?? 0), 0)
   const totalMinutes = logs.reduce((sum, l) => sum + (l.durationMinutes ?? 0), 0)
 
-  const inputClass = 'w-full h-10 px-3 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none transition'
+  const inputClass = 'w-full h-10 px-3 text-sm rounded-pill bg-paper-tint/40 ring-1 ring-foreground/10 focus:ring-accent/40 focus:outline-none transition'
   const feelingOptions = [
     { v: '1', icon: Smile, label: 'Tốt', tone: 'success' as const },
     { v: '3', icon: Meh,   label: 'TB',  tone: 'mist' as const },
@@ -76,7 +76,7 @@ export default function PracticeLogPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/15 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -96,10 +96,10 @@ export default function PracticeLogPage() {
 
       <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
         {showForm && (
-          <form onSubmit={handleAdd} className="rounded-card-lg bg-white shadow-soft ring-1 ring-accent/40 p-5 space-y-4">
+          <form onSubmit={handleAdd} className="rounded-card-lg bg-[var(--surface)] shadow-soft ring-1 ring-accent/40 p-5 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="text-xs text-ink/55 mb-1.5 block">Ngày</label>
+                <label className="text-xs text-foreground/55 mb-1.5 block">Ngày</label>
                 <input
                   type="date"
                   value={form.date}
@@ -108,7 +108,7 @@ export default function PracticeLogPage() {
                 />
               </div>
               <div>
-                <label className="text-xs text-ink/55 mb-1.5 block">Mét bơi</label>
+                <label className="text-xs text-foreground/55 mb-1.5 block">Mét bơi</label>
                 <input
                   type="number"
                   placeholder="500"
@@ -118,7 +118,7 @@ export default function PracticeLogPage() {
                 />
               </div>
               <div>
-                <label className="text-xs text-ink/55 mb-1.5 block">Thời gian (phút)</label>
+                <label className="text-xs text-foreground/55 mb-1.5 block">Thời gian (phút)</label>
                 <input
                   type="number"
                   placeholder="45"
@@ -130,7 +130,7 @@ export default function PracticeLogPage() {
             </div>
 
             <div>
-              <label className="text-xs text-ink/55 mb-2 block">Cảm giác hôm nay</label>
+              <label className="text-xs text-foreground/55 mb-2 block">Cảm giác hôm nay</label>
               <div className="flex gap-2">
                 {feelingOptions.map(f => {
                   const F = f.icon
@@ -141,7 +141,7 @@ export default function PracticeLogPage() {
                       type="button"
                       onClick={() => setForm(p => ({ ...p, selfFeeling: f.v }))}
                       className={`flex-1 py-2.5 rounded-pill text-sm font-medium transition inline-flex items-center justify-center gap-1.5 ring-1 ${
-                        active ? 'bg-ink text-paper ring-ink' : 'ring-ink/15 hover:bg-ink/5'
+                        active ? 'bg-ink text-paper ring-ink' : 'ring-foreground/15 hover:bg-foreground/5'
                       }`}
                     >
                       <F className="h-4 w-4" strokeWidth={1.75} /> {f.label}
@@ -162,14 +162,14 @@ export default function PracticeLogPage() {
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="flex-1 h-10 rounded-pill ring-1 ring-ink/15 text-sm hover:bg-ink/5 transition"
+                className="flex-1 h-10 rounded-pill ring-1 ring-foreground/15 text-sm hover:bg-foreground/5 transition"
               >
                 Huỷ
               </button>
               <button
                 type="submit"
                 disabled={adding}
-                className="flex-1 h-10 rounded-pill bg-ink text-paper text-sm font-semibold hover:bg-ink/90 transition disabled:opacity-60 inline-flex items-center justify-center gap-1.5"
+                className="flex-1 h-10 rounded-pill bg-ink text-paper text-sm font-semibold hover:bg-foreground/90 transition disabled:opacity-60 inline-flex items-center justify-center gap-1.5"
               >
                 {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Lưu nhật ký'}
               </button>
@@ -182,10 +182,10 @@ export default function PracticeLogPage() {
             <Loader2 className="h-6 w-6 animate-spin text-accent" strokeWidth={1.75} />
           </div>
         ) : logs.length === 0 ? (
-          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
-            <Activity className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có nhật ký</p>
-            <p className="text-sm text-ink/55">Ghi lại mỗi buổi tập để theo dõi tiến độ.</p>
+          <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
+            <Activity className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có nhật ký</p>
+            <p className="text-sm text-foreground/55">Ghi lại mỗi buổi tập để theo dõi tiến độ.</p>
           </div>
         ) : (
           logs.map(log => {
@@ -198,12 +198,12 @@ export default function PracticeLogPage() {
               : null
             const F = feelingMeta?.icon
             return (
-              <div key={log.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 px-5 py-4 flex items-center gap-4">
+              <div key={log.id} className="glass-card glass-card-hover px-5 py-4 flex items-center gap-4">
                 <div className="text-center w-12 shrink-0">
-                  <p className="font-heading italic text-2xl text-ink leading-none">
+                  <p className="font-heading italic text-2xl text-foreground leading-none">
                     {format(new Date(log.date), 'd')}
                   </p>
-                  <p className="text-[10px] tracking-widest uppercase text-ink/45 mt-1">
+                  <p className="text-[10px] tracking-widest uppercase text-foreground/45 mt-1">
                     {format(new Date(log.date), 'MMM', { locale: vi })}
                   </p>
                 </div>
@@ -213,7 +213,7 @@ export default function PracticeLogPage() {
                       <span className="text-accent font-medium">{log.distanceMeters}m</span>
                     )}
                     {log.durationMinutes && (
-                      <span className="text-ink/65">{log.durationMinutes} phút</span>
+                      <span className="text-foreground/65">{log.durationMinutes} phút</span>
                     )}
                     {feelingMeta && F && (
                       <Chip variant={feelingMeta.variant} className="text-[10px]">
@@ -222,7 +222,7 @@ export default function PracticeLogPage() {
                     )}
                   </div>
                   {log.notes && (
-                    <p className="text-xs text-ink/55 truncate mt-1">{log.notes}</p>
+                    <p className="text-xs text-foreground/55 truncate mt-1">{log.notes}</p>
                   )}
                 </div>
               </div>

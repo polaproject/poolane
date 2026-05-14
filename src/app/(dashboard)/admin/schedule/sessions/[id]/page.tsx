@@ -79,7 +79,7 @@ export default async function SessionDetailPage({ params }: Params) {
   return (
     <div className="min-h-screen bg-paper pb-12">
       {/* Hero */}
-      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
         <div className="relative max-w-5xl mx-auto">
           <Link
@@ -182,16 +182,16 @@ function SectionCard({
   children?: React.ReactNode
 }) {
   return (
-    <section className={`rounded-card-lg bg-white shadow-soft ring-1 overflow-hidden ${
-      tone === 'warn' ? 'ring-warn/30' : 'ring-ink/8'
+    <section className={`rounded-card-lg bg-[var(--surface)] shadow-soft ring-1 overflow-hidden ${
+      tone === 'warn' ? 'ring-warn/30' : 'ring-foreground/8'
     }`}>
       <header className={`px-5 py-3.5 border-b ${
-        tone === 'warn' ? 'bg-warn/5 border-warn/20' : 'bg-paper-tint/30 border-ink/8'
+        tone === 'warn' ? 'bg-warn/5 border-warn/20' : 'bg-paper-tint/30 border-foreground/8'
       }`}>
-        <p className={`eyebrow ${tone === 'warn' ? 'text-warn' : 'text-ink/55'}`}>{eyebrow}</p>
-        <p className="text-sm font-medium text-ink mt-0.5">{title}</p>
+        <p className={`eyebrow ${tone === 'warn' ? 'text-warn' : 'text-foreground/55'}`}>{eyebrow}</p>
+        <p className="text-sm font-medium text-foreground mt-0.5">{title}</p>
       </header>
-      <div className="divide-y divide-ink/5">
+      <div className="divide-y divide-foreground/5">
         {children}
       </div>
     </section>
@@ -212,10 +212,10 @@ function RegistrationRow({ reg, sessionId, showActions, attendance }: any) {
         {reg.student.user.fullName.split(/\s+/).map((w: string) => w[0]).slice(-2).join('').toUpperCase()}
       </div>
       <div className="flex-1 min-w-0">
-        <Link href={`/admin/students/${reg.student.id}`} className="text-sm font-medium text-ink hover:text-accent transition">
+        <Link href={`/admin/students/${reg.student.id}`} className="text-sm font-medium text-foreground hover:text-accent transition">
           {reg.student.user.fullName}
         </Link>
-        <div className="flex items-center gap-3 text-xs text-ink/55 mt-0.5 flex-wrap">
+        <div className="flex items-center gap-3 text-xs text-foreground/55 mt-0.5 flex-wrap">
           <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" strokeWidth={1.75} />{reg.student.user.phone}</span>
           <span className="font-mono">{reg.student.studentCode}</span>
           {reg.course && (
