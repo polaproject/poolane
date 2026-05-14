@@ -56,6 +56,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       items: [
         { label: 'Tổng quan tài chính', href: '/admin/finance', icon: DollarSign },
         { label: 'Hoàn tiền', href: '/admin/finance/refunds', icon: ReceiptText },
+        { label: 'Giao dịch chưa khớp', href: '/admin/finance/unmatched', icon: ReceiptText },
         { label: 'Báo cáo & Đối chiếu', href: '/admin/reports', icon: BarChart2 },
       ]
     },

@@ -41,7 +41,64 @@ Get-Process -Name node | Stop-Process -Force -ErrorAction SilentlyContinue
 npm run dev
 ```
 
-DB đã được apply schema mới (PasswordResetRequest, PushSubscription, SelfAssessment, ImprovementSessionPack) qua `prisma db push`. Không cần migrate gì.
+DB đã được apply schema mới (PasswordResetRequest, PushSubscription, SelfAssessment, ImprovementSessionPack, UnmatchedTransaction) qua `prisma db push`. Không cần migrate gì.
+
+---
+
+## ⚡ Setup Sepay (tự động xác nhận chuyển khoản — optional)
+
+Sepay là dịch vụ kết nối với tài khoản ngân hàng để webhook real-time mỗi khi có giao dịch vào (~99k/tháng). Khi setup xong, HV chuyển khoản → hệ thống tự confirm trong 30 giây thay vì admin phải check sao kê thủ công.
+
+### Bước setup:
+
+1. Đăng ký [sepay.vn](https://sepay.vn) → chọn gói **Basic 99k/tháng** (free trial 7 ngày để thử)
+2. Verify danh tính → liên kết tài khoản ngân hàng Poolane (cùng STK đã cấu hình `BANK_ACCOUNT_NO` ở trên)
+3. Vào **Cấu hình → Webhook**:
+   - URL: `https://poolane.vn/api/webhooks/sepay` (production)
+   - Hoặc local test với ngrok: `https://<your-ngrok-id>.ngrok.io/api/webhooks/sepay`
+   - Method: POST
+   - Auth header: chọn "Apikey" → tạo random token (vd: `openssl rand -hex 32`)
+4. Copy token đó → thêm vào `.env.local`:
+   ```env
+   SEPAY_API_KEY=<token vừa tạo>
+   ```
+5. Restart dev server
+6. Sepay sẽ tự gửi test transaction sau khi cấu hình webhook
+7. Check `/admin/finance/unmatched` (nếu memo không match) hoặc các đơn pending sẽ tự chuyển `paid` (nếu memo match POLA/POLAE)
+
+### Test webhook không cần Sepay:
+
+```bash
+# Set env: SEPAY_API_KEY=test_secret_123
+
+# Test 1: match enrollment (thay <8chars> bằng id enrollment thật)
+curl -X POST http://localhost:3000/api/webhooks/sepay \
+  -H "Authorization: Apikey test_secret_123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": 1,
+    "gateway": "Vietcombank",
+    "transactionDate": "2026-05-14 14:00:00",
+    "accountNumber": "001",
+    "content": "TRA NO POLAE<8chars>",
+    "transferType": "in",
+    "transferAmount": 1600000,
+    "referenceCode": "TEST123"
+  }'
+
+# Test 2: unmatched
+curl -X POST http://localhost:3000/api/webhooks/sepay \
+  -H "Authorization: Apikey test_secret_123" \
+  -d '{"id":2,"transactionDate":"2026-05-14 14:00:00","content":"CK ngau nhien","transferType":"in","transferAmount":100000}'
+
+# Vào /admin/finance/unmatched → thấy giao dịch chờ xử lý
+```
+
+### Khi nào KHÔNG cần Sepay:
+- Volume < 30 giao dịch/tháng → admin check sao kê 1-2 lần/ngày, bấm "Xác nhận" thủ công cũng ổn
+- Không muốn tốn 99k/tháng
+
+Manual confirm button vẫn ở `/admin/shop/orders` và `/admin/students/[id]` làm fallback.
 
 ---
 
