@@ -2,7 +2,7 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, HelpCircle } from 'lucide-react'
 import { QuizRunner } from './QuizRunner'
 
 type Params = { params: Promise<{ id: string }> }
@@ -13,32 +13,46 @@ export default async function TakeQuizPage({ params }: Params) {
 
   const quiz = await prisma.quiz.findUnique({
     where: { id, isPublished: true },
-    include: { questions: { orderBy: { orderIndex: 'asc' } } }
+    include: { questions: { orderBy: { orderIndex: 'asc' } } },
   })
 
   if (!quiz) notFound()
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] pb-10">
-      <div className="bg-[#1C2B4A] px-5 pt-6 pb-8">
-        <Link href="/student/quiz" className="inline-flex items-center gap-1 text-sm text-[#F6F1EA]/60 hover:text-[#F6F1EA] mb-3">
-          <ArrowLeft className="w-4 h-4" /> Danh sách quiz
-        </Link>
-        <h1 className="font-heading text-2xl text-[#F6F1EA]">{quiz.title}</h1>
-        {quiz.description && <p className="text-[#F6F1EA]/60 text-sm mt-1">{quiz.description}</p>}
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-2xl mx-auto">
+          <Link
+            href="/student/quiz"
+            className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group"
+          >
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" strokeWidth={2.25} />
+            Danh sách quiz
+          </Link>
+          <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
+            <HelpCircle className="h-3 w-3 text-accent" strokeWidth={1.75} /> {quiz.questions.length} câu hỏi
+          </p>
+          <h1 className="font-heading text-3xl sm:text-4xl italic leading-tight">{quiz.title}</h1>
+          {quiz.description && (
+            <p className="text-sm text-paper/65 mt-2 max-w-lg leading-relaxed">{quiz.description}</p>
+          )}
+        </div>
       </div>
 
-      <div className="px-4 -mt-4 max-w-2xl mx-auto">
-        <QuizRunner
-          quizId={quiz.id}
-          questions={quiz.questions.map(q => ({
-            id: q.id,
-            questionText: q.questionText,
-            type: q.type,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            options: (q.options as any) ?? [],
-          }))}
-        />
+      <div className="px-4 sm:px-8 -mt-6 max-w-2xl mx-auto relative z-10">
+        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5 sm:p-6">
+          <QuizRunner
+            quizId={quiz.id}
+            questions={quiz.questions.map(q => ({
+              id: q.id,
+              questionText: q.questionText,
+              type: q.type,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              options: (q.options as any) ?? [],
+            }))}
+          />
+        </div>
       </div>
     </div>
   )

@@ -1,6 +1,8 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft, Send } from 'lucide-react'
 import { RequestChangeForm } from './RequestChangeForm'
 
 export default async function RequestChangePage() {
@@ -14,40 +16,54 @@ export default async function RequestChangePage() {
           fullName: true, dob: true, phone: true,
           ward: true, district: true, province: true, addressStreet: true,
           idCardNumber: true,
-        }
-      }
-    }
+        },
+      },
+    },
   })
 
   if (!student) notFound()
 
-  // Nếu đã có pending request → redirect về profile (banner sẽ hiển thị)
   const pending = await prisma.profileChangeRequest.findFirst({
-    where: { studentId: student.id, status: 'pending' }
+    where: { studentId: student.id, status: 'pending' },
   })
   if (pending) redirect('/student/profile')
 
   const u = student.user
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] pb-10">
-      <div className="bg-[#1C2B4A] px-5 pt-6 pb-8">
-        <h1 className="font-heading text-2xl text-[#F6F1EA]">Yêu cầu cập nhật thông tin</h1>
-        <p className="text-[#F6F1EA]/50 text-xs mt-1">
-          Các trường định danh cần staff/admin duyệt — chọn trường muốn đổi và nhập giá trị mới
-        </p>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-2xl mx-auto">
+          <Link
+            href="/student/profile"
+            className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group"
+          >
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" strokeWidth={2.25} />
+            Hồ sơ
+          </Link>
+          <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
+            <Send className="h-3 w-3 text-accent" strokeWidth={1.75} /> Cần duyệt
+          </p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Yêu cầu cập nhật</h1>
+          <p className="text-sm text-paper/65 mt-2 max-w-lg leading-relaxed">
+            Các trường định danh cần staff/admin duyệt — chọn trường muốn đổi và nhập giá trị mới.
+          </p>
+        </div>
       </div>
-      <div className="px-4 -mt-4 max-w-2xl mx-auto">
-        <RequestChangeForm current={{
-          fullName: u.fullName ?? '',
-          dob: u.dob ? u.dob.toISOString().slice(0, 10) : '',
-          phone: u.phone ?? '',
-          ward: u.ward ?? '',
-          district: u.district ?? '',
-          province: u.province ?? '',
-          addressStreet: u.addressStreet ?? '',
-          idCardNumber: u.idCardNumber ?? '',
-        }} />
+      <div className="px-4 sm:px-8 -mt-6 max-w-2xl mx-auto relative z-10">
+        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5 sm:p-6">
+          <RequestChangeForm current={{
+            fullName: u.fullName ?? '',
+            dob: u.dob ? u.dob.toISOString().slice(0, 10) : '',
+            phone: u.phone ?? '',
+            ward: u.ward ?? '',
+            district: u.district ?? '',
+            province: u.province ?? '',
+            addressStreet: u.addressStreet ?? '',
+            idCardNumber: u.idCardNumber ?? '',
+          }} />
+        </div>
       </div>
     </div>
   )
