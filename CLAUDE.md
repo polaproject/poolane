@@ -171,11 +171,18 @@ LAYER 6 — Validation & Security
 
 Theo thứ tự quan trọng:
 
-1. **Admin: UI tạo/sửa blog** (`/admin/blog/new`) — API có, UI không
-2. **Student: UI làm quiz** (`/student/quiz/[id]`) — API có, UI không
-3. **Áp dụng design system** cho tất cả trang còn lại
-4. **Deploy Vercel** + trỏ domain poolane.vn
-5. **Email templates** với Resend
+1. **Deploy Vercel** + trỏ domain poolane.vn
+2. **Combo 3 khoá pricing** — chốt giá + implement
+3. **VNPay integration** (đã có MoMo)
+4. **Mobile responsive audit** với device thật
+5. **AI tư vấn cá nhân hoá** (Claude API)
+
+### Module mới (sprint sau đêm sprint)
+
+- ✅ MoMo online payment với webhook IPN
+- ✅ PWA manifest + icons
+- ✅ Teacher tools: lesson planning, exercise library, practice assignment, teacher metrics
+- ✅ Schema: GatewayTransaction, LessonPlan, Exercise, ExerciseAssignment
 
 ---
 

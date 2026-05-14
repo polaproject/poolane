@@ -75,6 +75,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
         { label: 'Quiz', href: '/admin/quizzes', icon: HelpCircle },
         { label: 'Album ảnh', href: '/admin/photos', icon: ImageIcon },
         { label: 'Video bơi', href: '/admin/videos', icon: Video },
+        { label: 'Thư viện bài tập', href: '/admin/exercises', icon: Award },
       ]
     },
     {
@@ -82,6 +83,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       items: [
         { label: 'AI dự báo', href: '/admin/ai', icon: Brain },
         { label: 'Heatmap kỹ năng', href: '/admin/skill-heatmap', icon: BarChart2 },
+        { label: 'Hiệu quả giảng dạy', href: '/admin/teacher-metrics', icon: TrendingUp },
       ]
     },
     {
@@ -140,6 +142,8 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       items: [
         { label: 'Mục tiêu cá nhân', href: '/student/goals', icon: Target },
         { label: 'Nhật ký luyện tập', href: '/student/log', icon: Activity },
+        { label: 'Bài tập của tôi', href: '/student/exercises/my', icon: Award },
+        { label: 'Thư viện bài tập', href: '/student/exercises', icon: BookOpen },
         { label: 'Thử thách', href: '/student/challenges', icon: Award },
       ]
     },
