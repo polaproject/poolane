@@ -1,21 +1,21 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { Calendar, CheckCircle2, Clock, XCircle, AlertCircle } from 'lucide-react'
-import { format, isFuture, isPast, isToday } from 'date-fns'
+import {
+  Calendar, CheckCircle2, Clock, XCircle, AlertCircle, Sunrise, Sunset, ArrowRight,
+} from 'lucide-react'
+import { format, isPast, isToday } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import { Chip } from '@/components/ui/Chip'
 
-const STATUS_CONFIG: Record<string, { label: string; className: string; icon: React.ReactNode }> = {
-  pending:   { label: 'Chờ duyệt',  className: 'bg-amber-50 text-amber-700 border-amber-200',   icon: <Clock className="w-3.5 h-3.5" /> },
-  approved:  { label: 'Đã duyệt',   className: 'bg-green-50 text-green-700 border-green-200',  icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
-  rejected:  { label: 'Từ chối',    className: 'bg-red-50 text-red-700 border-red-200',         icon: <XCircle className="w-3.5 h-3.5" /> },
-  waitlist:  { label: 'Chờ',        className: 'bg-blue-50 text-blue-700 border-blue-200',     icon: <Clock className="w-3.5 h-3.5" /> },
-  withdrawn: { label: 'Đã rút',     className: 'bg-gray-100 text-gray-500 border-gray-200',     icon: <XCircle className="w-3.5 h-3.5" /> },
-}
+type StatusVariant = 'neutral' | 'accent' | 'mist' | 'success' | 'warn' | 'danger'
 
-const TIME_SLOT_LABEL: Record<string, string> = {
-  morning: '🌅 5:30–7:30 sáng',
-  evening: '🌆 18:00–20:00 chiều',
+const STATUS_CONFIG: Record<string, { label: string; variant: StatusVariant; Icon: typeof Clock }> = {
+  pending:   { label: 'Chờ duyệt', variant: 'warn',    Icon: Clock },
+  approved:  { label: 'Đã duyệt',  variant: 'success', Icon: CheckCircle2 },
+  rejected:  { label: 'Từ chối',   variant: 'danger',  Icon: XCircle },
+  waitlist:  { label: 'Chờ list',  variant: 'mist',    Icon: Clock },
+  withdrawn: { label: 'Đã rút',    variant: 'neutral', Icon: XCircle },
 }
 
 export default async function MySchedulePage() {
@@ -23,25 +23,23 @@ export default async function MySchedulePage() {
 
   const student = await prisma.student.findFirst({ where: { userId: user.id }, select: { id: true } })
   if (!student) {
-    return <div className="p-6 text-center text-[#1C2B4A]/40">Không tìm thấy hồ sơ học viên</div>
+    return (
+      <div className="p-8 text-center text-ink/55">Không tìm thấy hồ sơ học viên</div>
+    )
   }
 
-  // Đăng ký từ 30 ngày trước đến tương lai
+  // eslint-disable-next-line react-hooks/purity
   const since = new Date(Date.now() - 30 * 86400000)
   const registrations = await prisma.sessionRegistration.findMany({
     where: { studentId: student.id, registeredAt: { gte: since } },
     orderBy: { registeredAt: 'desc' },
-    include: {
-      session: { select: { id: true, date: true, timeSlot: true, status: true } },
-    },
+    include: { session: { select: { id: true, date: true, timeSlot: true, status: true } } },
     take: 100,
   })
 
-  // Tách thành upcoming / past
   const upcoming = registrations.filter(r => !isPast(r.session.date) || isToday(r.session.date))
   const past = registrations.filter(r => isPast(r.session.date) && !isToday(r.session.date))
 
-  // Attendance để biết HV có đi không
   const attendance = await prisma.attendance.findMany({
     where: { studentId: student.id, markedAt: { gte: since } },
     select: { sessionId: true, status: true },
@@ -49,35 +47,43 @@ export default async function MySchedulePage() {
   const attendanceMap = new Map(attendance.map(a => [a.sessionId, a.status]))
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] pb-10">
-      <div className="bg-[#1C2B4A] px-5 pt-6 pb-8">
-        <h1 className="font-heading text-2xl text-[#F6F1EA]">Lịch học của tôi</h1>
-        <p className="text-[#F6F1EA]/50 text-xs mt-1">Buổi sắp tới và lịch sử 30 ngày</p>
+    <div className="min-h-screen bg-paper pb-12">
+      {/* Hero */}
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/15 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto">
+          <p className="eyebrow text-paper/55 mb-2">30 ngày · Buổi sắp tới + lịch sử</p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Lịch học của tôi</h1>
+        </div>
       </div>
 
-      <div className="px-4 -mt-4 max-w-2xl mx-auto space-y-4">
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-5 relative z-10">
         {/* Upcoming */}
         <Section
-          title="Sắp tới"
-          icon={<Calendar className="w-4 h-4" />}
+          eyebrow="Sắp tới"
+          title="Buổi đang chờ"
           empty="Bạn chưa đăng ký buổi nào sắp tới"
           emptyAction={
-            <Link href="/student/schedule" className="text-xs font-semibold text-[#5B8E9F] hover:underline">
-              → Đăng ký buổi học
+            <Link
+              href="/student/schedule"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
+            >
+              Đăng ký buổi học <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.25} />
             </Link>
           }
         >
           {upcoming.map(r => {
             const cfg = STATUS_CONFIG[r.status] ?? STATUS_CONFIG.pending
-            const sessionCancelled = r.session.status === 'cancelled'
+            const cancelled = r.session.status === 'cancelled'
             return (
-              <RegRow key={r.id}
+              <RegRow
+                key={r.id}
                 date={r.session.date}
                 timeSlot={r.session.timeSlot}
-                status={cfg.label}
-                statusClass={cfg.className}
-                statusIcon={cfg.icon}
-                cancelled={sessionCancelled}
+                statusLabel={cfg.label}
+                statusVariant={cfg.variant}
+                StatusIcon={cfg.Icon}
+                cancelled={cancelled}
                 rejectedReason={r.rejectedReasonText ?? null}
               />
             )
@@ -85,19 +91,22 @@ export default async function MySchedulePage() {
         </Section>
 
         {/* Past */}
-        <Section title="Đã qua" icon={<Calendar className="w-4 h-4 text-[#1C2B4A]/40" />} empty="Chưa có buổi nào trong 30 ngày qua">
+        <Section eyebrow="Đã qua" title="Lịch sử 30 ngày" empty="Chưa có buổi nào trong 30 ngày qua">
           {past.map(r => {
             const cfg = STATUS_CONFIG[r.status] ?? STATUS_CONFIG.pending
             const att = attendanceMap.get(r.session.id)
+            const statusLabel = att === 'present' ? 'Đã đi học' : att === 'absent' ? 'Vắng' : cfg.label
+            const statusVariant: StatusVariant =
+              att === 'present' ? 'success' : att === 'absent' ? 'danger' : cfg.variant
+            const StatusIcon = att === 'present' ? CheckCircle2 : att === 'absent' ? XCircle : cfg.Icon
             return (
-              <RegRow key={r.id}
+              <RegRow
+                key={r.id}
                 date={r.session.date}
                 timeSlot={r.session.timeSlot}
-                status={att === 'present' ? 'Đã đi học' : att === 'absent' ? 'Vắng' : cfg.label}
-                statusClass={att === 'present' ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                  : att === 'absent' ? 'bg-orange-50 text-orange-700 border-orange-200'
-                  : cfg.className}
-                statusIcon={att === 'present' ? <CheckCircle2 className="w-3.5 h-3.5" /> : cfg.icon}
+                statusLabel={statusLabel}
+                statusVariant={statusVariant}
+                StatusIcon={StatusIcon}
                 past
               />
             )
@@ -108,54 +117,88 @@ export default async function MySchedulePage() {
   )
 }
 
-function Section({ title, icon, children, empty, emptyAction }: {
-  title: string; icon: React.ReactNode; children: React.ReactNode;
-  empty: string; emptyAction?: React.ReactNode
+function Section({
+  eyebrow, title, children, empty, emptyAction,
+}: {
+  eyebrow: string
+  title: string
+  children: React.ReactNode
+  empty: string
+  emptyAction?: React.ReactNode
 }) {
   const hasChildren = Array.isArray(children) && children.length > 0
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 overflow-hidden">
-      <div className="px-5 py-3 border-b border-[#1C2B4A]/8 flex items-center gap-2">
-        {icon}
-        <h2 className="font-semibold text-[#1C2B4A] text-sm">{title}</h2>
-      </div>
+    <section className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+      <header className="px-5 py-4 border-b border-ink/8 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-accent" strokeWidth={1.75} />
+          <div>
+            <p className="eyebrow text-ink/55">{eyebrow}</p>
+            <h2 className="font-heading italic text-lg text-ink mt-0.5">{title}</h2>
+          </div>
+        </div>
+      </header>
       {hasChildren ? (
-        <div className="divide-y divide-[#1C2B4A]/5">{children}</div>
+        <div className="divide-y divide-ink/5">{children}</div>
       ) : (
-        <div className="px-5 py-6 text-center">
-          <p className="text-sm text-[#1C2B4A]/40">{empty}</p>
-          {emptyAction && <div className="mt-2">{emptyAction}</div>}
+        <div className="px-5 py-8 text-center">
+          <p className="text-sm text-ink/55 mb-2">{empty}</p>
+          {emptyAction}
         </div>
       )}
-    </div>
+    </section>
   )
 }
 
-function RegRow({ date, timeSlot, status, statusClass, statusIcon, cancelled, past, rejectedReason }: {
-  date: Date; timeSlot: string; status: string; statusClass: string; statusIcon: React.ReactNode
-  cancelled?: boolean; past?: boolean; rejectedReason?: string | null
+function RegRow({
+  date, timeSlot, statusLabel, statusVariant, StatusIcon, cancelled, past, rejectedReason,
+}: {
+  date: Date
+  timeSlot: string
+  statusLabel: string
+  statusVariant: StatusVariant
+  StatusIcon: typeof Clock
+  cancelled?: boolean
+  past?: boolean
+  rejectedReason?: string | null
 }) {
+  const isMorning = timeSlot === 'morning'
   return (
-    <div className="px-5 py-3 flex items-center justify-between">
-      <div className={past ? 'opacity-60' : ''}>
-        <p className="text-sm font-semibold text-[#1C2B4A]">
+    <div className={`px-5 py-4 flex items-start gap-3 ${past ? 'opacity-65' : ''}`}>
+      <div className="text-center w-12 shrink-0 pt-0.5">
+        <div className="text-[10px] tracking-widest uppercase text-ink/45">
+          {format(date, 'EEE', { locale: vi })}
+        </div>
+        <div className="font-heading italic text-2xl text-ink leading-none mt-0.5">
+          {format(date, 'dd', { locale: vi })}
+        </div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-ink">
           {format(date, 'EEEE, dd/MM/yyyy', { locale: vi })}
-          {isToday(date) && <span className="ml-2 text-xs text-[#C8A84B] font-bold">HÔM NAY</span>}
+          {isToday(date) && (
+            <Chip variant="accent" active className="ml-2 align-middle text-[10px]">Hôm nay</Chip>
+          )}
         </p>
-        <p className="text-xs text-[#1C2B4A]/50 mt-0.5">{TIME_SLOT_LABEL[timeSlot] ?? timeSlot}</p>
+        <p className="text-xs text-ink/55 mt-1 inline-flex items-center gap-1.5">
+          {isMorning ? (
+            <><Sunrise className="h-3 w-3 text-accent" strokeWidth={1.75} /> 5:30 – 7:30 sáng</>
+          ) : (
+            <><Sunset className="h-3 w-3 text-accent" strokeWidth={1.75} /> 18:00 – 20:00 chiều</>
+          )}
+        </p>
         {cancelled && (
-          <p className="text-xs text-red-600 mt-1 inline-flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" /> Buổi đã bị huỷ — vé đã hoàn lại
+          <p className="text-xs text-danger mt-1.5 inline-flex items-center gap-1">
+            <AlertCircle className="h-3 w-3" strokeWidth={2} /> Buổi đã huỷ — vé đã hoàn lại
           </p>
         )}
         {rejectedReason && (
-          <p className="text-xs text-red-600 mt-1">Lý do: {rejectedReason}</p>
+          <p className="text-xs text-danger mt-1.5">Lý do: {rejectedReason}</p>
         )}
       </div>
-      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full border ${statusClass}`}>
-        {statusIcon}
-        {status}
-      </span>
+      <Chip variant={statusVariant} active className="shrink-0">
+        <StatusIcon className="h-3 w-3" strokeWidth={2.25} /> {statusLabel}
+      </Chip>
     </div>
   )
 }

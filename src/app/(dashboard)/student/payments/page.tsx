@@ -2,15 +2,21 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
-import { Wallet, TrendingUp, TrendingDown, AlertCircle, QrCode } from 'lucide-react'
+import {
+  Wallet, TrendingUp, TrendingDown, AlertCircle, QrCode,
+  BookOpenText, Ticket, ShoppingBag, Undo2, Settings,
+} from 'lucide-react'
 import Link from 'next/link'
+import { Chip } from '@/components/ui/Chip'
+import { StatCard } from '@/components/ui/StatCard'
 
-const TYPE_CONFIG: Record<string, { label: string; icon: string }> = {
-  course_fee:  { label: 'Học phí',     icon: '📚' },
-  pool_ticket: { label: 'Vé bơi',      icon: '🎟️' },
-  shop:        { label: 'Shop',        icon: '🛒' },
-  refund:      { label: 'Hoàn tiền',   icon: '↩️' },
-  adjustment:  { label: 'Điều chỉnh',  icon: '⚙️' },
+type IconType = typeof Ticket
+const TYPE_CONFIG: Record<string, { label: string; Icon: IconType }> = {
+  course_fee:  { label: 'Học phí',    Icon: BookOpenText },
+  pool_ticket: { label: 'Vé bơi',     Icon: Ticket },
+  shop:        { label: 'Shop',       Icon: ShoppingBag },
+  refund:      { label: 'Hoàn tiền',  Icon: Undo2 },
+  adjustment:  { label: 'Điều chỉnh', Icon: Settings },
 }
 
 const METHOD_LABEL: Record<string, string> = {
@@ -27,7 +33,7 @@ export default async function StudentPaymentsPage() {
 
   const student = await prisma.student.findFirst({ where: { userId: user.id }, select: { id: true } })
   if (!student) {
-    return <div className="p-6 text-center text-[#1C2B4A]/40">Không tìm thấy hồ sơ</div>
+    return <div className="p-8 text-center text-ink/55">Không tìm thấy hồ sơ</div>
   }
 
   const [payments, pendingEnrollments] = await Promise.all([
@@ -37,15 +43,11 @@ export default async function StudentPaymentsPage() {
       take: 100,
     }),
     prisma.enrollment.findMany({
-      where: {
-        studentId: student.id,
-        status: { in: ['active', 'extension'] },
-      },
+      where: { studentId: student.id, status: { in: ['active', 'extension'] } },
       include: { course: { select: { name: true, code: true, price: true } } },
     }),
   ])
 
-  // Lọc các enrollment còn nợ
   const debtEnrollments = pendingEnrollments
     .map(e => ({
       id: e.id,
@@ -58,48 +60,51 @@ export default async function StudentPaymentsPage() {
     }))
     .filter(e => e.debt > 0)
 
-  // Tính tổng
   const totalIn = payments.filter(p => p.amount > 0).reduce((s, p) => s + p.amount, 0)
   const totalOut = payments.filter(p => p.amount < 0).reduce((s, p) => s + Math.abs(p.amount), 0)
   const net = totalIn - totalOut
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] pb-10">
-      <div className="bg-[#1C2B4A] px-5 pt-6 pb-8">
-        <h1 className="font-heading text-2xl text-[#F6F1EA]">Lịch sử thanh toán</h1>
-        <p className="text-[#F6F1EA]/50 text-xs mt-1">{payments.length} giao dịch gần nhất</p>
+    <div className="min-h-screen bg-paper pb-12">
+      {/* Hero */}
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto">
+          <p className="eyebrow text-paper/55 mb-2">Tài chính · {payments.length} giao dịch</p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Lịch sử thanh toán</h1>
+        </div>
       </div>
 
-      <div className="px-4 -mt-4 max-w-2xl mx-auto space-y-4">
-        {/* Pending debts — top priority */}
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-5 relative z-10">
+        {/* Debt warning — top priority */}
         {debtEnrollments.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden">
-            <div className="px-5 py-3 border-b border-amber-200 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-amber-700" />
-              <h2 className="font-semibold text-amber-900 text-sm">Khoản cần đóng ({debtEnrollments.length})</h2>
+          <div className="rounded-card-lg bg-warn/10 ring-1 ring-warn/30 overflow-hidden backdrop-blur-sm">
+            <div className="px-5 py-3 border-b border-warn/30 flex items-center gap-2 bg-warn/5">
+              <AlertCircle className="h-4 w-4 text-warn" strokeWidth={2} />
+              <h2 className="font-semibold text-sm text-ink">Khoản cần đóng ({debtEnrollments.length})</h2>
             </div>
-            <div className="divide-y divide-amber-200">
+            <div className="divide-y divide-warn/20">
               {debtEnrollments.map(e => (
-                <div key={e.id} className="px-5 py-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <p className="font-semibold text-sm text-[#1C2B4A]">📚 {e.courseName}</p>
-                      <p className="text-xs text-[#1C2B4A]/60 mt-0.5">
+                <div key={e.id} className="px-5 py-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-heading italic text-xl text-ink leading-tight">{e.courseName}</p>
+                      <p className="text-xs text-ink/65 mt-1">
                         Đã đóng {fmt(e.totalPaid)} / {fmt(e.coursePrice)}
-                        {e.deadline && (
-                          <span className="ml-2 text-red-600">
-                            · Hạn {format(e.deadline, 'dd/MM/yyyy', { locale: vi })}
-                          </span>
-                        )}
                       </p>
+                      {e.deadline && (
+                        <p className="text-xs text-danger mt-1 inline-flex items-center gap-1">
+                          <AlertCircle className="h-3 w-3" strokeWidth={2} /> Hạn {format(e.deadline, 'dd/MM/yyyy', { locale: vi })}
+                        </p>
+                      )}
                     </div>
-                    <p className="font-heading text-xl text-amber-700">{fmt(e.debt)}</p>
+                    <p className="font-heading italic text-2xl text-warn shrink-0">{fmt(e.debt)}</p>
                   </div>
                   <Link
                     href={`/student/payments/enrollment/${e.id}/pay`}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg text-sm font-semibold hover:bg-[#1C2B4A]/90"
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-ink text-paper rounded-pill text-sm font-semibold hover:bg-ink/90 transition shadow-soft"
                   >
-                    <QrCode className="w-4 h-4" /> Thanh toán qua chuyển khoản
+                    <QrCode className="h-4 w-4" strokeWidth={1.75} /> Thanh toán qua chuyển khoản
                   </Link>
                 </div>
               ))}
@@ -108,39 +113,54 @@ export default async function StudentPaymentsPage() {
         )}
 
         {/* Summary */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          <SummaryCard label="Đã đóng" value={totalIn} color="text-green-700" icon={<TrendingUp className="w-4 h-4" />} />
-          <SummaryCard label="Đã hoàn" value={totalOut} color="text-orange-700" icon={<TrendingDown className="w-4 h-4" />} />
-          <SummaryCard label="Tổng net" value={net} color="text-[#1C2B4A]" icon={<Wallet className="w-4 h-4" />} />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <StatCard label="Đã đóng" value={fmt(totalIn).replace('đ', '')} unit="đ" icon={TrendingUp} />
+          <StatCard label="Đã hoàn" value={fmt(totalOut).replace('đ', '')} unit="đ" icon={TrendingDown} />
+          <StatCard label="Tổng net" value={fmt(net).replace('đ', '')} unit="đ" icon={Wallet} tone="dark" />
         </div>
 
-        {/* Transactions list */}
-        <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 overflow-hidden">
+        {/* Transactions */}
+        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+          <div className="px-5 py-4 border-b border-ink/8 flex items-center justify-between">
+            <p className="eyebrow text-ink/55">Tất cả giao dịch</p>
+            <span className="text-xs text-ink/55">{payments.length} mục</span>
+          </div>
           {payments.length === 0 ? (
-            <div className="p-8 text-center text-[#1C2B4A]/40 text-sm">
-              Chưa có giao dịch nào
+            <div className="p-12 text-center">
+              <Wallet className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+              <p className="font-heading italic text-xl text-ink mb-1">Chưa có giao dịch</p>
+              <p className="text-sm text-ink/55">Khi có thanh toán, sẽ hiện ở đây.</p>
             </div>
           ) : (
-            <div className="divide-y divide-[#1C2B4A]/5">
+            <div className="divide-y divide-ink/5">
               {payments.map(p => {
-                const cfg = TYPE_CONFIG[p.type] ?? { label: p.type, icon: '💳' }
+                const cfg = TYPE_CONFIG[p.type] ?? { label: p.type, Icon: Wallet }
                 const isNegative = p.amount < 0
                 return (
-                  <div key={p.id} className="px-5 py-3 flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-[#1C2B4A]">
-                        {cfg.icon} {cfg.label}
-                        {p.isReversal && <span className="ml-2 text-xs text-orange-600">(bút toán đảo)</span>}
-                      </p>
-                      <p className="text-xs text-[#1C2B4A]/50 mt-0.5">
-                        {format(p.recordedAt, 'HH:mm dd/MM/yyyy', { locale: vi })} · {METHOD_LABEL[p.paymentMethod] ?? p.paymentMethod}
-                        {p.referenceNumber && <> · <code className="bg-[#1C2B4A]/8 px-1 rounded">{p.referenceNumber}</code></>}
-                      </p>
-                      {p.notes && (
-                        <p className="text-xs text-[#1C2B4A]/60 mt-1 italic">{p.notes}</p>
-                      )}
+                  <div key={p.id} className="px-5 py-3.5 flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <div className={`grid place-items-center h-9 w-9 rounded-pill shrink-0 ${
+                        isNegative ? 'bg-warn/15 text-warn' : 'bg-success/15 text-success'
+                      }`}>
+                        <cfg.Icon className="h-4 w-4" strokeWidth={1.75} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-ink inline-flex items-center gap-2 flex-wrap">
+                          {cfg.label}
+                          {p.isReversal && <Chip variant="warn" className="text-[10px]">Bút toán đảo</Chip>}
+                        </p>
+                        <p className="text-xs text-ink/55 mt-0.5">
+                          {format(p.recordedAt, 'HH:mm · dd/MM/yyyy', { locale: vi })} · {METHOD_LABEL[p.paymentMethod] ?? p.paymentMethod}
+                        </p>
+                        {p.referenceNumber && (
+                          <p className="text-[10px] text-ink/45 mt-0.5 font-mono">{p.referenceNumber}</p>
+                        )}
+                        {p.notes && (
+                          <p className="text-xs text-ink/65 mt-1 italic">{p.notes}</p>
+                        )}
+                      </div>
                     </div>
-                    <p className={`font-semibold text-sm ${isNegative ? 'text-orange-700' : 'text-green-700'}`}>
+                    <p className={`font-heading text-base shrink-0 ${isNegative ? 'text-warn' : 'text-success'}`}>
                       {isNegative ? '−' : '+'}{fmt(Math.abs(p.amount))}
                     </p>
                   </div>
@@ -150,24 +170,10 @@ export default async function StudentPaymentsPage() {
           )}
         </div>
 
-        <p className="text-xs text-[#1C2B4A]/40 text-center px-4">
-          Liên hệ lớp qua Zalo nếu có bất kỳ khoản nào không khớp với thực tế.
+        <p className="text-xs text-ink/55 text-center px-4">
+          Liên hệ lớp qua Zalo nếu có khoản nào không khớp.
         </p>
       </div>
-    </div>
-  )
-}
-
-function SummaryCard({ label, value, color, icon }: {
-  label: string; value: number; color: string; icon: React.ReactNode
-}) {
-  return (
-    <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-3">
-      <div className={`flex items-center gap-1.5 ${color}`}>
-        {icon}
-        <p className="text-xs uppercase tracking-wider font-semibold">{label}</p>
-      </div>
-      <p className={`font-heading text-lg mt-1 ${color}`}>{fmt(value)}</p>
     </div>
   )
 }
