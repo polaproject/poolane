@@ -87,10 +87,12 @@
 
 ## Lighthouse before/after (mobile, simulated throttling)
 
-| Trang | Perf trước Phase 12 | Perf sau | A11y trước | A11y sau | BP |
+| Trang | Perf trước Phase 12 | Perf sau (sau a11y bump) | A11y trước | A11y sau | BP |
 |---|---|---|---|---|---|
-| `/` (Landing) | 88 (Phase 11) | **86** | 100 | **96** | 100 |
-| `/sandbox/liquid-glass` | — (mới) | **87** | — | **93** | **100** |
+| `/` (Landing) | 88 (Phase 11) | **89** ✅ | 100 | **100** ✅ | 100 |
+| `/sandbox/liquid-glass` | — (mới) | **87** | — | **93** ⚠️ | **100** |
+
+**A11y bump bonus iteration:** `--lqg-text-secondary` + `--lqg-text-tertiary` đậm hơn ở cả 2 mode → Lighthouse a11y 96 → **100** trên landing.
 
 **Quan sát:**
 - Perf giữ ~86-87 (heavy backdrop-blur + lensing + specular tốn GPU, acceptable cho "Liquid Glass throughout")
