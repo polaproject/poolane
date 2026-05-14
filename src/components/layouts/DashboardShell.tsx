@@ -281,7 +281,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
         className={`
           fixed inset-y-0 left-0 z-50 flex flex-col w-64 pola-nav
           transition-transform duration-200 ease-in-out
-          lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:flex lg:flex-shrink-0
+          lg:sticky lg:inset-y-auto lg:left-auto lg:top-0 lg:h-screen lg:translate-x-0 lg:flex lg:flex-shrink-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
