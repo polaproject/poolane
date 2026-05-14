@@ -2,7 +2,8 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
-import { Wallet, TrendingUp, TrendingDown } from 'lucide-react'
+import { Wallet, TrendingUp, TrendingDown, AlertCircle, QrCode } from 'lucide-react'
+import Link from 'next/link'
 
 const TYPE_CONFIG: Record<string, { label: string; icon: string }> = {
   course_fee:  { label: 'Học phí',     icon: '📚' },
@@ -29,11 +30,33 @@ export default async function StudentPaymentsPage() {
     return <div className="p-6 text-center text-[#1C2B4A]/40">Không tìm thấy hồ sơ</div>
   }
 
-  const payments = await prisma.payment.findMany({
-    where: { studentId: student.id },
-    orderBy: { recordedAt: 'desc' },
-    take: 100,
-  })
+  const [payments, pendingEnrollments] = await Promise.all([
+    prisma.payment.findMany({
+      where: { studentId: student.id },
+      orderBy: { recordedAt: 'desc' },
+      take: 100,
+    }),
+    prisma.enrollment.findMany({
+      where: {
+        studentId: student.id,
+        status: { in: ['active', 'extension'] },
+      },
+      include: { course: { select: { name: true, code: true, price: true } } },
+    }),
+  ])
+
+  // Lọc các enrollment còn nợ
+  const debtEnrollments = pendingEnrollments
+    .map(e => ({
+      id: e.id,
+      courseName: e.course.name,
+      courseCode: e.course.code,
+      coursePrice: e.course.price,
+      totalPaid: e.totalPaid,
+      debt: e.course.price - e.totalPaid,
+      deadline: e.paymentDeadline,
+    }))
+    .filter(e => e.debt > 0)
 
   // Tính tổng
   const totalIn = payments.filter(p => p.amount > 0).reduce((s, p) => s + p.amount, 0)
@@ -48,6 +71,42 @@ export default async function StudentPaymentsPage() {
       </div>
 
       <div className="px-4 -mt-4 max-w-2xl mx-auto space-y-4">
+        {/* Pending debts — top priority */}
+        {debtEnrollments.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden">
+            <div className="px-5 py-3 border-b border-amber-200 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-700" />
+              <h2 className="font-semibold text-amber-900 text-sm">Khoản cần đóng ({debtEnrollments.length})</h2>
+            </div>
+            <div className="divide-y divide-amber-200">
+              {debtEnrollments.map(e => (
+                <div key={e.id} className="px-5 py-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="font-semibold text-sm text-[#1C2B4A]">📚 {e.courseName}</p>
+                      <p className="text-xs text-[#1C2B4A]/60 mt-0.5">
+                        Đã đóng {fmt(e.totalPaid)} / {fmt(e.coursePrice)}
+                        {e.deadline && (
+                          <span className="ml-2 text-red-600">
+                            · Hạn {format(e.deadline, 'dd/MM/yyyy', { locale: vi })}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <p className="font-heading text-xl text-amber-700">{fmt(e.debt)}</p>
+                  </div>
+                  <Link
+                    href={`/student/payments/enrollment/${e.id}/pay`}
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg text-sm font-semibold hover:bg-[#1C2B4A]/90"
+                  >
+                    <QrCode className="w-4 h-4" /> Thanh toán qua chuyển khoản
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Summary */}
         <div className="grid grid-cols-3 gap-3">
           <SummaryCard label="Đã đóng" value={totalIn} color="text-green-700" icon={<TrendingUp className="w-4 h-4" />} />
