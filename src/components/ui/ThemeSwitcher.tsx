@@ -3,43 +3,54 @@
 import { useTheme, type ThemeKey } from '@/components/providers/ThemeProvider'
 import { Palette } from 'lucide-react'
 
-const THEMES: Array<{ key: ThemeKey; label: string; dot: string; title: string }> = [
-  { key: 'A', label: 'A', dot: '#C8A84B', title: 'Đêm & Sao' },
-  { key: 'B', label: 'B', dot: '#E09850', title: 'Bình Minh' },
-  { key: 'D', label: 'D', dot: '#00E5C8', title: 'Night Pool' },
+interface ThemeMeta {
+  key: ThemeKey
+  label: string
+  dot: string
+  title: string
+  desc: string
+}
+
+const THEMES: ThemeMeta[] = [
+  { key: 'A', label: 'A', dot: '#C8A84B', title: 'Đêm & Sao',  desc: 'Navy ấm · Gold' },
+  { key: 'B', label: 'B', dot: '#E89B7A', title: 'Bình Yên',   desc: 'Lavender · Peach' },
 ]
 
+/** Full switcher với 2 chip preview — dùng trong sidebar */
 export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme()
 
   return (
     <div className="flex items-center gap-1.5 px-3 py-2">
       <span className="text-xs mr-1" style={{ color: 'var(--pola-nav-muted)' }}>
-        Theme
+        Giao diện
       </span>
-      {THEMES.map(t => (
-        <button
-          key={t.key}
-          onClick={() => setTheme(t.key)}
-          title={t.title}
-          aria-label={`Đổi theme sang ${t.title}`}
-          aria-pressed={theme === t.key}
-          className="w-6 h-6 rounded-full flex items-center justify-center transition-all text-xs font-bold"
-          style={{
-            background: theme === t.key ? t.dot : 'transparent',
-            color: theme === t.key ? '#000' : 'var(--pola-nav-muted)',
-            border: `2px solid ${theme === t.key ? t.dot : 'var(--pola-nav-active)'}`,
-          }}
-        >
-          {t.label}
-        </button>
-      ))}
+      {THEMES.map(t => {
+        const active = theme === t.key
+        return (
+          <button
+            key={t.key}
+            onClick={() => setTheme(t.key)}
+            title={`${t.title} — ${t.desc}`}
+            aria-label={`Đổi giao diện sang ${t.title}`}
+            aria-pressed={active}
+            className="w-6 h-6 rounded-full flex items-center justify-center transition-all text-xs font-bold"
+            style={{
+              background: active ? t.dot : 'transparent',
+              color: active ? '#0F1B33' : 'var(--pola-nav-muted)',
+              border: `2px solid ${active ? t.dot : 'var(--pola-nav-active)'}`,
+            }}
+          >
+            {t.label}
+          </button>
+        )
+      })}
     </div>
   )
 }
 
-/** Compact 1-button cycle theme — for mobile header */
-export function ThemeSwitcherCompact() {
+/** Compact 1-button cycle — cho mobile / public header */
+export function ThemeSwitcherCompact({ className }: { className?: string }) {
   const { theme, setTheme } = useTheme()
   const current = THEMES.find(t => t.key === theme) ?? THEMES[0]
 
@@ -52,9 +63,9 @@ export function ThemeSwitcherCompact() {
   return (
     <button
       onClick={cycle}
-      title={`Theme hiện tại: ${current.title}. Bấm để đổi.`}
-      aria-label={`Đổi theme. Hiện tại: ${current.title}`}
-      className="p-2 rounded-lg"
+      title={`Giao diện: ${current.title}. Bấm để đổi.`}
+      aria-label={`Đổi giao diện. Hiện tại: ${current.title}`}
+      className={className ?? 'p-2 rounded-lg'}
       style={{ color: 'var(--pola-nav-muted)' }}
     >
       <span className="relative inline-flex items-center justify-center">

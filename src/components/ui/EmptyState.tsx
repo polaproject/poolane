@@ -1,8 +1,8 @@
 import Link from 'next/link'
+import type { LucideIcon } from 'lucide-react'
 
 interface EmptyStateProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon?: any
+  icon?: LucideIcon
   title: string
   description?: string
   action?: {
@@ -15,18 +15,18 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
   return (
     <div className="text-center py-12 px-4">
       {Icon && (
-        <div className="w-14 h-14 rounded-full bg-[#F6F1EA] flex items-center justify-center mx-auto mb-3">
-          <Icon className="w-7 h-7 text-[#1C2B4A]/30" />
+        <div className="w-14 h-14 rounded-full bg-paper-tint flex items-center justify-center mx-auto mb-3">
+          <Icon className="w-7 h-7 text-ink/35" />
         </div>
       )}
-      <p className="text-base font-semibold text-[#1C2B4A] mb-1">{title}</p>
+      <p className="text-base font-semibold text-ink mb-1">{title}</p>
       {description && (
-        <p className="text-sm text-[#1C2B4A]/50 max-w-sm mx-auto">{description}</p>
+        <p className="text-sm text-ink/55 max-w-sm mx-auto">{description}</p>
       )}
       {action && (
         <Link
           href={action.href}
-          className="inline-block mt-4 px-4 py-2 bg-[#1C2B4A] text-[#F6F1EA] rounded-lg text-sm font-semibold hover:bg-[#1C2B4A]/90"
+          className="inline-block mt-4 px-4 py-2 bg-ink text-paper rounded-lg text-sm font-semibold hover:bg-ink/90 transition"
         >
           {action.label}
         </Link>

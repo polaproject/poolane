@@ -4,12 +4,29 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ────────────────────────────────────────────────────────────
+ * Poolane Design Tokens (Tailwind v4 @theme inline)
+ * Map CSS variables → Tailwind utility classes.
+ * Vars themselves are defined in :root / .theme-a / .theme-b.
+ * ──────────────────────────────────────────────────────────── */
 @theme inline {
+  /* Brand colors — theme-aware */
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-paper: var(--paper);
+  --color-paper-tint: var(--paper-tint);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-mist: var(--mist);
+  --color-success: var(--success);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+
+  /* shadcn tokens — pre-existing, kept for primitive compatibility */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -28,7 +45,6 @@
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -39,6 +55,8 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Radius scale — base shadcn + Poolane card scale */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -46,8 +64,27 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-pill: 9999px;
+  --radius-card: 1rem;
+  --radius-card-lg: 1.5rem;
+  --radius-card-xl: 1.75rem;
+
+  /* Backdrop blur */
+  --blur-glass: 24px;
 }
 
+/* Shadow utilities — defined outside @theme inline to avoid Lightning CSS
+ * self-reference parse error (Turbopack). Class names match Tailwind convention. */
+@layer utilities {
+  .shadow-soft  { box-shadow: var(--shadow-soft); }
+  .shadow-glass { box-shadow: var(--shadow-glass); }
+  .shadow-cta   { box-shadow: var(--shadow-cta); }
+}
+
+/* ────────────────────────────────────────────────────────────
+ * shadcn base palette (kept for compatibility w/ existing pages)
+ * Sẽ bị override bởi .theme-a / .theme-b bên dưới
+ * ──────────────────────────────────────────────────────────── */
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -61,7 +98,6 @@
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
@@ -123,104 +159,272 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body, ui-sans-serif, system-ui, sans-serif);
   }
   html {
     @apply font-sans;
   }
 }
 
-/* ── Poolane Brand Theme Variables ──────────────────────── */
+/* ════════════════════════════════════════════════════════════
+ * POOLANE THEME TOKENS
+ * Mỗi theme override:
+ *   1. Brand tokens (--ink, --paper, --accent, --mist, ...)
+ *   2. Legacy --pola-* namespace (cho sidebar + components cũ)
+ *   3. shadcn semantic vars (--primary, --secondary, ...) để
+ *      mọi primitive shadcn auto-theme.
+ * ════════════════════════════════════════════════════════════ */
+
 :root,
 .theme-a {
-  /* Theme A: Đêm & Sao (Default) */
-  --pola-nav-bg:     #1C2B4A;
-  --pola-nav-text:   #F6F1EA;
-  --pola-nav-muted:  rgba(246,241,234,0.5);
-  --pola-nav-active: rgba(246,241,234,0.12);
-  --pola-nav-hover:  rgba(246,241,234,0.08);
-  --pola-accent:     #C8A84B;
-  --pola-teal:       #5B8E9F;
-  --pola-page-bg:    #F6F1EA;
+  /* ── Theme A — Đêm & Sao ─────────────────────────── */
+  --ink: #0F1B33;
+  --ink-soft: #1C2B4A;
+  --paper: #FBF7F0;
+  --paper-tint: #F2EAD9;
+  --accent: #C8A84B;
+  --accent-soft: #E8D9A8;
+  --mist: #7FA8B5;
+  --success: #5C8A6E;
+  --warn: #D89B3A;
+  --danger: #B5483C;
+
+  /* Glass surface (semi-transparent paper trên ambient bg) */
+  --glass-bg: rgba(251, 247, 240, 0.08);
+  --glass-ring: rgba(255, 255, 255, 0.15);
+  --glass-text: #FBF7F0;
+
+  /* Shadow tokens (tinted by ink) */
+  --shadow-soft:  0 4px 20px -8px rgba(15, 27, 51, 0.18);
+  --shadow-glass: 0 30px 80px -20px rgba(0, 0, 0, 0.55);
+  --shadow-cta:   0 12px 28px -8px rgba(200, 168, 75, 0.45);
+
+  /* Legacy --pola-* mapping (cho code cũ vẫn chạy) */
+  --pola-nav-bg:     var(--ink-soft);
+  --pola-nav-text:   var(--paper);
+  --pola-nav-muted:  rgba(251, 247, 240, 0.55);
+  --pola-nav-active: rgba(251, 247, 240, 0.12);
+  --pola-nav-hover:  rgba(251, 247, 240, 0.08);
+  --pola-accent:     var(--accent);
+  --pola-teal:       var(--mist);
+  --pola-page-bg:    var(--paper);
   --pola-card-bg:    #FFFFFF;
-  --pola-border:     rgba(28,43,74,0.10);
-  --pola-text:       #1C2B4A;
-  --pola-text-muted: rgba(28,43,74,0.50);
+  --pola-border:     rgba(15, 27, 51, 0.10);
+  --pola-text:       var(--ink);
+  --pola-text-muted: rgba(15, 27, 51, 0.55);
+
+  /* shadcn override → Poolane palette */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: #FFFFFF;
+  --card-foreground: var(--ink);
+  --popover: #FFFFFF;
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: var(--paper-tint);
+  --secondary-foreground: var(--ink);
+  --muted: var(--paper-tint);
+  --muted-foreground: rgba(15, 27, 51, 0.55);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
+  --border: rgba(15, 27, 51, 0.10);
+  --input: rgba(15, 27, 51, 0.12);
+  --ring: var(--accent);
 }
 
 .theme-b {
-  /* Theme B: Bình Minh */
-  --pola-nav-bg:     #1A3F55;
-  --pola-nav-text:   #EEF4F7;
-  --pola-nav-muted:  rgba(238,244,247,0.5);
-  --pola-nav-active: rgba(238,244,247,0.12);
-  --pola-nav-hover:  rgba(238,244,247,0.08);
-  --pola-accent:     #E09850;
-  --pola-teal:       #6AACCF;
-  --pola-page-bg:    #EEF4F7;
+  /* ── Theme B — Bình Yên ─────────────────────────── */
+  --ink: #2D2A4A;
+  --ink-soft: #3A3463;
+  --paper: #F4EFFB;
+  --paper-tint: #EEEAFB;
+  --accent: #E89B7A;
+  --accent-soft: #FCE7E0;
+  --mist: #9B91D6;
+  --success: #6B9B7E;
+  --warn: #D89B3A;
+  --danger: #C25A4A;
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-ring: rgba(45, 42, 74, 0.08);
+  --glass-text: var(--ink);
+
+  --shadow-soft:  0 4px 20px -8px rgba(45, 42, 74, 0.12);
+  --shadow-glass: 0 30px 70px -20px rgba(45, 42, 74, 0.22);
+  --shadow-cta:   0 12px 28px -8px rgba(232, 155, 122, 0.45);
+
+  --pola-nav-bg:     var(--ink);
+  --pola-nav-text:   #FFFFFF;
+  --pola-nav-muted:  rgba(255, 255, 255, 0.55);
+  --pola-nav-active: rgba(255, 255, 255, 0.12);
+  --pola-nav-hover:  rgba(255, 255, 255, 0.08);
+  --pola-accent:     var(--accent);
+  --pola-teal:       var(--mist);
+  --pola-page-bg:    var(--paper);
   --pola-card-bg:    #FFFFFF;
-  --pola-border:     rgba(26,63,85,0.10);
-  --pola-text:       #1A3F55;
-  --pola-text-muted: rgba(26,63,85,0.50);
+  --pola-border:     rgba(45, 42, 74, 0.10);
+  --pola-text:       var(--ink);
+  --pola-text-muted: rgba(45, 42, 74, 0.55);
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: #FFFFFF;
+  --card-foreground: var(--ink);
+  --popover: #FFFFFF;
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: #FFFFFF;
+  --secondary: var(--paper-tint);
+  --secondary-foreground: var(--ink);
+  --muted: var(--paper-tint);
+  --muted-foreground: rgba(45, 42, 74, 0.55);
+  --accent-foreground: #FFFFFF;
+  --destructive: var(--danger);
+  --border: rgba(45, 42, 74, 0.10);
+  --input: rgba(45, 42, 74, 0.12);
+  --ring: var(--accent);
 }
 
-.theme-d {
-  /* Theme D: Night Pool */
-  --pola-nav-bg:     #080E18;
-  --pola-nav-text:   #E5EDF8;
-  --pola-nav-muted:  rgba(229,237,248,0.45);
-  --pola-nav-active: rgba(0,229,200,0.12);
-  --pola-nav-hover:  rgba(229,237,248,0.06);
-  --pola-accent:     #00E5C8;
-  --pola-teal:       #C9A84B;
-  --pola-page-bg:    #0D1828;
-  --pola-card-bg:    #132035;
-  --pola-border:     rgba(229,237,248,0.08);
-  --pola-text:       #E5EDF8;
-  --pola-text-muted: rgba(229,237,248,0.68);   /* tăng từ 0.45 cho WCAG AA contrast */
+/* ════════════════════════════════════════════════════════════
+ * AMBIENT BACKGROUND
+ * .ambient-bg = nền theme-aware: dark blobs cho A, lavender mesh cho B.
+ * Áp vào layout wrapper hoặc <main> để mọi page có nền cinematic.
+ * ════════════════════════════════════════════════════════════ */
+.ambient-bg {
+  position: relative;
+  background: var(--paper);
+}
+.ambient-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  /* Pattern mặc định (light) cho Theme B + fallback */
+  background:
+    radial-gradient(circle at 12% 18%, rgba(155, 145, 214, 0.22), transparent 45%),
+    radial-gradient(circle at 88% 22%, rgba(252, 231, 224, 0.55), transparent 50%),
+    radial-gradient(circle at 50% 92%, rgba(232, 155, 122, 0.18), transparent 55%);
+}
+.theme-a .ambient-bg {
+  background: var(--ink);
+  color: var(--paper);
+}
+.theme-a .ambient-bg::before {
+  background:
+    radial-gradient(circle at 10% 12%, rgba(28, 43, 74, 0.85), transparent 55%),
+    radial-gradient(circle at 88% 25%, rgba(127, 168, 181, 0.18), transparent 55%),
+    radial-gradient(circle at 50% 95%, rgba(200, 168, 75, 0.15), transparent 60%);
+}
+.ambient-bg > * {
+  position: relative;
+  z-index: 1;
 }
 
-/* ── Poolane Shadow System ───────────────────────────────── */
+/* ════════════════════════════════════════════════════════════
+ * GLASS UTILITIES — Soft frosted panels
+ * ════════════════════════════════════════════════════════════ */
+@layer components {
+  /* Frosted panel — chuẩn cho card lớn, hero, container */
+  .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-glass));
+    -webkit-backdrop-filter: blur(var(--blur-glass));
+    border: 1px solid var(--glass-ring);
+    border-radius: var(--radius-card-xl);
+    box-shadow: var(--shadow-glass);
+    position: relative;
+  }
+  .glass-panel-edge::before {
+    content: '';
+    position: absolute;
+    inset-inline: 1.5rem;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--glass-ring), transparent);
+    opacity: 0.8;
+  }
+
+  /* Glass pill — cho sticky nav, chip nhóm */
+  .glass-pill {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-glass));
+    -webkit-backdrop-filter: blur(var(--blur-glass));
+    border: 1px solid var(--glass-ring);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* Soft surface (alt to glass — không blur, paper-tint bg) */
+  .surface-soft {
+    background: var(--paper-tint);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+  }
+
+  /* Heading display — Cormorant italic theatrical */
+  .heading-display {
+    font-family: var(--font-heading);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  /* Eyebrow — chữ nhỏ tracking rộng, dùng trên heading */
+  .eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    font-weight: 500;
+    opacity: 0.65;
+  }
+
+  /* Pill — generic */
+  .pill {
+    border-radius: var(--radius-pill);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+ * LEGACY UTILITIES — Giữ cho 85 trang chưa migrate.
+ * Sẽ deprecate dần trong Phase 2–6.
+ * ════════════════════════════════════════════════════════════ */
 :root {
-  /* Shadow hierarchy — all tinted with navy */
-  --shadow-xs:  0 1px 4px rgba(28,43,74,0.06);
-  --shadow-sm:  0 2px 8px rgba(28,43,74,0.07);
-  --shadow-md:  0 4px 20px rgba(28,43,74,0.09);
-  --shadow-lg:  0 8px 32px rgba(28,43,74,0.14);
-  --shadow-xl:  0 16px 48px rgba(28,43,74,0.18);
-
-  /* Hover lifted shadows */
-  --shadow-sm-hover: 0 4px 16px rgba(28,43,74,0.13);
-  --shadow-md-hover: 0 8px 28px rgba(28,43,74,0.16);
-  --shadow-lg-hover: 0 14px 44px rgba(28,43,74,0.22);
+  --shadow-xs:  0 1px 4px rgba(15, 27, 51, 0.06);
+  --shadow-sm:  0 2px 8px rgba(15, 27, 51, 0.07);
+  --shadow-md:  0 4px 20px rgba(15, 27, 51, 0.09);
+  --shadow-lg:  0 8px 32px rgba(15, 27, 51, 0.14);
+  --shadow-xl:  0 16px 48px rgba(15, 27, 51, 0.18);
+  --shadow-sm-hover: 0 4px 16px rgba(15, 27, 51, 0.13);
+  --shadow-md-hover: 0 8px 28px rgba(15, 27, 51, 0.16);
+  --shadow-lg-hover: 0 14px 44px rgba(15, 27, 51, 0.22);
 }
 
-/* ── Utility classes for Poolane brand ──────────────────── */
 .pola-nav    { background-color: var(--pola-nav-bg); color: var(--pola-nav-text); }
 .pola-page   { background-color: var(--pola-page-bg); color: var(--pola-text); }
 .pola-card   { background-color: var(--pola-card-bg); border-color: var(--pola-border); }
 .pola-accent { color: var(--pola-accent); }
 .pola-teal   { color: var(--pola-teal); }
 
-/* ── Premium Card System ────────────────────────────────── */
-
-/* Base card — subtle elevation */
 .card-base {
-  background: white;
-  border-radius: 16px;
-  border: 1px solid rgba(28,43,74,0.08);
+  background: var(--pola-card-bg);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--pola-border);
   box-shadow: var(--shadow-md);
   transition: box-shadow 250ms ease, transform 250ms ease, border-color 250ms ease;
 }
 .card-base:hover {
   box-shadow: var(--shadow-md-hover);
-  border-color: rgba(28,43,74,0.14);
+  border-color: color-mix(in srgb, var(--ink) 14%, transparent);
 }
 
-/* Stats card — clickable, lifts on hover */
 .card-stat {
-  background: white;
-  border-radius: 16px;
-  border: 1px solid rgba(28,43,74,0.08);
+  background: var(--pola-card-bg);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--pola-border);
   box-shadow: var(--shadow-md);
   transition: box-shadow 250ms ease, transform 250ms ease, border-color 250ms ease;
   cursor: pointer;
@@ -228,16 +432,16 @@
 .card-stat:hover {
   box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
-  border-color: rgba(28,43,74,0.15);
+  border-color: color-mix(in srgb, var(--ink) 15%, transparent);
 }
 
-/* Navy card with subtle gradient */
 .card-navy {
-  background: linear-gradient(135deg, #1C2B4A 0%, #162340 100%);
-  border-radius: 16px;
+  background: linear-gradient(135deg, var(--ink-soft) 0%, var(--ink) 100%);
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-lg);
   position: relative;
   overflow: hidden;
+  color: var(--paper);
 }
 .card-navy::before {
   content: '';
@@ -245,7 +449,7 @@
   top: -40px; right: -40px;
   width: 120px; height: 120px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
 }
 .card-navy::after {
   content: '';
@@ -253,51 +457,44 @@
   bottom: -30px; left: -20px;
   width: 90px; height: 90px;
   border-radius: 50%;
-  background: rgba(200,168,75,0.06);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
-/* Alert card — warning/teal accent left border */
 .card-alert {
-  background: white;
+  background: var(--pola-card-bg);
   border-radius: 12px;
-  border: 1px solid rgba(28,43,74,0.08);
-  border-left: 3px solid var(--pola-teal);
+  border: 1px solid var(--pola-border);
+  border-left: 3px solid var(--mist);
   box-shadow: var(--shadow-sm);
   transition: box-shadow 200ms ease;
 }
 .card-alert:hover { box-shadow: var(--shadow-sm-hover); }
+.card-alert-danger  { border-left-color: var(--danger); }
+.card-alert-warning { border-left-color: var(--accent); }
 
-.card-alert-danger {
-  border-left-color: #ef4444;
-}
-.card-alert-warning {
-  border-left-color: var(--pola-accent);
-}
-
-/* ── Premium Button Styles ──────────────────────────────── */
 .btn-pola-primary {
-  background: #1C2B4A;
-  color: #F6F1EA;
+  background: var(--ink);
+  color: var(--paper);
   border-radius: 10px;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(28,43,74,0.20);
+  box-shadow: var(--shadow-cta);
   transition: all 200ms ease;
   border: none;
 }
 .btn-pola-primary:hover {
-  background: #162340;
-  box-shadow: 0 6px 20px rgba(28,43,74,0.30);
+  background: color-mix(in srgb, var(--ink) 92%, black);
+  box-shadow: 0 6px 20px rgba(15, 27, 51, 0.30);
   transform: translateY(-1px);
 }
 .btn-pola-primary:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(28,43,74,0.20);
+  box-shadow: 0 2px 8px rgba(15, 27, 51, 0.20);
 }
 
 .btn-pola-secondary {
-  background: white;
-  color: #1C2B4A;
-  border: 1px solid rgba(28,43,74,0.15);
+  background: var(--pola-card-bg);
+  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
   border-radius: 10px;
   font-weight: 500;
   box-shadow: var(--shadow-xs);
@@ -305,32 +502,31 @@
 }
 .btn-pola-secondary:hover {
   box-shadow: var(--shadow-sm);
-  border-color: rgba(28,43,74,0.25);
-  background: #FAFAF8;
+  border-color: color-mix(in srgb, var(--ink) 25%, transparent);
+  background: color-mix(in srgb, var(--paper-tint) 60%, white);
 }
 
-/* ── Premium Table ──────────────────────────────────────── */
 .table-pola {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
 }
 .table-pola thead tr th {
-  background: rgba(28,43,74,0.03);
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(28,43,74,0.45);
+  color: color-mix(in srgb, var(--ink) 50%, transparent);
   padding: 12px 20px;
-  border-bottom: 1px solid rgba(28,43,74,0.10);
+  border-bottom: 1px solid var(--pola-border);
 }
 .table-pola tbody tr {
   transition: background 150ms ease;
-  border-bottom: 1px solid rgba(28,43,74,0.06);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 6%, transparent);
 }
 .table-pola tbody tr:hover {
-  background: rgba(28,43,74,0.02);
+  background: color-mix(in srgb, var(--ink) 2%, transparent);
 }
 .table-pola tbody td {
   padding: 14px 20px;
@@ -339,9 +535,8 @@
   border-bottom: none;
 }
 
-/* ── Notification Card ──────────────────────────────────── */
 .notif-card {
-  background: white;
+  background: var(--pola-card-bg);
   border-radius: 14px;
   padding: 16px 18px;
   box-shadow: var(--shadow-md);
@@ -350,33 +545,30 @@
   align-items: flex-start;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(28,43,74,0.06);
+  border: 1px solid var(--pola-border);
   transition: box-shadow 200ms ease;
 }
-.notif-card:hover {
-  box-shadow: var(--shadow-md-hover);
-}
+.notif-card:hover { box-shadow: var(--shadow-md-hover); }
 .notif-card::before {
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0;
   width: 3px;
-  background: var(--pola-teal);
+  background: var(--mist);
 }
-.notif-card.notif-warning::before { background: var(--pola-accent); }
-.notif-card.notif-danger::before  { background: #ef4444; }
-.notif-card.notif-success::before { background: #22c55e; }
+.notif-card.notif-warning::before { background: var(--accent); }
+.notif-card.notif-danger::before  { background: var(--danger); }
+.notif-card.notif-success::before { background: var(--success); }
 .notif-icon-bg {
   width: 36px; height: 36px;
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  background: rgba(91,142,159,0.12);
+  background: color-mix(in srgb, var(--mist) 14%, transparent);
 }
-.notif-icon-bg.warning { background: rgba(200,168,75,0.12); }
-.notif-icon-bg.danger  { background: rgba(239,68,68,0.10); }
+.notif-icon-bg.warning { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.notif-icon-bg.danger  { background: color-mix(in srgb, var(--danger) 12%, transparent); }
 
-/* ── Badge / Tag ────────────────────────────────────────── */
 .badge-pola {
   display: inline-flex;
   align-items: center;
@@ -387,27 +579,28 @@
   font-weight: 600;
   letter-spacing: 0.02em;
 }
-.badge-active   { background: rgba(91,142,159,0.12); color: #2A7FA8; }
-.badge-enrolled { background: rgba(28,43,74,0.08);   color: #1C2B4A; }
-.badge-prospect { background: rgba(200,168,75,0.12); color: #8A6010; }
-.badge-warning  { background: rgba(245,158,11,0.12); color: #B45309; }
-.badge-danger   { background: rgba(239,68,68,0.10);  color: #DC2626; }
-.badge-success  { background: rgba(34,197,94,0.12);  color: #16A34A; }
+.badge-active   { background: color-mix(in srgb, var(--mist) 14%, transparent);   color: color-mix(in srgb, var(--mist) 75%, var(--ink)); }
+.badge-enrolled { background: color-mix(in srgb, var(--ink) 8%, transparent);     color: var(--ink); }
+.badge-prospect { background: color-mix(in srgb, var(--accent) 14%, transparent); color: color-mix(in srgb, var(--accent) 60%, var(--ink)); }
+.badge-warning  { background: color-mix(in srgb, var(--warn) 14%, transparent);   color: color-mix(in srgb, var(--warn) 60%, var(--ink)); }
+.badge-danger   { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
+.badge-success  { background: color-mix(in srgb, var(--success) 14%, transparent); color: color-mix(in srgb, var(--success) 70%, var(--ink)); }
 
-/* ── Pulse / Glow effect for critical items ─────────────── */
 @keyframes pola-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
-  50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--danger) 30%, transparent); }
+  50%       { box-shadow: 0 0 0 6px transparent; }
 }
 .badge-pulse { animation: pola-pulse 2s infinite; }
 
-/* ── Skeleton loading ───────────────────────────────────── */
 @keyframes pola-shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position:  200% 0; }
 }
 .skeleton {
-  background: linear-gradient(90deg, rgba(28,43,74,0.06) 25%, rgba(28,43,74,0.10) 50%, rgba(28,43,74,0.06) 75%);
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--ink) 6%, transparent) 25%,
+    color-mix(in srgb, var(--ink) 10%, transparent) 50%,
+    color-mix(in srgb, var(--ink) 6%, transparent) 75%);
   background-size: 200% 100%;
   animation: pola-shimmer 1.5s infinite;
   border-radius: 8px;
@@ -425,17 +618,14 @@ a {
 .btn-pola-secondary:focus-visible,
 button:focus-visible,
 a:focus-visible {
-  outline-color: var(--pola-accent, #C8A84B);
+  outline-color: var(--accent);
   outline-offset: 2px;
 }
-
-/* Disable focus ring khi click chuột (vẫn giữ cho keyboard) */
 button:focus:not(:focus-visible),
 a:focus:not(:focus-visible) {
   outline-color: transparent;
 }
 
-/* ── Mobile badge sizing ────────────────────────────────── */
 @media (max-width: 380px) {
   .badge-pola {
     font-size: 0.66rem;

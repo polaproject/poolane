@@ -2,12 +2,14 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 
-export type ThemeKey = 'A' | 'B' | 'D'
+export type ThemeKey = 'A' | 'B'
+
+const STORAGE_KEY = 'poolane-theme'
+const VALID_THEMES: ThemeKey[] = ['A', 'B']
 
 const THEME_CLASS: Record<ThemeKey, string> = {
   A: 'theme-a',
   B: 'theme-b',
-  D: 'theme-d',
 }
 
 interface ThemeContextType {
@@ -28,28 +30,41 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeKey>('A')
   const [mounted, setMounted] = useState(false)
 
-  // Load theme từ localStorage khi mount
+  // Hydrate theme từ localStorage khi mount (SSR không có localStorage,
+  // nên phải đọc client-side rồi sync vào React state).
   useEffect(() => {
-    const saved = localStorage.getItem('poolane-theme') as ThemeKey | null
-    if (saved && ['A', 'B', 'D'].includes(saved)) {
-      setThemeState(saved)
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY) as string | null
+      if (saved && VALID_THEMES.includes(saved as ThemeKey)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setThemeState(saved as ThemeKey)
+      } else if (saved) {
+        // Cleanup theme cũ đã bị bỏ (vd 'D')
+        localStorage.setItem(STORAGE_KEY, 'A')
+      }
+    } catch {
+      // localStorage không khả dụng — giữ default
     }
     setMounted(true)
   }, [])
 
-  // Áp dụng class vào document.documentElement
+  // Áp dụng class vào html
   useEffect(() => {
     if (!mounted) return
     const html = document.documentElement
-    // Xoá các class theme cũ
+    // Xoá mọi class theme cũ (bao gồm theme-d đã bị bỏ)
     html.classList.remove('theme-a', 'theme-b', 'theme-d')
-    // Thêm class theme mới
     html.classList.add(THEME_CLASS[theme])
+    html.setAttribute('data-theme', theme.toLowerCase())
   }, [theme, mounted])
 
   function setTheme(newTheme: ThemeKey) {
     setThemeState(newTheme)
-    localStorage.setItem('poolane-theme', newTheme)
+    try {
+      localStorage.setItem(STORAGE_KEY, newTheme)
+    } catch {
+      // ignore
+    }
   }
 
   return (
