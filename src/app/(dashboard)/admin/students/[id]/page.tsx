@@ -9,6 +9,7 @@ import { ArrowLeft, Phone, MapPin, Calendar, BookOpen, Ticket } from 'lucide-rea
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { COURSE_PRICES, POOL_TICKET } from '@/config/constants'
+import { ConfirmEnrollmentTransferButton } from '@/components/features/ConfirmEnrollmentTransferButton'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -191,9 +192,10 @@ export default async function StudentDetailPage({ params }: Params) {
           <div className="divide-y divide-[#1C2B4A]/5">
             {student.enrollments.map(e => {
               const remaining = e.course.price - e.totalPaid
+              const memo = `POLAE${e.id.replace(/-/g, '').slice(0, 8).toUpperCase()}`
               return (
-                <div key={e.id} className="px-5 py-4 flex items-center justify-between">
-                  <div>
+                <div key={e.id} className="px-5 py-4 flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm font-medium text-[#1C2B4A]">{e.course.name}</span>
                       <Badge
@@ -217,6 +219,16 @@ export default async function StudentDetailPage({ params }: Params) {
                       <p className="text-xs text-red-500">Còn nợ {formatCurrency(remaining)}</p>
                     )}
                   </div>
+                  {remaining > 0 && e.status !== 'cancelled' && e.status !== 'refunded' && (
+                    <div className="w-full pt-2 border-t border-[#1C2B4A]/5">
+                      <ConfirmEnrollmentTransferButton
+                        enrollmentId={e.id}
+                        memo={memo}
+                        debt={remaining}
+                        courseName={e.course.name}
+                      />
+                    </div>
+                  )}
                 </div>
               )
             })}
