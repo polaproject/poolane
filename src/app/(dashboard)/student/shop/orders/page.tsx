@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft, ShoppingBag, Package } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
-import { MoMoPayButton } from '@/components/features/MoMoPayButton'
+import { VietQRPayButton } from '@/components/features/VietQRPayButton'
 
 const STATUS_CONFIG: Record<string, { label: string; className: string; description: string }> = {
   pending:   { label: 'Chờ duyệt',     className: 'bg-amber-50 text-amber-700 border-amber-200',   description: 'Lớp sẽ duyệt và liên hệ bạn sớm' },
@@ -108,7 +108,7 @@ export default async function StudentOrdersPage() {
 
                 {order.status === 'approved' && (
                   <div className="mt-3 pt-3 border-t border-[#1C2B4A]/5">
-                    <MoMoPayButton orderId={order.id} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#A50064] text-white rounded-lg text-sm font-semibold hover:bg-[#A50064]/90" />
+                    <VietQRPayButton orderId={order.id} />
                   </div>
                 )}
 
