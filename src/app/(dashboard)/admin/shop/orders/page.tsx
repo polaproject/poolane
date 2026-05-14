@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Loader2, RefreshCw } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import { ConfirmTransferButton } from '@/components/features/ConfirmTransferButton'
 
 type Order = {
   id: string; status: string; finalAmount: number; createdAt: string
@@ -230,10 +231,17 @@ export default function OrdersPage() {
                     </>
                   )}
                   {order.status === 'approved' && (
-                    <Button size="sm" className="flex-1 bg-green-600 text-white hover:bg-green-700"
-                      onClick={() => startPay(order.id)}>
-                      💰 Ghi nhận thanh toán
-                    </Button>
+                    <>
+                      <ConfirmTransferButton
+                        orderId={order.id}
+                        memo={`POLA${order.id.replace(/-/g, '').slice(0, 8).toUpperCase()}`}
+                        amount={order.finalAmount}
+                      />
+                      <Button size="sm" variant="outline" className="text-xs"
+                        onClick={() => startPay(order.id)}>
+                        💰 Tiền mặt/khác
+                      </Button>
+                    </>
                   )}
                   {order.status === 'paid' && (
                     <Button size="sm" className="flex-1 bg-[#5B8E9F] text-white"

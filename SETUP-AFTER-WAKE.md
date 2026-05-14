@@ -4,6 +4,35 @@
 
 ---
 
+## ⭐ Setup tài khoản ngân hàng (cho VietQR thanh toán)
+
+Thêm vào `.env.local`:
+
+```env
+BANK_BIN=970436                          # 970436=Vietcombank, xem các mã khác bên dưới
+BANK_ACCOUNT_NO=0011234567890           # Số tài khoản nhận
+BANK_ACCOUNT_NAME=NGUYEN VAN OWNER      # Tên chủ TK (KHÔNG DẤU, VIẾT HOA)
+BANK_DISPLAY_NAME=Vietcombank           # Tên hiển thị
+```
+
+**BIN code các ngân hàng phổ biến:**
+- Vietcombank: `970436`
+- Techcombank: `970407`
+- VPBank: `970432`
+- MB Bank: `970422`
+- ACB: `970416`
+- TPBank: `970423`
+- BIDV: `970418`
+- VietinBank: `970415`
+- Sacombank: `970403`
+- OCB: `970448`
+
+Restart dev server → khi HV mua hàng → trang `/student/shop/orders/[id]/pay` hiện QR có thông tin TK thật → quét bằng app banking → tiền vào TK Poolane.
+
+**Admin đối chiếu**: vào sao kê tìm nội dung `POLA<8chars>` → bấm "✓ Xác nhận đã nhận tiền" trên `/admin/shop/orders` → hệ thống tự tạo Payment + paid order.
+
+---
+
 ## 1. Restart dev server
 
 ```powershell
