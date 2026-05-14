@@ -914,6 +914,30 @@ model PushSubscription {
   @@index([userId])
 }
 
+model UnmatchedTransaction {
+  id              String   @id @default(uuid())
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  sepayId         Int?     @unique @map("sepay_id")
+  gateway         String?
+  transactionDate DateTime @map("transaction_date")
+  accountNumber   String?  @map("account_number")
+  content         String
+  amount          Int
+  referenceCode   String?  @map("reference_code")
+  rawPayload      Json     @map("raw_payload")
+
+  status          String   @default("pending")
+  matchedToType   String?  @map("matched_to_type")
+  matchedToId     String?  @map("matched_to_id")
+  matchedAt       DateTime? @map("matched_at")
+  matchedBy       String?  @map("matched_by")
+  notes           String?
+
+  @@map("unmatched_transactions")
+  @@index([status, createdAt])
+}
+
 model PasswordResetRequest {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now()) @map("created_at")
