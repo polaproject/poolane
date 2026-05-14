@@ -114,7 +114,13 @@ export default async function SessionDetailPage({ params }: Params) {
               </p>
             )}
           </div>
-          <SessionActions sessionId={session.id} status={session.status} />
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link href={`/staff/lesson-plan/${session.id}`}
+              className="inline-flex items-center gap-1 px-3 py-2 text-xs font-semibold rounded-lg border border-[#1C2B4A]/15 text-[#1C2B4A] hover:bg-[#1C2B4A]/5">
+              📋 Kế hoạch bài học
+            </Link>
+            <SessionActions sessionId={session.id} status={session.status} />
+          </div>
         </div>
       </div>
 
