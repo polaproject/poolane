@@ -178,59 +178,57 @@ LAYER 6 — Validation & Security
 | Hạng mục | Status |
 |---|---|
 | Sidebar navigation | ✅ 8 nhóm có thể expand/collapse + Việt hoá + localStorage state |
-| Theme A/B/D switcher | ✅ + ThemeSwitcherCompact ở mobile header |
-| Design system (shadows, cards, badges) | ✅ globals.css |
+| Theme A/B switcher | ✅ Theme A (Đêm & Sao navy/gold) + Theme B (Bình Yên lavender/peach). Bỏ Theme D |
+| **Design system foundation (Phase 1)** | ✅ Tokens (ink/paper/accent/mist/glass/shadow), 5 primitive mới (Chip/PageHeader/GlassPanel/StatCard/FloatingCard), glass utilities (`.glass-panel`/`.glass-pill`/`.ambient-bg`/`.heading-display`/`.eyebrow`), Cormorant italic display |
+| **~70 trang redesign** | ✅ Public 6 + Student 24 + Admin 28 + Staff 10 — tất cả áp design language mới (hero dark ambient + italic display + Chip variants + soft glass) |
+| 14 admin form pages chưa redesign | ⚠️ Deferred (rare-use): students/new, students/[id]/enroll/ticket, sessions/new, shop/products/new+[id], vouchers/new+edit, blog/new+edit, quizzes/new, events/new, exercises/new+edit, profile-requests/[id] |
+| Auth pages polish | ⚠️ Pending (Phase 6): login/register/forgot-password chưa redesign theo design system mới |
 | Mobile audit (tables overflow + grid breakpoints + touch targets 44px) | ✅ 29 files fix |
-| Focus rings (a11y keyboard navigation) | ✅ `:focus-visible` outline |
-| Loading states (skeleton) | ✅ 8 critical pages có `loading.tsx` + `TableSkeleton`/`CardSkeleton`/`ListSkeleton` components |
-| Error boundaries | ✅ 1 root + 4 per-page (admin/skill-heatmap, teacher-metrics, finance, student/progress) |
+| Focus rings (a11y keyboard navigation) | ✅ `:focus-visible` outline qua accent token |
+| Loading states (skeleton) | ✅ 8 critical pages có `loading.tsx` + skeleton components |
+| Error boundaries | ✅ 1 root + 4 per-page |
 | Image alt text fix | ✅ 6 files |
-| Theme D contrast | ✅ Fix WCAG AA |
-| EmptyState component | ✅ Adoption ở 2 trang (vouchers, quizzes), pattern cho tương lai |
+| EmptyState component | ✅ Adoption rộng rãi sau Phase 1 (toàn bộ student/admin/staff lists) |
 | PWA manifest + icons | ✅ `manifest.json` + icon 192/512 + apple-touch + theme color |
-| Mobile responsive audit thực thiết bị | ⚠️ Đã pass devtools, chưa test device thật |
+| Mobile responsive audit thực thiết bị | ⚠️ Đã pass devtools, chưa test iPhone/Android thật |
+| QA toàn diện (lighthouse + a11y + screenshot diff 2 theme) | ⚠️ Pending (Phase 7) |
 
 ---
 
 ## 🔴 DANH SÁCH ƯU TIÊN — Việc Cần Làm Tiếp
 
-Theo thứ tự quan trọng:
+Theo thứ tự quan trọng (đã hoàn thành redesign sâu, giờ unblock infra để go-live):
 
-1. **Deploy Vercel** + trỏ domain poolane.vn (cần Vercel + Matbao access)
-2. **Setup Sepay** sau khi user duyệt hợp đồng — code đã sẵn sàng, chỉ cần `SEPAY_API_KEY` env + cấu hình webhook URL trên dashboard Sepay
-3. **Setup Supabase Storage bucket** `poolane-public` → photo upload hoạt động (chưa làm)
-4. **Setup Resend** → verify domain `poolane.vn` + `RESEND_API_KEY` → email biên lai gửi thật
-5. **Gen VAPID keys** → push notifications hoạt động thật
-6. **Combo 3 khoá pricing** — chốt giá + implement
-7. **AI tư vấn cá nhân hoá** (Claude API) — phase 12 roadmap
-8. **Mobile responsive audit với device thật** (đã pass DevTools, chưa test iPhone/Android thật)
-9. **Apply design system** cho legacy pages còn lại (pulse, AI dashboard, một số form)
-10. **EmptyState adoption** cho 34 trang còn lại (đã làm 2 trang đầu làm pattern)
+1. **Deploy Vercel** + trỏ domain poolane.vn (cần Vercel + Matbao access) — prerequisite cho mọi infra dưới
+2. **Setup Sepay** (user đã ký hợp đồng) — code sẵn sàng, cần `SEPAY_API_KEY` env + cấu hình webhook `https://poolane.vn/api/webhooks/sepay` trên dashboard Sepay. Xem `SETUP-AFTER-WAKE.md`
+3. **Setup Resend** → verify domain `poolane.vn` (MX/TXT trên Matbao) + `RESEND_API_KEY` → email biên lai/welcome/refund gửi thật
+4. **Setup Supabase Storage bucket** `poolane-public` (tạo trên Supabase dashboard, public read) → photo upload hoạt động
+5. **Gen VAPID keys** (`npx web-push generate-vapid-keys`) + env → push notifications hoạt động
+6. **Phase 6 — Auth polish** (login/register/forgot-password): redesign theo design system mới (split layout brand artwork + form, micro-copy ấm áp, glass technique)
+7. **Phase 7 — QA toàn diện**: lighthouse ≥ 85/95/95, axe a11y, screenshot diff cả 2 theme A/B, test mobile device thật
+8. **14 admin form pages** còn lại (low priority — apply hero + card pattern)
+9. **Xoá sandbox folder** (`src/app/sandbox/*`) trước deploy production — chỉ dùng dev demo
+10. **Combo 3 khoá pricing** — chốt giá + implement
+11. **AI tư vấn cá nhân hoá** (Claude API) — phase 12 roadmap
 
-### Việc đã hoàn thành lớn trong session này
+### Việc đã hoàn thành lớn trong session redesign
 
-- ✅ Đăng ký + reset password (auth onboarding đầy đủ)
-- ✅ VietQR thuần (shop + enrollment) + Sepay webhook + Unmatched UI
-- ✅ Public landing: `/`, `/courses`, `/faq`, `/privacy`
-- ✅ Email Resend 5 templates + tích vào payment/refund/birthday/absence
-- ✅ Photo upload infrastructure (Supabase Storage)
-- ✅ Voucher CRUD + tracking VoucherUsage
-- ✅ Video Drive links UI (admin + student)
-- ✅ Class photo album UI (admin + student)
-- ✅ Improvement pack auto-create khi paid
-- ✅ Admin tạo quiz UI với dynamic question editor
-- ✅ Cron jobs (4) + `vercel.json`
-- ✅ Self-assessment + Heatmap kỹ năng
-- ✅ Export Excel doanh thu + Reconciliation
-- ✅ Teacher tools: Lesson plan, Exercise library, Practice assignment, Teacher metrics
-- ✅ Sidebar reorganize (8 groups + i18n + collapse)
-- ✅ Schedule redesign hiển thị HV inline
-- ✅ PWA scaffolding (manifest, icons, service worker)
-- ✅ Mobile audit phase 1+2+3: tables overflow, grid breakpoints, touch targets, focus rings, loading skeletons, error boundaries, image alt, theme D contrast, EmptyState component
+- ✅ **Phase 1 — Design system foundation**: 2-theme A+B (navy/gold + lavender/peach), tokens, 5 primitives mới (Chip/PageHeader/GlassPanel/StatCard/FloatingCard), glass utilities, ambient-bg, Cormorant italic display
+- ✅ **Phase 3A — Public**: redesign `/` landing + `/courses` với `(public)/` route group, ambient-bg layout, soft glass hero
+- ✅ **Phase 3B — Public**: redesign `/blog` list + detail (drop cap), `/faq` (accordion glass), `/privacy` (editorial sections)
+- ✅ **Phase 4 — Student**: redesign 24 trang (dashboard, my-schedule, progress, payments, shop, profile + forms, exercises, videos, photos, quiz, events, challenges, goals, log, self-assessment, achievement card, pay pages)
+- ✅ **Phase 5 — Admin + Staff**: redesign 38 trang (admin: dashboard/students/schedule/finance/refunds/shop/vouchers/blog/quizzes/events/exercises/photos/pulse/broadcast/ai/heatmap/teacher-metrics/utility; staff: dashboard/registrations/students/attendance/assess/practice/lesson-plan/videos/stats)
+- ✅ **Bug fixes trong session**:
+  - Supabase Auth E.164 phone format (registration failed) → bỏ phone khỏi `auth.admin.createUser`, giữ phone trong Prisma User
+  - `logError()` không pass error vào `log.error/critical` → fixed
+  - Turbopack/Lightning CSS reject self-ref `@theme inline` → tách shadow utilities sang `@layer utilities`
+
+**Tổng commit redesign:** 16 commits (`feat(design-system)` → `feat(public)` → `feat(student)` → `feat(admin)` → `feat(staff)` → `fix(auth)`).
 
 ### Việc đã loại bỏ / thay thế
 
 - ~~MoMo online payment~~ → giữ code làm backup, **VietQR + Sepay là default** (0đ phí giao dịch)
+- ~~Theme D (Night Pool)~~ → bỏ trong Phase 1, giản lược system còn 2 theme A+B
 
 ---
 
@@ -322,36 +320,54 @@ Khi Polang / Polata ra mắt → dùng subdomain hoặc mua thêm domain riêng.
 
 **Không muốn:** Lời lẽ công nghiệp đại trà, không khí học tập căng thẳng, chỉ dạy-dạy-dạy mà không có kết nối con người.
 
-### Visual Identity (Đang Xây Dựng)
+### Visual Identity
 
-**Màu sắc đã định hướng:**
+**Trạng thái:** Design system foundation đã build xong (Phase 1), ~70 trang đã redesign theo. Logo chính thức chưa có (vẫn dùng SVG ngôi sao Polaris placeholder).
+
+**Palette tokens** (định nghĩa trong `src/config/theme.config.ts` + `src/app/globals.css`):
+
 ```
-Midnight Navy  #1C2B4A  — Bầu trời đêm, chiều sâu, chuyên nghiệp
-Warm Cream     #F6F1EA  — Ấm áp, chân thật, không lạnh
-Polar Gold     #C8A84B  — Ngôi sao Polaris, ánh sáng dẫn đường (accent)
-Mist Teal      #5B8E9F  — Nước, màu phụ cho UI
+Theme A — Đêm & Sao (mặc định)
+  ink         #0F1B33   text + dark surface
+  ink-soft    #1C2B4A   header / dark cards alt
+  paper       #FBF7F0   background chính (cream ấm)
+  paper-tint  #F2EAD9   surface subtle
+  accent      #C8A84B   gold — CTA + highlight (Polaris)
+  accent-soft #E8D9A8   hover, badge bg
+  mist        #7FA8B5   accent phụ (info, link)
+  success #5C8A6E  ·  warn #D89B3A  ·  danger #B5483C
+
+Theme B — Bình Yên (lavender pastel)
+  ink         #2D2A4A   text purple-leaning
+  paper       #F4EFFB   lavender mist bg
+  accent      #E89B7A   peach
+  mist        #9B91D6   lavender accent phụ
 ```
 
-**Typography đã định hướng:**
-- Heading: Cormorant Garamond (tinh tế, có chiều sâu)
-- Body + UI: Plus Jakarta Sans (hiện đại, ấm hơn Inter)
+Tất cả 2 theme dùng **cùng tên token** (`ink`, `paper`, `accent`, `mist`, ...) → switch theme = chỉ đổi CSS variables, không phải sửa code. Theme lưu trong `localStorage` (`poolane-theme`), apply qua class `theme-a`/`theme-b` trên `<html>`.
 
-**Logo direction:** Icon + wordmark. Hướng: Ngôi sao Polaris phản chiếu trên mặt nước — đơn giản, hình học, chứa đựng câu chuyện.
+**Typography:**
+- Display + heading: **Cormorant Garamond italic** (`heading-display` utility — clamp 2.5rem–4.5rem)
+- Body + UI: **Plus Jakarta Sans** (400/500/600/700)
 
-**Tham chiếu thương hiệu:** Nike (tối giản, truyền cảm hứng) + Tiny Revolution (nhẹ nhàng, ấm áp, kết nối).
+**Design language (Phase 1):**
+- **Glass panels** — `.glass-panel` + `.glass-pill` (frosted bg + backdrop-blur + soft ring)
+- **Ambient background** — `.ambient-bg` theme-aware (dark navy blobs cho A, lavender mesh cho B)
+- **Cards** — `rounded-card` (16) / `rounded-card-lg` (24) / `rounded-card-xl` (28), `shadow-soft` / `shadow-glass`
+- **Eyebrow** — text xs tracking widest uppercase opacity-60 (đặt trên heading)
+- **Italic serif display** — hero/section titles dùng Cormorant italic
+- **Soft motion** — transitions 150–250ms ease-out, hover scale max 1.02
 
-**Trạng thái:** ĐANG XÂY DỰNG — chưa có file thiết kế chính thức.
+**Primitive components** (`src/components/ui/`):
+- `Chip.tsx` (6 variants + active state), `PageHeader.tsx`, `GlassPanel.tsx`, `StatCard.tsx`, `FloatingCard.tsx`
+- `EmptyState.tsx`, `ThemeSwitcher.tsx` (A+B only)
+- `Button.tsx`, `Card.tsx`, `Badge.tsx`, `Input.tsx` (shadcn-based, auto-theme qua override shadcn vars trong `.theme-a`/`.theme-b`)
 
-**Chế độ chọn giao diện:** Học viên có thể chọn 1 trong 3 theme khi dùng app:
-- **Theme A — Đêm & Sao:** Navy #1C2B4A · Cream #F6F1EA · Gold #C8A84B *(mặc định)*
-- **Theme B — Bình Minh:** Ocean #1A3F55 · Mist #EEF4F7 · Sunrise #E09850
-- **Theme D — Night Pool:** Dark #080E18 · Glow #00E5C8 · Gold #C9A84B
+**Logo direction (chưa có file chính thức):** Icon + wordmark, ngôi sao Polaris phản chiếu trên mặt nước. Hiện dùng SVG placeholder trong `theme.config.ts`.
 
-Theme được lưu trong `user_preferences` table, áp dụng qua CSS variables trong `theme.config.ts`.
+**Tham chiếu cảm giác:** Soft glassmorphism / visionOS-inspired (panel kính nổi trên nền ambient, layering, italic serif). Reference Callour Studio email + Wix marketing.
 
-**Khi build UI:** Dùng Theme A làm mặc định. Sau khi có brand chính thức, cập nhật `theme.config.ts` là toàn bộ hệ thống áp dụng ngay.
-
-**Đối tượng:** Người lớn 16–40 tuổi → phong cách **chuyên nghiệp nhưng ấm áp**, không đại trà, không lạnh lùng.
+**Đối tượng:** Người lớn 16–40 tuổi → **chuyên nghiệp nhưng ấm áp**, không đại trà, không lạnh lùng.
 
 ---
 
