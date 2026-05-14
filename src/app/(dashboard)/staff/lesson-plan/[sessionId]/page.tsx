@@ -2,7 +2,7 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, FileText, Sunrise, Sunset } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { LessonPlanForm } from './LessonPlanForm'
@@ -20,16 +20,15 @@ export default async function LessonPlanPage({ params }: Params) {
         where: { status: 'approved' },
         include: {
           student: { select: { user: { select: { fullName: true } } } },
-          course: { select: { id: true, code: true, name: true } }
-        }
-      }
-    }
+          course: { select: { id: true, code: true, name: true } },
+        },
+      },
+    },
   })
   if (!session) notFound()
 
   const existing = await prisma.lessonPlan.findUnique({ where: { sessionId } })
 
-  // Suggest course từ majority registrations
   const courseCounts = new Map<string, { id: string; code: string; name: string; count: number }>()
   for (const r of session.registrations) {
     if (r.course) {
@@ -40,7 +39,6 @@ export default async function LessonPlanPage({ params }: Params) {
   }
   const courses = [...courseCounts.values()].sort((a, b) => b.count - a.count)
 
-  // Lấy plan buổi liền trước cùng ca (auto-prefill nếu chưa có plan)
   let previousPlan: typeof existing = null
   if (!existing) {
     const prev = await prisma.classSession.findFirst({
@@ -48,48 +46,66 @@ export default async function LessonPlanPage({ params }: Params) {
       orderBy: { date: 'desc' },
       select: { id: true },
     })
-    if (prev) {
-      previousPlan = await prisma.lessonPlan.findUnique({ where: { sessionId: prev.id } })
-    }
+    if (prev) previousPlan = await prisma.lessonPlan.findUnique({ where: { sessionId: prev.id } })
   }
 
+  const isMorning = session.timeSlot === 'morning'
+
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <Link href={`/admin/schedule/sessions/${sessionId}`}
-        className="inline-flex items-center gap-1 text-sm text-[#1C2B4A]/70 hover:text-[#1C2B4A] mb-6">
-        <ArrowLeft className="w-4 h-4" /> Buổi học
-      </Link>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto">
+          <Link
+            href={`/admin/schedule/sessions/${sessionId}`}
+            className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group"
+          >
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" strokeWidth={2.25} />
+            Buổi học
+          </Link>
+          <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
+            <FileText className="h-3 w-3 text-accent" strokeWidth={1.75} /> {session.registrations.length} HV duyệt
+          </p>
+          <h1 className="font-heading text-3xl sm:text-4xl italic leading-tight">Kế hoạch bài học</h1>
+          <p className="text-sm text-paper/65 mt-2 inline-flex items-center gap-2 flex-wrap">
+            <span>{format(session.date, 'EEEE, dd/MM/yyyy', { locale: vi })}</span>
+            <span>·</span>
+            <span className="inline-flex items-center gap-1">
+              {isMorning
+                ? <><Sunrise className="h-3.5 w-3.5 text-accent" strokeWidth={1.75} /> 5:30 – 7:30</>
+                : <><Sunset className="h-3.5 w-3.5 text-accent" strokeWidth={1.75} /> 18:00 – 20:00</>}
+            </span>
+          </p>
+        </div>
+      </div>
 
-      <h1 className="font-heading text-3xl text-[#1C2B4A] mb-1">Kế hoạch bài học</h1>
-      <p className="text-sm text-[#1C2B4A]/50 mb-6">
-        {format(session.date, 'EEEE, dd/MM/yyyy', { locale: vi })} ·
-        {session.timeSlot === 'morning' ? ' Ca sáng 5:30 – 7:30' : ' Ca chiều 18:00 – 20:00'} ·
-        {session.registrations.length} HV đã duyệt
-      </p>
-
-      <LessonPlanForm
-        sessionId={sessionId}
-        defaultCourseId={courses[0]?.id ?? null}
-        courses={courses}
-        initial={existing ? {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          focusSkills: (existing.focusSkills as any) ?? [],
-          warmupNotes: existing.warmupNotes ?? '',
-          mainNotes: existing.mainNotes ?? '',
-          cooldownNotes: existing.cooldownNotes ?? '',
-          equipment: existing.equipment ?? '',
-          courseId: existing.courseId ?? '',
-        } : (previousPlan ? {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          focusSkills: (previousPlan.focusSkills as any) ?? [],
-          warmupNotes: previousPlan.warmupNotes ?? '',
-          mainNotes: previousPlan.mainNotes ?? '',
-          cooldownNotes: previousPlan.cooldownNotes ?? '',
-          equipment: previousPlan.equipment ?? '',
-          courseId: previousPlan.courseId ?? '',
-        } : null)}
-        previousPlanExists={!!previousPlan && !existing}
-      />
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto relative z-10">
+        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5 sm:p-6">
+          <LessonPlanForm
+            sessionId={sessionId}
+            defaultCourseId={courses[0]?.id ?? null}
+            courses={courses}
+            initial={existing ? {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              focusSkills: (existing.focusSkills as any) ?? [],
+              warmupNotes: existing.warmupNotes ?? '',
+              mainNotes: existing.mainNotes ?? '',
+              cooldownNotes: existing.cooldownNotes ?? '',
+              equipment: existing.equipment ?? '',
+              courseId: existing.courseId ?? '',
+            } : (previousPlan ? {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              focusSkills: (previousPlan.focusSkills as any) ?? [],
+              warmupNotes: previousPlan.warmupNotes ?? '',
+              mainNotes: previousPlan.mainNotes ?? '',
+              cooldownNotes: previousPlan.cooldownNotes ?? '',
+              equipment: previousPlan.equipment ?? '',
+              courseId: previousPlan.courseId ?? '',
+            } : null)}
+            previousPlanExists={!!previousPlan && !existing}
+          />
+        </div>
+      </div>
     </div>
   )
 }
