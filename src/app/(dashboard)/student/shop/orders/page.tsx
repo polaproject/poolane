@@ -1,21 +1,28 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { ArrowLeft, ShoppingBag, Package } from 'lucide-react'
+import {
+  ArrowLeft, ShoppingBag, BookOpen, Waves, Sparkles, Box, ArrowRight,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { VietQRPayButton } from '@/components/features/VietQRPayButton'
+import { Chip } from '@/components/ui/Chip'
 
-const STATUS_CONFIG: Record<string, { label: string; className: string; description: string }> = {
-  pending:   { label: 'Chờ duyệt',     className: 'bg-amber-50 text-amber-700 border-amber-200',   description: 'Lớp sẽ duyệt và liên hệ bạn sớm' },
-  approved:  { label: 'Đã duyệt',      className: 'bg-blue-50 text-blue-700 border-blue-200',     description: 'Đơn đã được duyệt, đang chờ thanh toán' },
-  paid:      { label: 'Đã thanh toán', className: 'bg-green-50 text-green-700 border-green-200',  description: 'Đã thanh toán, chờ nhận hàng/lên lịch' },
-  fulfilled: { label: 'Hoàn thành',    className: 'bg-[#5B8E9F]/10 text-[#5B8E9F] border-[#5B8E9F]/20', description: 'Đã giao / hoàn tất' },
-  cancelled: { label: 'Đã huỷ',        className: 'bg-red-50 text-red-700 border-red-200',         description: 'Đơn đã bị huỷ' },
+type Variant = 'neutral' | 'accent' | 'mist' | 'success' | 'warn' | 'danger'
+const STATUS_CONFIG: Record<string, { label: string; variant: Variant; desc: string }> = {
+  pending:   { label: 'Chờ duyệt',     variant: 'warn',    desc: 'Lớp sẽ duyệt và liên hệ bạn sớm' },
+  approved:  { label: 'Đã duyệt',      variant: 'mist',    desc: 'Đơn đã duyệt, chờ thanh toán' },
+  paid:      { label: 'Đã thanh toán', variant: 'success', desc: 'Chờ nhận hàng / lên lịch' },
+  fulfilled: { label: 'Hoàn thành',    variant: 'accent',  desc: 'Đã giao / hoàn tất' },
+  cancelled: { label: 'Đã huỷ',        variant: 'danger',  desc: 'Đơn đã huỷ' },
 }
 
-const PRODUCT_TYPE_EMOJI: Record<string, string> = {
-  course: '📚', improvement_pack: '🏊', service: '⭐', physical: '📦',
+const PRODUCT_TYPE_ICON: Record<string, typeof BookOpen> = {
+  course: BookOpen,
+  improvement_pack: Waves,
+  service: Sparkles,
+  physical: Box,
 }
 
 function fmt(n: number) { return n.toLocaleString('vi-VN') + 'đ' }
@@ -25,9 +32,7 @@ export default async function StudentOrdersPage() {
 
   const student = await prisma.student.findFirst({ where: { userId: user.id }, select: { id: true } })
   if (!student) {
-    return (
-      <div className="p-6 text-center text-[#1C2B4A]/40">Không tìm thấy hồ sơ học viên</div>
-    )
+    return <div className="p-8 text-center text-ink/55">Không tìm thấy hồ sơ học viên</div>
   }
 
   const orders = await prisma.order.findMany({
@@ -35,94 +40,101 @@ export default async function StudentOrdersPage() {
     orderBy: { createdAt: 'desc' },
     take: 50,
     include: {
-      orderItems: { include: { product: { select: { name: true, type: true } } } }
-    }
+      orderItems: { include: { product: { select: { name: true, type: true } } } },
+    },
   })
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] pb-10">
-      <div className="bg-[#1C2B4A] px-5 pt-6 pb-8">
-        <Link
-          href="/student/shop"
-          className="inline-flex items-center gap-1 text-sm text-[#F6F1EA]/60 hover:text-[#F6F1EA] mb-3"
-        >
-          <ArrowLeft className="w-4 h-4" /> Quay lại Shop
-        </Link>
-        <h1 className="font-heading text-2xl text-[#F6F1EA]">Đơn của tôi</h1>
-        <p className="text-[#F6F1EA]/50 text-xs mt-1">{orders.length} đơn hàng đã đặt</p>
+    <div className="min-h-screen bg-paper pb-12">
+      {/* Hero */}
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto">
+          <Link
+            href="/student/shop"
+            className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group"
+          >
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" strokeWidth={2.25} />
+            Quay lại Shop
+          </Link>
+          <p className="eyebrow text-paper/55 mb-2">{orders.length} đơn hàng</p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Đơn của tôi</h1>
+        </div>
       </div>
 
-      <div className="px-4 -mt-4 max-w-lg mx-auto space-y-3">
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
         {orders.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-8 text-center">
-            <ShoppingBag className="w-10 h-10 text-[#1C2B4A]/20 mx-auto mb-3" />
-            <p className="text-sm text-[#1C2B4A]/50 mb-4">Bạn chưa có đơn hàng nào</p>
+          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
+            <ShoppingBag className="h-10 w-10 text-ink/30 mx-auto mb-3" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-ink mb-1">Chưa có đơn hàng</p>
+            <p className="text-sm text-ink/55 mb-6">Hãy ghé Shop xem các sản phẩm.</p>
             <Link
               href="/student/shop"
-              className="inline-block px-4 py-2 text-sm font-semibold rounded-lg bg-[#1C2B4A] text-[#F6F1EA] hover:bg-[#1C2B4A]/90"
+              className="inline-flex items-center gap-1.5 bg-ink text-paper font-semibold px-5 py-2.5 rounded-pill text-sm hover:bg-ink/90 transition"
             >
-              Khám phá Shop
+              Khám phá Shop <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.25} />
             </Link>
           </div>
         ) : (
           orders.map(order => {
             const cfg = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.pending
             return (
-              <div key={order.id} className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 p-4">
-                <div className="flex items-start justify-between mb-3">
+              <div key={order.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-5">
+                <div className="flex items-start justify-between gap-3 mb-4">
                   <div>
-                    <p className="text-xs text-[#1C2B4A]/40">
-                      Đặt {format(order.createdAt, 'dd/MM/yyyy HH:mm', { locale: vi })}
+                    <p className="text-xs text-ink/55">
+                      {format(order.createdAt, 'HH:mm · dd/MM/yyyy', { locale: vi })}
                     </p>
-                    <p className="font-mono text-xs text-[#1C2B4A]/40 mt-0.5">
+                    <p className="font-mono text-[10px] text-ink/40 mt-0.5">
                       #{order.id.slice(0, 8).toUpperCase()}
                     </p>
                   </div>
-                  <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${cfg.className}`}>
-                    {cfg.label}
-                  </span>
+                  <Chip variant={cfg.variant} active>{cfg.label}</Chip>
                 </div>
 
-                <div className="space-y-1.5 mb-3">
-                  {order.orderItems.map(item => (
-                    <div key={item.id} className="flex items-center justify-between text-sm">
-                      <span className="text-[#1C2B4A] flex items-center gap-1.5">
-                        <span>{PRODUCT_TYPE_EMOJI[item.product.type] ?? '📦'}</span>
-                        {item.product.name}
-                        {item.quantity > 1 && <span className="text-[#1C2B4A]/50">× {item.quantity}</span>}
-                      </span>
-                      <span className="text-[#1C2B4A]/60">{fmt(item.lineTotal)}</span>
-                    </div>
-                  ))}
+                <div className="space-y-1.5 mb-4">
+                  {order.orderItems.map(item => {
+                    const Icon = PRODUCT_TYPE_ICON[item.product.type] ?? Box
+                    return (
+                      <div key={item.id} className="flex items-center justify-between text-sm gap-3">
+                        <span className="text-ink inline-flex items-center gap-2 min-w-0">
+                          <Icon className="h-3.5 w-3.5 text-accent shrink-0" strokeWidth={1.75} />
+                          <span className="truncate">{item.product.name}</span>
+                          {item.quantity > 1 && <span className="text-ink/55 shrink-0">× {item.quantity}</span>}
+                        </span>
+                        <span className="text-ink/65 shrink-0">{fmt(item.lineTotal)}</span>
+                      </div>
+                    )
+                  })}
                 </div>
 
-                <div className="border-t border-[#1C2B4A]/5 pt-3 flex items-center justify-between">
-                  <div>
+                <div className="border-t border-ink/8 pt-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
                     {order.discountAmount > 0 && (
-                      <p className="text-xs text-green-600">Giảm {fmt(order.discountAmount)}</p>
+                      <p className="text-xs text-success">Giảm {fmt(order.discountAmount)}</p>
                     )}
-                    <p className="text-xs text-[#1C2B4A]/50">{cfg.description}</p>
+                    <p className="text-xs text-ink/55 truncate">{cfg.desc}</p>
                   </div>
-                  <p className="font-heading text-lg text-[#1C2B4A]">{fmt(order.finalAmount)}</p>
+                  <p className="font-heading italic text-2xl text-ink shrink-0">{fmt(order.finalAmount)}</p>
                 </div>
 
                 {order.status === 'approved' && (
-                  <div className="mt-3 pt-3 border-t border-[#1C2B4A]/5">
+                  <div className="mt-3 pt-3 border-t border-ink/8">
                     <VietQRPayButton orderId={order.id} />
                   </div>
                 )}
 
                 {order.noteFromStudent && (
-                  <div className="mt-3 pt-3 border-t border-[#1C2B4A]/5">
-                    <p className="text-xs text-[#1C2B4A]/40 uppercase tracking-wider mb-0.5">Ghi chú của bạn</p>
-                    <p className="text-sm text-[#1C2B4A]/70">{order.noteFromStudent}</p>
+                  <div className="mt-3 pt-3 border-t border-ink/8">
+                    <p className="eyebrow text-ink/55 mb-1">Ghi chú của bạn</p>
+                    <p className="text-sm text-ink/75">{order.noteFromStudent}</p>
                   </div>
                 )}
 
                 {order.fulfillmentNote && (
-                  <div className="mt-3 pt-3 border-t border-[#1C2B4A]/5">
-                    <p className="text-xs text-[#1C2B4A]/40 uppercase tracking-wider mb-0.5">Phản hồi từ lớp</p>
-                    <p className="text-sm text-[#1C2B4A]/70">{order.fulfillmentNote}</p>
+                  <div className="mt-3 pt-3 border-t border-ink/8">
+                    <p className="eyebrow text-accent mb-1">Phản hồi từ lớp</p>
+                    <p className="text-sm text-ink/75">{order.fulfillmentNote}</p>
                   </div>
                 )}
               </div>

@@ -2,9 +2,13 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { format } from 'date-fns'
-import { Pencil, Send, AlertCircle, CheckCircle2 } from 'lucide-react'
+import {
+  Pencil, Send, AlertCircle, CheckCircle2, Bell, ShieldCheck,
+  User as UserIcon, Heart,
+} from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { PushSubscribeButton } from '@/components/features/PushSubscribeButton'
+import { Chip } from '@/components/ui/Chip'
 
 export default async function StudentProfilePage() {
   const user = await requireRole(['student'])
@@ -15,7 +19,7 @@ export default async function StudentProfilePage() {
       user: true,
       enrollments: {
         where: { status: { in: ['active', 'extension'] } },
-        include: { course: { select: { code: true, name: true } } }
+        include: { course: { select: { code: true, name: true } } },
       },
       poolTickets: {
         where: { isActive: true },
@@ -23,65 +27,79 @@ export default async function StudentProfilePage() {
         orderBy: { purchasedAt: 'desc' },
         take: 1,
       },
-    }
+    },
   })
 
   if (!student) notFound()
 
   const pendingRequest = await prisma.profileChangeRequest.findFirst({
     where: { studentId: student.id, status: 'pending' },
-    orderBy: { requestedAt: 'desc' }
+    orderBy: { requestedAt: 'desc' },
   })
 
   const u = student.user
   const ticket = student.poolTickets[0]
+  const initial = u.fullName?.charAt(0).toUpperCase() ?? '?'
 
   return (
-    <div className="min-h-screen bg-[#F6F1EA] pb-10">
-      {/* Hero header */}
-      <div className="bg-[#1C2B4A] px-5 pt-6 pb-10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/5 -translate-y-1/4 translate-x-1/4" />
-        <div className="relative z-10">
-          <p className="text-[#F6F1EA]/50 text-xs mb-1">{student.studentCode}</p>
-          <h1 className="font-heading text-3xl text-[#F6F1EA]">{u.fullName}</h1>
-          <div className="flex gap-4 mt-3 text-sm text-[#F6F1EA]/60">
-            <span>{u.phone}</span>
-            {ticket && <span>· Vé còn {ticket.maxSessions - ticket.sessionsUsed} buổi</span>}
-            {student.enrollments.length > 0 && (
-              <span>· {student.enrollments.length} khoá đang học</span>
-            )}
+    <div className="min-h-screen bg-paper pb-12">
+      {/* Hero */}
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 w-48 h-48 rounded-full bg-mist/10 translate-y-1/2 blur-3xl" />
+
+        <div className="relative max-w-3xl mx-auto flex items-start gap-5">
+          <div className="grid place-items-center h-16 w-16 sm:h-20 sm:w-20 rounded-pill bg-accent text-ink font-heading italic text-3xl sm:text-4xl shrink-0 shadow-cta">
+            {initial}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="eyebrow text-paper/55 mb-1 font-mono normal-case tracking-[0.2em]">{student.studentCode}</p>
+            <h1 className="font-heading text-3xl sm:text-4xl italic leading-tight truncate">{u.fullName}</h1>
+            <div className="flex flex-wrap gap-2 mt-3 text-xs text-paper/65">
+              <span>{u.phone}</span>
+              {ticket && (
+                <><span>·</span><span>Vé còn {ticket.maxSessions - ticket.sessionsUsed} buổi</span></>
+              )}
+              {student.enrollments.length > 0 && (
+                <><span>·</span><span>{student.enrollments.length} khoá đang học</span></>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="px-4 -mt-4 max-w-2xl mx-auto">
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
         {/* Pending banner */}
         {pendingRequest && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 mb-4 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+          <div className="rounded-card-lg bg-warn/10 ring-1 ring-warn/30 p-4 flex items-start gap-3 backdrop-blur-sm">
+            <div className="grid place-items-center h-9 w-9 rounded-pill bg-warn/20 shrink-0">
+              <AlertCircle className="h-4 w-4 text-warn" strokeWidth={1.75} />
+            </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-yellow-900">Bạn có 1 yêu cầu cập nhật đang chờ duyệt</p>
-              <p className="text-xs text-yellow-700 mt-0.5">
+              <p className="text-sm font-semibold text-ink">Có 1 yêu cầu cập nhật đang chờ duyệt</p>
+              <p className="text-xs text-ink/65 mt-0.5">
                 Gửi lúc {format(pendingRequest.requestedAt, 'dd/MM/yyyy HH:mm')} — chờ staff/admin xử lý
               </p>
             </div>
           </div>
         )}
 
-        {/* Identity fields (read-only, requires approval) */}
-        <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 mb-4">
-          <div className="px-5 py-4 border-b border-[#1C2B4A]/8 flex items-center justify-between">
-            <h2 className="font-semibold text-[#1C2B4A] text-sm">Thông tin định danh</h2>
-            {!pendingRequest && (
-              <Link
-                href="/student/profile/request-change"
-                className="text-xs font-semibold text-[#1C2B4A] flex items-center gap-1 hover:underline"
-              >
-                <Send className="w-3.5 h-3.5" /> Yêu cầu cập nhật
-              </Link>
-            )}
-          </div>
-          <div className="px-5 py-4 grid grid-cols-2 gap-4 text-sm">
+        {/* Identity */}
+        <Section
+          eyebrow="Định danh"
+          title="Thông tin định danh"
+          icon={UserIcon}
+          action={!pendingRequest && (
+            <Link
+              href="/student/profile/request-change"
+              className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline"
+            >
+              <Send className="h-3.5 w-3.5" strokeWidth={1.75} /> Yêu cầu cập nhật
+            </Link>
+          )}
+          footnote="Các trường định danh cần staff/admin duyệt khi cập nhật để đảm bảo chính xác."
+        >
+          <div className="grid grid-cols-2 gap-4">
             <Field label="Họ và tên" value={u.fullName} />
             <Field label="Ngày sinh" value={u.dob ? format(u.dob, 'dd/MM/yyyy') : null} />
             <Field label="Số điện thoại" value={u.phone} />
@@ -92,71 +110,100 @@ export default async function StudentProfilePage() {
             <Field label="Địa chỉ chi tiết" value={u.addressStreet} />
             <Field label="Số CCCD/CMND" value={u.idCardNumber} />
           </div>
-          <p className="px-5 pb-4 text-xs text-[#1C2B4A]/40">
-            Các trường định danh cần staff/admin duyệt khi cập nhật để đảm bảo chính xác.
-          </p>
-        </div>
+        </Section>
 
-        {/* Soft fields (self-editable) */}
-        <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 mb-4">
-          <div className="px-5 py-4 border-b border-[#1C2B4A]/8 flex items-center justify-between">
-            <h2 className="font-semibold text-[#1C2B4A] text-sm">Thông tin cá nhân</h2>
+        {/* Soft fields */}
+        <Section
+          eyebrow="Cá nhân"
+          title="Thông tin mềm"
+          icon={Heart}
+          action={
             <Link
               href="/student/profile/edit-soft"
-              className="text-xs font-semibold text-[#1C2B4A] flex items-center gap-1 hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline"
             >
-              <Pencil className="w-3.5 h-3.5" /> Tự sửa
+              <Pencil className="h-3.5 w-3.5" strokeWidth={1.75} /> Tự sửa
             </Link>
-          </div>
-          <div className="px-5 py-4 grid grid-cols-2 gap-4 text-sm">
+          }
+        >
+          <div className="grid grid-cols-2 gap-4">
             <Field label="Nghề nghiệp" value={u.occupation} />
             <Field label="Ghi chú sức khoẻ" value={u.healthNotes} />
             <Field label="Liên hệ khẩn — Tên" value={u.emergencyContactName} />
             <Field label="Liên hệ khẩn — SĐT" value={u.emergencyContactPhone} />
           </div>
-        </div>
+        </Section>
 
         {/* Consents */}
-        <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 mb-4">
-          <div className="px-5 py-4 border-b border-[#1C2B4A]/8">
-            <h2 className="font-semibold text-[#1C2B4A] text-sm">Đồng ý & Bảo mật</h2>
-          </div>
-          <div className="px-5 py-4 space-y-2.5 text-sm">
+        <Section eyebrow="Bảo mật" title="Đồng ý & Bảo mật" icon={ShieldCheck}>
+          <div className="space-y-2.5">
             <ConsentRow label="Đồng ý hình ảnh học tập nội bộ" at={u.photoConsentAt} />
             <ConsentRow label="Đồng ý hình ảnh dùng cho marketing" at={u.imageConsentMarketingAt} />
             <ConsentRow label="Đã đọc chính sách hoàn tiền" at={u.refundPolicyAcknowledgedAt} />
             <ConsentRow label="Đã đọc điều khoản sử dụng" at={u.termsAcknowledgedAt} />
-            <div className="pt-3 mt-3 border-t border-[#1C2B4A]/5 flex items-center justify-between">
-              <span className="text-[#1C2B4A]/70">Thông báo đẩy trình duyệt</span>
+            <div className="pt-3 mt-3 border-t border-ink/8 flex items-center justify-between gap-3">
+              <span className="text-sm text-ink/75 inline-flex items-center gap-2">
+                <Bell className="h-4 w-4 text-accent" strokeWidth={1.75} /> Thông báo đẩy trình duyệt
+              </span>
               <PushSubscribeButton />
             </div>
           </div>
-        </div>
+        </Section>
       </div>
     </div>
+  )
+}
+
+function Section({
+  eyebrow, title, icon: Icon, action, footnote, children,
+}: {
+  eyebrow: string
+  title: string
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
+  action?: React.ReactNode
+  footnote?: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+      <header className="px-5 py-4 border-b border-ink/8 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icon className="h-4 w-4 text-accent" strokeWidth={1.75} />
+          <div>
+            <p className="eyebrow text-ink/55">{eyebrow}</p>
+            <h2 className="font-heading italic text-lg text-ink mt-0.5">{title}</h2>
+          </div>
+        </div>
+        {action}
+      </header>
+      <div className="px-5 py-4 text-sm">{children}</div>
+      {footnote && (
+        <p className="px-5 pb-4 text-xs text-ink/45">{footnote}</p>
+      )}
+    </section>
   )
 }
 
 function Field({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div>
-      <p className="text-xs text-[#1C2B4A]/40 mb-0.5">{label}</p>
-      <p className="text-[#1C2B4A]">{value || <span className="text-[#1C2B4A]/30">—</span>}</p>
+      <p className="text-xs text-ink/45 mb-1">{label}</p>
+      <p className="text-ink">{value || <span className="text-ink/30">—</span>}</p>
     </div>
   )
 }
 
 function ConsentRow({ label, at }: { label: string; at: Date | null }) {
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-[#1C2B4A]/70">{label}</span>
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm text-ink/80">{label}</span>
       {at ? (
-        <span className="flex items-center gap-1 text-xs text-green-700">
-          <CheckCircle2 className="w-3.5 h-3.5" />
+        <Chip variant="success" active className="text-[10px]">
+          <CheckCircle2 className="h-3 w-3" strokeWidth={2.25} />
           {format(at, 'dd/MM/yyyy')}
-        </span>
+        </Chip>
       ) : (
-        <span className="text-xs text-[#1C2B4A]/30">Chưa xác nhận</span>
+        <span className="text-xs text-ink/35">Chưa xác nhận</span>
       )}
     </div>
   )

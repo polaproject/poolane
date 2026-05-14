@@ -1,21 +1,30 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { ShoppingCart, Plus, Minus, Package, Loader2, CheckCircle, Search, History } from 'lucide-react'
+import {
+  ShoppingCart, Plus, Minus, Package, Loader2, CheckCircle, Search, History,
+  BookOpen, Waves, Sparkles, Box, ArrowRight,
+} from 'lucide-react'
 import Link from 'next/link'
+import { Chip } from '@/components/ui/Chip'
 
 type Product = {
-  id: string; name: string; type: string; price: number
-  stockQuantity: number | null; description: string | null; sessionsCount: number | null
+  id: string
+  name: string
+  type: string
+  price: number
+  stockQuantity: number | null
+  description: string | null
+  sessionsCount: number | null
   photos: string[]
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  course: '📚 Khoá học', improvement_pack: '🏊 Pack cải thiện',
-  service: '⭐ Dịch vụ', physical: '📦 Vật phẩm'
+const TYPE_META: Record<string, { label: string; Icon: typeof BookOpen }> = {
+  course: { label: 'Khoá học', Icon: BookOpen },
+  improvement_pack: { label: 'Pack cải thiện', Icon: Waves },
+  service: { label: 'Dịch vụ', Icon: Sparkles },
+  physical: { label: 'Vật phẩm', Icon: Box },
 }
 
 const FILTER_TABS = [
@@ -23,7 +32,7 @@ const FILTER_TABS = [
   { value: 'course', label: 'Khoá học' },
   { value: 'improvement_pack', label: 'Pack' },
   { value: 'service', label: 'Dịch vụ' },
-  { value: 'physical', label: 'Đồ' },
+  { value: 'physical', label: 'Vật phẩm' },
 ]
 
 function fmt(n: number) { return n.toLocaleString('vi-VN') + 'đ' }
@@ -86,163 +95,219 @@ export default function ShopPage() {
         body: JSON.stringify({
           items: cartItems.map(([productId, quantity]) => ({ productId, quantity })),
           noteFromStudent: note || undefined,
-        })
+        }),
       })
       const data = await res.json()
       if (!res.ok || data.error) { toast.error(data.error?.message ?? 'Lỗi'); return }
       setOrdered(true)
       setCart({})
-      toast.success('Đặt hàng thành công! Chờ duyệt nhé 😊')
-    } catch { toast.error('Không thể kết nối') }
-    finally { setOrdering(false) }
+      toast.success('Đặt hàng thành công! Chờ duyệt nhé')
+    } catch {
+      toast.error('Không thể kết nối')
+    } finally {
+      setOrdering(false)
+    }
   }
 
   if (ordered) {
     return (
-      <div className="p-6 text-center">
-        <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <h2 className="font-heading text-2xl text-[#1C2B4A] mb-2">Đặt hàng thành công!</h2>
-        <p className="text-[#1C2B4A]/60 mb-4">Lớp sẽ duyệt đơn và liên hệ bạn sớm nhất nhé.</p>
-        <div className="flex gap-2 justify-center">
-          <Button onClick={() => setOrdered(false)} className="bg-[#1C2B4A] text-[#F6F1EA]">Tiếp tục mua</Button>
-          <Button asChild variant="outline">
-            <Link href="/student/shop/orders">Xem đơn của tôi</Link>
-          </Button>
+      <div className="min-h-screen bg-paper grid place-items-center px-4">
+        <div className="rounded-card-xl bg-white shadow-glass ring-1 ring-ink/8 p-8 sm:p-12 text-center max-w-md">
+          <div className="grid place-items-center h-16 w-16 rounded-pill bg-success/15 mx-auto mb-4">
+            <CheckCircle className="h-8 w-8 text-success" strokeWidth={1.75} />
+          </div>
+          <h2 className="font-heading italic text-3xl text-ink mb-2">Đặt hàng thành công!</h2>
+          <p className="text-sm text-ink/65 mb-6">Lớp sẽ duyệt đơn và liên hệ bạn sớm nhất.</p>
+          <div className="flex gap-2 justify-center flex-wrap">
+            <button
+              onClick={() => setOrdered(false)}
+              className="inline-flex items-center gap-1.5 bg-ink text-paper font-semibold px-5 py-2.5 rounded-pill text-sm hover:bg-ink/90 transition"
+            >
+              Tiếp tục mua
+            </button>
+            <Link
+              href="/student/shop/orders"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-pill ring-1 ring-ink/15 text-sm font-medium hover:bg-ink/5 transition"
+            >
+              Xem đơn của tôi <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.25} />
+            </Link>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto pb-32">
-      <div className="flex items-center justify-between mb-1">
-        <h1 className="font-heading text-2xl text-[#1C2B4A]">Shop</h1>
-        <Link
-          href="/student/shop/orders"
-          className="inline-flex items-center gap-1 text-xs font-semibold text-[#1C2B4A]/70 hover:text-[#1C2B4A]"
-        >
-          <History className="w-3.5 h-3.5" /> Đơn của tôi
-        </Link>
-      </div>
-      <p className="text-xs text-[#1C2B4A]/50 mb-4">Đặt hàng, trả sau khi nhận</p>
-
-      {/* Search */}
-      <div className="relative mb-3">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1C2B4A]/40" />
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Tìm sản phẩm..."
-          className="w-full pl-9 pr-4 py-2 text-sm border border-[#1C2B4A]/15 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1C2B4A]/20 bg-white"
-        />
-      </div>
-
-      {/* Type tabs */}
-      <div className="flex gap-1.5 overflow-x-auto mb-4 -mx-1 px-1 pb-1">
-        {FILTER_TABS.map(t => (
-          <button
-            key={t.value}
-            onClick={() => setTypeFilter(t.value)}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-full whitespace-nowrap border transition-colors ${
-              typeFilter === t.value
-                ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]'
-                : 'bg-white text-[#1C2B4A]/60 border-[#1C2B4A]/15 hover:border-[#1C2B4A]/40'
-            }`}
+    <div className="min-h-screen bg-paper pb-32">
+      {/* Hero */}
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">
+          <div>
+            <p className="eyebrow text-paper/55 mb-2">Cửa hàng · Poolane</p>
+            <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Shop</h1>
+            <p className="text-sm text-paper/65 mt-2">Khoá học, pack cải thiện, dịch vụ và vật phẩm bơi.</p>
+          </div>
+          <Link
+            href="/student/shop/orders"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-pill ring-1 ring-paper/20 hover:bg-paper/5 transition text-sm"
           >
-            {t.label}
-          </button>
-        ))}
+            <History className="h-4 w-4" strokeWidth={1.75} /> Đơn của tôi
+          </Link>
+        </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="w-5 h-5 animate-spin text-[#1C2B4A]/40" /></div>
-      ) : filteredProducts.length === 0 ? (
-        <div className="text-center py-12 text-[#1C2B4A]/40">
-          <Package className="w-8 h-8 mx-auto mb-3 opacity-30" />
-          <p>{products.length === 0 ? 'Chưa có sản phẩm nào' : 'Không tìm thấy sản phẩm phù hợp'}</p>
+      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto relative z-10 space-y-4">
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink/40" strokeWidth={1.75} />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Tìm sản phẩm..."
+            className="w-full pl-10 pr-4 py-3 text-sm rounded-pill bg-white ring-1 ring-ink/10 focus:ring-accent/40 focus:outline-none transition shadow-soft"
+          />
         </div>
-      ) : (
-        <div className="space-y-3">
-          {filteredProducts.map(p => {
-            const qty = cart[p.id] ?? 0
-            const isOutOfStock = p.type === 'physical' && p.stockQuantity !== null && p.stockQuantity <= 0
-            return (
-              <div key={p.id} className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-4 shadow-sm">
-                <div className="flex justify-between items-start mb-2 gap-3">
-                  {p.photos && p.photos.length > 0 && (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={p.photos[0]} alt="" className="w-20 h-20 rounded-xl object-cover flex-shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <p className="font-semibold text-[#1C2B4A] text-sm">{p.name}</p>
-                      <Badge variant="outline" className="text-xs">{TYPE_LABELS[p.type] ?? p.type}</Badge>
+
+        {/* Type tabs */}
+        <div className="flex gap-2 overflow-x-auto -mx-1 px-1 pb-1">
+          {FILTER_TABS.map(t => (
+            <button
+              key={t.value}
+              onClick={() => setTypeFilter(t.value)}
+              className="shrink-0"
+            >
+              <Chip active={typeFilter === t.value}>{t.label}</Chip>
+            </button>
+          ))}
+        </div>
+
+        {/* Products */}
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="h-6 w-6 animate-spin text-accent" strokeWidth={1.75} />
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="rounded-card-xl bg-white shadow-soft ring-1 ring-ink/8 p-12 text-center">
+            <Package className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+            <p className="font-heading italic text-2xl text-ink mb-1">
+              {products.length === 0 ? 'Chưa có sản phẩm' : 'Không khớp tìm kiếm'}
+            </p>
+            <p className="text-sm text-ink/55">
+              {products.length === 0 ? 'Cửa hàng đang cập nhật' : 'Thử từ khoá khác hoặc bỏ filter'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredProducts.map(p => {
+              const qty = cart[p.id] ?? 0
+              const isOutOfStock = p.type === 'physical' && p.stockQuantity !== null && p.stockQuantity <= 0
+              const typeMeta = TYPE_META[p.type] ?? { label: p.type, Icon: Box }
+              const TypeIcon = typeMeta.Icon
+              return (
+                <div key={p.id} className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 p-4 transition hover:ring-accent/30">
+                  <div className="flex gap-3">
+                    {p.photos && p.photos.length > 0 ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={p.photos[0]} alt="" className="w-20 h-20 rounded-card object-cover shrink-0" />
+                    ) : (
+                      <div className="w-20 h-20 rounded-card bg-paper-tint grid place-items-center shrink-0">
+                        <TypeIcon className="h-7 w-7 text-accent opacity-70" strokeWidth={1.5} />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <p className="font-medium text-ink text-sm leading-tight">{p.name}</p>
+                        <p className="font-heading text-base text-ink shrink-0">{fmt(p.price)}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <Chip variant="mist" className="text-[10px]">
+                          <TypeIcon className="h-2.5 w-2.5" strokeWidth={2.25} /> {typeMeta.label}
+                        </Chip>
+                        {p.sessionsCount && (
+                          <span className="text-[10px] text-ink/55">· {p.sessionsCount} buổi</span>
+                        )}
+                      </div>
+                      {p.description && (
+                        <p className="text-xs text-ink/55 line-clamp-2 leading-relaxed">{p.description}</p>
+                      )}
+                      {p.type === 'physical' && p.stockQuantity !== null && (
+                        <p className={`text-[10px] mt-1 ${p.stockQuantity <= 3 ? 'text-warn' : 'text-ink/45'}`}>
+                          Còn {p.stockQuantity} sp
+                        </p>
+                      )}
                     </div>
-                    {p.description && <p className="text-xs text-[#1C2B4A]/50 line-clamp-2">{p.description}</p>}
-                    {p.sessionsCount && <p className="text-xs text-[#5B8E9F] mt-1">{p.sessionsCount} buổi</p>}
-                    {p.type === 'physical' && p.stockQuantity !== null && (
-                      <p className={`text-xs mt-1 ${p.stockQuantity <= 3 ? 'text-amber-600' : 'text-[#1C2B4A]/40'}`}>
-                        Còn {p.stockQuantity} sp
-                      </p>
+                  </div>
+
+                  <div className="mt-3">
+                    {qty === 0 ? (
+                      <button
+                        onClick={() => !isOutOfStock && addToCart(p.id)}
+                        disabled={isOutOfStock}
+                        className={`w-full py-2.5 rounded-pill text-sm font-medium ring-1 transition ${
+                          isOutOfStock
+                            ? 'ring-ink/8 text-ink/30 cursor-not-allowed'
+                            : 'ring-ink/20 text-ink hover:bg-ink hover:text-paper hover:ring-ink'
+                        }`}
+                      >
+                        {isOutOfStock ? 'Hết hàng' : '+ Thêm vào giỏ'}
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-3 justify-between bg-paper-tint rounded-pill px-2 py-1.5">
+                        <button
+                          onClick={() => removeFromCart(p.id)}
+                          className="h-8 w-8 rounded-pill bg-white ring-1 ring-ink/10 grid place-items-center hover:bg-danger/10 hover:ring-danger/30 transition"
+                        >
+                          <Minus className="h-3.5 w-3.5" strokeWidth={2.25} />
+                        </button>
+                        <span className="font-heading text-lg text-ink">{qty}</span>
+                        <button
+                          onClick={() => addToCart(p.id)}
+                          className="h-8 w-8 rounded-pill bg-ink text-paper grid place-items-center hover:bg-ink/90 transition"
+                        >
+                          <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+                        </button>
+                      </div>
                     )}
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-[#1C2B4A]">{fmt(p.price)}</p>
-                  </div>
                 </div>
-
-                <div className="flex justify-between items-center mt-3">
-                  {qty === 0 ? (
-                    <button
-                      onClick={() => !isOutOfStock && addToCart(p.id)}
-                      disabled={isOutOfStock}
-                      className={`w-full py-2 rounded-xl text-sm font-medium border transition-all ${
-                        isOutOfStock
-                          ? 'border-[#1C2B4A]/10 text-[#1C2B4A]/30 cursor-not-allowed'
-                          : 'border-[#1C2B4A] text-[#1C2B4A] hover:bg-[#1C2B4A] hover:text-[#F6F1EA]'
-                      }`}
-                    >
-                      {isOutOfStock ? 'Hết hàng' : '+ Thêm vào giỏ'}
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-3 w-full justify-between">
-                      <button onClick={() => removeFromCart(p.id)} className="w-8 h-8 rounded-lg border border-[#1C2B4A]/15 flex items-center justify-center hover:bg-red-50">
-                        <Minus className="w-3.5 h-3.5" />
-                      </button>
-                      <span className="font-semibold text-[#1C2B4A] text-sm">{qty}</span>
-                      <button onClick={() => addToCart(p.id)} className="w-8 h-8 rounded-lg border border-[#1C2B4A] bg-[#1C2B4A] flex items-center justify-center text-white">
-                        <Plus className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
+              )
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Fixed cart bottom */}
       {cartItems.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#1C2B4A]/10 p-4 max-w-lg mx-auto">
-          <div className="flex items-center gap-2 mb-3">
-            <ShoppingCart className="w-4 h-4 text-[#1C2B4A]/60" />
-            <span className="text-sm text-[#1C2B4A]/60">{cartItems.length} sản phẩm</span>
-            <span className="ml-auto font-semibold text-[#1C2B4A]">{fmt(cartTotal)}</span>
+        <div className="fixed bottom-0 inset-x-0 z-30 p-4 max-w-3xl mx-auto">
+          <div className="rounded-card-xl bg-ink text-paper p-4 shadow-glass ring-1 ring-paper/12">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="grid place-items-center h-9 w-9 rounded-pill bg-accent/15">
+                <ShoppingCart className="h-4 w-4 text-accent" strokeWidth={1.75} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-paper/55">{cartItems.length} sản phẩm trong giỏ</p>
+                <p className="font-heading italic text-xl text-accent leading-none mt-0.5">{fmt(cartTotal)}</p>
+              </div>
+            </div>
+            <input
+              placeholder="Ghi chú cho lớp (tuỳ chọn)"
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              className="w-full h-9 px-3 text-sm rounded-pill bg-paper/10 ring-1 ring-paper/15 placeholder:text-paper/40 text-paper mb-3 focus:outline-none focus:ring-accent/40 transition"
+            />
+            <button
+              className="w-full bg-accent text-ink font-semibold h-11 rounded-pill hover:bg-accent/90 transition disabled:opacity-60 inline-flex items-center justify-center gap-2"
+              disabled={ordering}
+              onClick={placeOrder}
+            >
+              {ordering ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Đang đặt...</>
+              ) : (
+                <>Đặt hàng · {fmt(cartTotal)}</>
+              )}
+            </button>
           </div>
-          <input
-            placeholder="Ghi chú cho lớp (tuỳ chọn)"
-            value={note}
-            onChange={e => setNote(e.target.value)}
-            className="w-full h-8 px-3 text-sm rounded-lg border border-[#1C2B4A]/15 mb-3 focus:outline-none"
-          />
-          <Button
-            className="w-full bg-[#1C2B4A] text-[#F6F1EA] h-11"
-            disabled={ordering}
-            onClick={placeOrder}
-          >
-            {ordering ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Đang đặt...</> : `Đặt hàng · ${fmt(cartTotal)}`}
-          </Button>
         </div>
       )}
     </div>
