@@ -27,6 +27,20 @@ export const metadata: Metadata = {
   description: 'Lớp dạy bơi cho người lớn 16-40 tuổi. Bơi Ếch, Sải, Bướm — hệ thống đánh giá kỹ năng chuẩn hoá, theo dõi tiến độ trực quan.',
   keywords: ['học bơi', 'lớp bơi', 'poolane', 'pola project', 'poolane.vn', 'bơi ếch', 'bơi sải', 'bơi bướm', 'lớp bơi người lớn'],
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://poolane.vn'),
+  manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Poolane',
+  },
   openGraph: {
     type: 'website',
     locale: 'vi_VN',
@@ -43,6 +57,13 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+}
+
+export const viewport = {
+  themeColor: '#1C2B4A',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 }
 
 export default function RootLayout({
