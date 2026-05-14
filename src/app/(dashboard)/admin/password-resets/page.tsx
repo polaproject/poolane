@@ -1,7 +1,9 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { format } from 'date-fns'
+import { Key } from 'lucide-react'
 import { ResetActionButton } from './ResetActionButton'
+import { Chip } from '@/components/ui/Chip'
 
 type SearchParams = Promise<{ status?: string }>
 
@@ -16,71 +18,67 @@ export default async function PasswordResetsPage({ searchParams }: { searchParam
   const params = await searchParams
   const status = params.status ?? 'pending'
 
-  const items = await prisma.passwordResetRequest.findMany({
-    where: { status },
-    orderBy: { requestedAt: 'desc' },
-    take: 100,
-  })
+  const items = await prisma.passwordResetRequest.findMany({ where: { status }, orderBy: { requestedAt: 'desc' }, take: 100 })
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="font-heading text-3xl text-[#1C2B4A]">Yêu cầu reset mật khẩu</h1>
-        <p className="text-sm text-[#1C2B4A]/50 mt-1">{items.length} yêu cầu</p>
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-4xl mx-auto">
+          <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
+            <Key className="h-3 w-3 text-accent" strokeWidth={1.75} /> {items.length} yêu cầu
+          </p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Reset mật khẩu</h1>
+        </div>
       </div>
 
-      <div className="flex gap-2 mb-5">
-        {STATUS_TABS.map(t => (
-          <a key={t.value} href={`/admin/password-resets?status=${t.value}`}
-            className={`px-4 py-2 text-sm rounded-lg border ${
-              status === t.value ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]' : 'bg-white text-[#1C2B4A]/60 border-[#1C2B4A]/15'
-            }`}>
-            {t.label}
-          </a>
-        ))}
-      </div>
+      <div className="px-4 sm:px-8 -mt-6 max-w-4xl mx-auto space-y-4 relative z-10">
+        <div className="flex gap-2 flex-wrap">
+          {STATUS_TABS.map(t => (
+            <a key={t.value} href={`/admin/password-resets?status=${t.value}`}>
+              <Chip asButton active={status === t.value}>{t.label}</Chip>
+            </a>
+          ))}
+        </div>
 
-      <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 overflow-hidden">
-        {items.length === 0 ? (
-          <div className="p-12 text-center text-[#1C2B4A]/40">Không có yêu cầu nào</div>
-        ) : (
-          <div className="overflow-x-auto">
-
-          <table className="w-full min-w-[640px]">
-            <thead className="bg-[#F6F1EA]/40">
-              <tr className="text-left text-xs uppercase tracking-wider text-[#1C2B4A]/50">
-                <th className="px-5 py-3">SĐT / Tên</th>
-                <th className="px-5 py-3">Thời gian</th>
-                <th className="px-5 py-3">IP</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#1C2B4A]/5">
-              {items.map(r => (
-                <tr key={r.id}>
-                  <td className="px-5 py-3">
-                    <p className="font-mono text-sm text-[#1C2B4A]">{r.phone}</p>
-                    {r.fullNameHint && <p className="text-xs text-[#1C2B4A]/50">{r.fullNameHint}</p>}
-                  </td>
-                  <td className="px-5 py-3 text-xs text-[#1C2B4A]/60">
-                    {format(r.requestedAt, 'HH:mm dd/MM/yyyy')}
-                  </td>
-                  <td className="px-5 py-3 text-xs text-[#1C2B4A]/40 font-mono">{r.ipAddress ?? '—'}</td>
-                  <td className="px-5 py-3 text-right">
-                    {r.status === 'pending' ? (
-                      <ResetActionButton id={r.id} />
-                    ) : (
-                      <span className="text-xs text-[#1C2B4A]/40">
-                        {r.processedAt ? format(r.processedAt, 'HH:mm dd/MM') : '—'}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-        )}
+        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+          {items.length === 0 ? (
+            <div className="p-12 text-center">
+              <Key className="h-10 w-10 mx-auto mb-3 text-ink/30" strokeWidth={1.5} />
+              <p className="font-heading italic text-2xl text-ink">Không có yêu cầu</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px]">
+                <thead className="bg-paper-tint/30 border-b border-ink/8">
+                  <tr>
+                    <th className="text-left px-5 py-3 eyebrow text-ink/55">SĐT / Tên</th>
+                    <th className="text-left px-5 py-3 eyebrow text-ink/55">Thời gian</th>
+                    <th className="text-left px-5 py-3 eyebrow text-ink/55">IP</th>
+                    <th className="px-5 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map(r => (
+                    <tr key={r.id} className="border-b border-ink/5 last:border-b-0 hover:bg-paper-tint/20 transition">
+                      <td className="px-5 py-3">
+                        <p className="font-mono text-sm text-ink">{r.phone}</p>
+                        {r.fullNameHint && <p className="text-xs text-ink/55 mt-0.5">{r.fullNameHint}</p>}
+                      </td>
+                      <td className="px-5 py-3 text-xs text-ink/65">{format(r.requestedAt, 'HH:mm · dd/MM/yyyy')}</td>
+                      <td className="px-5 py-3 text-xs text-ink/45 font-mono">{r.ipAddress ?? '—'}</td>
+                      <td className="px-5 py-3 text-right">
+                        {r.status === 'pending'
+                          ? <ResetActionButton id={r.id} />
+                          : <span className="text-xs text-ink/45">{r.processedAt ? format(r.processedAt, 'HH:mm · dd/MM') : '—'}</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

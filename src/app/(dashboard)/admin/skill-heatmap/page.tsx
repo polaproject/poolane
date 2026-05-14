@@ -1,6 +1,8 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { COURSE_SKILLS } from '@/config/constants'
+import { BarChart2 } from 'lucide-react'
+import { Chip } from '@/components/ui/Chip'
 
 type SearchParams = Promise<{ course?: string }>
 
@@ -10,33 +12,22 @@ export default async function SkillHeatmapPage({ searchParams }: { searchParams:
   const courseCode = (params.course ?? 'ECH') as keyof typeof COURSE_SKILLS
 
   const course = await prisma.course.findFirst({ where: { code: courseCode } })
-  if (!course) {
-    return <div className="p-6 text-center text-[#1C2B4A]/40">Không tìm thấy khoá</div>
-  }
+  if (!course) return <div className="min-h-screen grid place-items-center text-ink/55">Không tìm thấy khoá</div>
 
   const skills = COURSE_SKILLS[courseCode] ?? []
 
-  // Lấy điểm gần nhất của mỗi học viên cho mỗi kỹ năng
   const scores = await prisma.assessmentScore.findMany({
     where: { assessment: { courseId: course.id } },
-    select: {
-      skillKey: true,
-      score: true,
-      assessment: { select: { studentId: true, assessmentDate: true } }
-    },
+    select: { skillKey: true, score: true, assessment: { select: { studentId: true, assessmentDate: true } } },
     orderBy: { assessment: { assessmentDate: 'desc' } },
   })
 
-  // Group: per student per skill → lấy điểm mới nhất
   const latestByStudentSkill = new Map<string, number>()
   for (const s of scores) {
     const key = `${s.assessment.studentId}::${s.skillKey}`
-    if (!latestByStudentSkill.has(key)) {
-      latestByStudentSkill.set(key, s.score)
-    }
+    if (!latestByStudentSkill.has(key)) latestByStudentSkill.set(key, s.score)
   }
 
-  // Aggregate per skill
   const skillStats = skills.map(skill => {
     const studentScores: number[] = []
     for (const [k, v] of latestByStudentSkill.entries()) {
@@ -44,83 +35,89 @@ export default async function SkillHeatmapPage({ searchParams }: { searchParams:
     }
     const count = studentScores.length
     const avg = count > 0 ? studentScores.reduce((s, n) => s + n, 0) / count : 0
-    const weak = studentScores.filter(s => s <= 2).length // điểm yếu
+    const weak = studentScores.filter(s => s <= 2).length
     const strong = studentScores.filter(s => s >= 4).length
     return { key: skill.key, label: skill.label, count, avg, weak, strong }
   })
 
-  // Sắp xếp theo avg tăng dần → kỹ năng yếu lên đầu
   const sorted = [...skillStats].sort((a, b) => a.avg - b.avg)
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="font-heading text-3xl text-[#1C2B4A]">Heatmap kỹ năng</h1>
-        <p className="text-sm text-[#1C2B4A]/50 mt-1">
-          Trung bình điểm gần nhất của lớp — sắp xếp theo kỹ năng yếu nhất
+    <div className="min-h-screen bg-paper pb-12">
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="relative max-w-5xl mx-auto">
+          <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
+            <BarChart2 className="h-3 w-3 text-accent" strokeWidth={1.75} /> Phân bố kỹ năng cả lớp
+          </p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Heatmap kỹ năng</h1>
+          <p className="text-sm text-paper/65 mt-2">Trung bình điểm gần nhất — sắp xếp theo kỹ năng yếu nhất.</p>
+        </div>
+      </div>
+
+      <div className="px-4 sm:px-8 -mt-6 max-w-5xl mx-auto space-y-4 relative z-10">
+        <div className="flex gap-2 flex-wrap">
+          {(['ECH', 'SAI', 'BUOM'] as const).map(code => (
+            <a key={code} href={`/admin/skill-heatmap?course=${code}`}>
+              <Chip asButton active={courseCode === code}>
+                {code === 'ECH' ? 'Bơi Ếch' : code === 'SAI' ? 'Bơi Sải' : 'Bơi Bướm'}
+              </Chip>
+            </a>
+          ))}
+        </div>
+
+        <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[700px]">
+              <thead className="bg-paper-tint/30 border-b border-ink/8">
+                <tr>
+                  <th className="text-left px-5 py-3 eyebrow text-ink/55">Kỹ năng</th>
+                  <th className="text-center px-5 py-3 eyebrow text-ink/55">TB lớp</th>
+                  <th className="text-center px-5 py-3 eyebrow text-ink/55">Số HV</th>
+                  <th className="text-center px-5 py-3 eyebrow text-ink/55">Yếu ≤2</th>
+                  <th className="text-center px-5 py-3 eyebrow text-ink/55">Mạnh ≥4</th>
+                  <th className="text-left px-5 py-3 eyebrow text-ink/55">Phân bố</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map(s => {
+                  const tone = s.avg >= 4 ? 'success' : s.avg >= 3 ? 'warn' : 'danger'
+                  const bgClass = tone === 'success' ? 'bg-success/12' : tone === 'warn' ? 'bg-warn/12' : 'bg-danger/12'
+                  const textClass = tone === 'success' ? 'text-success' : tone === 'warn' ? 'text-warn' : 'text-danger'
+                  return (
+                    <tr key={s.key} className={`border-b border-ink/5 last:border-b-0 hover:bg-paper-tint/20 transition ${s.count === 0 ? 'opacity-50' : ''}`}>
+                      <td className="px-5 py-3 text-sm font-medium text-ink">{s.label}</td>
+                      <td className="px-5 py-3 text-center">
+                        <span className={`inline-block font-heading italic text-xl ${textClass} ${bgClass} px-3 py-1 rounded-pill`}>
+                          {s.count > 0 ? s.avg.toFixed(1) : '—'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-center text-sm text-ink/65">{s.count}</td>
+                      <td className="px-5 py-3 text-center text-sm text-danger font-medium">{s.weak > 0 ? s.weak : '—'}</td>
+                      <td className="px-5 py-3 text-center text-sm text-success font-medium">{s.strong > 0 ? s.strong : '—'}</td>
+                      <td className="px-5 py-3">
+                        {s.count > 0 && (
+                          <div className="flex h-2 rounded-full overflow-hidden bg-ink/8">
+                            <div className="bg-danger" style={{ width: `${(s.weak / s.count) * 100}%` }} />
+                            <div className="bg-warn" style={{ width: `${((s.count - s.weak - s.strong) / s.count) * 100}%` }} />
+                            <div className="bg-success" style={{ width: `${(s.strong / s.count) * 100}%` }} />
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <p className="text-xs text-ink/55 text-center">
+          <span className="inline-flex items-center gap-1 mr-3"><span className="h-2 w-2 rounded-pill bg-danger" /> &lt; 3 cần luyện</span>
+          <span className="inline-flex items-center gap-1 mr-3"><span className="h-2 w-2 rounded-pill bg-warn" /> 3–4 trung bình</span>
+          <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-pill bg-success" /> ≥4 vững</span>
         </p>
       </div>
-
-      {/* Course selector */}
-      <div className="flex gap-2 mb-6">
-        {(['ECH', 'SAI', 'BUOM'] as const).map(code => (
-          <a key={code} href={`/admin/skill-heatmap?course=${code}`}
-            className={`px-4 py-2 text-sm rounded-lg border ${
-              courseCode === code ? 'bg-[#1C2B4A] text-[#F6F1EA] border-[#1C2B4A]' : 'bg-white text-[#1C2B4A]/60 border-[#1C2B4A]/15'
-            }`}>
-            {code === 'ECH' ? 'Bơi Ếch' : code === 'SAI' ? 'Bơi Sải' : 'Bơi Bướm'}
-          </a>
-        ))}
-      </div>
-
-      {/* Heatmap */}
-      <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-
-        <table className="w-full min-w-[640px]">
-          <thead className="bg-[#F6F1EA]/40">
-            <tr className="text-left text-xs uppercase tracking-wider text-[#1C2B4A]/50">
-              <th className="px-5 py-3">Kỹ năng</th>
-              <th className="px-5 py-3 text-center">TB lớp</th>
-              <th className="px-5 py-3 text-center">Số HV đánh giá</th>
-              <th className="px-5 py-3 text-center">HV yếu (≤2)</th>
-              <th className="px-5 py-3 text-center">HV mạnh (≥4)</th>
-              <th className="px-5 py-3">Phân bố</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#1C2B4A]/5">
-            {sorted.map(s => {
-              const heat = s.avg >= 4 ? 'green' : s.avg >= 3 ? 'amber' : 'red'
-              const bgClass = heat === 'green' ? 'bg-green-50' : heat === 'amber' ? 'bg-amber-50' : 'bg-red-50'
-              return (
-                <tr key={s.key} className={s.count === 0 ? 'opacity-50' : ''}>
-                  <td className="px-5 py-3 text-sm text-[#1C2B4A] font-semibold">{s.label}</td>
-                  <td className={`px-5 py-3 text-center text-lg font-heading ${bgClass}`}>
-                    {s.count > 0 ? s.avg.toFixed(1) : '—'}
-                  </td>
-                  <td className="px-5 py-3 text-center text-sm text-[#1C2B4A]/60">{s.count}</td>
-                  <td className="px-5 py-3 text-center text-sm text-red-600 font-semibold">{s.weak > 0 ? s.weak : '—'}</td>
-                  <td className="px-5 py-3 text-center text-sm text-green-700 font-semibold">{s.strong > 0 ? s.strong : '—'}</td>
-                  <td className="px-5 py-3">
-                    {s.count > 0 && (
-                      <div className="flex h-2 rounded-full overflow-hidden bg-[#1C2B4A]/8">
-                        <div className="bg-red-500" style={{ width: `${(s.weak / s.count) * 100}%` }} />
-                        <div className="bg-amber-400" style={{ width: `${((s.count - s.weak - s.strong) / s.count) * 100}%` }} />
-                        <div className="bg-green-500" style={{ width: `${(s.strong / s.count) * 100}%` }} />
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-          </div>
-      </div>
-
-      <p className="text-xs text-[#1C2B4A]/40 mt-4">
-        🔴 TB &lt; 3 = lớp cần luyện thêm · 🟡 3-4 = trung bình · 🟢 ≥4 = vững vàng
-      </p>
     </div>
   )
 }
