@@ -268,7 +268,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
   const logoSvg = <PolarisStar size={26} withReflection animated color="currentColor" />
 
   return (
-    <div className="pola-page min-h-screen lg:flex">
+    <div className="pola-page min-h-screen lg:flex lg:items-start">
       {/* Skip link cho keyboard user */}
       <a
         href="#main-content"
