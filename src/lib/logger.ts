@@ -93,10 +93,12 @@ export async function logError({
   inputData?: Record<string, unknown>
   severity?: 'info' | 'warn' | 'error' | 'critical'
 }) {
-  log[severity](context, message, {
-    userId,
-    inputData: inputData ? sanitize(inputData) : undefined,
-  })
+  const data = { userId, inputData: inputData ? sanitize(inputData) : undefined }
+  if (severity === 'error' || severity === 'critical') {
+    log[severity](context, message, error, data)
+  } else {
+    log[severity](context, message, data)
+  }
 
   // TODO: Phase 1 sau khi có Prisma schema — lưu vào error_logs table
   // try {

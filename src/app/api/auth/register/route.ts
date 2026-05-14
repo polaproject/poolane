@@ -35,10 +35,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Supabase Auth user
+    // Phone không được truyền vào Supabase Auth vì cần E.164 format (+84...);
+    // Phone gốc lưu ở Prisma User table và dùng cho login qua email-alias.
     const adminSupabase = await createAdminClient()
     const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
       email: emailForAuth,
-      phone: input.phone,
       password: input.password,
       email_confirm: true,
       user_metadata: { full_name: input.fullName, role: 'student' }
