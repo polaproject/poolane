@@ -85,7 +85,7 @@ export default async function TeacherMetricsPage() {
       </div>
 
       {/* Class-wide metrics */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         <MetricCard
           icon={Users}
           label="Retention rate"
@@ -114,7 +114,9 @@ export default async function TeacherMetricsPage() {
         <div className="px-5 py-4 border-b border-[#1C2B4A]/8">
           <h2 className="font-semibold text-[#1C2B4A]">Theo giáo viên</h2>
         </div>
-        <table className="w-full">
+        <div className="overflow-x-auto">
+
+        <table className="w-full min-w-[640px]">
           <thead className="bg-[#F6F1EA]/40">
             <tr className="text-left text-xs uppercase tracking-wider text-[#1C2B4A]/50">
               <th className="px-5 py-3">Giáo viên</th>
@@ -150,6 +152,7 @@ export default async function TeacherMetricsPage() {
             ))}
           </tbody>
         </table>
+          </div>
       </div>
 
       <p className="text-xs text-[#1C2B4A]/40 mt-4">

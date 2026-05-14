@@ -295,6 +295,8 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
                 {/* Group header */}
                 <button
                   onClick={() => toggleGroup(group.key)}
+                  aria-expanded={isOpen}
+                  aria-label={`${isOpen ? 'Thu gọn' : 'Mở rộng'} nhóm ${group.label}`}
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs uppercase tracking-wider font-semibold transition-colors"
                   style={{
                     color: 'var(--pola-nav-muted)',
@@ -396,9 +398,11 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
         >
           <button
             onClick={() => setSidebarOpen(true)}
+            aria-label="Mở menu điều hướng"
+            className="p-2 -m-2 rounded-lg"
             style={{ color: 'var(--pola-nav-text)' }}
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-6 h-6" />
           </button>
           <div className="flex items-center gap-2">
             <span style={{ color: 'var(--pola-nav-text)' }}>
@@ -410,13 +414,16 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
               POOLANE
             </span>
           </div>
-          <div className="ml-auto flex items-center gap-2">
-            <Link href="/shared/notifications" style={{ color: 'var(--pola-nav-muted)' }}>
-              <Bell className="w-4 h-4" />
+          <div className="ml-auto flex items-center gap-1">
+            <Link href="/shared/notifications" aria-label="Thông báo"
+              className="p-2 rounded-lg"
+              style={{ color: 'var(--pola-nav-muted)' }}>
+              <Bell className="w-5 h-5" />
             </Link>
             <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
               style={{ background: 'var(--pola-accent)', color: '#000' }}
+              aria-label={`Tài khoản ${userFullName}`}
             >
               {userInitial}
             </div>
@@ -440,11 +447,13 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex flex-col items-center gap-0.5 py-2 px-3 transition-all"
+                aria-label={item.label}
+                aria-current={active ? 'page' : undefined}
+                className="flex flex-col items-center gap-0.5 py-2.5 px-3 transition-all min-w-[56px]"
                 style={{ color: active ? 'var(--pola-accent)' : 'var(--pola-nav-muted)' }}
               >
                 <ItemIcon className="w-5 h-5" />
-                <span className="text-[9px] font-medium leading-none">{item.label}</span>
+                <span className="text-[10px] font-medium leading-none">{item.label}</span>
               </Link>
             )
           })}

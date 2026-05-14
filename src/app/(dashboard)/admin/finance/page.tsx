@@ -124,7 +124,7 @@ export default async function FinancePage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
         {/* Breakdown */}
         <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 shadow-sm p-5">
           <h2 className="font-semibold text-[#1C2B4A] text-sm mb-4">Thu theo loại (tháng này)</h2>

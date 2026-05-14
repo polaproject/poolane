@@ -102,7 +102,8 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 overflow-hidden shadow-sm">
-        <table className="w-full">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px]">
           <thead className="bg-[#F6F1EA]/40">
             <tr className="text-left text-xs uppercase tracking-wider text-[#1C2B4A]/50">
               <th className="px-5 py-3">Sản phẩm</th>
@@ -173,6 +174,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {totalPages > 1 && (

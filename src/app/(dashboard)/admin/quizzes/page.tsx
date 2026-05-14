@@ -29,7 +29,8 @@ export default async function AdminQuizzesPage() {
             <p>Chưa có quiz nào</p>
           </div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px]">
             <thead className="bg-[#F6F1EA]/40">
               <tr className="text-left text-xs uppercase tracking-wider text-[#1C2B4A]/50">
                 <th className="px-5 py-3">Tiêu đề</th>
@@ -58,6 +59,7 @@ export default async function AdminQuizzesPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

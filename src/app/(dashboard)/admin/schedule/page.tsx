@@ -176,7 +176,9 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
         </div>
       </div>
 
-      {/* 7-day grid */}
+      {/* 7-day grid — horizontal scroll on small viewports */}
+      <div className="overflow-x-auto pb-2 -mx-6 px-6">
+      <div className="min-w-[820px]">
       <div className="grid grid-cols-7 gap-2 mb-2">
         {days.map(day => {
           const isToday = format(day, 'yyyy-MM-dd') === todayStr
@@ -236,6 +238,8 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
             </div>
           )
         })}
+      </div>
+      </div>
       </div>
 
       {/* Legend */}

@@ -85,7 +85,7 @@ export default async function RefundDetailPage({ params }: Params) {
                 </p>
                 <p className="font-semibold text-[#1C2B4A]">{fmt(refund.courseRefundAmount)}</p>
               </div>
-              <div className="grid grid-cols-3 gap-3 text-xs text-[#1C2B4A]/60">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs text-[#1C2B4A]/60">
                 <div>
                   <p className="text-[#1C2B4A]/40 uppercase tracking-wider">Đã học</p>
                   <p className="mt-0.5 text-[#1C2B4A]">{refund.courseSessionsAttended} buổi</p>
@@ -108,7 +108,7 @@ export default async function RefundDetailPage({ params }: Params) {
                 <p className="text-sm font-semibold text-[#1C2B4A]">🎟️ Hoàn vé bơi</p>
                 <p className="font-semibold text-[#1C2B4A]">{fmt(refund.ticketRefundAmount)}</p>
               </div>
-              <div className="grid grid-cols-3 gap-3 text-xs text-[#1C2B4A]/60">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs text-[#1C2B4A]/60">
                 <div>
                   <p className="text-[#1C2B4A]/40 uppercase tracking-wider">Đã dùng</p>
                   <p className="mt-0.5 text-[#1C2B4A]">{refund.ticketSessionsUsed} buổi</p>

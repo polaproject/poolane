@@ -142,7 +142,7 @@ export default function NewStudentPage() {
             <h2 className="text-base font-semibold text-[#1C2B4A]">Địa chỉ</h2>
           </CardHeader>
           <CardContent className="px-6 pb-6 space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="ward">Phường/Xã <span className="text-red-500">*</span></Label>
                 <Input id="ward" {...register('ward')} placeholder="Phường Bến Nghé" />

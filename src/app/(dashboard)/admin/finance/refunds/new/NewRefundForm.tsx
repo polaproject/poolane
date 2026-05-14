@@ -374,7 +374,7 @@ export function NewRefundForm({ students, preselected }: Props) {
               <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
                 Lý do <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 {REASON_OPTIONS.map(opt => (
                   <button
                     key={opt.value}

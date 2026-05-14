@@ -51,7 +51,7 @@ export default async function StaffDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         <StatCard label="Đăng ký chờ duyệt" value={pending} href="/staff/registrations" urgent={pending > 0} />
         <StatCard label="Học viên tiềm năng" value={prospects} href="/staff/students?status=prospect" />
         <StatCard label="Buổi hôm nay" value={todaySessions.length} href="/admin/schedule" />
@@ -89,7 +89,7 @@ export default async function StaffDashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Pending */}
         <div className="bg-white rounded-2xl shadow-sm border border-[#1C2B4A]/8 overflow-hidden">
           <div className="px-5 py-4 border-b border-[#1C2B4A]/8 flex items-center justify-between">

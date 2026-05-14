@@ -128,7 +128,8 @@ export default async function StudentsPage({ searchParams }: { searchParams: Sea
 
       {/* Table */}
       <div style={{ background: 'white', borderRadius: 16, border: '1px solid rgba(28,43,74,0.08)', boxShadow: 'var(--shadow-md)', overflow: 'hidden' }}>
-        <table className="table-pola">
+        <div className="overflow-x-auto">
+        <table className="table-pola min-w-[700px]">
           <thead>
             <tr>
               <th className="text-left">Học viên</th>
@@ -208,6 +209,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Sea
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Pagination */}

@@ -162,7 +162,7 @@ export default function OrdersPage() {
                     <label className="block text-xs uppercase tracking-wider text-[#1C2B4A]/50 font-semibold mb-1.5">
                       Phương thức thanh toán
                     </label>
-                    <div className="grid grid-cols-4 gap-1.5">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
                       {PAYMENT_METHODS.map(m => (
                         <button
                           key={m.value}

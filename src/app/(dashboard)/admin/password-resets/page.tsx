@@ -44,7 +44,9 @@ export default async function PasswordResetsPage({ searchParams }: { searchParam
         {items.length === 0 ? (
           <div className="p-12 text-center text-[#1C2B4A]/40">Không có yêu cầu nào</div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+
+          <table className="w-full min-w-[640px]">
             <thead className="bg-[#F6F1EA]/40">
               <tr className="text-left text-xs uppercase tracking-wider text-[#1C2B4A]/50">
                 <th className="px-5 py-3">SĐT / Tên</th>
@@ -77,6 +79,7 @@ export default async function PasswordResetsPage({ searchParams }: { searchParam
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

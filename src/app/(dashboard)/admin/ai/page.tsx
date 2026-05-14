@@ -70,7 +70,7 @@ export default function AIPage() {
 
       {/* Summary */}
       {summary && (
-        <div className="grid grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           {[
             { label: 'Tổng theo dõi', value: summary.total, color: 'text-[#1C2B4A]' },
             { label: '🔴 Nguy cơ cao', value: summary.high, color: 'text-red-600' },

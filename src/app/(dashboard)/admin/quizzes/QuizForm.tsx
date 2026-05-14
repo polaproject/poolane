@@ -139,7 +139,7 @@ export function QuizForm({ courses }: { courses: Course[] }) {
           <textarea rows={2} maxLength={1000} value={description} onChange={e => setDescription(e.target.value)}
             className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white" />
         </Field>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           <Field label="Khoá học liên kết">
             <select value={courseId} onChange={e => setCourseId(e.target.value)}
               className="w-full px-3 py-2 text-sm border border-[#1C2B4A]/20 rounded-lg bg-white">

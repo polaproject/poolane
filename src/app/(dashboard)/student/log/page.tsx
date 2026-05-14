@@ -84,7 +84,7 @@ export default function PracticeLogPage() {
 
       {showForm && (
         <form onSubmit={handleAdd} className="bg-white rounded-2xl border border-[#1C2B4A]/10 p-4 mb-4 shadow-sm space-y-3">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
             <div>
               <label className="text-xs text-[#1C2B4A]/50 mb-1 block">Ngày</label>
               <input type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))}

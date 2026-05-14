@@ -49,7 +49,8 @@ export default async function AdminBlogPage() {
             Chưa có bài viết nào — bấm &ldquo;Viết bài mới&rdquo; để bắt đầu
           </div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px]">
             <thead className="bg-[#F6F1EA]/40">
               <tr className="text-left text-xs uppercase tracking-wider text-[#1C2B4A]/50">
                 <th className="px-5 py-3">Tiêu đề</th>
@@ -109,6 +110,7 @@ export default async function AdminBlogPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

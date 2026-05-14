@@ -108,7 +108,7 @@ export default async function StudentPaymentsPage() {
         )}
 
         {/* Summary */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           <SummaryCard label="Đã đóng" value={totalIn} color="text-green-700" icon={<TrendingUp className="w-4 h-4" />} />
           <SummaryCard label="Đã hoàn" value={totalOut} color="text-orange-700" icon={<TrendingDown className="w-4 h-4" />} />
           <SummaryCard label="Tổng net" value={net} color="text-[#1C2B4A]" icon={<Wallet className="w-4 h-4" />} />

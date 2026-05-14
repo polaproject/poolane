@@ -154,7 +154,7 @@ export default async function ProgressPage() {
             {latest.metrics.length > 0 && (
               <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 p-4">
                 <h3 className="font-semibold text-[#1C2B4A] text-sm mb-3">Chỉ số thực tế</h3>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                   {latest.metrics.map(m => (
                     <div key={m.metricKey} className="text-center">
                       <p className="font-heading text-2xl text-[#1C2B4A]">{m.value}</p>

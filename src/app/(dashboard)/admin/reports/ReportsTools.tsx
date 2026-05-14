@@ -124,7 +124,7 @@ export function ReportsTools() {
               <p className="text-xs">Ngày {recon.date} · checked at {new Date(recon.checkedAt).toLocaleString('vi-VN')}</p>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
               <Stat label="GD hôm nay" value={String(recon.checks.payments?.count ?? 0)} />
               <Stat label="Buổi học" value={String(recon.checks.sessions?.count ?? 0)} />
               <Stat label="Đơn shop 7d" value={String(recon.checks.orders?.paidRecent ?? 0)} />

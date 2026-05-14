@@ -109,7 +109,7 @@ export default async function StaffStudentDetailPage({ params }: Params) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         <div className={`bg-white rounded-2xl p-4 border ${sessionsLeft !== null && sessionsLeft <= 2 ? 'border-red-200' : 'border-[#1C2B4A]/8'}`}>
           <div className="flex items-center gap-2 mb-3">
             <Ticket className="w-4 h-4 text-[#5B8E9F]" />
