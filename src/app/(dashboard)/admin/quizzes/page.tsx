@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Plus, HelpCircle } from 'lucide-react'
 import { format } from 'date-fns'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 export default async function AdminQuizzesPage() {
   await requireRole(['admin', 'staff'])
@@ -24,10 +25,12 @@ export default async function AdminQuizzesPage() {
 
       <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 overflow-hidden shadow-sm">
         {quizzes.length === 0 ? (
-          <div className="p-12 text-center text-[#1C2B4A]/40">
-            <HelpCircle className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p>Chưa có quiz nào</p>
-          </div>
+          <EmptyState
+            icon={HelpCircle}
+            title="Chưa có quiz nào"
+            description="Tạo quiz để học viên ôn lại kiến thức sau buổi học"
+            action={{ label: 'Tạo quiz mới', href: '/admin/quizzes/new' }}
+          />
         ) : (
           <div className="overflow-x-auto">
           <table className="w-full min-w-[640px]">

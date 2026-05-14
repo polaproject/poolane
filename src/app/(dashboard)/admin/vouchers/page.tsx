@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { Plus, Tag } from 'lucide-react'
 import { format, isFuture, isPast } from 'date-fns'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 function fmt(n: number) { return n.toLocaleString('vi-VN') + 'đ' }
 
@@ -28,10 +29,12 @@ export default async function VouchersPage() {
 
       <div className="bg-white rounded-2xl border border-[#1C2B4A]/8 overflow-hidden shadow-sm">
         {vouchers.length === 0 ? (
-          <div className="p-12 text-center text-[#1C2B4A]/40">
-            <Tag className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p>Chưa có voucher nào</p>
-          </div>
+          <EmptyState
+            icon={Tag}
+            title="Chưa có voucher nào"
+            description="Tạo mã giảm giá để áp dụng cho khoá học hoặc shop"
+            action={{ label: 'Tạo mã mới', href: '/admin/vouchers/new' }}
+          />
         ) : (
           <div className="overflow-x-auto">
 

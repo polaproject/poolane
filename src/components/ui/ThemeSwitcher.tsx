@@ -1,6 +1,7 @@
 'use client'
 
 import { useTheme, type ThemeKey } from '@/components/providers/ThemeProvider'
+import { Palette } from 'lucide-react'
 
 const THEMES: Array<{ key: ThemeKey; label: string; dot: string; title: string }> = [
   { key: 'A', label: 'A', dot: '#C8A84B', title: 'Đêm & Sao' },
@@ -21,6 +22,8 @@ export function ThemeSwitcher() {
           key={t.key}
           onClick={() => setTheme(t.key)}
           title={t.title}
+          aria-label={`Đổi theme sang ${t.title}`}
+          aria-pressed={theme === t.key}
           className="w-6 h-6 rounded-full flex items-center justify-center transition-all text-xs font-bold"
           style={{
             background: theme === t.key ? t.dot : 'transparent',
@@ -32,5 +35,35 @@ export function ThemeSwitcher() {
         </button>
       ))}
     </div>
+  )
+}
+
+/** Compact 1-button cycle theme — for mobile header */
+export function ThemeSwitcherCompact() {
+  const { theme, setTheme } = useTheme()
+  const current = THEMES.find(t => t.key === theme) ?? THEMES[0]
+
+  function cycle() {
+    const idx = THEMES.findIndex(t => t.key === theme)
+    const next = THEMES[(idx + 1) % THEMES.length]
+    setTheme(next.key)
+  }
+
+  return (
+    <button
+      onClick={cycle}
+      title={`Theme hiện tại: ${current.title}. Bấm để đổi.`}
+      aria-label={`Đổi theme. Hiện tại: ${current.title}`}
+      className="p-2 rounded-lg"
+      style={{ color: 'var(--pola-nav-muted)' }}
+    >
+      <span className="relative inline-flex items-center justify-center">
+        <Palette className="w-5 h-5" />
+        <span
+          className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border"
+          style={{ background: current.dot, borderColor: 'var(--pola-nav-bg)' }}
+        />
+      </span>
+    </button>
   )
 }
