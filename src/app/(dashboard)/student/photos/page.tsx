@@ -32,7 +32,7 @@ export default async function StudentPhotosPage() {
                 className="group block bg-white rounded-xl border border-[#1C2B4A]/8 overflow-hidden hover:shadow-md transition-shadow">
                 <div className="aspect-square bg-[#F6F1EA]/40 overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.photoUrl} alt={p.caption ?? ''}
+                  <img src={p.photoUrl} alt={p.caption ?? 'Ảnh lớp Poolane'}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
                 {p.caption && (

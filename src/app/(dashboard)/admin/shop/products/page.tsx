@@ -130,7 +130,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                       <Link href={`/admin/shop/products/${p.id}`} className="flex items-center gap-3 group">
                         {Array.isArray(p.photos) && p.photos.length > 0 ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={(p.photos as string[])[0]} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                          <img src={(p.photos as string[])[0]} alt={`Ảnh sản phẩm ${p.name}`} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                         ) : (
                           <div className="w-10 h-10 rounded-lg bg-[#F6F1EA] flex items-center justify-center text-[#1C2B4A]/20 text-xs flex-shrink-0">—</div>
                         )}

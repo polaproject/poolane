@@ -68,7 +68,7 @@ export default async function AdminBlogPage() {
                     <div className="flex items-center gap-3">
                       {p.coverImageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={p.coverImageUrl} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                        <img src={p.coverImageUrl} alt={`Ảnh bìa: ${p.title}`} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
                       ) : (
                         <div className="w-12 h-12 rounded-lg bg-[#F6F1EA] flex items-center justify-center text-[#1C2B4A]/20 text-xs">
                           —

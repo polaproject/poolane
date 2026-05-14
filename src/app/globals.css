@@ -176,7 +176,7 @@
   --pola-card-bg:    #132035;
   --pola-border:     rgba(229,237,248,0.08);
   --pola-text:       #E5EDF8;
-  --pola-text-muted: rgba(229,237,248,0.45);
+  --pola-text-muted: rgba(229,237,248,0.68);   /* tăng từ 0.45 cho WCAG AA contrast */
 }
 
 /* ── Poolane Shadow System ───────────────────────────────── */

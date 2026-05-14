@@ -30,7 +30,7 @@ export default async function AdminPhotosPage() {
               <div key={p.id} className="bg-white rounded-xl border border-[#1C2B4A]/8 overflow-hidden">
                 <div className="aspect-square bg-[#F6F1EA]/40">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.photoUrl} alt={p.caption ?? ''} className="w-full h-full object-cover" />
+                  <img src={p.photoUrl} alt={p.caption ?? 'Ảnh lớp Poolane'} className="w-full h-full object-cover" />
                 </div>
                 {p.caption && <p className="text-xs text-[#1C2B4A]/70 p-2 line-clamp-2">{p.caption}</p>}
                 <p className="text-[10px] text-[#1C2B4A]/40 px-2 pb-2">{format(p.createdAt, 'dd/MM/yyyy')}</p>

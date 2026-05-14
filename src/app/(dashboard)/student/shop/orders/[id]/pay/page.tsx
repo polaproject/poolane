@@ -73,7 +73,7 @@ export default async function PayOrderPage({ params }: Params) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={qrInfo.qrUrl}
-            alt="VietQR thanh toán"
+            alt="Mã QR thanh toán đơn hàng Poolane"
             className="mx-auto w-full max-w-xs rounded-xl border border-[#1C2B4A]/10"
           />
           <p className="text-xs text-[#1C2B4A]/40 mt-3">
