@@ -34,9 +34,14 @@ export function isVietQRConfigured(): boolean {
   )
 }
 
-/** Generate memo từ order ID — format `POLA<8chars uppercase>` */
+/** Generate memo từ order ID — format `POLA<8chars uppercase>` (shop order) */
 export function buildMemo(orderId: string): string {
   return `POLA${orderId.replace(/-/g, '').slice(0, 8).toUpperCase()}`
+}
+
+/** Memo cho enrollment (học phí) — format `POLAE<8chars uppercase>` */
+export function buildEnrollmentMemo(enrollmentId: string): string {
+  return `POLAE${enrollmentId.replace(/-/g, '').slice(0, 8).toUpperCase()}`
 }
 
 /** Match memo từ sao kê về order ID (truy ngược) */
