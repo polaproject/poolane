@@ -7,6 +7,8 @@ import { createProductSchema, productListQuerySchema } from '@/lib/validations/p
 // ─── GET /api/shop/products ─────────────────────────────
 export async function GET(request: NextRequest) {
   try {
+    // Phase 12 security fix: yêu cầu auth — student/staff/admin đều xem được nhưng phải login
+    await requireRole(['admin', 'staff', 'student'])
     const { searchParams } = request.nextUrl
     const query = productListQuerySchema.safeParse({
       page: searchParams.get('page') ?? undefined,

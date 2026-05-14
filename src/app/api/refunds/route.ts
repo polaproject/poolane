@@ -128,6 +128,24 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Audit log (Phase 12 — bổ sung cho financial transaction tracking)
+    await prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        role: user.role,
+        action: 'refund.request',
+        entityType: 'refund_request',
+        entityId: refund.id,
+        afterData: {
+          studentId: input.studentId,
+          courseRefundAmount,
+          ticketRefundAmount,
+          totalRefundAmount,
+          reason: input.reason,
+        }
+      }
+    })
+
     // Thông báo cho admin
     log.info('refunds.create', `Refund request created for student ${input.studentId}`, {
       total: totalRefundAmount, requestedBy: user.id
