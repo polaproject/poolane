@@ -441,9 +441,39 @@ model Payment {
   notes           String?
   isReversal      Boolean       @default(false) @map("is_reversal")
 
+  gatewayName          String? @map("gateway_name")
+  gatewayTransactionId String? @map("gateway_transaction_id")
+  gatewayStatusCode    String? @map("gateway_status_code")
+
   student Student @relation(fields: [studentId], references: [id])
 
   @@map("payments")
+  @@index([gatewayTransactionId])
+}
+
+model GatewayTransaction {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  gatewayName   String   @map("gateway_name")
+  requestId     String   @unique @map("request_id")
+  orderId       String   @map("order_id")
+  orderInfo     String?  @map("order_info")
+  amount        Int
+  status        String   @default("pending")
+  studentId     String?  @map("student_id")
+  referenceType String?  @map("reference_type")
+  referenceId   String?  @map("reference_id")
+  paymentId     String?  @map("payment_id")
+  rawRequest    Json     @default("{}") @map("raw_request")
+  rawResponse   Json     @default("{}") @map("raw_response")
+  errorMessage  String?  @map("error_message")
+  completedAt   DateTime? @map("completed_at")
+
+  @@map("gateway_transactions")
+  @@index([orderId])
+  @@index([status])
 }
 
 enum PaymentType {
@@ -950,4 +980,59 @@ model Faq {
   isActive   Boolean @default(true) @map("is_active")
 
   @@map("faqs")
+}
+
+model LessonPlan {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  sessionId     String  @unique @map("session_id")
+  courseId      String? @map("course_id")
+  focusSkills   Json    @default("[]") @map("focus_skills")
+  warmupNotes   String? @map("warmup_notes")
+  mainNotes     String? @map("main_notes")
+  cooldownNotes String? @map("cooldown_notes")
+  equipment     String?
+  createdBy     String  @map("created_by")
+
+  @@map("lesson_plans")
+}
+
+model Exercise {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  title       String
+  description String
+  skillTarget String   @map("skill_target")
+  difficulty  String
+  videoUrl    String?  @map("video_url")
+  stepsJson   Json     @default("[]") @map("steps_json")
+  isPublished Boolean  @default(true) @map("is_published")
+  createdBy   String   @map("created_by")
+
+  assignments ExerciseAssignment[]
+
+  @@map("exercises")
+  @@index([skillTarget, difficulty])
+}
+
+model ExerciseAssignment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  exerciseId  String    @map("exercise_id")
+  studentId   String    @map("student_id")
+  assignedBy  String    @map("assigned_by")
+  dueDate     DateTime? @map("due_date")
+  status      String    @default("assigned")
+  studentNote String?   @map("student_note")
+  completedAt DateTime? @map("completed_at")
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@map("exercise_assignments")
+  @@index([studentId, status])
 }
