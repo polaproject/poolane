@@ -11,23 +11,39 @@ const NAV_LINKS = [
 export function PublicHeader() {
   return (
     <header className="sticky top-4 z-40 px-3 sm:px-4">
-      <nav className="mx-auto max-w-6xl glass-pill px-3 py-2 flex items-center gap-2">
-        <Link href="/" aria-label="Poolane — về trang chủ" className="flex items-center gap-2 pl-2 pr-3 py-1 group">
-          <span className="grid place-items-center h-8 w-8 rounded-pill bg-accent text-ink shadow-soft transition-transform duration-300 [transition-timing-function:var(--ease-spring)] group-hover:rotate-[18deg] group-hover:scale-110">
+      <nav
+        className="mx-auto max-w-6xl px-3 py-2 flex items-center gap-2 lqg-card lqg-card-medium lqg-specular"
+        style={{ borderRadius: 'var(--lqg-r-pill)' }}
+      >
+        <Link
+          href="/"
+          aria-label="Poolane — về trang chủ"
+          className="flex items-center gap-2 pl-2 pr-3 py-1 group relative z-10"
+        >
+          <span
+            className="grid place-items-center h-8 w-8 rounded-full transition-transform duration-300 group-hover:rotate-[18deg] group-hover:scale-110"
+            style={{
+              background: 'linear-gradient(135deg, var(--lqg-accent), var(--lqg-accent-deep))',
+              color: 'var(--lqg-text-on-accent)',
+              boxShadow: '0 4px 12px -4px color-mix(in srgb, var(--lqg-accent) 50%, transparent)',
+              transitionTimingFunction: 'var(--lqg-ease-overshoot)',
+            }}
+          >
             <PolarisStar size={18} withReflection={false} animated />
           </span>
           <div className="hidden sm:block">
-            <p className="font-body font-bold text-sm tracking-[0.16em] text-foreground leading-none">POOLANE</p>
-            <p className="text-[10px] tracking-wide text-mist leading-none mt-0.5">a Pola Project</p>
+            <p className="font-body font-bold text-sm tracking-[0.16em] leading-none lqg-text-primary">POOLANE</p>
+            <p className="text-[10px] tracking-wide leading-none mt-0.5 lqg-text-tertiary">a Pola Project</p>
           </div>
         </Link>
 
-        <ul className="hidden md:flex items-center gap-1 ml-2 text-sm">
+        <ul className="hidden md:flex items-center gap-1 ml-2 text-sm relative z-10">
           {NAV_LINKS.map(l => (
             <li key={l.href}>
               <Link
                 href={l.href}
-                className="px-3 py-1.5 rounded-pill text-foreground/75 hover:text-foreground hover:bg-foreground/5 transition"
+                className="px-3 py-1.5 rounded-full lqg-text-secondary hover:lqg-text-primary transition"
+                style={{ transitionTimingFunction: 'var(--lqg-ease-soft)', transitionDuration: '200ms' }}
               >
                 {l.label}
               </Link>
@@ -35,17 +51,17 @@ export function PublicHeader() {
           ))}
         </ul>
 
-        <div className="ml-auto flex items-center gap-1.5">
-          <ThemeSwitcherCompact className="p-2 rounded-pill text-foreground/70 hover:text-foreground hover:bg-foreground/5 transition" />
+        <div className="ml-auto flex items-center gap-1.5 relative z-10">
+          <ThemeSwitcherCompact className="p-2 rounded-full lqg-text-secondary hover:lqg-text-primary transition" />
           <Link
             href="/login"
-            className="hidden sm:inline-flex px-3 py-1.5 text-sm font-medium text-foreground/80 hover:text-foreground rounded-pill hover:bg-foreground/5 transition"
+            className="hidden sm:inline-flex px-3 py-1.5 text-sm font-medium rounded-full lqg-text-secondary hover:lqg-text-primary transition"
           >
             Đăng nhập
           </Link>
           <Link
             href="/register"
-            className="inline-flex px-4 py-2 text-sm font-semibold bg-ink text-paper rounded-pill hover:bg-foreground/90 transition shadow-soft"
+            className="lqg-btn lqg-btn-primary lqg-btn-sm"
           >
             Tạo tài khoản
           </Link>
@@ -57,38 +73,52 @@ export function PublicHeader() {
 
 export function PublicFooter() {
   return (
-    <footer className="mt-16 bg-ink text-paper/75 py-10">
+    <footer
+      className="mt-20 py-12 relative z-10"
+      style={{
+        background: 'var(--lqg-bg-elevated)',
+        borderTop: '1px solid var(--lqg-edge-hi)',
+        backdropFilter: 'var(--lqg-lens-light)',
+        WebkitBackdropFilter: 'var(--lqg-lens-light)',
+      }}
+    >
       <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-3 gap-8 text-sm">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="grid place-items-center h-7 w-7 rounded-pill bg-accent text-ink">
+          <div className="flex items-center gap-2 mb-2">
+            <span
+              className="grid place-items-center h-7 w-7 rounded-full"
+              style={{
+                background: 'linear-gradient(135deg, var(--lqg-accent), var(--lqg-accent-deep))',
+                color: 'var(--lqg-text-on-accent)',
+              }}
+            >
               <PolarisStar size={14} withReflection={false} animated={false} />
             </span>
-            <p className="font-body font-bold text-paper tracking-[0.18em] text-lg leading-none">POOLANE</p>
+            <p className="font-body font-bold tracking-[0.18em] text-lg leading-none lqg-text-primary">POOLANE</p>
           </div>
-          <p className="text-xs tracking-wider text-paper/65 ml-9">a Pola Project</p>
-          <p className="mt-4 text-paper/65 leading-relaxed">
+          <p className="text-xs tracking-wider ml-9 lqg-text-tertiary">a Pola Project</p>
+          <p className="mt-4 leading-relaxed lqg-text-secondary">
             Dạy bơi không chỉ để bơi — kết nối thân với tâm, xây dựng cộng đồng những người trưởng thành cùng sở thích.
           </p>
         </div>
         <div>
-          <p className="eyebrow mb-3">Khám phá</p>
-          <ul className="space-y-2">
-            <li><Link href="/courses" className="hover:text-paper transition">Khoá học</Link></li>
-            <li><Link href="/blog" className="hover:text-paper transition">Blog</Link></li>
-            <li><Link href="/faq" className="hover:text-paper transition">Câu hỏi thường gặp</Link></li>
-            <li><Link href="/privacy" className="hover:text-paper transition">Chính sách bảo mật</Link></li>
+          <p className="lqg-eyebrow mb-3">Khám phá</p>
+          <ul className="space-y-2 lqg-text-secondary">
+            <li><Link href="/courses" className="hover:lqg-text-primary transition">Khoá học</Link></li>
+            <li><Link href="/blog" className="hover:lqg-text-primary transition">Blog</Link></li>
+            <li><Link href="/faq" className="hover:lqg-text-primary transition">Câu hỏi thường gặp</Link></li>
+            <li><Link href="/privacy" className="hover:lqg-text-primary transition">Chính sách bảo mật</Link></li>
           </ul>
         </div>
         <div>
-          <p className="eyebrow mb-3">Liên hệ</p>
-          <ul className="space-y-2 text-paper/70">
-            <li>Email: <a href="mailto:support@poolane.vn" className="hover:text-paper transition">support@poolane.vn</a></li>
+          <p className="lqg-eyebrow mb-3">Liên hệ</p>
+          <ul className="space-y-2 lqg-text-secondary">
+            <li>Email: <a href="mailto:support@poolane.vn" className="hover:lqg-text-primary transition">support@poolane.vn</a></li>
             <li>Domain: poolane.vn</li>
           </ul>
         </div>
       </div>
-      <div className="max-w-6xl mx-auto px-4 mt-8 pt-6 border-t border-paper/10 text-xs text-paper/65">
+      <div className="max-w-6xl mx-auto px-4 mt-8 pt-6 text-xs lqg-text-tertiary" style={{ borderTop: '1px solid var(--lqg-edge-hi)' }}>
         © {new Date().getFullYear()} Poolane · a Pola Project
       </div>
     </footer>

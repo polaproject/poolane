@@ -3,13 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
 import { PolarisStar } from '@/components/brand/PolarisStar'
+import { GlassCard, GlassButton, GlassInput, AmbientMesh } from '@/components/ui/glass'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -59,87 +56,77 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-paper p-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
+      <AmbientMesh />
+      <div className="w-full max-w-sm relative z-10">
 
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <span className="text-foreground mb-3">
+          <span className="mb-3 lqg-text-primary">
             <PolarisStar size={56} withReflection animated glow />
           </span>
-          <h1 className="font-body font-bold text-xl tracking-[0.18em] text-foreground">POOLANE</h1>
-          <p className="text-xs tracking-[0.15em] text-mist uppercase mt-0.5">a Pola Project</p>
+          <h1 className="font-body font-bold text-xl tracking-[0.18em] lqg-text-primary">POOLANE</h1>
+          <p className="text-xs tracking-[0.15em] uppercase mt-0.5 lqg-text-tertiary">a Pola Project</p>
         </div>
 
         {/* Login Card */}
-        <Card className="border-0 shadow-lg shadow-ink/8 bg-[var(--surface)]">
-          <CardHeader className="pb-4 pt-6 px-6">
-            <h2 className="font-heading text-2xl text-foreground">Đăng nhập</h2>
-            <p className="text-sm text-foreground/50 mt-1">Chào mừng bạn trở lại 🌊</p>
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="phone" className="text-foreground text-sm font-medium">
-                  Số điện thoại
+        <GlassCard tier="heavy" radius="xl" interactive={false} className="p-6 sm:p-7">
+          <div className="mb-5">
+            <h2 className="lqg-display text-3xl mb-1">Đăng nhập</h2>
+            <p className="text-sm lqg-text-secondary">Chào mừng bạn trở lại 🌊</p>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="phone" className="text-sm font-medium lqg-text-primary">
+                Số điện thoại
+              </Label>
+              <GlassInput
+                id="phone"
+                type="tel"
+                placeholder="0912 345 678"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="password" className="text-sm font-medium lqg-text-primary">
+                  Mật khẩu
                 </Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="0912 345 678"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  required
-                  disabled={loading}
-                  className="border-foreground/15 focus-visible:ring-foreground/30 placeholder:text-foreground/30"
-                />
+                <a href="/forgot-password" className="text-xs lqg-text-accent hover:underline">
+                  Quên mật khẩu?
+                </a>
               </div>
+              <GlassInput
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
 
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="password" className="text-foreground text-sm font-medium">
-                    Mật khẩu
-                  </Label>
-                  <a
-                    href="/forgot-password"
-                    className="text-xs text-[#5B8E9F] hover:underline"
-                  >
-                    Quên mật khẩu?
-                  </a>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  required
-                  disabled={loading}
-                  className="border-foreground/15 focus-visible:ring-foreground/30"
-                />
-              </div>
+            <GlassButton
+              type="submit"
+              variant="primary"
+              size="lg"
+              loading={loading}
+              disabled={!phone || !password}
+              className="w-full mt-2"
+            >
+              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            </GlassButton>
+          </form>
+        </GlassCard>
 
-              <Button
-                type="submit"
-                disabled={loading || !phone || !password}
-                className="w-full bg-ink-soft hover:bg-foreground/90 text-paper font-semibold h-11 mt-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Đang đăng nhập...
-                  </>
-                ) : (
-                  'Đăng nhập'
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <p className="text-center text-sm text-foreground/50 mt-6">
+        <p className="text-center text-sm mt-6 lqg-text-secondary">
           Chưa có tài khoản?{' '}
-          <a href="/register" className="text-[#5B8E9F] hover:underline font-semibold">
+          <a href="/register" className="lqg-text-accent hover:underline font-semibold">
             Tạo tài khoản mới
           </a>
         </p>
