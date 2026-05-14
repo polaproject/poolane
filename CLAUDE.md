@@ -70,8 +70,9 @@ LAYER 6 — Validation & Security
 | Login/logout | ✅ |
 | Middleware route protection | ✅ |
 | Role-based routing | ✅ |
-| Đăng ký tài khoản (học viên tự tạo) | ❌ Chưa có UI |
-| Reset mật khẩu | ❌ Chưa có flow |
+| Đăng ký tài khoản (học viên tự tạo) | ✅ `/register` với welcome email |
+| Reset mật khẩu | ✅ `/forgot-password` → admin xử lý qua `/admin/password-resets`, gen temp password 1-time-display |
+| Public landing pages | ✅ `/`, `/courses`, `/faq`, `/privacy` (NĐ 13/2023) |
 
 ### Module: Học Viên (Students)
 | Hạng mục | Status |
@@ -86,16 +87,18 @@ LAYER 6 — Validation & Security
 | Student: tự sửa trường mềm | ✅ `/student/profile/edit-soft` (occupation, healthNotes, emergency) |
 | Student: yêu cầu cập nhật trường định danh | ✅ `/student/profile/request-change` |
 | Admin/Staff: duyệt yêu cầu cập nhật | ✅ `/admin/profile-requests` |
+| Avatar upload (Supabase Storage) | ✅ `PhotoUploader` + bucket `poolane-public` (cần user tạo bucket lần đầu) |
 
 ### Module: Lịch Học & Điểm Danh
 | Hạng mục | Status |
 |---|---|
-| Admin: lịch tuần | ✅ |
+| Admin: lịch tuần | ✅ Redesigned — hiển thị HV inline (không cần click) |
+| Admin: chi tiết buổi học | ✅ `/admin/schedule/sessions/[id]` với 4 section pending/approved/waitlist/khác |
 | Admin: tạo buổi học | ✅ |
 | Staff: duyệt đăng ký | ✅ |
 | Staff: điểm danh | ✅ |
 | Student: đăng ký buổi | ✅ |
-| Student: xem lịch của mình | ❌ Chưa có view cá nhân |
+| Student: xem lịch của mình | ✅ `/student/my-schedule` (30 ngày + attendance result) |
 | Huỷ ca + hoàn vé tự động | ✅ |
 
 ### Module: Tài Chính
@@ -106,8 +109,14 @@ LAYER 6 — Validation & Security
 | Admin: danh sách hoàn tiền | ✅ `/admin/finance/refunds` với tab status + summary |
 | Admin: tạo yêu cầu hoàn tiền | ✅ `/admin/finance/refunds/new` (preview tự tính) |
 | Admin: duyệt + đánh dấu đã chuyển | ✅ `/admin/finance/refunds/[id]` |
-| Student: xem lịch sử thanh toán | ❌ Chưa có trang |
-| Export Excel doanh thu | ❌ Chưa implement |
+| Student: xem lịch sử thanh toán | ✅ `/student/payments` với 3 summary card + transactions list |
+| Student: xem khoản cần đóng | ✅ Banner đầu `/student/payments` liệt kê enrollment debt + nút thanh toán |
+| Export Excel doanh thu | ✅ `/admin/reports` với 3 sheet (Tổng quan / Chi tiết / Theo loại) |
+| Reconciliation báo cáo | ✅ `/admin/reports` check 4 mục mỗi ngày |
+| **VietQR thanh toán** | ✅ Shop + enrollment đều có QR pay page, admin xác nhận thủ công |
+| **Sepay webhook tự động** | ✅ Code sẵn (cần `SEPAY_API_KEY` env), unmatched UI tại `/admin/finance/unmatched` |
+| Voucher CRUD | ✅ `/admin/vouchers`, 3 loại discount (percent/fixed/free pool session), tracking VoucherUsage |
+| Improvement pack auto-create | ✅ Khi đơn shop `improvement_pack` được paid → tự tạo `ImprovementSessionPack` |
 
 ### Module: Đánh Giá Kỹ Năng
 | Hạng mục | Status |
@@ -115,55 +124,71 @@ LAYER 6 — Validation & Security
 | Staff: form đánh giá quick/detailed | ✅ |
 | Staff: pre-fill từ buổi trước | ✅ |
 | Student: xem tiến độ + radar chart | ✅ |
-| Admin: heatmap kỹ năng yếu lớp | ❌ Chưa có UI |
-| Tự đánh giá của học viên (buổi 5,9) | ❌ Chưa có UI |
+| Admin: heatmap kỹ năng yếu lớp | ✅ `/admin/skill-heatmap` với selector ECH/SAI/BUOM |
+| Tự đánh giá của học viên (buổi 5,9) | ✅ `/student/self-assessment/[courseId]/[sessionNumber]` |
+| Hiệu quả giảng dạy theo giáo viên | ✅ `/admin/teacher-metrics` |
+| Kế hoạch bài học (LessonPlan) | ✅ `/staff/lesson-plan/[sessionId]` |
+| Thư viện bài tập (Exercise) | ✅ `/admin/exercises` + `/student/exercises` |
+| Practice assignment (gán bài tập) | ✅ `/student/exercises/my` |
 
 ### Module: Shop
 | Hạng mục | Status |
 |---|---|
-| Student: duyệt + đặt hàng | ✅ |
-| Admin: duyệt/xử lý đơn hàng | ✅ |
-| Admin: thêm/sửa/ngừng bán sản phẩm | ✅ `/admin/shop/products` (4 loại với conditional fields) |
+| Student: duyệt + đặt hàng | ✅ với search + 5 filter tabs + thumbnail ảnh |
+| Student: xem đơn hàng của mình | ✅ `/student/shop/orders` |
+| Student: thanh toán qua VietQR | ✅ `/student/shop/orders/[id]/pay` |
+| Admin: duyệt/xử lý đơn hàng | ✅ tab pending/approved/paid/fulfilled/cancelled |
+| Admin: xác nhận đã nhận tiền (manual) | ✅ button trên `/admin/shop/orders` |
+| Admin: thêm/sửa/ngừng bán sản phẩm | ✅ `/admin/shop/products` (4 loại với conditional fields + photo upload) |
 | Seed sản phẩm mẫu | ✅ 9 sản phẩm — `npx dotenv -e .env.local -- npx tsx prisma/seed-products.ts` |
 
 ### Module: Thông Báo & Communication
 | Hạng mục | Status |
 |---|---|
-| Notification center (xem + đánh dấu đọc) | ✅ |
-| Admin: broadcast toàn lớp | ✅ |
-| Push notification (Web Push API) | ❌ Chưa implement |
-| Email gửi tự động (Resend) | ❌ Templates chưa có |
+| Notification center (xem + đánh dấu đọc) | ✅ `/shared/notifications` |
+| Admin: broadcast toàn lớp | ✅ `/admin/broadcast` |
+| Push notification (Web Push API) | ✅ Infrastructure: `sw.js`, `PushSubscribeButton`, `/api/push/subscribe`, `manifest.json` (cần `VAPID_PUBLIC/PRIVATE_KEY` env để dùng thật) |
+| Email gửi tự động (Resend) | ✅ 5 templates + sendEmail wrapper. Tích vào: register (welcome), payment record (receipt), refund transfer (confirmation), cron birthday/absence |
 
 ### Module: Blog & Nội Dung
 | Hạng mục | Status |
 |---|---|
-| Public blog listing + detail | ✅ |
+| Public blog listing + detail | ✅ Với PublicHeader/Footer + cover image |
 | API tạo bài viết | ✅ |
-| **Admin: UI tạo/sửa bài viết** | **❌ THIẾU** |
+| Admin: UI tạo/sửa bài viết | ✅ `/admin/blog` + `/admin/blog/new` + `/admin/blog/[id]/edit` (Markdown editor, auto-slug có dấu Việt, cover upload) |
 | Quiz API | ✅ |
-| **Student: UI làm quiz** | **❌ THIẾU** |
-| Events UI | ❌ Chưa có |
-| Challenges UI | ❌ Chưa có |
+| Student: UI làm quiz | ✅ `/student/quiz/[id]` với 3 loại câu hỏi + giải thích sau khi sai |
+| Admin: UI tạo quiz | ✅ `/admin/quizzes/new` với dynamic question editor |
+| Events UI | ✅ `/admin/events` + `/student/events` |
+| Challenges UI | ✅ `/student/challenges` với progress bar |
+| Video Drive links | ✅ `/staff/videos` admin add, `/student/videos` iframe embed Drive preview |
+| Class photo album | ✅ `/admin/photos` upload + `/student/photos` gallery |
+| FAQ public | ✅ `/faq` (8 entries seed) |
 
 ### Module: AI & Analytics
 | Hạng mục | Status |
 |---|---|
 | AI dropout prediction + UI | ✅ |
 | Staff stats (thống kê giảng dạy) | ✅ |
-| Export Excel báo cáo | ❌ Chưa implement |
-| Reconciliation report hàng ngày | ❌ Chưa implement |
+| Export Excel báo cáo | ✅ `/api/reports/revenue` (3 sheet) |
+| Reconciliation report hàng ngày | ✅ `/api/reports/reconciliation` + cron job |
+| Cron jobs (4 jobs) | ✅ `vercel.json` + `/api/cron/{birthday,pulse-check,reconciliation,absence-reminder}` (cần `CRON_SECRET` env) |
 
 ### Module: UI/UX
 | Hạng mục | Status |
 |---|---|
-| Sidebar navigation | ✅ |
-| Theme A/B/D switcher | ✅ |
+| Sidebar navigation | ✅ 8 nhóm có thể expand/collapse + Việt hoá + localStorage state |
+| Theme A/B/D switcher | ✅ + ThemeSwitcherCompact ở mobile header |
 | Design system (shadows, cards, badges) | ✅ globals.css |
-| Applied to: dashboard, students list | ✅ |
-| Applied to: finance, schedule, pulse, other pages | ❌ Chưa áp dụng |
-| Mobile responsive audit | ❌ Chưa test |
-| Loading states (skeleton) | ❌ Chưa implement |
-| Error boundaries | ❌ Chưa implement |
+| Mobile audit (tables overflow + grid breakpoints + touch targets 44px) | ✅ 29 files fix |
+| Focus rings (a11y keyboard navigation) | ✅ `:focus-visible` outline |
+| Loading states (skeleton) | ✅ 8 critical pages có `loading.tsx` + `TableSkeleton`/`CardSkeleton`/`ListSkeleton` components |
+| Error boundaries | ✅ 1 root + 4 per-page (admin/skill-heatmap, teacher-metrics, finance, student/progress) |
+| Image alt text fix | ✅ 6 files |
+| Theme D contrast | ✅ Fix WCAG AA |
+| EmptyState component | ✅ Adoption ở 2 trang (vouchers, quizzes), pattern cho tương lai |
+| PWA manifest + icons | ✅ `manifest.json` + icon 192/512 + apple-touch + theme color |
+| Mobile responsive audit thực thiết bị | ⚠️ Đã pass devtools, chưa test device thật |
 
 ---
 
@@ -171,18 +196,41 @@ LAYER 6 — Validation & Security
 
 Theo thứ tự quan trọng:
 
-1. **Deploy Vercel** + trỏ domain poolane.vn
-2. **Combo 3 khoá pricing** — chốt giá + implement
-3. **VNPay integration** (đã có MoMo)
-4. **Mobile responsive audit** với device thật
-5. **AI tư vấn cá nhân hoá** (Claude API)
+1. **Deploy Vercel** + trỏ domain poolane.vn (cần Vercel + Matbao access)
+2. **Setup Sepay** sau khi user duyệt hợp đồng — code đã sẵn sàng, chỉ cần `SEPAY_API_KEY` env + cấu hình webhook URL trên dashboard Sepay
+3. **Setup Supabase Storage bucket** `poolane-public` → photo upload hoạt động (chưa làm)
+4. **Setup Resend** → verify domain `poolane.vn` + `RESEND_API_KEY` → email biên lai gửi thật
+5. **Gen VAPID keys** → push notifications hoạt động thật
+6. **Combo 3 khoá pricing** — chốt giá + implement
+7. **AI tư vấn cá nhân hoá** (Claude API) — phase 12 roadmap
+8. **Mobile responsive audit với device thật** (đã pass DevTools, chưa test iPhone/Android thật)
+9. **Apply design system** cho legacy pages còn lại (pulse, AI dashboard, một số form)
+10. **EmptyState adoption** cho 34 trang còn lại (đã làm 2 trang đầu làm pattern)
 
-### Module mới (sprint sau đêm sprint)
+### Việc đã hoàn thành lớn trong session này
 
-- ✅ MoMo online payment với webhook IPN
-- ✅ PWA manifest + icons
-- ✅ Teacher tools: lesson planning, exercise library, practice assignment, teacher metrics
-- ✅ Schema: GatewayTransaction, LessonPlan, Exercise, ExerciseAssignment
+- ✅ Đăng ký + reset password (auth onboarding đầy đủ)
+- ✅ VietQR thuần (shop + enrollment) + Sepay webhook + Unmatched UI
+- ✅ Public landing: `/`, `/courses`, `/faq`, `/privacy`
+- ✅ Email Resend 5 templates + tích vào payment/refund/birthday/absence
+- ✅ Photo upload infrastructure (Supabase Storage)
+- ✅ Voucher CRUD + tracking VoucherUsage
+- ✅ Video Drive links UI (admin + student)
+- ✅ Class photo album UI (admin + student)
+- ✅ Improvement pack auto-create khi paid
+- ✅ Admin tạo quiz UI với dynamic question editor
+- ✅ Cron jobs (4) + `vercel.json`
+- ✅ Self-assessment + Heatmap kỹ năng
+- ✅ Export Excel doanh thu + Reconciliation
+- ✅ Teacher tools: Lesson plan, Exercise library, Practice assignment, Teacher metrics
+- ✅ Sidebar reorganize (8 groups + i18n + collapse)
+- ✅ Schedule redesign hiển thị HV inline
+- ✅ PWA scaffolding (manifest, icons, service worker)
+- ✅ Mobile audit phase 1+2+3: tables overflow, grid breakpoints, touch targets, focus rings, loading skeletons, error boundaries, image alt, theme D contrast, EmptyState component
+
+### Việc đã loại bỏ / thay thế
+
+- ~~MoMo online payment~~ → giữ code làm backup, **VietQR + Sepay là default** (0đ phí giao dịch)
 
 ---
 
