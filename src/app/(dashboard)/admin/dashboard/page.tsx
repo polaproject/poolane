@@ -1,8 +1,12 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { Users, BookOpen, AlertTriangle, TrendingUp, Calendar, DollarSign, Zap, Brain } from 'lucide-react'
-import { POOL_TICKET, ABSENCE_ALERT_THRESHOLDS } from '@/config/constants'
+import {
+  Users, BookOpen, AlertTriangle, TrendingUp, Calendar, DollarSign, ShoppingBag,
+  Sunrise, Sunset, ArrowRight, UserPlus, FileText, Zap, BarChart2, Tags,
+} from 'lucide-react'
+import { ABSENCE_ALERT_THRESHOLDS } from '@/config/constants'
+import { StatCard } from '@/components/ui/StatCard'
 
 export default async function AdminDashboard() {
   const user = await requireRole(['admin'])
@@ -20,184 +24,220 @@ export default async function AdminDashboard() {
     prisma.sessionRegistration.count({ where: { status: 'pending' } }),
     prisma.payment.aggregate({
       where: { recordedAt: { gte: monthStart }, isReversal: false, amount: { gt: 0 } },
-      _sum: { amount: true }
+      _sum: { amount: true },
     }),
     prisma.student.count({
       where: {
         status: { in: ['active', 'extension', 'enrolled'] },
         OR: [
           { lastAttendedAt: { lt: redCutoff } },
-          { lastAttendedAt: null, createdAt: { lt: redCutoff } }
-        ]
-      }
+          { lastAttendedAt: null, createdAt: { lt: redCutoff } },
+        ],
+      },
     }),
     prisma.student.findMany({
+      // eslint-disable-next-line react-hooks/purity
       where: { createdAt: { gte: new Date(Date.now() - 7 * 86400000) } },
       include: { user: { select: { fullName: true } } },
       orderBy: { createdAt: 'desc' },
-      take: 5
+      take: 5,
     }),
     prisma.classSession.findMany({
       where: {
         date: { gte: new Date(now.setHours(0,0,0,0)), lte: new Date(now.setHours(23,59,59,999)) },
-        status: { not: 'cancelled' }
+        status: { not: 'cancelled' },
       },
-      include: { registrations: { where: { status: 'approved' } } }
+      include: { registrations: { where: { status: 'approved' } } },
     }),
   ])
 
-  const stats = [
-    { label: 'Tổng học viên',  value: totalStudents,  icon: Users,       href: '/admin/students',               color: '#1C2B4A', bg: 'rgba(28,43,74,0.06)' },
-    { label: 'Đang học',       value: activeStudents,  icon: BookOpen,    href: '/admin/students?status=active', color: '#5B8E9F', bg: 'rgba(91,142,159,0.08)' },
-    { label: 'Thu tháng này',  value: `${((monthRevenue._sum.amount ?? 0) / 1_000_000).toFixed(1)}M`, icon: DollarSign, href: '/admin/finance', color: '#22c55e', bg: 'rgba(34,197,94,0.08)' },
-    { label: 'HV mới (7 ngày)', value: recentStudents.length, icon: TrendingUp, href: '/admin/students', color: '#C8A84B', bg: 'rgba(200,168,75,0.08)' },
-  ]
+  const monthSum = (monthRevenue._sum.amount ?? 0)
 
   const alerts = [
-    pendingRegistrations > 0 && { label: `${pendingRegistrations} đăng ký chờ duyệt`, href: '/staff/registrations', type: 'warning' as const },
-    needFollowUp > 0 && { label: `${needFollowUp} học viên vắng > ${ABSENCE_ALERT_THRESHOLDS.RED_DAYS} ngày`, href: '/admin/pulse', type: 'danger' as const },
-  ].filter(Boolean) as Array<{ label: string; href: string; type: 'warning' | 'danger' }>
+    pendingRegistrations > 0 && {
+      label: `${pendingRegistrations} đăng ký chờ duyệt`,
+      href: '/staff/registrations',
+      tone: 'warn' as const,
+    },
+    needFollowUp > 0 && {
+      label: `${needFollowUp} học viên vắng > ${ABSENCE_ALERT_THRESHOLDS.RED_DAYS} ngày`,
+      href: '/admin/pulse',
+      tone: 'danger' as const,
+    },
+  ].filter(Boolean) as Array<{ label: string; href: string; tone: 'warn' | 'danger' }>
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="mb-7">
-        <p className="text-sm mb-1" style={{ color: 'rgba(28,43,74,0.45)' }}>Xin chào,</p>
-        <h1 className="font-heading text-[2.6rem] leading-tight" style={{ color: '#1C2B4A' }}>
-          {user.fullName} <span style={{ color: '#C8A84B' }}>✦</span>
-        </h1>
-        <p className="text-xs font-semibold tracking-widest uppercase mt-1" style={{ color: '#5B8E9F' }}>
-          Admin · Poolane
-        </p>
-      </div>
+    <div className="min-h-screen bg-paper pb-12">
+      {/* Hero */}
+      <div className="bg-ink text-paper px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-accent/12 -translate-y-1/3 translate-x-1/4 blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 w-60 h-60 rounded-full bg-mist/10 translate-y-1/2 blur-3xl" />
 
-      {/* Alerts */}
-      {alerts.length > 0 && (
-        <div className="space-y-2 mb-6">
-          {alerts.map((alert, i) => (
-            <Link key={i} href={alert.href}>
-              <div className={`notif-card notif-${alert.type} group`}>
-                <div className={`notif-icon-bg ${alert.type}`}>
-                  <AlertTriangle className="w-4 h-4" style={{ color: alert.type === 'danger' ? '#DC2626' : '#B45309' }} />
-                </div>
-                <p className="text-sm font-medium" style={{ color: '#1C2B4A' }}>{alert.label}</p>
-                <span className="ml-auto text-xs opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#5B8E9F' }}>
-                  Xem →
-                </span>
-              </div>
-            </Link>
-          ))}
+        <div className="relative max-w-6xl mx-auto">
+          <p className="eyebrow text-paper/55 mb-2">Admin · Poolane</p>
+          <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">
+            Xin chào, {user.fullName}
+          </h1>
+          <p className="text-sm text-paper/65 mt-3">
+            Tổng quan vận hành — đăng ký, học viên, tài chính, lịch học.
+          </p>
         </div>
-      )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {stats.map(stat => (
-          <Link key={stat.label} href={stat.href} className="block">
-            <div className="card-stat p-5">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(28,43,74,0.40)' }}>
-                  {stat.label}
-                </p>
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: stat.bg }}>
-                  <stat.icon className="w-4 h-4" style={{ color: stat.color }} />
-                </div>
-              </div>
-              <p className="font-heading text-3xl" style={{ color: stat.color }}>{stat.value}</p>
-            </div>
-          </Link>
-        ))}
       </div>
 
-      {/* Today sessions */}
-      {todaySessions.length > 0 && (
-        <div
-          className="p-6 mb-6 relative overflow-hidden rounded-2xl"
-          style={{
-            background: 'linear-gradient(135deg, #1C2B4A 0%, #162340 100%)',
-            boxShadow: '0 8px 32px rgba(28,43,74,0.22)',
-          }}
-        >
-          {/* Decorative orbs */}
-          <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full pointer-events-none" style={{ background: 'rgba(255,255,255,0.04)' }} />
-          <div className="absolute -bottom-6 -left-4 w-20 h-20 rounded-full pointer-events-none" style={{ background: 'rgba(200,168,75,0.07)' }} />
-
-          <div className="flex items-center gap-2 mb-4 relative">
-            <Calendar className="w-4 h-4" style={{ color: 'rgba(246,241,234,0.6)' }} />
-            <h2 className="font-semibold text-sm" style={{ color: 'rgba(246,241,234,0.8)' }}>Buổi học hôm nay</h2>
-          </div>
-          <div className="flex gap-3 relative">
-            {todaySessions.map(s => (
-              <Link key={s.id} href={`/admin/schedule/sessions/${s.id}`}>
-                <div
-                  className="px-4 py-3 rounded-xl transition-all hover:scale-[1.03] cursor-pointer"
-                  style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.08)' }}
-                >
-                  <p className="font-medium text-sm" style={{ color: '#F6F1EA' }}>
-                    {s.timeSlot === 'morning' ? '☀️ 5:30' : '🌙 18:00'}
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: 'rgba(246,241,234,0.55)' }}>
-                    {s.registrations.length}/{s.capacity} người
-                  </p>
+      <div className="px-4 sm:px-8 -mt-6 max-w-6xl mx-auto space-y-5 relative z-10">
+        {/* Alerts */}
+        {alerts.length > 0 && (
+          <div className="space-y-2">
+            {alerts.map((alert, i) => (
+              <Link
+                key={i}
+                href={alert.href}
+                className={`group flex items-center gap-3 p-4 rounded-card-lg ring-1 backdrop-blur-sm transition hover:ring-opacity-60 ${
+                  alert.tone === 'danger'
+                    ? 'bg-danger/8 ring-danger/30 hover:ring-danger/50'
+                    : 'bg-warn/8 ring-warn/30 hover:ring-warn/50'
+                }`}
+              >
+                <div className={`grid place-items-center h-9 w-9 rounded-pill shrink-0 ${
+                  alert.tone === 'danger' ? 'bg-danger/15' : 'bg-warn/15'
+                }`}>
+                  <AlertTriangle className={`h-4 w-4 ${alert.tone === 'danger' ? 'text-danger' : 'text-warn'}`} strokeWidth={1.75} />
                 </div>
+                <p className="text-sm font-medium text-ink flex-1">{alert.label}</p>
+                <ArrowRight className="h-4 w-4 text-ink/40 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
               </Link>
             ))}
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="grid grid-cols-2 gap-4">
-        {/* Recent students */}
-        <div style={{ background: 'white', borderRadius: 16, border: '1px solid rgba(28,43,74,0.08)', boxShadow: 'var(--shadow-md)', overflow: 'hidden' }}>
-          <div className="px-5 py-4 flex justify-between items-center" style={{ borderBottom: '1px solid rgba(28,43,74,0.07)' }}>
-            <h2 className="font-semibold text-sm" style={{ color: '#1C2B4A' }}>Học viên mới (7 ngày)</h2>
-            <Link href="/admin/students" className="text-xs hover:underline" style={{ color: '#5B8E9F' }}>Xem tất cả</Link>
-          </div>
-          <div>
-            {recentStudents.length === 0 ? (
-              <p className="px-5 py-4 text-sm" style={{ color: 'rgba(28,43,74,0.40)' }}>Chưa có học viên mới</p>
-            ) : (
-              recentStudents.map(s => (
-                <Link key={s.id} href={`/admin/students/${s.id}`}
-                  className="flex items-center px-5 py-3 transition-colors hover:bg-[#F6F1EA]/60"
-                  style={{ borderBottom: '1px solid rgba(28,43,74,0.05)' }}
-                >
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0"
-                    style={{ background: 'rgba(91,142,159,0.12)', color: '#5B8E9F' }}
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Link href="/admin/students"><StatCard label="Tổng học viên" value={totalStudents} icon={Users} /></Link>
+          <Link href="/admin/students?status=active"><StatCard label="Đang học" value={activeStudents} icon={BookOpen} /></Link>
+          <Link href="/admin/finance"><StatCard label="Thu tháng này" value={`${(monthSum / 1_000_000).toFixed(1)}M`} unit="đ" icon={DollarSign} tone="dark" /></Link>
+          <Link href="/admin/students"><StatCard label="HV mới (7 ngày)" value={recentStudents.length} icon={TrendingUp} tone="accent" /></Link>
+        </div>
+
+        {/* Today sessions */}
+        {todaySessions.length > 0 && (
+          <div className="rounded-card-xl bg-ink text-paper p-6 sm:p-7 relative overflow-hidden shadow-soft">
+            <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-accent/15 blur-3xl" />
+            <div className="absolute -bottom-10 -left-5 h-32 w-32 rounded-full bg-mist/10 blur-3xl" />
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-4">
+                <Calendar className="h-4 w-4 text-accent" strokeWidth={1.75} />
+                <p className="eyebrow text-paper/55">Buổi học hôm nay · {todaySessions.length}</p>
+              </div>
+              <div className="flex gap-3 flex-wrap">
+                {todaySessions.map(s => (
+                  <Link
+                    key={s.id}
+                    href={`/admin/schedule/sessions/${s.id}`}
+                    className="group flex items-center gap-3 px-4 py-3 rounded-card bg-paper/8 ring-1 ring-paper/15 hover:bg-paper/12 hover:scale-[1.02] transition-all"
                   >
-                    {s.user.fullName.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium" style={{ color: '#1C2B4A' }}>{s.user.fullName}</p>
-                    <p className="text-xs" style={{ color: 'rgba(28,43,74,0.40)' }}>{s.studentCode}</p>
-                  </div>
-                </Link>
-              ))
+                    <div className="grid place-items-center h-9 w-9 rounded-pill bg-accent/15 shrink-0">
+                      {s.timeSlot === 'morning' ? (
+                        <Sunrise className="h-4 w-4 text-accent" strokeWidth={1.75} />
+                      ) : (
+                        <Sunset className="h-4 w-4 text-accent" strokeWidth={1.75} />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-heading italic text-lg leading-none">
+                        {s.timeSlot === 'morning' ? '5:30' : '18:00'}
+                      </p>
+                      <p className="text-xs text-paper/65 mt-1">{s.registrations.length}/{s.capacity} HV</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 2-col: recent students + quick actions */}
+        <div className="grid md:grid-cols-2 gap-4">
+          {/* Recent students */}
+          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+            <div className="px-5 py-4 border-b border-ink/8 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-4 w-4 text-accent" strokeWidth={1.75} />
+                <p className="eyebrow text-ink/55">HV mới · 7 ngày</p>
+              </div>
+              <Link href="/admin/students" className="text-xs font-medium text-accent hover:underline inline-flex items-center gap-1">
+                Tất cả <ArrowRight className="h-3 w-3" strokeWidth={2.25} />
+              </Link>
+            </div>
+            {recentStudents.length === 0 ? (
+              <div className="p-8 text-center text-ink/45">
+                <Users className="h-8 w-8 mx-auto mb-2 opacity-50" strokeWidth={1.5} />
+                <p className="text-sm">Chưa có học viên mới</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-ink/5">
+                {recentStudents.map(s => (
+                  <Link
+                    key={s.id}
+                    href={`/admin/students/${s.id}`}
+                    className="flex items-center px-5 py-3 hover:bg-paper-tint/40 transition group"
+                  >
+                    <div className="grid place-items-center h-9 w-9 rounded-pill bg-mist/15 text-mist font-heading italic text-sm shrink-0 mr-3">
+                      {s.user.fullName.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-ink truncate">{s.user.fullName}</p>
+                      <p className="text-xs text-ink/45 font-mono">{s.studentCode}</p>
+                    </div>
+                    <ArrowRight className="h-3.5 w-3.5 text-ink/30 group-hover:translate-x-0.5 group-hover:text-accent transition" strokeWidth={2.25} />
+                  </Link>
+                ))}
+              </div>
             )}
           </div>
-        </div>
 
-        {/* Quick actions */}
-        <div className="card-base p-5">
-          <h2 className="font-semibold text-sm mb-4" style={{ color: '#1C2B4A' }}>Thao tác nhanh</h2>
-          <div className="space-y-2">
-            {[
-              { label: '+ Thêm học viên', href: '/admin/students/new', primary: true },
-              { label: '📅 Lịch học tuần này', href: '/admin/schedule', primary: false },
-              { label: '💰 Tài chính', href: '/admin/finance', primary: false },
-              { label: '📊 Báo cáo & Đối chiếu', href: '/admin/reports', primary: false },
-              { label: '🎟️ Mã giảm giá', href: '/admin/vouchers', primary: false },
-              { label: '📝 Viết bài blog', href: '/admin/blog/new', primary: false },
-              { label: '⚡ Pulse Check', href: '/admin/pulse', primary: false },
-            ].map(action => (
-              <Link key={action.label} href={action.href} className={action.primary ? 'btn-pola-primary block px-4 py-2.5 text-sm text-center' : 'btn-pola-secondary block px-4 py-2.5 text-sm text-center'}>
-                {action.label}
-              </Link>
-            ))}
+          {/* Quick actions */}
+          <div className="rounded-card-lg bg-white shadow-soft ring-1 ring-ink/8 overflow-hidden">
+            <div className="px-5 py-4 border-b border-ink/8 flex items-center gap-2">
+              <Zap className="h-4 w-4 text-accent" strokeWidth={1.75} />
+              <p className="eyebrow text-ink/55">Thao tác nhanh</p>
+            </div>
+            <div className="p-3 space-y-1.5">
+              <ActionLink href="/admin/students/new" icon={UserPlus} label="Thêm học viên" primary />
+              <ActionLink href="/admin/schedule" icon={Calendar} label="Lịch học tuần này" />
+              <ActionLink href="/admin/finance" icon={DollarSign} label="Tài chính" />
+              <ActionLink href="/admin/reports" icon={BarChart2} label="Báo cáo & Đối chiếu" />
+              <ActionLink href="/admin/vouchers" icon={Tags} label="Mã giảm giá" />
+              <ActionLink href="/admin/blog/new" icon={FileText} label="Viết bài blog" />
+              <ActionLink href="/admin/pulse" icon={Zap} label="Pulse Check" />
+              <ActionLink href="/admin/shop/orders" icon={ShoppingBag} label="Đơn hàng" />
+            </div>
           </div>
         </div>
       </div>
     </div>
+  )
+}
+
+function ActionLink({
+  href, icon: Icon, label, primary,
+}: {
+  href: string
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
+  label: string
+  primary?: boolean
+}) {
+  return (
+    <Link
+      href={href}
+      className={`group flex items-center gap-3 px-3 py-2.5 rounded-card transition ${
+        primary
+          ? 'bg-ink text-paper hover:bg-ink/90 shadow-soft'
+          : 'hover:bg-paper-tint/50'
+      }`}
+    >
+      <Icon className={`h-4 w-4 shrink-0 ${primary ? 'text-accent' : 'text-accent'}`} strokeWidth={1.75} />
+      <span className={`text-sm font-medium flex-1 ${primary ? 'text-paper' : 'text-ink'}`}>{label}</span>
+      <ArrowRight className={`h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform ${primary ? 'text-paper/60' : 'text-ink/30'}`} strokeWidth={2.25} />
+    </Link>
   )
 }
