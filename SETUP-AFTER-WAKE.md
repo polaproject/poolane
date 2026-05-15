@@ -14,13 +14,19 @@ Password:  privatePassPrj@4Website
 Tên:       Nguyễn Ngọc Hoàng Việt
 ```
 
-### Demo accounts (cho test — chạy `npm run db:seed-demo` để tạo)
+### Demo accounts (Synthetic monitoring — luôn live trên production)
 ```
 Staff:    0900000099 / PoolaneDemo@123
 Student:  0900000088 / PoolaneDemo@123  (vé 8 buổi, enrolled khoá ECH)
 ```
 
-Xoá demo: `DELETE_DEMO=1 npm run db:seed-demo`
+Quy tắc (Phase 15.2):
+- Chạy **luồng thật** — registration / payment / attendance / assessment đều dùng code production, KHÔNG bypass logic
+- API DELETE **block 403** nếu phone start `0900000` (protected)
+- Cron daily **5:30 AM VN** (`ensure-test-account`) tự re-create nếu missing
+- **Auto-exclude khỏi analytics** qua `getDemoStudentIds()` helper (7 critical queries)
+- **Audit log giữ** — debug cần đầy đủ trace
+- Refresh: `DELETE_DEMO=1 npm run db:seed-demo` rồi `npm run db:seed-demo`
 
 ---
 
@@ -159,7 +165,7 @@ Nâng Pro $25/mo khi: cần daily backup, không bị pause, >500MB data.
 - 1M function invocations
 - 5000 image optimizations
 - 24,000 build minutes
-- 40 cron jobs (Poolane dùng 4)
+- 40 cron jobs (Poolane dùng **5** — `birthday`, `pulse-check`, `reconciliation`, `absence-reminder`, `ensure-test-account`)
 - 1 concurrent build
 
 ---
@@ -173,12 +179,17 @@ Nâng Pro $25/mo khi: cần daily backup, không bị pause, >500MB data.
 - Phase 14: Dark mode contrast boost
 - Phase 6: Auth pages migrate LQG primitives
 - **Production deploy**: GitHub + Vercel + Domain + SSL + Sepay-ready
+- Phase 15: AI rule-based polish (dropout prediction + skill comments — no LLM)
+- Phase 15.1: STRICT payment validation (Sepay amount match)
+- Phase 15.2: Test account protection + Data integrity (cron + getDemoStudentIds filter)
+- Phase 15.3: UX micro-fixes (password reveal, session restore, admin direct approve)
+- Phase 16: Quiet luxury UI (xoá toàn bộ specular/halo/decoration blob — 68 file)
+- Phase 16.1: Code clean discipline (lint 0 errors + 0 warnings baseline)
 
 ### ⏸️ Pending
 - **Sepay webhook save** (owner manual — 5 phút)
 - **Smoke test 5 mục** (login, public, register, push, cron)
 - **Combo 3 khoá pricing** (chốt giá business)
-- **AI features (Phase 15+)**: dropout prediction polish, AI tư vấn cá nhân
 
 ### 💡 Future enhancements
 - Auth pages split-layout với artwork (current is centered)
@@ -190,4 +201,15 @@ Nâng Pro $25/mo khi: cần daily backup, không bị pause, >500MB data.
 ---
 
 **Maintained by:** Owner Nguyễn Ngọc Hoàng Việt + Claude AI assistant
-**Last updated:** 2026-05-15 (Phase 14 + auth migrate)
+**Last updated:** 2026-05-16 (Phase 15-16.1 — AI + payment + data integrity + quiet luxury + lint clean)
+
+---
+
+## 🎨 Design Philosophy (Phase 16 — Quiet Luxury)
+
+Apple Liquid Glass framework giữ ở mức **structure** (frosted bg + blur + border + hover lift), **bỏ hoàn toàn animation loop**:
+
+❌ Không dùng: specular streak, halo pulse quanh logo, decoration blur blob hero, route-level `loading.tsx`
+✅ Vẫn dùng: frosted bg + backdrop-blur, border + ring, hover lift 200-280ms spring, focus ring, StarField (landing), AmbientMesh
+
+Triết lý: **"Premium quiet"** — UI nhường chỗ cho học viên/buổi học, không tranh giành attention. Default theme: **light** (Sáng). Force migrate user cũ qua localStorage key `poolane-theme-v2`.

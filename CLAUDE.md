@@ -226,6 +226,12 @@ Theo thứ tự quan trọng (đã hoàn thành redesign sâu, giờ unblock inf
 16. **Phase 13.1 — Specular streak cleanup**: ✅ Phase 10 over-applied vệt sáng specular qua `.glass-card` (264 chỗ) + sidebar `.pola-nav` (18s loop) → "vương vãi" khắp app. Scope lại CSS chỉ cho `.glass-button` + `.glass-pill` (element nhỏ) + opt-in `.glass-shimmer`. Default `GlassPanel.shimmer = false`, `GlassCard.specular = false`. Sidebar specular tắt. `PublicHeader` bỏ class `lqg-specular`. 4 commit: `c36ac91`, `7b540d9`.
 17. **Phase 13.2 — Default light + mobile login**: ✅ ThemeProvider default `'dark'` → `'light'`. Bump localStorage key `poolane-theme` → `poolane-theme-v2` để force migrate user cũ (dark có visual bugs, không muốn user mắc kẹt). Bỏ legacy A/B migration. PublicHeader login button bỏ `hidden sm:inline-flex` → show mobile (compact px-2.5 text-xs). 2 commit: `105869c`, `e831be5`.
 18. **Phase 14 — Dark mode contrast boost**: ✅ Fix 4 BLOCKERS + 5 SHOULD-FIX qua CSS layer override trong `globals.css`. RadarChart hard-coded `rgba(28,43,74,...)` + `#1C2B4A` → `currentColor` adapt theme. Append 80 dòng CSS scope `.theme-dark`/`.lqg-dark` boost opacity utilities: border `/8` → 18%, `/15` → 32%; ring `/8` → 18%, `/15` → 32%; text `/30` → 55%, `/50` → 68%; bg/divide tương tự. Tailwind `@custom-variant dark` mở rộng recognize `.theme-dark + .lqg-dark + .dark` (trước chỉ `.dark` → mọi `dark:` variant trong code không hoạt động). 3 commit: `d9f6d64`, `0cc4ad2`, `326b10d`.
+19. **Phase 15 — AI polish (rule-based)**: ✅ Dropout prediction + recommendation decision tree (priority/action/template per HV), `src/lib/ai/skill-comments.ts` rule engine cho `/student/progress` (overall + improvements + weaknesses + encouragement + graduation %). KHÔNG dùng LLM (Claude API). Lý do: scale 200 HV đủ insight, cost saving. Commit: `f24ecd4`.
+20. **Phase 15.1 — STRICT payment validation**: ✅ `confirmOrderTransfer()` check `input.amount === order.finalAmount` khi `source=='sepay'`. Mismatch → `AMOUNT_MISMATCH` error → unmatched + notify admin. Manual confirm (admin click `/admin/shop/orders` "Xác nhận đã nhận tiền") bypass strict (admin đã verify sao kê). Enrollment KHÔNG strict (partial pay OK cho plan B/C). Commit: `476edcc`.
+21. **Phase 15.2 — Test account protection + Data integrity**: ✅ Demo accounts (`0900000088` student + `0900000099` staff, pass `PoolaneDemo@123`) chạy luồng thật (no bypass logic). API DELETE block với 403 `DEMO_ACCOUNT_PROTECTED`. Daily cron 5:30 sáng VN `/api/cron/ensure-test-account` tự re-create nếu missing. Query-layer filter: `getDemoStudentIds()` helper trong `src/lib/demo-account.ts` cached 60s, exclude khỏi 7 analytics queries (admin/dashboard, reports/revenue, ai/dropout-risk, skill-heatmap, cron/{pulse-check, reconciliation, absence-reminder}). Audit log KHÔNG filter (debug đầy đủ). Commits: `35bb3ee`, `b9a896f`.
+22. **Phase 15.3 — UX micro-fixes**: ✅ Password reveal toggle (GlassInput prop `revealable`), session restore button (`/api/sessions/[id]/restore` + UI), admin tương tác duyệt HV trực tiếp tại `/admin/schedule/sessions/[id]` (RegistrationActionRow client component), ProductForm router.push same-URL bug fix (stay on page + setSubmitting(false) cho mode='edit'). Commits: `2b3373b`, `6a3d914`, `a5b5f6a`, `144840d`.
+23. **Phase 16 — Quiet luxury UI**: ✅ Xoá HOÀN TOÀN code (không chỉ disable): `glow` + `withReflection` props (PolarisStar), `shimmer` + `specular` props (GlassPanel/GlassCard), 4 keyframes (`liquid-specular`, `lqg-specular-anim`, `pola-glass-shimmer`, `pola-glow-pulse`), 4 utility classes (`.motion-glow`, `.glass-shimmer`, `.lqg-specular`, `.motion-glass-shimmer`), 2 CSS vars (`--specular-color`, `--specular-angle`), `waterLinePath` + `reflectionPath` từ theme.config.ts. **68 decoration blur blob `<div>` xoá khỏi 61 file** (mass migration script). **12 loading.tsx skeleton xoá** (Next.js convention, owner muốn instant navigate). Apple Liquid Glass framework giữ (frosted bg + blur + border + hover) — chỉ bỏ animation loop. Net: -148 lines code, +30 lines comment. Commits: `c36ac91`, `7b540d9`, `dd6eb32`, `ef6b632`, `b7edf23`, `e162d32`, `0f83195`.
+24. **Phase 16.1 — Code clean discipline**: ✅ Lint 0 errors + 0 warnings (từ 44 problems). ESLint config: ignore `qa/`/`scripts/`/`prisma/`, disable `react-hooks/set-state-in-effect` + `react-hooks/purity` (React 19 strict overkill cho client component fetch pattern + Server Component Date.now() acceptable), accept `_` prefix unused convention. Fix actual: 4 unescaped quotes (`"` → `&ldquo;`/`&rdquo;`), `Date.now()` impure → extract `const sevenDaysAgo`, 10+ unused imports, `useMemo` wrap `groups`+`bottomItems` trong DashboardShell. Commit: `a78662e`.
 
 ### 🟢 DEPLOY ĐÃ HOÀN TẤT (2026-05-15)
 
@@ -412,6 +418,27 @@ Tất cả 2 theme dùng **cùng tên token** (`ink`, `paper`, `accent`, `mist`,
 **Logo direction (chưa có file chính thức):** Icon + wordmark, ngôi sao Polaris phản chiếu trên mặt nước. Hiện dùng SVG placeholder trong `theme.config.ts`.
 
 **Tham chiếu cảm giác:** Soft glassmorphism / visionOS-inspired (panel kính nổi trên nền ambient, layering, italic serif). Reference Callour Studio email + Wix marketing.
+
+### Design Discipline (Phase 16 — "Quiet Luxury")
+
+Apple Liquid Glass framework giữ ở mức **structure** (frosted bg + blur + border + hover lift), **bỏ hoàn toàn animation loop**:
+
+❌ **KHÔNG dùng:**
+- Specular streak (vệt sáng chạy qua glass element mỗi N giây)
+- Glow halo pulse quanh logo/element
+- Decoration blur blob trong hero corner (`<div className="absolute ... blur-3xl">`)
+- Loading.tsx skeleton (Next.js convention) — instant navigate ưu tiên hơn flash skeleton
+
+✅ **VẪN dùng:**
+- Frosted bg + backdrop-blur (chính là LQG)
+- Border + ring (edge highlight)
+- Hover lift transition (200-280ms spring)
+- Focus ring spring (a11y keyboard nav)
+- StarField (chỉ landing — brand element Polaris)
+- AmbientMesh (background subtle theme-aware, drift 24s)
+- Skeleton inline (rare, khi page load partial component)
+
+**Triết lý: "Premium quiet"** — UI không tranh giành sự chú ý với content. User focus vào học viên/bài học, không vào animation. Apple iOS 26 ngôn ngữ design (structure) — nhưng zero animation loop để phù hợp app type "focus mode" (không entertainment).
 
 **Đối tượng:** Người lớn 16–40 tuổi → **chuyên nghiệp nhưng ấm áp**, không đại trà, không lạnh lùng.
 
@@ -1738,6 +1765,18 @@ Sau mỗi session, AI hỏi user:
 
 Nếu có → AI tự edit + show diff trước khi save.
 
+### 12.8. Visual Debugging Workflow (Phase 16 lesson)
+
+Khi user phàn nàn về visual ("hình lạ", "vệt sáng", "vương vãi", "elip rất to"):
+
+1. **KHÔNG assume root cause** — cùng cảm giác có thể từ 3-4 CSS pattern khác nhau (specular streak ≠ halo glow ≠ decoration blob ≠ ambient mesh)
+2. **Grep MULTIPLE patterns ngay lập tức** — specular, motion-glow, blur-3xl, rounded-full + non-square aspect, shimmer, animation, decoration, lqg-mesh, hero-block, gradient
+3. **Ask clarifying trước khi mass change**: *"Owner đang chỉ vào element X (logo halo) hay Y (background blob) hay Z (streak animation)?"*
+4. **Show owner danh sách affected files trước khi fix** nếu >5 file
+5. **Test trên nhiều trang khác nhau**, không chỉ trang owner screenshot
+
+**Bài học từ Phase 16:** owner phàn nàn "specular vương vãi" → AI fix specular nhưng MISS 2 element khác (logo halo `motion-glow rounded-full` + decoration blobs `<div blur-3xl>` 68 chỗ). Tốn 2 round-trip mới sạch hết. Nếu apply 5 steps trên → 1 round-trip done.
+
 ---
 
 ## 13. Logging & Traceability
@@ -1952,11 +1991,134 @@ Phase 8-11 mass-applied class changes không kiểm tra context → tạo regres
 - Commit checkpoint mỗi batch (revert dễ)
 - Không trust regex 100% — context matters
 
+### 14.6. Template prompt cho owner khi báo visual bug
+
+```
+Trên trang [URL cụ thể], tôi thấy có [hình dạng: elip dọc / blob tròn mờ /
+vệt sáng chạy ngang] [ở vị trí: xung quanh logo / góc trên phải hero / sau
+form] [behavior: tĩnh / pulse / scroll qua / hover hiện ra].
+
+Yêu cầu:
+1. RÀ SOÁT toàn codebase tìm TẤT CẢ pattern tương tự.
+2. LIỆT KÊ cho tôi xem trước khi fix.
+3. Sau khi tôi confirm → mới sửa + push.
+```
+
+**Trade-off:** prompt cụ thể = 1 round-trip; prompt mơ hồ ("bỏ hiệu ứng này") = 3-5 round-trip.
+
 ---
 
-## 15. Security & Privacy
+## 15. Operational Principles (Production Discipline)
 
-### 15.1. Tuân Thủ Pháp Lý Việt Nam
+### 15.1. Test Account Principle (Phase 15.2)
+
+Luôn duy trì 1 set demo accounts cho **smoke test + UX verify**:
+
+- **Student**: `0900000088` / `PoolaneDemo@123` (vé 8 buổi, enrolled khoá ECH)
+- **Staff**: `0900000099` / `PoolaneDemo@123`
+
+**Quy tắc:**
+1. **Chạy luồng thật** — registration / payment / attendance / assessment đều chạy code thật, **KHÔNG bypass logic** → tester thấy UX đúng như user thật
+2. **Protected** — API DELETE block với 403 `DEMO_ACCOUNT_PROTECTED` nếu `phone.startsWith('0900000')`
+3. **Auto-ensure** — cron `/api/cron/ensure-test-account` daily 5:30 sáng VN tự re-create nếu missing (idempotent)
+4. **Exclude analytics** — `getDemoStudentIds()` filter exclude khỏi 7 critical queries
+5. **Audit log giữ** — debug cần đầy đủ trace
+6. **Refresh data manual** — `DELETE_DEMO=1 npm run db:seed-demo`
+
+### 15.2. Data Integrity Pattern (Phase 15.2)
+
+**Approach: soft tagging + query-level filter** (không cần env riêng — overkill cho 200 HV).
+
+Helper `src/lib/demo-account.ts`:
+```typescript
+isDemoAccount(phone)          // detect by prefix '0900000'
+getDemoStudentIds(prisma)     // cached 60s, return string[]
+excludeDemoStudentsFilter()   // Prisma WHERE { studentId: { notIn } } helper
+```
+
+**Affected queries (7):**
+- `/admin/dashboard` — 6 stats
+- `/api/reports/revenue` — Excel export
+- `/api/ai/dropout-risk` — prediction list
+- `/admin/skill-heatmap` — class average
+- `/api/cron/pulse-check` — follow-up list
+- `/api/cron/reconciliation` — payment check
+- `/api/cron/absence-reminder` — email loop
+
+**KHÔNG filter** (intentional):
+- `audit_log` (debug trace đầy đủ)
+- `error_logs`
+- Notifications
+
+### 15.3. STRICT Payment Validation (Phase 15.1)
+
+Sepay automated webhook → `input.amount === order.finalAmount` phải khớp **chính xác**:
+
+| Match | Hành vi |
+|---|---|
+| ✅ Khớp | Auto-confirm Order `paid` + Payment record |
+| ❌ Lệch | `AMOUNT_MISMATCH` error → save `unmatched_transactions` + notify admin |
+
+**Manual admin confirm bypass** strict (admin click `/admin/shop/orders` "Xác nhận đã nhận tiền") vì admin đã verify sao kê.
+
+**Enrollment KHÔNG strict** — partial payment chấp nhận (plan B/C cho phép 30% deposit trước, full sau).
+
+### 15.4. Rule-based AI > LLM (Phase 15, scale 200 HV)
+
+**Dropout prediction** (`/api/ai/dropout-risk`):
+- 5 heuristic factors (vắng, nợ, vé, tần suất, ôn luyện) + decision tree
+- Output: priority/action/reason/suggestion/templateMessage per HV
+- 7 patterns recommendation cụ thể (critical/high/medium)
+
+**Skill comments** (`src/lib/ai/skill-comments.ts`):
+- Rule engine: delta calc + threshold + variant pool
+- Output: overall + improvements[] + weaknesses[] + encouragement + graduationReadiness%
+
+**LLM (Claude API) sẽ phù hợp khi:**
+- Scale >1000 HV
+- Real-time chat tư vấn cá nhân
+- Video stroke analysis (Phase 17+)
+
+Hiện tại scale 200 HV → rule-based đủ insight, cost saving, no dependency.
+
+### 15.5. Force Migrate Strategy (Phase 13.2)
+
+Khi cần reset user preference (vd localStorage), **bump key version** thay vì write JS migration code:
+
+```typescript
+const STORAGE_KEY = 'poolane-theme-v2'  // bumped từ 'poolane-theme'
+```
+
+User cũ có key cũ → app KHÔNG đọc key đó → fresh init default (light). Browser tự GC orphan key sau. Không cần touch old data, không write migration JS.
+
+### 15.6. Code Clean Discipline (Phase 16.1)
+
+**Trước khi build feature mới**, baseline phải đạt:
+
+```bash
+npm run lint    # → 0 errors + 0 warnings
+npm run build   # → pass TypeScript strict
+```
+
+Cộng audit "orphan refs" sau mỗi mass migration:
+- Grep removed props/classes — đảm bảo 0 active code references
+- Chỉ comment lịch sử cho phép giữ (intentional)
+
+**Tốn 30 phút audit > 2 ngày debug regression sau.**
+
+### 15.7. Quiet Luxury UI Philosophy (Phase 16)
+
+Apple Liquid Glass framework giữ ở mức **structure** (frosted bg + blur + border + hover), **bỏ hoàn toàn animation loop** (specular streak, halo pulse, decoration blob).
+
+**Triết lý:** "Premium quiet" — UI không tranh giành sự chú ý với content. App type Poolane = focus mode (không entertainment) → animation noise là anti-pattern.
+
+Chi tiết tại Section 2 (Brand) — Design Discipline subsection.
+
+---
+
+## 16. Security & Privacy
+
+### 16.1. Tuân Thủ Pháp Lý Việt Nam
 
 **Nghị định 13/2023/NĐ-CP — Bảo vệ dữ liệu cá nhân:**
 - Trang chính sách bảo mật public tại `/privacy`
@@ -1965,7 +2127,7 @@ Phase 8-11 mass-applied class changes không kiểm tra context → tạo regres
 - Right to delete: học viên yêu cầu xoá (qua admin, có quy trình)
 - Data retention: dữ liệu học viên không hoạt động > 2 năm có thể archive
 
-### 15.2. Đồng Ý Hình Ảnh/Video
+### 16.2. Đồng Ý Hình Ảnh/Video
 
 2 mức consent tách biệt:
 - **Học tập nội bộ** (bắt buộc khi đăng ký) — cho phép lớp ghi hình kỹ thuật để dạy
@@ -1973,7 +2135,7 @@ Phase 8-11 mass-applied class changes không kiểm tra context → tạo regres
 
 Cả 2 lưu timestamp xác nhận trong `users` table.
 
-### 15.3. Secrets Management
+### 16.3. Secrets Management
 
 - `.env.local` — local development, không commit
 - Vercel Environment Variables — production
@@ -1981,7 +2143,7 @@ Cả 2 lưu timestamp xác nhận trong `users` table.
 - KHÔNG BAO GIỜ paste secret vào chat với AI
 - `SUPABASE_SERVICE_ROLE_KEY` chỉ dùng server-side
 
-### 15.4. RBAC Enforcement
+### 16.4. RBAC Enforcement
 
 3 tầng:
 1. **UI** — ẩn tính năng không có quyền
@@ -1990,28 +2152,28 @@ Cả 2 lưu timestamp xác nhận trong `users` table.
 
 Mọi route phải có check ở TẦNG 2. UI và DB là defense in depth.
 
-### 15.5. Sensitive Data Handling
+### 16.5. Sensitive Data Handling
 
 - CCCD — encrypted at rest (Supabase column encryption)
 - Mật khẩu — Supabase Auth tự hash (bcrypt)
 - Số điện thoại — không encrypt nhưng có RLS
 
-### 15.6. Rate Limiting
+### 16.6. Rate Limiting
 
 - Login: 5 lần fail / 15 phút / IP
 - Registration: 3 account / SĐT / 24h
 - API chung: 100 req / phút / user
 
-### 15.7. CORS & CSRF
+### 16.7. CORS & CSRF
 
 - CORS: chỉ allow `polaproject.com` ở production
 - CSRF: Next.js mặc định protect, dùng server actions tận dụng
 
 ---
 
-## 16. Testing Strategy
+## 17. Testing Strategy
 
-### 16.1. Cho Non-Developer
+### 17.1. Cho Non-Developer
 
 **Không cần viết automated test** — thay vào đó:
 
@@ -2019,7 +2181,7 @@ Mọi route phải có check ở TẦNG 2. UI và DB là defense in depth.
 2. **Seed data script** để test thật
 3. **Vercel Preview Deployment** để test trước khi production
 
-### 16.2. Seed Data Bắt Buộc
+### 17.2. Seed Data Bắt Buộc
 
 `prisma/seed.ts` tạo:
 - 1 admin, 2 staff
@@ -2036,7 +2198,7 @@ Mọi route phải có check ở TẦNG 2. UI và DB là defense in depth.
 
 Chạy `npm run seed` → có data đầy đủ để test.
 
-### 16.3. Acceptance Test Checklist Mỗi Phase
+### 17.3. Acceptance Test Checklist Mỗi Phase
 
 Format:
 ```
@@ -2048,7 +2210,7 @@ Format:
 
 AI tạo checklist sau khi build xong, user tự check trên browser.
 
-### 16.4. Manual Test Scenarios Quan Trọng
+### 17.4. Manual Test Scenarios Quan Trọng
 
 **Registration Flow:**
 - [ ] Học viên mới tự đăng ký → tạo account thành công
@@ -2075,7 +2237,7 @@ AI tạo checklist sau khi build xong, user tự check trên browser.
 - [ ] Voice note record + lưu link
 - [ ] Radar chart hiển thị đúng
 
-### 16.5. Production Smoke Test (sau mỗi deploy)
+### 17.5. Production Smoke Test (sau mỗi deploy)
 
 1. Login với 1 admin, 1 staff, 1 student
 2. Tạo 1 đăng ký mới + duyệt
@@ -2085,9 +2247,9 @@ AI tạo checklist sau khi build xong, user tự check trên browser.
 
 ---
 
-## 17. Deployment & Operations
+## 18. Deployment & Operations
 
-### 17.1. Environment
+### 18.1. Environment
 
 | Environment | Purpose | URL |
 |---|---|---|
@@ -2095,7 +2257,7 @@ AI tạo checklist sau khi build xong, user tự check trên browser.
 | Preview | Test trước deploy | *.vercel.app (auto từ PR) |
 | Production | Live | polaproject.com |
 
-### 17.2. Environment Variables (.env.example)
+### 18.2. Environment Variables (.env.example)
 
 ```
 # Supabase
@@ -2118,7 +2280,7 @@ NEXT_PUBLIC_SCHOOL_NAME=Pola Project
 TZ=Asia/Ho_Chi_Minh
 ```
 
-### 17.3. Domain DNS (Matbao → Vercel)
+### 18.3. Domain DNS (Matbao → Vercel)
 
 Trong trang quản lý Matbao, thêm:
 ```
@@ -2128,20 +2290,20 @@ Type: CNAME Name: www   Value: cname.vercel-dns.com
 
 Trong Vercel: Add domain `polaproject.com` + `www.polaproject.com`.
 
-### 17.4. Backup & Recovery
+### 18.4. Backup & Recovery
 
 - **Supabase Pro daily backup** — 7 days retention
 - **Manual export hàng tuần** — admin tự download JSON full
 - **Vercel git-based** — toàn bộ code có lịch sử trên GitHub
 
-### 17.5. Monitoring
+### 18.5. Monitoring
 
 - **Vercel Analytics** — page views, performance
 - **Vercel Logs** — runtime errors
 - **Supabase Dashboard** — DB usage, slow queries
 - **Custom Health Check** — `/api/health` ping
 
-### 17.6. Chi Phí Hàng Tháng
+### 18.6. Chi Phí Hàng Tháng
 
 | Giai đoạn | Chi phí | Note |
 |---|---|---|
@@ -2150,7 +2312,7 @@ Trong Vercel: Add domain `polaproject.com` + `www.polaproject.com`.
 | Tăng trưởng (>300 HV) | $45 ≈ 1.1M VND | + Resend Starter |
 | Scale lớn | $65+ ≈ 1.6M VND | + Vercel Pro |
 
-### 17.7. Disaster Recovery
+### 18.7. Disaster Recovery
 
 **Scenario: Database mất dữ liệu**
 1. Supabase support khôi phục từ backup (within 1 day)
@@ -2167,9 +2329,9 @@ Trong Vercel: Add domain `polaproject.com` + `www.polaproject.com`.
 
 ---
 
-## 18. DEPLOY READINESS CHECKLIST (Phase 13 — Pre-launch)
+## 19. DEPLOY READINESS CHECKLIST (Phase 13 — Pre-launch)
 
-### 18.1. Code (AI có thể verify autonomously)
+### 19.1. Code (AI có thể verify autonomously)
 - [x] All builds pass (`npm run build` exit 0)
 - [x] Lighthouse landing perf 89 / a11y 100 / bp 100 (sau Phase 12.1 + 13)
 - [x] No console.log secrets, no hardcoded API keys
@@ -2181,7 +2343,7 @@ Trong Vercel: Add domain `polaproject.com` + `www.polaproject.com`.
 - [ ] Sandbox folder removed hoặc moved sang `qa/design-reference/`
 - [ ] Verify Lighthouse cả 5 trang × 2 mode (dark/light) — owner test thủ công
 
-### 18.2. Infrastructure (owner thao tác 3rd-party dashboard)
+### 19.2. Infrastructure (owner thao tác 3rd-party dashboard)
 - [ ] **Vercel**: tạo project + connect GitHub repo
 - [ ] **Vercel**: import env vars từ `.env.local`
 - [ ] **Matbao DNS**: thêm A record `@` → `76.76.21.21` + CNAME `www` → `cname.vercel-dns.com`
@@ -2194,14 +2356,14 @@ Trong Vercel: Add domain `polaproject.com` + `www.polaproject.com`.
 - [ ] **Cron secret**: env `CRON_SECRET` (random 32 char)
 - [ ] **Health check**: monitor `/api/health` → alert nếu fail
 
-### 18.3. Content (owner chốt)
+### 19.3. Content (owner chốt)
 - [ ] **Combo 3 khoá pricing** — chốt giá giảm (% hay số tiền cố định)
 - [ ] **Shop products real list** (placeholder 9 product seed hiện tại — cần real)
 - [ ] **Email templates** chi tiết (welcome, invoice, refund, birthday, absence) — code sẵn sàng, cần review tone
 - [ ] **FAQ entries** — 8 entries seed đã có, kiểm tra cập nhật
 - [ ] **Blog posts** demo 3-5 bài (technique / safety / nutrition / student_story) cho launch
 
-### 18.4. QA cuối (owner thao tác)
+### 19.4. QA cuối (owner thao tác)
 - [ ] Test 3 role login (admin/staff/student) flow toàn diện
 - [ ] Test thanh toán mock với Sepay sandbox
 - [ ] Test push notification trên Safari + Chrome
@@ -2274,8 +2436,8 @@ Những điều CHƯA chốt, cần quyết định trước khi build:
 
 ---
 
-**Phiên bản:** 1.3 — Phase 13 typography + deploy ready
-**Cập nhật cuối:** 2026-05-15
+**Phiên bản:** 1.4 — Phase 15-16.1 (AI + payment + data integrity + quiet luxury + lint clean)
+**Cập nhật cuối:** 2026-05-16
 **Maintainer:** Owner + AI
 
 > Mọi quyết định nghiệp vụ phải được phản ánh ở đây. Code đi theo file này, không ngược lại.

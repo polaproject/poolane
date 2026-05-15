@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Poolane
 
-## Getting Started
+> Hệ thống quản lý lớp dạy bơi cho người lớn — production tại https://poolane.vn
 
-First, run the development server:
+## Brand
+
+Poolane là 1 trong 3 brand của **Pola Project** — tên "Pola" lấy từ Polaris (sao Bắc Đẩu) — luôn đứng yên dẫn đường:
+
+- 🏊 **Poolane** — Bơi lội (production)
+- 📚 Polang — Ngoại ngữ (future)
+- 📊 Polata — Phân tích dữ liệu (future)
+
+Triết lý: *"Dạy bơi không chỉ để bơi"* — kết nối thân với tâm, cộng đồng người trưởng thành cùng giải toả áp lực.
+
+## Stack
+
+- **Frontend**: Next.js 16 App Router + TypeScript strict + Tailwind v4
+- **DB**: PostgreSQL via Supabase Singapore + Prisma 7
+- **Deploy**: Vercel Pro region `sin1`
+- **Payment**: VietQR (TPBank `22282138888`) + Sepay webhook auto-confirm
+- **Email**: Resend (domain polaproject.com verified)
+- **Auth**: Supabase Auth (phone + password, no OTP)
+- **Storage**: Supabase Storage bucket `poolane-public` + Google Drive (videos)
+
+## SSOT (Single Source of Truth)
+
+| File | Mục đích |
+|---|---|
+| [CLAUDE.md](CLAUDE.md) | Project SSOT — quy ước, phases, schema, business rules, operational principles |
+| [brand-guideline.md](brand-guideline.md) | Brand identity, color, typography, design discipline (Quiet Luxury) |
+| [SETUP-AFTER-WAKE.md](SETUP-AFTER-WAKE.md) | Operational reference — env vars, infra, troubleshooting |
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install                    # postinstall auto-run `prisma generate`
+npm run dev                    # http://localhost:3000
+npm run build                  # Production build (test trước deploy)
+npm run lint                   # ESLint — kỳ vọng 0 errors + 0 warnings (Phase 16.1 baseline)
+
+# Database
+npm run db:push                # Push schema to Supabase (no migration)
+npm run db:studio              # Prisma Studio — browse/edit data
+npm run db:seed-production     # Seed minimum (admin + 3 courses + 8 FAQs) — chạy 1 lần
+npm run db:seed-demo           # Seed test accounts + data
+DELETE_DEMO=1 npm run db:seed-demo  # Cleanup demo data
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Demo Accounts (Synthetic Monitoring)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Demo luôn live trên production, chạy luồng thật, exclude khỏi analytics:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+Staff:    0900000099 / PoolaneDemo@123
+Student:  0900000088 / PoolaneDemo@123  (vé 8 buổi, enrolled khoá ECH)
+```
 
-## Learn More
+- API DELETE block 403 (protected)
+- Cron daily 5:30 AM VN tự re-create nếu missing
+- Auto-exclude khỏi 7 analytics queries qua `getDemoStudentIds()` helper
 
-To learn more about Next.js, take a look at the following resources:
+## Design Philosophy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Phase 16 — Quiet Luxury:** Apple Liquid Glass framework giữ ở mức structure (frosted + blur + border + hover lift), bỏ hoàn toàn animation loop (specular streak, halo pulse, decoration blob). UI nhường chỗ cho content. Default theme: `light`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Private — Pola Project © 2026

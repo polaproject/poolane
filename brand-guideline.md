@@ -4,8 +4,9 @@
 > **Tài liệu này là nguồn chân lý về nhận diện thương hiệu Poolane.**
 > Dùng làm tham chiếu cho mọi hoạt động thiết kế, nội dung, và giao tiếp.
 
-**Phiên bản:** 1.0
-**Cập nhật lần cuối:** 2026-05-12
+**Phiên bản:** 1.1 — Phase 16 design discipline ("Quiet luxury")
+**Cập nhật lần cuối:** 2026-05-16
+**Trạng thái:** Production live tại https://poolane.vn
 **Trạng thái:** Working Draft — Logo chưa có file chính thức
 
 ---
@@ -416,6 +417,34 @@ Highlight: Không burn out điểm sáng
 Vignette: Nhẹ — tạo cảm giác ấm cúng, hội tụ
 Filter: Không dùng filter màu mạnh
 ```
+
+---
+
+### Design Discipline — "Quiet Luxury" (Phase 16)
+
+Brand visual KHÔNG dùng:
+
+❌ Animation loop (specular streak chạy qua glass, halo pulse quanh logo/element)
+❌ Decoration blur blob trong hero/corner (68 chỗ Phase 1-15 đã xoá khỏi 61 file)
+❌ Route-level `loading.tsx` skeleton (Next.js convention)
+❌ Background gradient hard-coded thay cho token
+❌ Decoration không phục vụ content
+
+Brand visual DÙNG:
+
+✅ Frosted glass (backdrop-blur + saturate) — chính là Apple Liquid Glass
+✅ Border + ring (edge highlight subtle)
+✅ Hover lift transition (200-280ms spring)
+✅ Focus ring spring (a11y)
+✅ StarField (chỉ landing page — brand element Polaris, không lặp ở mọi trang)
+✅ AmbientMesh (background subtle, theme-aware)
+✅ Skeleton inline trong page khi cần (rare, không dùng route-level)
+
+**Triết lý:** "Premium quiet" — UI nhường chỗ cho học viên/buổi học, KHÔNG tranh giành sự chú ý với content. User focus vào học, không vào animation.
+
+**Reference:** Apple iOS 26 / macOS 26 design language ở mức **structure** (frosted + blur + concentric radius) — nhưng **zero animation loop** để phù hợp app type Poolane (focus mode, không entertainment).
+
+**Default theme:** `light` (Sáng — lavender pastel). User cũ có localStorage key cũ sẽ tự fresh init qua force-migrate key `poolane-theme-v2`.
 
 ---
 
