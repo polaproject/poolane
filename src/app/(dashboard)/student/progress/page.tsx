@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { COURSE_SKILLS, SCALE_DESCRIPTIONS } from '@/config/constants'
 import { RadarChart } from '@/components/features/assessment/RadarChart'
 import { Chip } from '@/components/ui/Chip'
-import { TrendingUp, Target, GraduationCap, Repeat, BookOpen, Award } from 'lucide-react'
+import { generateSkillComments } from '@/lib/ai/skill-comments'
+import { TrendingUp, Target, GraduationCap, Repeat, BookOpen, Award, Sparkles, ArrowUp, ArrowDown } from 'lucide-react'
 
 export default async function ProgressPage() {
   const user = await requireRole(['admin', 'staff', 'student'])
@@ -79,12 +80,24 @@ export default async function ProgressPage() {
 
           const latest = assessments[assessments.length - 1]
           const latestScores = Object.fromEntries(latest.scores.map(s => [s.skillKey, s.score]))
+          const previousScores = assessments.length > 1
+            ? Object.fromEntries(assessments[0].scores.map(s => [s.skillKey, s.score]))
+            : undefined
           const avg = latest.scores.length > 0
             ? latest.scores.reduce((sum, s) => sum + s.score, 0) / latest.scores.length
             : 0
           const weakSkills = latest.scores
             .filter(s => s.score <= 2)
             .map(s => skills.find(sk => sk.key === s.skillKey)?.label ?? s.skillKey)
+
+          // Phase 15 — rule-based analysis (no LLM)
+          const analysis = generateSkillComments({
+            skills,
+            scores: latestScores,
+            previousScores,
+            courseCode,
+            sessionNumber: latest.sessionNumber,
+          })
 
           const statusChip = enrollment.status === 'completed'
             ? { variant: 'success' as const, Icon: GraduationCap, label: 'Đã tốt nghiệp' }
@@ -127,12 +140,76 @@ export default async function ProgressPage() {
                 <RadarChart
                   skills={skills}
                   scores={latestScores}
-                  previousScores={
-                    assessments.length > 1
-                      ? Object.fromEntries(assessments[0].scores.map(s => [s.skillKey, s.score]))
-                      : undefined
-                  }
+                  previousScores={previousScores}
                 />
+              </div>
+
+              {/* AI Phân Tích Tiến Độ — rule-based (Phase 15) */}
+              <div className="rounded-card-lg bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="h-4 w-4 text-accent" strokeWidth={1.75} />
+                  <p className="eyebrow text-foreground/55">Phân tích tiến độ</p>
+                </div>
+
+                {/* Overall */}
+                <p className="text-base text-foreground leading-relaxed mb-4">
+                  {analysis.overall}
+                </p>
+
+                {/* Improvements */}
+                {analysis.improvements.length > 0 && (
+                  <div className="mb-3">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <ArrowUp className="h-3.5 w-3.5 text-success" strokeWidth={2.25} />
+                      <p className="text-xs font-semibold text-success uppercase tracking-wider">Cải thiện rõ</p>
+                    </div>
+                    <ul className="space-y-1">
+                      {analysis.improvements.map((msg, i) => (
+                        <li key={i} className="text-sm text-foreground/85 pl-5">{msg}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Weaknesses */}
+                {analysis.weaknesses.length > 0 && (
+                  <div className="mb-3">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <ArrowDown className="h-3.5 w-3.5 text-warn" strokeWidth={2.25} />
+                      <p className="text-xs font-semibold text-warn uppercase tracking-wider">Tập trung thêm</p>
+                    </div>
+                    <ul className="space-y-1">
+                      {analysis.weaknesses.map((msg, i) => (
+                        <li key={i} className="text-sm text-foreground/85 pl-5">{msg}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Graduation readiness bar */}
+                <div className="mt-4 pt-4 border-t border-foreground/8">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <p className="text-xs text-foreground/55 uppercase tracking-wider font-semibold">
+                      {analysis.isGraduationReady ? '🎉 Sẵn sàng tốt nghiệp' : 'Tiến tới tốt nghiệp'}
+                    </p>
+                    <span className="text-sm font-bold text-accent tabular-nums">{analysis.graduationReadiness}%</span>
+                  </div>
+                  <div className="h-2 bg-foreground/10 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        analysis.isGraduationReady ? 'bg-success' :
+                        analysis.graduationReadiness >= 60 ? 'bg-accent' :
+                        'bg-mist'
+                      }`}
+                      style={{ width: `${analysis.graduationReadiness}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Encouragement */}
+                <p className="text-sm italic text-foreground/65 mt-4 text-center">
+                  {analysis.encouragement}
+                </p>
               </div>
 
               {/* Skill list */}
