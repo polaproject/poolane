@@ -116,7 +116,7 @@ export default function ShopPage() {
           <div className="grid place-items-center h-16 w-16 rounded-pill bg-success/15 mx-auto mb-4">
             <CheckCircle className="h-8 w-8 text-success" strokeWidth={1.75} />
           </div>
-          <h2 className="font-heading italic text-3xl text-foreground mb-2">Đặt hàng thành công!</h2>
+          <h2 className="lqg-headline text-3xl text-foreground mb-2">Đặt hàng thành công!</h2>
           <p className="text-sm text-foreground/65 mb-6">Lớp sẽ duyệt đơn và liên hệ bạn sớm nhất.</p>
           <div className="flex gap-2 justify-center flex-wrap">
             <button
@@ -190,7 +190,7 @@ export default function ShopPage() {
         ) : filteredProducts.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <Package className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">
+            <p className="lqg-headline text-2xl text-foreground mb-1">
               {products.length === 0 ? 'Chưa có sản phẩm' : 'Không khớp tìm kiếm'}
             </p>
             <p className="text-sm text-foreground/55">
@@ -287,7 +287,7 @@ export default function ShopPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-paper/55">{cartItems.length} sản phẩm trong giỏ</p>
-                <p className="font-heading italic text-xl text-accent leading-none mt-0.5">{fmt(cartTotal)}</p>
+                <p className="lqg-headline text-xl text-accent leading-none mt-0.5">{fmt(cartTotal)}</p>
               </div>
             </div>
             <input

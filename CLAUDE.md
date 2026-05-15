@@ -219,10 +219,16 @@ Theo thứ tự quan trọng (đã hoàn thành redesign sâu, giờ unblock inf
 9. **Phase 9 — True Dark/Light Mode**: ✅ 7 sub-phase (nav bug fix longest-match + hover bump, token rebuild với adaptive `--surface/--nav-bg/--hero-bg`, ThemeSwitcher Sun/Moon + Sáng/Tối, adaptive sidebar + hero, dashboard ambient-bg wrap). Theme A/B rename → `theme-dark/theme-light`. Cards không còn hard-code `#FFFFFF`. localStorage auto-migrate. Build pass, perf 70-76 (motion-heavy hero acceptable), a11y/bp 100.
 10. **Phase 10 — Apple Liquid Glass throughout**: ✅ 12 sub-phase. Xuyên suốt design language Apple iOS 26 / macOS 26. Lens tokens (blur+saturate+brightness), glass tints adaptive, specular streak animation 11s, concentric radius scale. Sidebar + mọi card + button + input glass + lensing. Table body rows glass-table-row alternating tint. TiltCard component cho 3D micro-tilt. 2 migration scripts (264 + 11 replacements). Lighthouse **perf 88, a11y 100, bp 100** — đạt mọi ngưỡng SSOT.
 11. **Phase 11 — Sidebar Fixed + Color Harmony**: ✅ Sidebar `lg:fixed lg:ml-64` đứng yên khi cuộn. Mass migration 1474 replacements/135 files: `text-ink/N` → `text-foreground/N`, `bg-accent text-foreground` → `bg-accent text-ink` (30 CTA buttons giữ dark text trên gold). `--foreground` token đổi adaptive. Cards trong dark mode không còn chữ "chìm". Hero bands không còn "block đen choáng" trên light mode. Lighthouse a11y 100/bp 100.
-12. **Phase 12 — Liquid Glass Reset (family.co reference)**: ✅ Reset design layer Phase 8-11 → family.co pastel Liquid Glass. Token system `.lqg-*` ở `:root` (light) + `html.lqg-dark` (dark deep purple-grey `#0E0D14`). 5 primitives mới ở `src/components/ui/glass/`: `AmbientMesh`, `GlassCard`, `GlassButton`, `GlassInput`, `RefinedNumber`. Smart CSS-level unification: `.glass-card`/`.glass-button`/`.glass-input`/`.pola-nav` đổi sang LQG tokens → 264 usages auto-inherit family.co palette. Sandbox demo tại `/sandbox/liquid-glass` đầy đủ 5 sections. Auto-fix 2 critical security (refund audit log + shop/products GET auth). Báo cáo: [qa/overnight-report-2026-05-15.md](qa/overnight-report-2026-05-15.md). Lighthouse landing 86/96/100. Cần tiếp Phase 12.1+: migrate primitives per-page + bump a11y contrast.
-8. **Xoá sandbox folder** (`src/app/sandbox/*`) trước deploy production — chỉ dùng dev demo (owner còn polish trong đó)
-9. **Combo 3 khoá pricing** — chốt giá + implement
-10. **AI tư vấn cá nhân hoá** (Claude API) — phase 12 roadmap
+12. **Phase 12 — Liquid Glass Reset (family.co reference)**: ✅ Reset design layer Phase 8-11 → family.co pastel Liquid Glass. Token system `.lqg-*` ở `:root` (light) + `html.lqg-dark` (dark deep purple-grey `#0E0D14`). 5 primitives mới ở `src/components/ui/glass/`: `AmbientMesh`, `GlassCard`, `GlassButton`, `GlassInput`, `RefinedNumber`. Smart CSS-level unification: `.glass-card`/`.glass-button`/`.glass-input`/`.pola-nav` đổi sang LQG tokens → 264 usages auto-inherit family.co palette. Sandbox demo tại `/sandbox/liquid-glass`. Auto-fix 2 critical security. Lighthouse landing 89/100/100 sau a11y bump.
+13. **Phase 12.X — Sidebar fixed bug fix**: ✅ Root cause `.pola-nav { position: relative }` (Phase 10) silently override `.pola-sidebar { position: fixed }` qua CSS cascade. 5 fix attempts trước thất bại vì patch symptoms. Cuối cùng đào built CSS bundle (`grep -oE "\.pola-nav\s*{[^}]*}" .next/static/chunks/*.css`) tìm ra. Notion-style layout: `.pola-shell { padding-left: 16rem }` + `.pola-sidebar { position: fixed }`. Bài học → CLAUDE.md section 14.5.
+14. **Phase 12.1 — Form input auto-glass + Debugging Strategy docs**: ✅ Auto-glass cho `input-blog`/`input-pola` aliases qua base CSS rules. Tài liệu hoá Visual/CSS Bug Debugging Workflow ở section 14.5 (5-step procedure + 2 rules).
+15. **Phase 13 — Typography Discipline**: ✅ Italic Cormorant từ 204 lần dùng SAI → chỉ 1 (philosophy blockquote). Migration script `migrate-typography.mjs` context-aware (skip blockquote/greeting/blog/quote pattern) → 116 replacements/55 files. 2 utility class mới: `.lqg-headline` (sans bold 600 cho headings) + `.lqg-numeric-sans` (sans tabular 700 cho stats/currency, 7 size variants). Primitives update: `RefinedNumber` default `variant='sans'`, `PageHeader` cả 2 nhánh dùng `.lqg-headline`, `StatCard` value dùng `.lqg-numeric-sans`. Rule mới: italic CHỈ cho quote/citation, blog body, greeting message.
+
+### Còn lại trước deploy
+- **Xoá sandbox folder** (`src/app/sandbox/*`) hoặc move sang `qa/design-reference/` — owner còn polish nên defer
+- **Phase 6 Auth split-layout redesign** (login/register/forgot-password full layout với brand artwork)
+- **Combo 3 khoá pricing** — chốt giá + implement
+- **AI tư vấn cá nhân hoá** (Claude API) — roadmap Phase 14+
 
 ### Việc đã hoàn thành lớn trong session redesign
 
@@ -359,16 +365,28 @@ Theme B — Bình Yên (lavender pastel)
 
 Tất cả 2 theme dùng **cùng tên token** (`ink`, `paper`, `accent`, `mist`, ...) → switch theme = chỉ đổi CSS variables, không phải sửa code. Theme lưu trong `localStorage` (`poolane-theme`), apply qua class `theme-a`/`theme-b` trên `<html>`.
 
-**Typography:**
-- Display + heading: **Cormorant Garamond italic** (`heading-display` utility — clamp 2.5rem–4.5rem)
-- Body + UI: **Plus Jakarta Sans** (400/500/600/700)
+**Typography (Phase 13 discipline — italic dùng tiết chế):**
+- **Cormorant Garamond italic** — CHỈ 3 trường hợp:
+  1. **Quote / citation** (`<blockquote>`) — trích dẫn, philosophy, testimonial
+  2. **Blog body** — nội dung dài đọc lâu
+  3. **Greeting message** ("Chào buổi sáng/tối, [Tên]") — accent moment ở hero dashboard
+- **Plus Jakarta Sans (400-700)** — mọi UI khác:
+  - **Page headings** (h1/h2/h3) → `.lqg-headline` (sans bold 600, letter-spacing tight)
+  - **Stats / numbers / currency** → `.lqg-numeric-sans` (sans bold 700 tabular-nums)
+  - Body text, buttons, labels, navigation, empty states, form fields
+- **Utility classes**:
+  - `.lqg-headline` — page/section/card titles
+  - `.lqg-numeric-sans` (+ size variants xs..3xl) — số liệu data
+  - `.lqg-display` — italic serif (chỉ dùng cho 3 trường hợp trên)
+  - `.lqg-numeric` — italic serif numbers (chỉ dùng cho accent drop-cap)
+  - `.lqg-eyebrow` — text xs tracking widest uppercase
 
 **Design language (Phase 1):**
 - **Glass panels** — `.glass-panel` + `.glass-pill` (frosted bg + backdrop-blur + soft ring)
 - **Ambient background** — `.ambient-bg` theme-aware (dark navy blobs cho A, lavender mesh cho B)
 - **Cards** — `rounded-card` (16) / `rounded-card-lg` (24) / `rounded-card-xl` (28), `shadow-soft` / `shadow-glass`
 - **Eyebrow** — text xs tracking widest uppercase opacity-60 (đặt trên heading)
-- **Italic serif display** — hero/section titles dùng Cormorant italic
+- **Liquid Glass Phase 12** — `.glass-card`, `.glass-button`, `.glass-input` + specular streak animation
 - **Soft motion** — transitions 150–250ms ease-out, hover scale max 1.02
 
 **Primitive components** (`src/components/ui/`):
@@ -2134,6 +2152,49 @@ Trong Vercel: Add domain `polaproject.com` + `www.polaproject.com`.
 
 ---
 
+## 18. DEPLOY READINESS CHECKLIST (Phase 13 — Pre-launch)
+
+### 18.1. Code (AI có thể verify autonomously)
+- [x] All builds pass (`npm run build` exit 0)
+- [x] Lighthouse landing perf 89 / a11y 100 / bp 100 (sau Phase 12.1 + 13)
+- [x] No console.log secrets, no hardcoded API keys
+- [x] Audit log on all financial write operations (Phase 12 fixed refund.create)
+- [x] requireRole on all protected routes (Phase 12 fixed shop/products GET)
+- [x] Typography discipline (Phase 13 — italic chỉ ở 3 cases)
+- [x] Sidebar fixed Notion-style (Phase 12.X bug fix)
+- [x] Mass migration scripts committed (`migrate-tokens`, `migrate-glass`, `migrate-glass-tables`, `migrate-theme-harmony`, `migrate-typography`)
+- [ ] Sandbox folder removed hoặc moved sang `qa/design-reference/`
+- [ ] Verify Lighthouse cả 5 trang × 2 mode (dark/light) — owner test thủ công
+
+### 18.2. Infrastructure (owner thao tác 3rd-party dashboard)
+- [ ] **Vercel**: tạo project + connect GitHub repo
+- [ ] **Vercel**: import env vars từ `.env.local`
+- [ ] **Matbao DNS**: thêm A record `@` → `76.76.21.21` + CNAME `www` → `cname.vercel-dns.com`
+- [ ] **Vercel domain**: add `poolane.vn` + `www.poolane.vn`
+- [ ] **Supabase Pro**: upgrade plan ($25/mo) → daily backup 7 days
+- [ ] **Supabase Storage**: tạo bucket `poolane-public` (public read)
+- [ ] **Sepay**: env `SEPAY_API_KEY` + cấu hình webhook `https://poolane.vn/api/webhooks/sepay`
+- [ ] **Resend**: tạo account + verify domain `poolane.vn` (thêm MX/TXT DNS Matbao) + env `RESEND_API_KEY`
+- [ ] **VAPID keys**: chạy `npx web-push generate-vapid-keys` → env `VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY`
+- [ ] **Cron secret**: env `CRON_SECRET` (random 32 char)
+- [ ] **Health check**: monitor `/api/health` → alert nếu fail
+
+### 18.3. Content (owner chốt)
+- [ ] **Combo 3 khoá pricing** — chốt giá giảm (% hay số tiền cố định)
+- [ ] **Shop products real list** (placeholder 9 product seed hiện tại — cần real)
+- [ ] **Email templates** chi tiết (welcome, invoice, refund, birthday, absence) — code sẵn sàng, cần review tone
+- [ ] **FAQ entries** — 8 entries seed đã có, kiểm tra cập nhật
+- [ ] **Blog posts** demo 3-5 bài (technique / safety / nutrition / student_story) cho launch
+
+### 18.4. QA cuối (owner thao tác)
+- [ ] Test 3 role login (admin/staff/student) flow toàn diện
+- [ ] Test thanh toán mock với Sepay sandbox
+- [ ] Test push notification trên Safari + Chrome
+- [ ] Test mobile real device (iPhone + Android) — touch target 44px, scroll, sticky
+- [ ] Test theme switcher Sáng/Tối preserve trong session
+
+---
+
 ## PHỤ LỤC: TODO / TBD
 
 Những điều CHƯA chốt, cần quyết định trước khi build:
@@ -2186,11 +2247,20 @@ Những điều CHƯA chốt, cần quyết định trước khi build:
 | **MVP** | Phiên bản tối thiểu có thể dùng được |
 | **Audit log** | Nhật ký hệ thống ghi mọi hành động quan trọng |
 | **RLS** | Row Level Security của Supabase |
+| **Liquid Glass** | Apple iOS 26/macOS 26 design language (translucent + lensing + specular streak). Reference: family.co |
+| **LQG tokens** | `.lqg-*` CSS variable namespace cho design system Phase 12+ (vd `--lqg-bg-glass`, `--lqg-accent`) |
+| **Lensing** | `backdrop-filter: blur(N) saturate(M%) brightness(K)` compound — màu phía sau "uốn" qua kính |
+| **Specular streak** | Vệt sáng gradient trượt chéo qua glass element mỗi 8-11s (linear-gradient animated) |
+| **Concentric radius** | Bo góc nested chuẩn: outer 32px → inner 24px → button 16px → small 12px |
+| **Spring overshoot** | Cubic-bezier easing có overshoot (`0.34, 1.7, 0.64, 1`) — bouncy feel |
+| **Press squish** | Click feedback `scale(0.96) + brightness(0.92)` snappy 150ms |
+| **Notion-style sidebar** | Layout pattern: outer padding-left 16rem + sidebar position: fixed (KHÔNG flex parallel) |
+| **Typography discipline** | Phase 13 rule: italic Cormorant CHỈ cho quote/blog body/greeting; sans Plus Jakarta cho mọi UI structural |
 
 ---
 
-**Phiên bản:** 1.0
-**Cập nhật cuối:** Khi bắt đầu Phase 1
+**Phiên bản:** 1.3 — Phase 13 typography + deploy ready
+**Cập nhật cuối:** 2026-05-15
 **Maintainer:** Owner + AI
 
 > Mọi quyết định nghiệp vụ phải được phản ánh ở đây. Code đi theo file này, không ngược lại.

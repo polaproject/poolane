@@ -76,7 +76,7 @@ export default function RegistrationsPage() {
       <div className="min-h-screen bg-paper grid place-items-center p-6">
         <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-8 text-center max-w-md">
           <CheckSquare className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-          <p className="font-heading italic text-2xl text-foreground mb-1">Chưa chọn buổi</p>
+          <p className="lqg-headline text-2xl text-foreground mb-1">Chưa chọn buổi</p>
           <p className="text-sm text-foreground/55 mb-4">Vào lịch học, click vào ô buổi → &ldquo;Xử lý đăng ký&rdquo;.</p>
           <a href="/admin/schedule" className="inline-flex items-center gap-1.5 bg-ink text-paper font-semibold px-5 py-2.5 rounded-pill text-sm hover:bg-foreground/90 transition">
             Mở lịch học
@@ -106,7 +106,7 @@ export default function RegistrationsPage() {
         ) : registrations.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <Check className="h-10 w-10 mx-auto mb-3 text-success" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Đã hết</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Đã hết</p>
             <p className="text-sm text-foreground/55">Không có đăng ký nào đang chờ duyệt.</p>
           </div>
         ) : (
@@ -180,7 +180,7 @@ export default function RegistrationsPage() {
         <div className="fixed inset-0 bg-ink/60 backdrop-blur-sm grid place-items-center z-50 p-4">
           <div className="rounded-card-xl bg-[var(--surface)] shadow-glass ring-1 ring-foreground/8 p-6 w-full max-w-md">
             <p className="eyebrow text-danger mb-1">Từ chối đăng ký</p>
-            <h3 className="font-heading italic text-2xl text-foreground mb-4">{rejectModal.name}</h3>
+            <h3 className="lqg-headline text-2xl text-foreground mb-4">{rejectModal.name}</h3>
 
             <div className="space-y-2 mb-4">
               {REJECT_REASONS.map(r => (

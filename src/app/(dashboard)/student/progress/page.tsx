@@ -30,7 +30,7 @@ export default async function ProgressPage() {
         <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto">
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <BookOpen className="h-12 w-12 mx-auto mb-4 text-foreground/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có dữ liệu đánh giá</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có dữ liệu đánh giá</p>
             <p className="text-sm text-foreground/55">Sau khi học buổi 1, giáo viên sẽ chấm điểm khởi đầu.</p>
           </div>
         </div>
@@ -71,7 +71,7 @@ export default async function ProgressPage() {
           if (assessments.length === 0) {
             return (
               <div key={enrollment.id} className="glass-card glass-card-hover p-6">
-                <h2 className="font-heading italic text-2xl text-foreground mb-2">{enrollment.course.name}</h2>
+                <h2 className="lqg-headline text-2xl text-foreground mb-2">{enrollment.course.name}</h2>
                 <p className="text-sm text-foreground/55">Chưa có đánh giá nào</p>
               </div>
             )
@@ -100,7 +100,7 @@ export default async function ProgressPage() {
                 <div className="relative flex justify-between items-start gap-4">
                   <div className="min-w-0">
                     <p className="eyebrow text-paper/55 mb-1">Khoá học</p>
-                    <h2 className="font-heading italic text-3xl text-paper leading-tight">{enrollment.course.name}</h2>
+                    <h2 className="lqg-headline text-3xl text-paper leading-tight">{enrollment.course.name}</h2>
                     <div className="mt-3 flex items-center gap-2 flex-wrap text-xs text-paper/65">
                       <Chip variant={statusChip.variant} active className="text-[10px]">
                         <statusChip.Icon className="h-3 w-3" strokeWidth={2.25} /> {statusChip.label}
@@ -112,7 +112,7 @@ export default async function ProgressPage() {
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="font-heading italic text-5xl text-accent leading-none">{avg.toFixed(1)}</p>
+                    <p className="lqg-headline text-5xl text-accent leading-none">{avg.toFixed(1)}</p>
                     <p className="text-xs text-paper/55 mt-1">điểm TB</p>
                   </div>
                 </div>
@@ -202,7 +202,7 @@ export default async function ProgressPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {latest.metrics.map(m => (
                       <div key={m.metricKey} className="rounded-card bg-paper-tint/50 p-4 text-center">
-                        <p className="font-heading italic text-3xl text-foreground leading-none">{m.value}</p>
+                        <p className="lqg-headline text-3xl text-foreground leading-none">{m.value}</p>
                         <p className="text-xs text-foreground/55 mt-1.5">{m.unit}</p>
                         <p className="text-xs text-foreground/40 mt-0.5">
                           {m.metricKey === 'continuous_meters' ? 'Mét liên tục'

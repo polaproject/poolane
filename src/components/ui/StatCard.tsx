@@ -64,8 +64,8 @@ export function StatCard({
         )}
       </div>
       <div className="mt-3 flex items-baseline gap-2">
-        <span className="font-heading text-3xl sm:text-4xl leading-none">{value}</span>
-        {unit && <span className="text-sm opacity-65">{unit}</span>}
+        <span className="lqg-numeric-sans lqg-numeric-sans-xl sm:lqg-numeric-sans-2xl">{value}</span>
+        {unit && <span className="text-sm opacity-75">{unit}</span>}
       </div>
       {(trend !== undefined || trendLabel) && (
         <div className="mt-3 flex items-center gap-2 text-xs">

@@ -45,7 +45,7 @@ export default async function StaffVideosPage() {
           {recent.length === 0 ? (
             <div className="glass-card glass-card-hover p-12 text-center">
               <VideoIcon className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-foreground">Chưa có video</p>
+              <p className="lqg-headline text-2xl text-foreground">Chưa có video</p>
             </div>
           ) : (
             <div className="glass-card glass-card-hover overflow-hidden">

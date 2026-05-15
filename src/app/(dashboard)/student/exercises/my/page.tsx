@@ -45,7 +45,7 @@ export default async function MyExercisesPage() {
         {active.length === 0 && done.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <Dumbbell className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa được gán bài</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Chưa được gán bài</p>
             <p className="text-sm text-foreground/55">Lớp sẽ gán bài tập sau khi đánh giá kỹ năng.</p>
           </div>
         ) : (
@@ -86,7 +86,7 @@ function AssignmentCard({ a, canAct }: { a: any; canAct?: boolean }) {
       overdue ? 'ring-danger/40' : 'ring-foreground/8'
     }`}>
       <div className="flex items-start justify-between gap-3 mb-2">
-        <h3 className="font-heading italic text-xl text-foreground leading-tight flex-1 min-w-0">{a.exercise.title}</h3>
+        <h3 className="lqg-headline text-xl text-foreground leading-tight flex-1 min-w-0">{a.exercise.title}</h3>
         {isDone ? (
           <Chip variant="success" active><CheckCircle2 className="h-3 w-3" strokeWidth={2.25} /> Đã làm</Chip>
         ) : isSkipped ? (

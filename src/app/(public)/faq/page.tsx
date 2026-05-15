@@ -45,7 +45,7 @@ export default async function FaqPage() {
         {faqs.length === 0 ? (
           <GlassPanel className="p-12 text-center">
             <HelpCircle className="h-10 w-10 mx-auto mb-3 opacity-40" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl mb-1">Đang cập nhật...</p>
+            <p className="lqg-headline text-2xl mb-1">Đang cập nhật...</p>
             <p className="text-sm opacity-65">Lớp đang viết các câu hỏi thường gặp. Quay lại sớm nhé.</p>
           </GlassPanel>
         ) : (
@@ -85,7 +85,7 @@ export default async function FaqPage() {
               <Mail className="h-5 w-5 text-accent" strokeWidth={1.75} />
             </div>
             <div>
-              <p className="font-heading italic text-xl mb-1">Vẫn còn thắc mắc?</p>
+              <p className="lqg-headline text-xl mb-1">Vẫn còn thắc mắc?</p>
               <p className="text-sm opacity-70">Email lớp, mình sẽ trả lời chi tiết trong 24h.</p>
             </div>
           </div>

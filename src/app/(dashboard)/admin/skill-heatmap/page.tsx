@@ -88,7 +88,7 @@ export default async function SkillHeatmapPage({ searchParams }: { searchParams:
                     <tr key={s.key} className={`border-b border-foreground/5 last:border-b-0 hover:bg-paper-tint/20 transition ${s.count === 0 ? 'opacity-50' : ''}`}>
                       <td className="px-5 py-3 text-sm font-medium text-foreground">{s.label}</td>
                       <td className="px-5 py-3 text-center">
-                        <span className={`inline-block font-heading italic text-xl ${textClass} ${bgClass} px-3 py-1 rounded-pill`}>
+                        <span className={`inline-block lqg-headline text-xl ${textClass} ${bgClass} px-3 py-1 rounded-pill`}>
                           {s.count > 0 ? s.avg.toFixed(1) : '—'}
                         </span>
                       </td>

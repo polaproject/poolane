@@ -1331,6 +1331,39 @@ body.lqg-body {
 .lqg-numeric-2xl { font-size: 3.5rem; }
 .lqg-numeric-3xl { font-size: 4.5rem; }
 
+/* ════════ Phase 13 — Typography discipline ════════
+ * Rule mới: italic serif Cormorant CHỈ dùng cho:
+ *   1. Quote/citation (<blockquote> hoặc .lqg-display giữ italic)
+ *   2. Blog body (.lqg-body article)
+ *   3. Greeting message ("Chào buổi sáng/tối, [Tên]")
+ * Tất cả heading/UI structural khác → sans (Plus Jakarta) qua .lqg-headline.
+ * Tất cả stats/currency → sans tabular qua .lqg-numeric-sans.
+ */
+.lqg-headline {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  color: var(--lqg-text-primary);
+}
+
+.lqg-numeric-sans {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  display: inline-block;
+  color: var(--lqg-text-primary);
+}
+.lqg-numeric-sans-xs  { font-size: 0.875rem; }
+.lqg-numeric-sans-sm  { font-size: 1rem; }
+.lqg-numeric-sans-md  { font-size: 1.25rem; }
+.lqg-numeric-sans-lg  { font-size: 1.75rem; }
+.lqg-numeric-sans-xl  { font-size: 2.5rem; }
+.lqg-numeric-sans-2xl { font-size: 3.5rem; }
+.lqg-numeric-sans-3xl { font-size: 4.5rem; }
+
 /* ────── Radius helpers ────── */
 .lqg-r-sm  { border-radius: var(--lqg-r-sm); }
 .lqg-r-md  { border-radius: var(--lqg-r-md); }

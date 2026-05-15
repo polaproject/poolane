@@ -88,7 +88,7 @@ export default async function StudentPaymentsPage() {
                 <div key={e.id} className="px-5 py-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="font-heading italic text-xl text-foreground leading-tight">{e.courseName}</p>
+                      <p className="lqg-headline text-xl text-foreground leading-tight">{e.courseName}</p>
                       <p className="text-xs text-foreground/65 mt-1">
                         Đã đóng {fmt(e.totalPaid)} / {fmt(e.coursePrice)}
                       </p>
@@ -98,7 +98,7 @@ export default async function StudentPaymentsPage() {
                         </p>
                       )}
                     </div>
-                    <p className="font-heading italic text-2xl text-warn shrink-0">{fmt(e.debt)}</p>
+                    <p className="lqg-headline text-2xl text-warn shrink-0">{fmt(e.debt)}</p>
                   </div>
                   <Link
                     href={`/student/payments/enrollment/${e.id}/pay`}
@@ -128,7 +128,7 @@ export default async function StudentPaymentsPage() {
           {payments.length === 0 ? (
             <div className="p-12 text-center">
               <Wallet className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-xl text-foreground mb-1">Chưa có giao dịch</p>
+              <p className="lqg-headline text-xl text-foreground mb-1">Chưa có giao dịch</p>
               <p className="text-sm text-foreground/55">Khi có thanh toán, sẽ hiện ở đây.</p>
             </div>
           ) : (

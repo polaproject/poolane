@@ -76,7 +76,7 @@ export default function AIPage() {
             ].map(s => (
               <div key={s.label} className="glass-card glass-card-hover p-4 text-center">
                 <p className="eyebrow text-foreground/55 mb-2">{s.label}</p>
-                <p className={`font-heading italic text-3xl leading-none ${
+                <p className={`lqg-headline text-3xl leading-none ${
                   s.tone === 'danger' ? 'text-danger' :
                   s.tone === 'warn' ? 'text-warn' :
                   s.tone === 'success' ? 'text-success' : 'text-foreground'
@@ -105,7 +105,7 @@ export default function AIPage() {
         ) : filtered.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <TrendingDown className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Trống nhóm này</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Trống nhóm này</p>
             <p className="text-sm text-foreground/55">Không có học viên nào ở mức rủi ro này.</p>
           </div>
         ) : (

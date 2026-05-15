@@ -31,7 +31,7 @@ export default async function StudentChallengesPage() {
         {challenges.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <Target className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có thử thách</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có thử thách</p>
             <p className="text-sm text-foreground/55">Khi admin tạo thử thách tháng, sẽ hiện ở đây.</p>
           </div>
         ) : (
@@ -45,7 +45,7 @@ export default async function StudentChallengesPage() {
               <div key={c.id} className="glass-card glass-card-hover p-5">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="min-w-0 flex-1">
-                    <h2 className="font-heading italic text-xl text-foreground leading-tight">{c.name}</h2>
+                    <h2 className="lqg-headline text-xl text-foreground leading-tight">{c.name}</h2>
                     <p className="text-xs text-foreground/55 mt-1">
                       Đến {format(c.endDate, 'dd/MM/yyyy')} · còn {daysLeft} ngày
                     </p>
@@ -57,7 +57,7 @@ export default async function StudentChallengesPage() {
                 <div>
                   <div className="flex items-center justify-between text-xs mb-1.5">
                     <span className="text-foreground/65">{current}/{c.goalValue} {c.unit}</span>
-                    <span className={`font-heading italic text-lg ${achieved ? 'text-success' : 'text-foreground'}`}>{pct}%</span>
+                    <span className={`lqg-headline text-lg ${achieved ? 'text-success' : 'text-foreground'}`}>{pct}%</span>
                   </div>
                   <div className="h-2 bg-ink/8 rounded-full overflow-hidden">
                     <div

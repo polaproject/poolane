@@ -106,7 +106,7 @@ export default async function RefundsPage({ searchParams }: { searchParams: Sear
           {items.length === 0 ? (
             <div className="p-12 text-center">
               <Undo2 className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-foreground mb-1">Không có yêu cầu</p>
+              <p className="lqg-headline text-2xl text-foreground mb-1">Không có yêu cầu</p>
               <p className="text-sm text-foreground/55">Trong tab này chưa có yêu cầu hoàn tiền nào.</p>
             </div>
           ) : (
@@ -150,7 +150,7 @@ export default async function RefundsPage({ searchParams }: { searchParams: Sear
                           {REASON_LABELS[r.reason] ?? r.reason}
                         </td>
                         <td className="px-5 py-3.5 text-right">
-                          <p className="font-heading italic text-lg text-foreground leading-none">{fmt(r.totalRefundAmount)}</p>
+                          <p className="lqg-headline text-lg text-foreground leading-none">{fmt(r.totalRefundAmount)}</p>
                           <p className="text-xs text-foreground/45 mt-1">{format(r.requestedAt, 'dd/MM HH:mm', { locale: vi })}</p>
                         </td>
                         <td className="px-5 py-3.5 text-right">
@@ -194,7 +194,7 @@ function SummaryCard({
           <Icon className={`h-4 w-4 ${tone === 'warn' ? 'text-warn' : 'text-mist'}`} strokeWidth={1.75} />
         </div>
       </div>
-      <p className="font-heading italic text-4xl text-foreground leading-none">{count}</p>
+      <p className="lqg-headline text-4xl text-foreground leading-none">{count}</p>
       <p className="text-sm text-foreground/65 mt-2">{fmt(amount)}</p>
     </div>
   )

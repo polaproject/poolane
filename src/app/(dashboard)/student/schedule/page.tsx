@@ -73,7 +73,7 @@ export default async function StudentSchedulePage() {
         {sessions.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <Calendar className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có lịch</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có lịch</p>
             <p className="text-sm text-foreground/55">Lớp chưa tạo buổi cho 2 tuần tới.</p>
           </div>
         ) : (
@@ -95,7 +95,7 @@ export default async function StudentSchedulePage() {
                       <div className="text-[10px] tracking-widest uppercase text-foreground/45">
                         {format(session.date, 'EEE', { locale: vi })}
                       </div>
-                      <div className="font-heading italic text-3xl text-foreground leading-none mt-0.5">
+                      <div className="lqg-headline text-3xl text-foreground leading-none mt-0.5">
                         {format(session.date, 'dd', { locale: vi })}
                       </div>
                       <div className="text-[10px] text-foreground/40 mt-0.5">

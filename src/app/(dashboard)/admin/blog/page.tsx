@@ -46,7 +46,7 @@ export default async function AdminBlogPage() {
           {posts.length === 0 ? (
             <div className="p-12 text-center">
               <FileText className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có bài viết</p>
+              <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có bài viết</p>
               <p className="text-sm text-foreground/55">Bấm &ldquo;Viết bài&rdquo; để bắt đầu.</p>
             </div>
           ) : (

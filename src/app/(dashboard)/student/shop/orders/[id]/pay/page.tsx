@@ -34,7 +34,7 @@ export default async function PayOrderPage({ params }: Params) {
           <div className="grid place-items-center h-16 w-16 rounded-pill bg-warn/15 mx-auto mb-4">
             <AlertCircle className="h-8 w-8 text-warn" strokeWidth={1.75} />
           </div>
-          <h1 className="font-heading italic text-2xl text-foreground mb-2">Chưa thể thanh toán</h1>
+          <h1 className="lqg-headline text-2xl text-foreground mb-2">Chưa thể thanh toán</h1>
           <p className="text-sm text-foreground/65 mb-5">
             Trạng thái hiện tại: <strong className="text-foreground">{order.status}</strong>. Đơn cần được lớp duyệt trước.
           </p>

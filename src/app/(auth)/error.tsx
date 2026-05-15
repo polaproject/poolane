@@ -30,7 +30,7 @@ export default function AuthError({
         <div className="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
           <AlertTriangle className="w-8 h-8 text-danger" />
         </div>
-        <h1 className="heading-display text-3xl mb-3">Không vào được lúc này</h1>
+        <h1 className="lqg-headline text-3xl mb-3">Không vào được lúc này</h1>
         <p className="text-sm text-foreground/70 mb-1">
           Có lỗi nhỏ xảy ra khi xử lý đăng nhập. Thử lại nhé.
         </p>

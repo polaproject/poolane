@@ -80,7 +80,7 @@ export default async function StudentDashboard() {
 
         <div className="relative z-10 max-w-3xl mx-auto">
           <p className="eyebrow opacity-65 mb-3">{greeting}</p>
-          <h1 className="heading-display">
+          <h1 className="lqg-headline">
             {user.fullName}
           </h1>
           {avgScore && (
@@ -112,7 +112,7 @@ export default async function StudentDashboard() {
 
             {ticket ? (
               <>
-                <p className="font-heading italic text-5xl text-foreground leading-none">
+                <p className="lqg-headline text-5xl text-foreground leading-none">
                   {sessionsLeft}
                   <span className="text-sm font-body not-italic text-foreground/55 ml-2">buổi còn</span>
                 </p>
@@ -130,7 +130,7 @@ export default async function StudentDashboard() {
               </>
             ) : (
               <>
-                <p className="font-heading italic text-3xl text-foreground/40">Chưa có vé</p>
+                <p className="lqg-headline text-3xl text-foreground/40">Chưa có vé</p>
                 <p className="text-sm text-foreground/55 mt-1">Liên hệ lớp để mua vé bơi</p>
               </>
             )}
@@ -150,7 +150,7 @@ export default async function StudentDashboard() {
 
               {nextSession ? (
                 <div className="relative flex-1">
-                  <p className="font-heading italic text-3xl leading-tight">
+                  <p className="lqg-headline text-3xl leading-tight">
                     {format(nextSession.session.date, 'EEEE', { locale: vi })}
                   </p>
                   <p className="font-heading text-2xl text-accent mt-1">
@@ -169,7 +169,7 @@ export default async function StudentDashboard() {
                 </div>
               ) : (
                 <div className="relative flex-1">
-                  <p className="font-heading italic text-2xl">Chưa đăng ký</p>
+                  <p className="lqg-headline text-2xl">Chưa đăng ký</p>
                   <p className="text-sm text-paper/65 mt-2">Đăng ký buổi học mới ở tab kế bên</p>
                 </div>
               )}
@@ -205,7 +205,7 @@ export default async function StudentDashboard() {
                   className="flex items-center justify-between py-2.5 px-3 rounded-card bg-paper-tint/50 hover:bg-paper-tint transition group"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="font-heading italic text-lg text-foreground">{e.course.name}</span>
+                    <span className="lqg-headline text-lg text-foreground">{e.course.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Chip variant="mist">{e.course.code}</Chip>

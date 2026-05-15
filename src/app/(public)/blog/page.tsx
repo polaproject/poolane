@@ -70,7 +70,7 @@ export default async function BlogPage({
         {posts.length === 0 ? (
           <div className="rounded-card-xl bg-current/5 ring-1 ring-current/10 p-12 text-center backdrop-blur-sm">
             <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl mb-1">Chưa có bài viết nào</p>
+            <p className="lqg-headline text-2xl mb-1">Chưa có bài viết nào</p>
             <p className="text-sm opacity-65">Lớp đang viết bài đầu tay — quay lại sớm nhé.</p>
           </div>
         ) : (

@@ -59,7 +59,7 @@ export default async function ProfileRequestsPage({ searchParams }: { searchPara
           {items.length === 0 ? (
             <div className="p-12 text-center">
               <UserCog className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-foreground">Không có yêu cầu</p>
+              <p className="lqg-headline text-2xl text-foreground">Không có yêu cầu</p>
             </div>
           ) : (
             <div className="overflow-x-auto">

@@ -26,7 +26,7 @@ export default async function StudentEventsPage() {
         {events.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <Star className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có sự kiện</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có sự kiện</p>
             <p className="text-sm text-foreground/55">Lớp đang lên kế hoạch sự kiện đầu tiên.</p>
           </div>
         ) : (
@@ -57,7 +57,7 @@ function Section({
         <Calendar className={`h-4 w-4 ${highlight ? 'text-accent' : 'text-foreground/55'}`} strokeWidth={1.75} />
         <div>
           <p className="eyebrow text-foreground/55">{eyebrow}</p>
-          <h2 className="font-heading italic text-xl text-foreground mt-0.5">{title}</h2>
+          <h2 className="lqg-headline text-xl text-foreground mt-0.5">{title}</h2>
         </div>
       </header>
       <div className="space-y-3">{children}</div>
@@ -74,12 +74,12 @@ function EventCard({ e, upcoming }: { e: any; upcoming?: boolean }) {
           <div className="text-[10px] tracking-widest uppercase text-accent">
             {format(e.date, 'MMM', { locale: vi })}
           </div>
-          <div className="font-heading italic text-3xl text-foreground leading-none mt-0.5">
+          <div className="lqg-headline text-3xl text-foreground leading-none mt-0.5">
             {format(e.date, 'dd', { locale: vi })}
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-heading italic text-xl text-foreground leading-tight">{e.name}</h3>
+          <h3 className="lqg-headline text-xl text-foreground leading-tight">{e.name}</h3>
           {e.description && <p className="text-sm text-foreground/65 mt-2 leading-relaxed">{e.description}</p>}
           {e.participantCount && (
             <div className="mt-3">

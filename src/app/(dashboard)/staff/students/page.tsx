@@ -97,7 +97,7 @@ export default async function StaffStudentsPage({ searchParams }: { searchParams
           {students.length === 0 ? (
             <div className="p-12 text-center">
               <Users className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-foreground mb-1">
+              <p className="lqg-headline text-2xl text-foreground mb-1">
                 {search || statusFilter ? 'Không khớp tìm kiếm' : 'Chưa có học viên'}
               </p>
               <p className="text-sm text-foreground/55">
@@ -124,7 +124,7 @@ export default async function StaffStudentsPage({ searchParams }: { searchParams
                       <tr key={s.id} className="border-b border-foreground/5 last:border-b-0 hover:bg-paper-tint/20 transition group glass-table-row">
                         <td className="px-5 py-3.5">
                           <Link href={`/staff/students/${s.id}`} className="flex items-center gap-3">
-                            <div className="grid place-items-center h-9 w-9 rounded-pill bg-mist/15 text-mist font-heading italic text-sm shrink-0">
+                            <div className="grid place-items-center h-9 w-9 rounded-pill bg-mist/15 text-mist lqg-headline text-sm shrink-0">
                               {s.user.fullName.charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0">

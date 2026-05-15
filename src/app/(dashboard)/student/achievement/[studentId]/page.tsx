@@ -58,7 +58,7 @@ export default async function AchievementPage({ params }: Params) {
             >
               Tốt nghiệp
             </p>
-            <h1 className="font-heading italic text-3xl leading-tight">{lastGrad.course.name}</h1>
+            <h1 className="lqg-headline text-3xl leading-tight">{lastGrad.course.name}</h1>
             <p className="text-sm mt-3 font-medium" style={{ color: '#C8A84B' }}>
               {student.user.fullName}
             </p>
@@ -71,7 +71,7 @@ export default async function AchievementPage({ params }: Params) {
             <p className="text-[10px] tracking-[0.25em] uppercase font-medium opacity-55 mb-1">
               Ngày hoàn thành
             </p>
-            <p className="font-heading italic text-2xl">
+            <p className="lqg-headline text-2xl">
               {lastGrad.graduationDate
                 ? format(lastGrad.graduationDate, "dd 'tháng' MM, yyyy", { locale: vi })
                 : 'Đã hoàn thành'}
@@ -87,7 +87,7 @@ export default async function AchievementPage({ params }: Params) {
                 {student.enrollments.map((e, i) => (
                   <div key={e.id} className="text-center">
                     <div
-                      className="w-12 h-12 rounded-pill grid place-items-center mb-1 font-heading italic text-lg"
+                      className="w-12 h-12 rounded-pill grid place-items-center mb-1 lqg-headline text-lg"
                       style={{
                         background: i === student.enrollments.length - 1 ? '#C8A84B' : 'rgba(15,27,51,0.08)',
                         color: i === student.enrollments.length - 1 ? '#0F1B33' : '#0F1B33',

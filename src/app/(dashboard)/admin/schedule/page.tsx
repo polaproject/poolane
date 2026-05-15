@@ -207,7 +207,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
                       }`}>
                         {format(day, 'EEE', { locale: vi })}
                       </p>
-                      <p className={`font-heading italic text-2xl mt-0.5 ${
+                      <p className={`lqg-headline text-2xl mt-0.5 ${
                         isToday ? 'text-foreground' : 'text-foreground/65'
                       }`}>
                         {format(day, 'd')}

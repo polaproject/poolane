@@ -33,7 +33,7 @@ export default async function SelfAssessmentListPage() {
         <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto">
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <ClipboardCheck className="h-12 w-12 text-foreground/30 mx-auto mb-4" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có khoá học</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có khoá học</p>
             <p className="text-sm text-foreground/55">Bạn cần đăng ký khoá học trước khi tự đánh giá.</p>
           </div>
         </div>
@@ -67,7 +67,7 @@ export default async function SelfAssessmentListPage() {
               <ClipboardCheck className="h-4 w-4 text-accent" strokeWidth={1.75} />
               <div>
                 <p className="eyebrow text-foreground/55">Khoá học</p>
-                <h2 className="font-heading italic text-xl text-foreground mt-0.5">{e.course.name}</h2>
+                <h2 className="lqg-headline text-xl text-foreground mt-0.5">{e.course.name}</h2>
               </div>
             </div>
             <div className="divide-y divide-foreground/5">
@@ -82,7 +82,7 @@ export default async function SelfAssessmentListPage() {
                     <div className="flex items-center gap-3">
                       <div className="text-center w-12 shrink-0">
                         <div className="text-[10px] tracking-widest uppercase text-foreground/45">Buổi</div>
-                        <div className="font-heading italic text-2xl text-foreground leading-none">{sn}</div>
+                        <div className="lqg-headline text-2xl text-foreground leading-none">{sn}</div>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-foreground">Đánh giá buổi {sn}</p>

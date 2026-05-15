@@ -89,7 +89,7 @@ export default async function BlogPostPage({ params }: Params) {
       </div>
 
       {/* Title */}
-      <h1 className="font-heading italic text-4xl sm:text-5xl leading-[1.1] tracking-tight mb-6">
+      <h1 className="lqg-headline text-4xl sm:text-5xl leading-[1.1] tracking-tight mb-6">
         {post.title}
       </h1>
 

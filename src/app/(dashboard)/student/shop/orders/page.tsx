@@ -66,7 +66,7 @@ export default async function StudentOrdersPage() {
         {orders.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <ShoppingBag className="h-10 w-10 text-foreground/30 mx-auto mb-3" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có đơn hàng</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có đơn hàng</p>
             <p className="text-sm text-foreground/55 mb-6">Hãy ghé Shop xem các sản phẩm.</p>
             <Link
               href="/student/shop"
@@ -115,7 +115,7 @@ export default async function StudentOrdersPage() {
                     )}
                     <p className="text-xs text-foreground/55 truncate">{cfg.desc}</p>
                   </div>
-                  <p className="font-heading italic text-2xl text-foreground shrink-0">{fmt(order.finalAmount)}</p>
+                  <p className="lqg-headline text-2xl text-foreground shrink-0">{fmt(order.finalAmount)}</p>
                 </div>
 
                 {order.status === 'approved' && (

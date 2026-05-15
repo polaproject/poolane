@@ -51,7 +51,7 @@ export default async function StaffDashboard() {
         <StarField density={18} maxSize={2} className="text-accent/50" />
         <div className="relative max-w-6xl mx-auto">
           <p className="eyebrow opacity-65 mb-2">Trợ lý · Poolane</p>
-          <h1 className="heading-display">Xin chào, {user.fullName}</h1>
+          <h1 className="lqg-headline">Xin chào, {user.fullName}</h1>
           <p className="text-sm opacity-75 mt-3">Duyệt đăng ký, theo dõi học viên, hỗ trợ lớp học hàng ngày.</p>
         </div>
       </div>
@@ -90,7 +90,7 @@ export default async function StaffDashboard() {
                       {s.timeSlot === 'morning'
                         ? <Sunrise className="h-4 w-4 text-accent" strokeWidth={1.75} />
                         : <Sunset className="h-4 w-4 text-accent" strokeWidth={1.75} />}
-                      <p className="font-heading italic text-lg leading-none">
+                      <p className="lqg-headline text-lg leading-none">
                         {s.timeSlot === 'morning' ? '5:30 – 7:30' : '18:00 – 20:00'}
                       </p>
                     </div>
@@ -183,7 +183,7 @@ export default async function StaffDashboard() {
                   className="px-3 py-4 text-center hover:bg-paper-tint/30 transition"
                 >
                   <p className="text-[10px] tracking-widest uppercase text-foreground/45">{format(s.date, 'EEE', { locale: vi })}</p>
-                  <p className="font-heading italic text-2xl text-foreground mt-0.5">{format(s.date, 'dd/MM')}</p>
+                  <p className="lqg-headline text-2xl text-foreground mt-0.5">{format(s.date, 'dd/MM')}</p>
                   <p className="text-xs text-foreground/55 mt-1 inline-flex items-center gap-1">
                     {s.timeSlot === 'morning'
                       ? <Sunrise className="h-3 w-3 text-accent" strokeWidth={1.75} />

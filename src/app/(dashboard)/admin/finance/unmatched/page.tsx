@@ -56,7 +56,7 @@ export default async function UnmatchedTransactionsPage({ searchParams }: { sear
           {items.length === 0 ? (
             <div className="p-12 text-center">
               <AlertCircle className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-foreground mb-1">Không có giao dịch</p>
+              <p className="lqg-headline text-2xl text-foreground mb-1">Không có giao dịch</p>
               <p className="text-sm text-foreground/55">Tab này chưa có giao dịch nào.</p>
             </div>
           ) : (
@@ -66,7 +66,7 @@ export default async function UnmatchedTransactionsPage({ searchParams }: { sear
                   <div className="flex items-start justify-between flex-wrap gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-2">
-                        <p className="font-heading italic text-2xl text-foreground leading-none">{fmt(t.amount)}</p>
+                        <p className="lqg-headline text-2xl text-foreground leading-none">{fmt(t.amount)}</p>
                         {t.gateway && <Chip variant="mist">{t.gateway}</Chip>}
                         <span className="text-xs text-foreground/55">
                           {format(t.transactionDate, 'HH:mm · dd/MM/yyyy', { locale: vi })}

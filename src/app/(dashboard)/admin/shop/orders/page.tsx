@@ -132,7 +132,7 @@ export default function OrdersPage() {
         ) : orders.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <ShoppingBag className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Không có đơn hàng</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Không có đơn hàng</p>
             <p className="text-sm text-foreground/55">Tab này chưa có đơn nào.</p>
           </div>
         ) : (
@@ -149,7 +149,7 @@ export default function OrdersPage() {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-heading italic text-2xl text-foreground leading-none">{fmt(order.finalAmount)}</p>
+                      <p className="lqg-headline text-2xl text-foreground leading-none">{fmt(order.finalAmount)}</p>
                       <Chip variant={cfg.variant} active className="text-[10px] mt-2">{cfg.label}</Chip>
                     </div>
                   </div>

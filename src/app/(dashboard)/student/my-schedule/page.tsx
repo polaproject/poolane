@@ -134,7 +134,7 @@ function Section({
           <Calendar className="h-4 w-4 text-accent" strokeWidth={1.75} />
           <div>
             <p className="eyebrow text-foreground/55">{eyebrow}</p>
-            <h2 className="font-heading italic text-lg text-foreground mt-0.5">{title}</h2>
+            <h2 className="lqg-headline text-lg text-foreground mt-0.5">{title}</h2>
           </div>
         </div>
       </header>
@@ -169,7 +169,7 @@ function RegRow({
         <div className="text-[10px] tracking-widest uppercase text-foreground/45">
           {format(date, 'EEE', { locale: vi })}
         </div>
-        <div className="font-heading italic text-2xl text-foreground leading-none mt-0.5">
+        <div className="lqg-headline text-2xl text-foreground leading-none mt-0.5">
           {format(date, 'dd', { locale: vi })}
         </div>
       </div>

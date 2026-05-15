@@ -89,7 +89,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           {products.length === 0 ? (
             <div className="p-12 text-center">
               <Package className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-foreground mb-1">
+              <p className="lqg-headline text-2xl text-foreground mb-1">
                 {search || typeFilter ? 'Không khớp tìm kiếm' : 'Chưa có sản phẩm'}
               </p>
               <p className="text-sm text-foreground/55">

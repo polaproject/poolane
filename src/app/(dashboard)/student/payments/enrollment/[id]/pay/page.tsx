@@ -34,7 +34,7 @@ export default async function PayEnrollmentPage({ params }: Params) {
           <div className="grid place-items-center h-16 w-16 rounded-pill bg-warn/15 mx-auto mb-4">
             <AlertCircle className="h-8 w-8 text-warn" strokeWidth={1.75} />
           </div>
-          <h1 className="font-heading italic text-2xl text-foreground mb-2">Không thể thanh toán</h1>
+          <h1 className="lqg-headline text-2xl text-foreground mb-2">Không thể thanh toán</h1>
           <p className="text-sm text-foreground/65">
             Khoá học ở trạng thái <strong className="text-foreground">{enrollment.status}</strong>.
           </p>
@@ -86,7 +86,7 @@ export default async function PayEnrollmentPage({ params }: Params) {
           </div>
           <div className="border-t border-foreground/10 pt-2 flex justify-between items-baseline">
             <span className="text-foreground font-medium">Còn nợ</span>
-            <span className="font-heading italic text-2xl text-warn">{fmt(debt)}</span>
+            <span className="lqg-headline text-2xl text-warn">{fmt(debt)}</span>
           </div>
         </div>
 

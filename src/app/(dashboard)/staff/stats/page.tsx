@@ -115,7 +115,7 @@ export default async function StaffStatsPage() {
           <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-accent/15 blur-3xl" />
           <div className="relative">
             <p className="eyebrow text-paper/55 mb-2">Thu tháng {format(now, 'MM/yyyy')}</p>
-            <p className="font-heading italic text-5xl text-accent leading-none">{fmt(monthSum)}</p>
+            <p className="lqg-headline text-5xl text-accent leading-none">{fmt(monthSum)}</p>
             <div className="mt-4 flex gap-6 text-sm text-paper/65 flex-wrap">
               <div><span className="text-paper">{totalStudents}</span> tổng HV</div>
               <div><span className="text-paper">{activeStudents}</span> đang học</div>

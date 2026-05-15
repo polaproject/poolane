@@ -74,7 +74,7 @@ export default async function StaffStudentDetailPage({ params }: Params) {
           </div>
 
           <div className="flex items-start gap-5">
-            <div className="grid place-items-center h-16 w-16 sm:h-20 sm:w-20 rounded-pill bg-accent text-ink font-heading italic text-3xl sm:text-4xl shrink-0 shadow-cta">
+            <div className="grid place-items-center h-16 w-16 sm:h-20 sm:w-20 rounded-pill bg-accent text-ink lqg-headline text-3xl sm:text-4xl shrink-0 shadow-cta">
               {initial}
             </div>
             <div className="min-w-0 flex-1">
@@ -103,7 +103,7 @@ export default async function StaffStudentDetailPage({ params }: Params) {
             </div>
             {activeTicket ? (
               <>
-                <p className="font-heading italic text-4xl text-foreground leading-none">
+                <p className="lqg-headline text-4xl text-foreground leading-none">
                   {sessionsLeft}<span className="text-sm font-body not-italic text-foreground/55 ml-1.5">buổi</span>
                 </p>
                 <div className="h-1.5 bg-ink/8 rounded-full mt-3 overflow-hidden">
@@ -119,7 +119,7 @@ export default async function StaffStudentDetailPage({ params }: Params) {
               <BookOpen className="h-4 w-4 text-accent" strokeWidth={1.75} />
               <p className="eyebrow text-foreground/55">Khoá học</p>
             </div>
-            <p className="font-heading italic text-4xl text-foreground leading-none">
+            <p className="lqg-headline text-4xl text-foreground leading-none">
               {activeEnr.length}<span className="text-sm font-body not-italic text-foreground/55 ml-1.5">đang học</span>
             </p>
             <p className="text-xs text-foreground/55 mt-2">{student.enrollments.length} tổng khoá</p>
@@ -131,7 +131,7 @@ export default async function StaffStudentDetailPage({ params }: Params) {
               <p className="eyebrow text-foreground/55">Lần cuối</p>
             </div>
             {student.lastAttendedAt
-              ? <p className="font-heading italic text-4xl text-foreground leading-none">{format(student.lastAttendedAt, 'dd/MM')}</p>
+              ? <p className="lqg-headline text-4xl text-foreground leading-none">{format(student.lastAttendedAt, 'dd/MM')}</p>
               : <p className="text-sm text-foreground/45">Chưa đi học</p>}
           </div>
         </div>

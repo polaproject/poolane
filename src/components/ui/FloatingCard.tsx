@@ -56,7 +56,7 @@ export function FloatingCard({
         )}
         <div className="min-w-0 flex-1">
           {label && <p className="text-xs opacity-60 leading-none">{label}</p>}
-          <p className="font-heading italic text-lg leading-tight mt-1 truncate">{title}</p>
+          <p className="lqg-headline text-lg leading-tight mt-1 truncate">{title}</p>
         </div>
       </div>
       {(meta || action) && (

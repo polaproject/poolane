@@ -91,7 +91,7 @@ export default function PrivacyPage() {
             className="rounded-card-xl bg-current/5 ring-1 ring-current/10 p-6 sm:p-8 backdrop-blur-sm"
           >
             <div className="flex items-start gap-4 mb-4">
-              <span className="font-heading italic text-3xl text-accent leading-none shrink-0">{s.num}</span>
+              <span className="lqg-headline text-3xl text-accent leading-none shrink-0">{s.num}</span>
               <h2 className="font-heading text-2xl sm:text-3xl italic leading-tight">{s.title}</h2>
             </div>
             <div className="ml-0 sm:ml-12 space-y-3">
@@ -125,7 +125,7 @@ export default function PrivacyPage() {
         <article className="rounded-card-xl bg-ink text-paper p-6 sm:p-8 shadow-glass relative overflow-hidden">
           <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-accent/15 blur-3xl" />
           <div className="relative flex items-start gap-4 mb-4">
-            <span className="font-heading italic text-3xl text-accent leading-none shrink-0">07</span>
+            <span className="lqg-headline text-3xl text-accent leading-none shrink-0">07</span>
             <h2 className="font-heading text-2xl sm:text-3xl italic leading-tight">Liên hệ</h2>
           </div>
           <div className="relative ml-0 sm:ml-12 flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -136,7 +136,7 @@ export default function PrivacyPage() {
               <p className="text-sm text-paper/75 mb-1.5">Mọi thắc mắc về chính sách bảo mật:</p>
               <Link
                 href="mailto:support@poolane.vn"
-                className="font-heading italic text-xl text-accent hover:underline"
+                className="lqg-headline text-xl text-accent hover:underline"
               >
                 support@poolane.vn
               </Link>

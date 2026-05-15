@@ -35,7 +35,7 @@ export default async function StudentVideosPage() {
         {videos.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <VideoIcon className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có video</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có video</p>
             <p className="text-sm text-foreground/55">Lớp sẽ gửi video sau buổi học nếu có ghi hình.</p>
           </div>
         ) : (

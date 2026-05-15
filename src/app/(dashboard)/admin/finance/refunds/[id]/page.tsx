@@ -77,7 +77,7 @@ export default async function RefundDetailPage({ params }: Params) {
                   <BookOpen className="h-4 w-4 text-accent" strokeWidth={1.75} />
                   Hoàn học phí {refund.enrollment?.course.code && `(${refund.enrollment.course.code})`}
                 </p>
-                <p className="font-heading italic text-xl text-foreground">{fmt(refund.courseRefundAmount)}</p>
+                <p className="lqg-headline text-xl text-foreground">{fmt(refund.courseRefundAmount)}</p>
               </div>
               <div className="grid grid-cols-3 gap-3 text-xs">
                 <div>
@@ -103,7 +103,7 @@ export default async function RefundDetailPage({ params }: Params) {
                   <Ticket className="h-4 w-4 text-mist" strokeWidth={1.75} />
                   Hoàn vé bơi
                 </p>
-                <p className="font-heading italic text-xl text-foreground">{fmt(refund.ticketRefundAmount)}</p>
+                <p className="lqg-headline text-xl text-foreground">{fmt(refund.ticketRefundAmount)}</p>
               </div>
               <div className="grid grid-cols-3 gap-3 text-xs">
                 <div>
@@ -127,7 +127,7 @@ export default async function RefundDetailPage({ params }: Params) {
           {/* Total */}
           <div className="border-t border-foreground/8 pt-4 flex items-center justify-between">
             <p className="eyebrow text-foreground/55">Tổng hoàn</p>
-            <p className="font-heading italic text-3xl text-warn leading-none">{fmt(refund.totalRefundAmount)}</p>
+            <p className="lqg-headline text-3xl text-warn leading-none">{fmt(refund.totalRefundAmount)}</p>
           </div>
 
           {/* Reason */}

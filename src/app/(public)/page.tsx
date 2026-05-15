@@ -105,7 +105,7 @@ export default async function LandingPage() {
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <p className="eyebrow">Lịch tuần này</p>
-                  <p className="font-heading italic text-2xl mt-0.5">Mở đăng ký</p>
+                  <p className="lqg-headline text-2xl mt-0.5">Mở đăng ký</p>
                 </div>
                 <Chip variant="accent" active>
                   <Waves className="h-3 w-3" /> Đang mở
@@ -175,7 +175,7 @@ export default async function LandingPage() {
                 <Chip variant="accent">{c.tag}</Chip>
               </div>
               <div className="eyebrow mb-1">0{i + 1}</div>
-              <h3 className="font-heading text-3xl italic mb-1.5">{COURSE_NAMES[c.code]}</h3>
+              <h3 className="lqg-headline text-3xl mb-1.5">{COURSE_NAMES[c.code]}</h3>
               <p className="text-sm opacity-70 leading-relaxed mb-5">{c.desc}</p>
 
               <ul className="space-y-1.5 mb-6">
@@ -242,7 +242,7 @@ export default async function LandingPage() {
         <Stagger step={0.08} className="grid md:grid-cols-4 gap-4">
           {JOURNEY.map((s) => (
             <div key={s.step} className="rounded-card-lg bg-current/5 ring-1 ring-current/10 p-5 backdrop-blur-sm transition-all duration-300 [transition-timing-function:var(--ease-spring-soft)] hover:-translate-y-1 hover:bg-current/10">
-              <p className="font-heading italic text-5xl text-accent leading-none mb-3">{s.step}</p>
+              <p className="lqg-headline text-5xl text-accent leading-none mb-3">{s.step}</p>
               <h3 className="font-semibold mb-1.5">{s.title}</h3>
               <p className="text-sm opacity-70 leading-relaxed">{s.desc}</p>
             </div>
@@ -304,7 +304,7 @@ function Feature({
       <div className="inline-grid place-items-center h-12 w-12 rounded-pill bg-accent/15 mb-4">
         <Icon className="h-6 w-6 text-accent" strokeWidth={1.75} />
       </div>
-      <h3 className="font-heading text-xl italic mb-1.5">{title}</h3>
+      <h3 className="lqg-headline text-xl mb-1.5">{title}</h3>
       <p className="text-sm opacity-70 leading-relaxed">{desc}</p>
     </div>
   )

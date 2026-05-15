@@ -45,7 +45,7 @@ export default async function PasswordResetsPage({ searchParams }: { searchParam
           {items.length === 0 ? (
             <div className="p-12 text-center">
               <Key className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-              <p className="font-heading italic text-2xl text-foreground">Không có yêu cầu</p>
+              <p className="lqg-headline text-2xl text-foreground">Không có yêu cầu</p>
             </div>
           ) : (
             <div className="overflow-x-auto">

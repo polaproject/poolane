@@ -206,7 +206,7 @@ export default async function FinancePage() {
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="font-heading italic text-lg text-danger leading-none">{fmt(e.remaining)}</p>
+                    <p className="lqg-headline text-lg text-danger leading-none">{fmt(e.remaining)}</p>
                     <p className="text-xs text-foreground/45 mt-0.5">còn nợ</p>
                   </div>
                 </div>

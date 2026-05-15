@@ -79,7 +79,7 @@ export default async function AdminDashboard() {
 
         <div className="relative max-w-6xl mx-auto">
           <p className="eyebrow opacity-65 mb-2">Admin · Poolane</p>
-          <h1 className="heading-display">
+          <h1 className="lqg-headline">
             Xin chào, {user.fullName}
           </h1>
           <p className="text-sm opacity-75 mt-3">
@@ -147,7 +147,7 @@ export default async function AdminDashboard() {
                       )}
                     </div>
                     <div>
-                      <p className="font-heading italic text-lg leading-none">
+                      <p className="lqg-headline text-lg leading-none">
                         {s.timeSlot === 'morning' ? '5:30' : '18:00'}
                       </p>
                       <p className="text-xs text-paper/65 mt-1">{s.registrations.length}/{s.capacity} HV</p>
@@ -185,7 +185,7 @@ export default async function AdminDashboard() {
                     href={`/admin/students/${s.id}`}
                     className="flex items-center px-5 py-3 hover:bg-paper-tint/40 transition group"
                   >
-                    <div className="grid place-items-center h-9 w-9 rounded-pill bg-mist/15 text-mist font-heading italic text-sm shrink-0 mr-3">
+                    <div className="grid place-items-center h-9 w-9 rounded-pill bg-mist/15 text-mist lqg-headline text-sm shrink-0 mr-3">
                       {s.user.fullName.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">

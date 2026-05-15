@@ -193,7 +193,7 @@ export default function PulsePage() {
         {total === 0 && (
           <div className="rounded-card-xl bg-success/8 ring-1 ring-success/30 p-12 text-center">
             <Check className="h-12 w-12 mx-auto mb-3 text-success" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Tuần này yên bình</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Tuần này yên bình</p>
             <p className="text-sm text-foreground/65">Không có học viên nào cần follow-up đặc biệt.</p>
           </div>
         )}

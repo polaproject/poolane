@@ -80,7 +80,7 @@ export default async function StudentDetailPage({ params }: Params) {
             Danh sách học viên
           </Link>
           <div className="flex items-start gap-5">
-            <div className="grid place-items-center h-16 w-16 sm:h-20 sm:w-20 rounded-pill bg-accent text-ink font-heading italic text-3xl sm:text-4xl shrink-0 shadow-cta">
+            <div className="grid place-items-center h-16 w-16 sm:h-20 sm:w-20 rounded-pill bg-accent text-ink lqg-headline text-3xl sm:text-4xl shrink-0 shadow-cta">
               {initial}
             </div>
             <div className="min-w-0 flex-1">
@@ -116,7 +116,7 @@ export default async function StudentDetailPage({ params }: Params) {
             </div>
             {activeTicket ? (
               <>
-                <p className="font-heading italic text-4xl text-foreground leading-none">
+                <p className="lqg-headline text-4xl text-foreground leading-none">
                   {sessionsLeft}
                   <span className="text-sm font-body not-italic text-foreground/55 ml-1.5">buổi</span>
                 </p>
@@ -139,7 +139,7 @@ export default async function StudentDetailPage({ params }: Params) {
               <BookOpen className="h-4 w-4 text-accent" strokeWidth={1.75} />
               <p className="eyebrow text-foreground/55">Khoá học</p>
             </div>
-            <p className="font-heading italic text-4xl text-foreground leading-none">
+            <p className="lqg-headline text-4xl text-foreground leading-none">
               {activeEnrollments.length}
               <span className="text-sm font-body not-italic text-foreground/55 ml-1.5">đang học</span>
             </p>
@@ -154,7 +154,7 @@ export default async function StudentDetailPage({ params }: Params) {
             </div>
             {student.lastAttendedAt ? (
               <>
-                <p className="font-heading italic text-4xl text-foreground leading-none">{format(student.lastAttendedAt, 'dd/MM')}</p>
+                <p className="lqg-headline text-4xl text-foreground leading-none">{format(student.lastAttendedAt, 'dd/MM')}</p>
                 <p className="text-xs text-foreground/55 mt-2">{format(student.lastAttendedAt, 'yyyy', { locale: vi })}</p>
               </>
             ) : (
@@ -180,7 +180,7 @@ export default async function StudentDetailPage({ params }: Params) {
                     <div className="flex items-start justify-between gap-3 flex-wrap">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <span className="font-heading italic text-lg text-foreground">{e.course.name}</span>
+                          <span className="lqg-headline text-lg text-foreground">{e.course.name}</span>
                           <Chip variant={enrCfg.variant} active className="text-[10px]">{enrCfg.label}</Chip>
                         </div>
                         <p className="text-xs text-foreground/55">

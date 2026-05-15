@@ -49,7 +49,7 @@ export default async function StudentProfilePage() {
         <div className="absolute bottom-0 left-1/4 w-48 h-48 rounded-full bg-mist/10 translate-y-1/2 blur-3xl" />
 
         <div className="relative max-w-3xl mx-auto flex items-start gap-5">
-          <div className="grid place-items-center h-16 w-16 sm:h-20 sm:w-20 rounded-pill bg-accent text-ink font-heading italic text-3xl sm:text-4xl shrink-0 shadow-cta">
+          <div className="grid place-items-center h-16 w-16 sm:h-20 sm:w-20 rounded-pill bg-accent text-ink lqg-headline text-3xl sm:text-4xl shrink-0 shadow-cta">
             {initial}
           </div>
           <div className="min-w-0 flex-1">
@@ -171,7 +171,7 @@ function Section({
           <Icon className="h-4 w-4 text-accent" strokeWidth={1.75} />
           <div>
             <p className="eyebrow text-foreground/55">{eyebrow}</p>
-            <h2 className="font-heading italic text-lg text-foreground mt-0.5">{title}</h2>
+            <h2 className="lqg-headline text-lg text-foreground mt-0.5">{title}</h2>
           </div>
         </div>
         {action}

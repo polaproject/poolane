@@ -30,7 +30,7 @@ export default function PublicError({
         <div className="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
           <AlertTriangle className="w-8 h-8 text-danger" />
         </div>
-        <h1 className="heading-display text-3xl mb-3">Có chuyện không như mong đợi</h1>
+        <h1 className="lqg-headline text-3xl mb-3">Có chuyện không như mong đợi</h1>
         <p className="text-sm text-foreground/70 mb-1">
           Trang này không tải được. Lớp đã ghi nhận và sẽ kiểm tra ngay.
         </p>

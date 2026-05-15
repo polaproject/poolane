@@ -70,7 +70,7 @@ export default async function AdminExercisesPage({ searchParams }: { searchParam
         {exercises.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <Dumbbell className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có bài tập</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có bài tập</p>
             <p className="text-sm text-foreground/55">Thêm bài tập đầu tiên qua nút phía trên.</p>
           </div>
         ) : (

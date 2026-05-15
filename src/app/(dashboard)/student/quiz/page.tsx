@@ -32,7 +32,7 @@ export default async function StudentQuizListPage() {
         {quizzes.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <HelpCircle className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có quiz</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có quiz</p>
             <p className="text-sm text-foreground/55">Lớp đang chuẩn bị bộ câu hỏi đầu tiên.</p>
           </div>
         ) : (
@@ -50,7 +50,7 @@ export default async function StudentQuizListPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h2 className="font-heading italic text-xl text-foreground leading-tight">{q.title}</h2>
+                    <h2 className="lqg-headline text-xl text-foreground leading-tight">{q.title}</h2>
                     {q.description && <p className="text-sm text-foreground/65 mt-1 line-clamp-2 leading-relaxed">{q.description}</p>}
                     <div className="flex items-center gap-2 mt-3 flex-wrap text-xs">
                       <Chip variant="mist">{q._count.questions} câu</Chip>
@@ -66,7 +66,7 @@ export default async function StudentQuizListPage() {
                   </div>
                   {pct !== null ? (
                     <div className="text-right shrink-0">
-                      <p className={`font-heading italic text-3xl leading-none ${scoreTone}`}>{pct}%</p>
+                      <p className={`lqg-headline text-3xl leading-none ${scoreTone}`}>{pct}%</p>
                       <p className="text-xs text-foreground/55 mt-1">{score}/{max}</p>
                     </div>
                   ) : (

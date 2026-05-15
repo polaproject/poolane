@@ -184,7 +184,7 @@ export default function PracticeLogPage() {
         ) : logs.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <Activity className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
-            <p className="font-heading italic text-2xl text-foreground mb-1">Chưa có nhật ký</p>
+            <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có nhật ký</p>
             <p className="text-sm text-foreground/55">Ghi lại mỗi buổi tập để theo dõi tiến độ.</p>
           </div>
         ) : (
@@ -200,7 +200,7 @@ export default function PracticeLogPage() {
             return (
               <div key={log.id} className="glass-card glass-card-hover px-5 py-4 flex items-center gap-4">
                 <div className="text-center w-12 shrink-0">
-                  <p className="font-heading italic text-2xl text-foreground leading-none">
+                  <p className="lqg-headline text-2xl text-foreground leading-none">
                     {format(new Date(log.date), 'd')}
                   </p>
                   <p className="text-[10px] tracking-widest uppercase text-foreground/45 mt-1">
