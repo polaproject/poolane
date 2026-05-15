@@ -1,226 +1,193 @@
-# Setup Sau Khi Thức — Đêm Sprint
+# Poolane Production Setup Reference
 
-Đêm qua AI build feature-complete code. Mọi thứ chạy được với fallback no-op. Khi bạn thức dậy, làm theo các bước sau để bật full features:
-
----
-
-## ⭐ Setup tài khoản ngân hàng (cho VietQR thanh toán)
-
-Thêm vào `.env.local`:
-
-```env
-BANK_BIN=970436                          # 970436=Vietcombank, xem các mã khác bên dưới
-BANK_ACCOUNT_NO=0011234567890           # Số tài khoản nhận
-BANK_ACCOUNT_NAME=NGUYEN VAN OWNER      # Tên chủ TK (KHÔNG DẤU, VIẾT HOA)
-BANK_DISPLAY_NAME=Vietcombank           # Tên hiển thị
-```
-
-**BIN code các ngân hàng phổ biến:**
-- Vietcombank: `970436`
-- Techcombank: `970407`
-- VPBank: `970432`
-- MB Bank: `970422`
-- ACB: `970416`
-- TPBank: `970423`
-- BIDV: `970418`
-- VietinBank: `970415`
-- Sacombank: `970403`
-- OCB: `970448`
-
-Restart dev server → khi HV mua hàng → trang `/student/shop/orders/[id]/pay` hiện QR có thông tin TK thật → quét bằng app banking → tiền vào TK Poolane.
-
-**Admin đối chiếu**: vào sao kê tìm nội dung `POLA<8chars>` → bấm "✓ Xác nhận đã nhận tiền" trên `/admin/shop/orders` → hệ thống tự tạo Payment + paid order.
+> Hệ thống Poolane đã **live tại https://poolane.vn** từ **2026-05-15**. File này là quick reference cho owner + debugging.
 
 ---
 
-## 1. Restart dev server
+## 🎯 Quick Access
 
-```powershell
-# Stop old dev (nếu còn chạy):
-Get-Process -Name node | Stop-Process -Force -ErrorAction SilentlyContinue
-npm run dev
+### Admin login (production)
+```
+URL:       https://poolane.vn/login
+Phone:     0355553205
+Password:  privatePassPrj@4Website
+Tên:       Nguyễn Ngọc Hoàng Việt
 ```
 
-DB đã được apply schema mới (PasswordResetRequest, PushSubscription, SelfAssessment, ImprovementSessionPack, UnmatchedTransaction) qua `prisma db push`. Không cần migrate gì.
+### Demo accounts (cho test — chạy `npm run db:seed-demo` để tạo)
+```
+Staff:    0900000099 / PoolaneDemo@123
+Student:  0900000088 / PoolaneDemo@123  (vé 8 buổi, enrolled khoá ECH)
+```
+
+Xoá demo: `DELETE_DEMO=1 npm run db:seed-demo`
 
 ---
 
-## ⚡ Setup Sepay (tự động xác nhận chuyển khoản — optional)
+## 🏗️ Infrastructure
 
-Sepay là dịch vụ kết nối với tài khoản ngân hàng để webhook real-time mỗi khi có giao dịch vào (~99k/tháng). Khi setup xong, HV chuyển khoản → hệ thống tự confirm trong 30 giây thay vì admin phải check sao kê thủ công.
-
-### Bước setup:
-
-1. Đăng ký [sepay.vn](https://sepay.vn) → chọn gói **Basic 99k/tháng** (free trial 7 ngày để thử)
-2. Verify danh tính → liên kết tài khoản ngân hàng Poolane (cùng STK đã cấu hình `BANK_ACCOUNT_NO` ở trên)
-3. Vào **Cấu hình → Webhook**:
-   - URL: `https://poolane.vn/api/webhooks/sepay` (production)
-   - Hoặc local test với ngrok: `https://<your-ngrok-id>.ngrok.io/api/webhooks/sepay`
-   - Method: POST
-   - Auth header: chọn "Apikey" → tạo random token (vd: `openssl rand -hex 32`)
-4. Copy token đó → thêm vào `.env.local`:
-   ```env
-   SEPAY_API_KEY=<token vừa tạo>
-   ```
-5. Restart dev server
-6. Sepay sẽ tự gửi test transaction sau khi cấu hình webhook
-7. Check `/admin/finance/unmatched` (nếu memo không match) hoặc các đơn pending sẽ tự chuyển `paid` (nếu memo match POLA/POLAE)
-
-### Test webhook không cần Sepay:
-
-```bash
-# Set env: SEPAY_API_KEY=test_secret_123
-
-# Test 1: match enrollment (thay <8chars> bằng id enrollment thật)
-curl -X POST http://localhost:3000/api/webhooks/sepay \
-  -H "Authorization: Apikey test_secret_123" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "id": 1,
-    "gateway": "Vietcombank",
-    "transactionDate": "2026-05-14 14:00:00",
-    "accountNumber": "001",
-    "content": "TRA NO POLAE<8chars>",
-    "transferType": "in",
-    "transferAmount": 1600000,
-    "referenceCode": "TEST123"
-  }'
-
-# Test 2: unmatched
-curl -X POST http://localhost:3000/api/webhooks/sepay \
-  -H "Authorization: Apikey test_secret_123" \
-  -d '{"id":2,"transactionDate":"2026-05-14 14:00:00","content":"CK ngau nhien","transferType":"in","transferAmount":100000}'
-
-# Vào /admin/finance/unmatched → thấy giao dịch chờ xử lý
-```
-
-### Khi nào KHÔNG cần Sepay:
-- Volume < 30 giao dịch/tháng → admin check sao kê 1-2 lần/ngày, bấm "Xác nhận" thủ công cũng ổn
-- Không muốn tốn 99k/tháng
-
-Manual confirm button vẫn ở `/admin/shop/orders` và `/admin/students/[id]` làm fallback.
-
----
-
-## 2. Tạo Supabase Storage bucket (BẮT BUỘC cho photo upload)
-
-Mở [Supabase Dashboard](https://supabase.com/dashboard) → project Poolane → **Storage** → **New bucket**:
-
-- **Name**: `poolane-public`
-- **Public bucket**: ✅ tick
-- **File size limit**: 5 MB
-- **Allowed MIME types**: `image/jpeg, image/png, image/webp, image/gif`
-
-Sau đó vào **Policies** của bucket → thêm:
-- Policy: **Allow public read** — `SELECT` với expression `true`
-- Policy: **Allow authenticated upload** — `INSERT` với expression `auth.role() = 'authenticated'`
-
-Nếu không tạo bucket: photo upload sẽ trả lỗi friendly "Bucket chưa tồn tại". Mọi tính năng khác vẫn chạy.
-
----
-
-## 3. Setup Resend (cho email biên lai, sinh nhật, hoàn tiền)
-
-1. Sign up tại [resend.com](https://resend.com) (free tier 3.000 email/tháng)
-2. Verify domain `poolane.vn` qua DNS records:
-   - Thêm 3 records (MX/TXT/CNAME) vào Matbao DNS theo hướng dẫn của Resend
-   - Đợi 5-30 phút để propagate
-3. Tạo API key tại resend.com → API Keys → **Create API Key**
-4. Thêm vào `.env.local`:
-   ```
-   RESEND_API_KEY=re_xxxxxxxxxxxxx
-   EMAIL_FROM=support@poolane.vn
-   ```
-5. Restart dev server
-
-**Test**: ghi 1 payment cho HV có email thật → check inbox + Resend dashboard logs.
-
----
-
-## 4. Setup Web Push (VAPID keys)
-
-Gen 1 cặp VAPID keys:
-
-```bash
-npx web-push generate-vapid-keys
-```
-
-Output sẽ có 2 keys. Thêm vào `.env.local`:
-```
-NEXT_PUBLIC_VAPID_PUBLIC_KEY=BC...your_public_key
-VAPID_PRIVATE_KEY=your_private_key
-VAPID_SUBJECT=mailto:support@poolane.vn
-```
-
-Restart dev server. HV vào `/student/profile` → section "Đồng ý & Bảo mật" → nút "Bật thông báo" sẽ hoạt động.
-
----
-
-## 5. Cron jobs
-
-`vercel.json` đã có 4 cron jobs sẵn sàng. Chỉ chạy khi deploy lên Vercel.
-
-**Test thủ công local** (cần `CRON_SECRET` env hoặc bỏ qua trong dev):
-```bash
-# Trong dev (không cần secret):
-curl http://localhost:3000/api/cron/birthday
-curl http://localhost:3000/api/cron/pulse-check
-curl http://localhost:3000/api/cron/reconciliation
-curl http://localhost:3000/api/cron/absence-reminder
-```
-
-**Trên production**: Vercel tự gọi endpoints này theo schedule.
-
-Setup `CRON_SECRET` cho production trong Vercel env vars:
-```
-CRON_SECRET=<random 32 chars, gen bằng `openssl rand -hex 32`>
-```
-
----
-
-## 6. Test các tính năng mới đêm nay
-
-Seed data đã có sẵn. Login bằng admin `0900000001 / Poolane@123456`.
-
-| Tính năng | URL |
+| Service | Detail |
 |---|---|
-| Lịch học redesigned | `/admin/schedule` (xem HV inline trong từng buổi) |
-| Sidebar nhóm + collapse | (tự nhiên ở mọi trang dashboard) |
-| Public landing | `/` (chưa login) |
-| Public courses | `/courses` |
-| Public FAQ | `/faq` (8 FAQ demo) |
-| Public privacy | `/privacy` |
-| Photo upload (sản phẩm) | `/admin/shop/products/new` → upload ảnh |
-| Photo upload (blog cover) | `/admin/blog/new` → upload bìa |
-| Voucher admin | `/admin/vouchers` (3 voucher demo: WELCOME10, GIAM50K, TANGVE) |
-| Video Drive admin | `/staff/videos` hoặc `/admin/videos` |
-| Video student | `/student/videos` (login HV `0901000006`) |
-| Album ảnh admin | `/admin/photos` (8 ảnh demo) |
-| Album ảnh student | `/student/photos` |
-| Admin tạo quiz | `/admin/quizzes/new` |
-| Email biên lai | Ghi 1 payment → check log dev server (no-op nếu chưa setup Resend) |
-| Cron birthday | `curl localhost:3000/api/cron/birthday` |
+| **GitHub** | `polaproject/poolane@master` |
+| **Vercel** | Team `pola-project` Pro plan ($20/mo). Project `poolane` region `sin1` (Singapore) |
+| **Supabase** | Project `frzqhredvgdmlwimctpy` region Singapore. **Free tier** — auto-pause sau 1 tuần idle |
+| **DB** | PostgreSQL 17, 44 tables, 3 courses + admin + 8 FAQs |
+| **Storage** | Bucket `poolane-public` (5MB, image/* MIME) + 4 RLS policies |
+| **Resend** | Domain `polaproject.com` verified. FROM `support@polaproject.com` |
+| **Sepay** | Gói Basic 99k/tháng. ⚠️ Owner cần save webhook URL `https://poolane.vn/api/webhooks/sepay` với API Key `5d7d97977c...` |
+| **TPBank** | Account `22282138888` (NGUYEN NGOC HOANG VIET) cho VietQR pay |
+| **DNS** | Matbao quản lý. A `@` → `216.150.1.1` + `216.150.16.1`, CNAME `www` → `f03179357ed4c972.vercel-dns-016.com.` |
+| **SSL** | Let's Encrypt cert apex+www, auto-renew |
 
 ---
 
-## 7. Các tính năng cần env vars để chạy thật
+## 🔧 Common Commands
 
-| Tính năng | Env cần | Hành vi nếu thiếu |
+### Development
+```bash
+npm run dev                    # Local dev server :3000
+npm run build                  # Test production build local
+npm run lint                   # ESLint check
+```
+
+### Database
+```bash
+npm run db:push                # Push schema to Supabase (no migrations)
+npm run db:studio              # Open Prisma Studio (browse data)
+npm run db:seed-production     # Init courses + admin + FAQs (đã chạy 1 lần)
+npm run db:seed-demo           # Tạo demo HV + sessions cho test
+DELETE_DEMO=1 npm run db:seed-demo  # Xoá demo data
+```
+
+### Vercel
+```bash
+vercel logs --token=$VERCEL_TOKEN     # Live logs
+vercel deploy --prod --token=$VERCEL_TOKEN  # Manual deploy (override git push)
+```
+
+---
+
+## 🔴 Sepay Webhook Setup — Vẫn cần owner làm
+
+DNS đã resolve, URL `https://poolane.vn/api/webhooks/sepay` accessible. Owner quay lại https://sepay.vn → Webhook → Tạo mới:
+
+| Field | Giá trị |
+|---|---|
+| Tên | `Poolane Production` |
+| URL | `https://poolane.vn/api/webhooks/sepay` |
+| Loại GD | ✅ Tiền vào |
+| Định dạng | JSON |
+| Tự gửi lại lỗi | ✅ Bật |
+| TK ngân hàng | TPBank `22282138888` |
+| Bảo mật → API Key | `5d7d97977cddb184f70a2e9e2c5e237c7379c7f36216bff904f4719636a47f32` |
+| Cảnh báo | (tắt) |
+
+Sepay sẽ tự test → kỳ vọng **200 OK**. Sau đó mọi giao dịch chuyển khoản vào TPBank `22282138888` sẽ auto-confirm enrollment/order qua memo `POLA<id>` hoặc `POLAE<id>`.
+
+Backup: nếu chưa setup Sepay, admin có nút "Xác nhận đã nhận tiền" tại `/admin/shop/orders` để confirm thủ công.
+
+---
+
+## 📋 Env Variables (Vercel — 19 vars)
+
+| Key | Loại | Note |
 |---|---|---|
-| Photo upload | Supabase Storage bucket | Trả lỗi friendly "Bucket chưa tồn tại" |
-| Email gửi | `RESEND_API_KEY` | No-op + log warning |
-| Web Push subscribe | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Hiển thị "Trình duyệt không hỗ trợ hoặc VAPID chưa setup" |
-| Cron production | `CRON_SECRET` | Trong dev mode bypass auth — production trả 401 |
+| `NEXT_PUBLIC_SUPABASE_URL` | Plain | `https://frzqhredvgdmlwimctpy.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Plain | `sb_publishable_...` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Sensitive | Service role cho admin operations |
+| `DATABASE_URL` | Sensitive | Transaction pooler port 6543 |
+| `DIRECT_URL` | Sensitive | Session pooler port 5432 |
+| `RESEND_API_KEY` | Sensitive | Resend email API |
+| `EMAIL_FROM` | Plain | `support@polaproject.com` |
+| `NEXT_PUBLIC_APP_URL` | Plain | `https://poolane.vn` |
+| `NEXT_PUBLIC_APP_DOMAIN` | Plain | `poolane.vn` |
+| `NEXT_PUBLIC_SCHOOL_NAME` | Plain | `Poolane` |
+| `BANK_BIN` | Plain | `970423` (TPBank) |
+| `BANK_ACCOUNT_NO` | Plain | `22282138888` |
+| `BANK_ACCOUNT_NAME` | Plain | `NGUYEN NGOC HOANG VIET` |
+| `BANK_DISPLAY_NAME` | Plain | `TPBank` |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Plain | Web Push public |
+| `VAPID_PRIVATE_KEY` | Sensitive | Web Push private |
+| `VAPID_SUBJECT` | Plain | `mailto:support@polaproject.com` |
+| `CRON_SECRET` | Sensitive | Vercel cron Authorization Bearer |
+| `SEPAY_API_KEY` | Sensitive | Sepay webhook auth |
+
+Bỏ `TZ` — Vercel reserved name, code dùng date-fns với Asia/Ho_Chi_Minh explicit.
 
 ---
 
-## 8. Việc còn lại không làm đêm nay
+## 🐛 Common Issues
 
-- Deploy Vercel + trỏ domain poolane.vn (cần access Vercel account của bạn)
-- Combo 3 khoá pricing (chưa chốt giá)
-- Mobile responsive audit (cần thiết bị thật)
-- AI features stretch (phase 12 roadmap)
+### "Not secure" trên Chrome (cert valid theo DevTools)
+Chrome cached "allowed insecure content" từ lần truy cập trước cert active. Fix:
+- `chrome://net-internals/#hsts` → Delete domain `poolane.vn`
+- Hoặc Incognito test (fresh state)
+- Owner Chrome Enterprise có thể có MITM proxy — verify trên Edge/Firefox
+
+### Photo upload fail "Bucket not found"
+Storage bucket `poolane-public` chưa tạo. AI tạo qua SQL:
+```sql
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('poolane-public', 'poolane-public', true, 5242880,
+  ARRAY['image/jpeg','image/png','image/webp','image/gif']);
+```
+
+### Webhook 401 Unauthorized từ Sepay
+Token paste sai trong Sepay config. Check lại env `SEPAY_API_KEY` trên Vercel khớp với token nhập trong Sepay Bảo mật tab.
+
+### Vercel deploy fail "Prisma client not found"
+Script `postinstall: "prisma generate"` đã add trong package.json. Nếu vẫn fail → check Vercel build log có chạy `prisma generate` không.
+
+### DB connection timeout
+`DATABASE_URL` dùng Transaction pooler (port 6543) cho query runtime. Nếu thấy "too many connections" → check Vercel function vùng region khớp `sin1` (giảm latency + connection lifetime).
 
 ---
 
-Mọi câu hỏi paste log lỗi vào chat, AI fix.
+## 📊 Free Tier Limits (Supabase + Vercel)
+
+### Supabase Free
+- 500MB DB storage
+- 1GB file storage
+- 2GB bandwidth/tháng
+- 50,000 monthly active users
+- **Auto-pause sau 1 tuần idle** ← rủi ro với traffic thấp ban đầu
+
+Nâng Pro $25/mo khi: cần daily backup, không bị pause, >500MB data.
+
+### Vercel Pro $20/mo
+- 1TB bandwidth
+- 1M function invocations
+- 5000 image optimizations
+- 24,000 build minutes
+- 40 cron jobs (Poolane dùng 4)
+- 1 concurrent build
+
+---
+
+## 🚀 Phase Roadmap
+
+### ✅ Completed (2026-05)
+- Phase 1-13: Design system + Liquid Glass + Typography
+- Phase 13.1: Specular streak cleanup
+- Phase 13.2: Default light + mobile login
+- Phase 14: Dark mode contrast boost
+- Phase 6: Auth pages migrate LQG primitives
+- **Production deploy**: GitHub + Vercel + Domain + SSL + Sepay-ready
+
+### ⏸️ Pending
+- **Sepay webhook save** (owner manual — 5 phút)
+- **Smoke test 5 mục** (login, public, register, push, cron)
+- **Combo 3 khoá pricing** (chốt giá business)
+- **AI features (Phase 15+)**: dropout prediction polish, AI tư vấn cá nhân
+
+### 💡 Future enhancements
+- Auth pages split-layout với artwork (current is centered)
+- Real-time WebSocket cho notifications
+- Mobile PWA install prompt
+- Bulk operations (export/import data)
+- Multi-language (EN/VI toggle)
+
+---
+
+**Maintained by:** Owner Nguyễn Ngọc Hoàng Việt + Claude AI assistant
+**Last updated:** 2026-05-15 (Phase 14 + auth migrate)
