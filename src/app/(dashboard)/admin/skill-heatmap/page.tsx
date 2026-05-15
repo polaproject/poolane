@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { COURSE_SKILLS } from '@/config/constants'
 import { BarChart2 } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
+import { getDemoStudentIds } from '@/lib/demo-account'
 
 type SearchParams = Promise<{ course?: string }>
 
@@ -16,8 +17,16 @@ export default async function SkillHeatmapPage({ searchParams }: { searchParams:
 
   const skills = COURSE_SKILLS[courseCode] ?? []
 
+  // Phase 15.2: Exclude demo accounts khỏi heatmap (analytics integrity)
+  const demoStudentIds = await getDemoStudentIds(prisma)
+
   const scores = await prisma.assessmentScore.findMany({
-    where: { assessment: { courseId: course.id } },
+    where: {
+      assessment: {
+        courseId: course.id,
+        studentId: { notIn: demoStudentIds },
+      },
+    },
     select: { skillKey: true, score: true, assessment: { select: { studentId: true, assessmentDate: true } } },
     orderBy: { assessment: { assessmentDate: 'desc' } },
   })

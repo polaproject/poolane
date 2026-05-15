@@ -4,6 +4,7 @@ import { log, logError } from '@/lib/logger'
 import { verifyCronSecret } from '@/lib/cron/auth'
 import { sendEmail } from '@/lib/email/client'
 import { absenceReminderEmail } from '@/lib/email/templates'
+import { getDemoStudentIds } from '@/lib/demo-account'
 
 // ─── GET /api/cron/absence-reminder — Weekly ───
 export async function GET(request: NextRequest) {
@@ -16,10 +17,14 @@ export async function GET(request: NextRequest) {
     const since = new Date(Date.now() - 14 * 86400000)
     const until = new Date(Date.now() - 7 * 86400000)
 
+    // Phase 15.2: Exclude demo accounts khỏi absence reminder
+    const demoStudentIds = await getDemoStudentIds(prisma)
+
     const students = await prisma.student.findMany({
       where: {
         status: { in: ['active', 'extension'] },
         lastAttendedAt: { gte: since, lte: until },
+        id: { notIn: demoStudentIds },
       },
       include: { user: { select: { fullName: true, email: true } } },
       take: 50,

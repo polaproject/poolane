@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { log, logError } from '@/lib/logger'
 import { verifyCronSecret } from '@/lib/cron/auth'
+import { getDemoStudentIds } from '@/lib/demo-account'
 
 // ─── GET /api/cron/reconciliation — Daily 6am ───
 // Đối chiếu dữ liệu, notify admin nếu có critical issues
@@ -15,9 +16,16 @@ export async function GET(request: NextRequest) {
     dayStart.setHours(0, 0, 0, 0)
     const dayEnd = new Date(dayStart.getTime() + 86400000)
 
+    // Phase 15.2: Exclude demo accounts khỏi reconciliation (analytics integrity)
+    const demoStudentIds = await getDemoStudentIds(prisma)
+
     // Check 1: Order paid → có Payment?
     const recentPaidOrders = await prisma.order.findMany({
-      where: { status: 'paid', createdAt: { gte: new Date(Date.now() - 7 * 86400000) } },
+      where: {
+        status: 'paid',
+        createdAt: { gte: new Date(Date.now() - 7 * 86400000) },
+        studentId: { notIn: demoStudentIds },
+      },
       select: { id: true, studentId: true }
     })
 

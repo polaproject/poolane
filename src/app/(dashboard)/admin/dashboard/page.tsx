@@ -6,6 +6,7 @@ import {
   Sunrise, Sunset, ArrowRight, UserPlus, FileText, Zap, BarChart2, Tags,
 } from 'lucide-react'
 import { ABSENCE_ALERT_THRESHOLDS } from '@/config/constants'
+import { getDemoStudentIds } from '@/lib/demo-account'
 import { StatCard } from '@/components/ui/StatCard'
 import { StarField } from '@/components/brand/StarField'
 import { ScrollReveal } from '@/components/motion/ScrollReveal'
@@ -18,20 +19,39 @@ export default async function AdminDashboard() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
   const redCutoff = new Date(now.getTime() - ABSENCE_ALERT_THRESHOLDS.RED_DAYS * 86400000)
 
+  // Phase 15.2: Exclude demo accounts khỏi all dashboard stats (data integrity)
+  const demoStudentIds = await getDemoStudentIds(prisma)
+
   const [
     totalStudents, activeStudents, pendingRegistrations,
     monthRevenue, needFollowUp, recentStudents, todaySessions,
   ] = await Promise.all([
-    prisma.student.count(),
-    prisma.student.count({ where: { status: { in: ['active', 'extension'] } } }),
-    prisma.sessionRegistration.count({ where: { status: 'pending' } }),
+    prisma.student.count({ where: { id: { notIn: demoStudentIds } } }),
+    prisma.student.count({
+      where: {
+        status: { in: ['active', 'extension'] },
+        id: { notIn: demoStudentIds },
+      },
+    }),
+    prisma.sessionRegistration.count({
+      where: {
+        status: 'pending',
+        studentId: { notIn: demoStudentIds },
+      },
+    }),
     prisma.payment.aggregate({
-      where: { recordedAt: { gte: monthStart }, isReversal: false, amount: { gt: 0 } },
+      where: {
+        recordedAt: { gte: monthStart },
+        isReversal: false,
+        amount: { gt: 0 },
+        studentId: { notIn: demoStudentIds },
+      },
       _sum: { amount: true },
     }),
     prisma.student.count({
       where: {
         status: { in: ['active', 'extension', 'enrolled'] },
+        id: { notIn: demoStudentIds },
         OR: [
           { lastAttendedAt: { lt: redCutoff } },
           { lastAttendedAt: null, createdAt: { lt: redCutoff } },
@@ -40,7 +60,10 @@ export default async function AdminDashboard() {
     }),
     prisma.student.findMany({
       // eslint-disable-next-line react-hooks/purity
-      where: { createdAt: { gte: new Date(Date.now() - 7 * 86400000) } },
+      where: {
+        createdAt: { gte: new Date(Date.now() - 7 * 86400000) },
+        id: { notIn: demoStudentIds },
+      },
       include: { user: { select: { fullName: true } } },
       orderBy: { createdAt: 'desc' },
       take: 5,

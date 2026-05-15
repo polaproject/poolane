@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { log, logError } from '@/lib/logger'
 import { verifyCronSecret } from '@/lib/cron/auth'
+import { getDemoStudentIds } from '@/lib/demo-account'
 
 // ─── GET /api/cron/pulse-check — Weekly Monday 6am ───
 // Tạo danh sách HV cần follow-up cho admin
@@ -15,12 +16,16 @@ export async function GET(request: NextRequest) {
     const red = new Date(now - 21 * 86400000)
     const yellow = new Date(now - 14 * 86400000)
 
+    // Phase 15.2: Exclude demo accounts khỏi pulse check (tránh spam template demo)
+    const demoStudentIds = await getDemoStudentIds(prisma)
+
     const [absentRed, absentYellow, lowTicket] = await Promise.all([
       // Đỏ: vắng > 21 ngày
       prisma.student.findMany({
         where: {
           status: { in: ['active', 'extension'] },
           lastAttendedAt: { lt: red },
+          id: { notIn: demoStudentIds },
         },
         include: { user: { select: { fullName: true } } },
         take: 30,
@@ -30,13 +35,17 @@ export async function GET(request: NextRequest) {
         where: {
           status: { in: ['active', 'extension'] },
           lastAttendedAt: { lt: yellow, gte: red },
+          id: { notIn: demoStudentIds },
         },
         include: { user: { select: { fullName: true } } },
         take: 30,
       }),
       // Vé sắp hết (≤ 2)
       prisma.poolTicket.findMany({
-        where: { isActive: true },
+        where: {
+          isActive: true,
+          studentId: { notIn: demoStudentIds },
+        },
         include: { student: { include: { user: { select: { fullName: true } } } } },
         take: 30,
       }),

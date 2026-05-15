@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logError } from '@/lib/logger'
+import { getDemoStudentIds } from '@/lib/demo-account'
 import ExcelJS from 'exceljs'
 
 // ─── GET /api/reports/revenue?from=YYYY-MM-DD&to=YYYY-MM-DD ───
@@ -19,8 +20,14 @@ export async function GET(request: NextRequest) {
     const from = fromStr ? new Date(fromStr) : new Date(now.getFullYear(), now.getMonth(), 1)
     const to = toStr ? new Date(toStr) : new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
 
+    // Phase 15.2: Exclude demo accounts khỏi revenue report (analytics integrity)
+    const demoStudentIds = await getDemoStudentIds(prisma)
+
     const payments = await prisma.payment.findMany({
-      where: { recordedAt: { gte: from, lte: to } },
+      where: {
+        recordedAt: { gte: from, lte: to },
+        studentId: { notIn: demoStudentIds },
+      },
       orderBy: { recordedAt: 'asc' },
       include: {
         student: { include: { user: { select: { fullName: true, phone: true } } } }

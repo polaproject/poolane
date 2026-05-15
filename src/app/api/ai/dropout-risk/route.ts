@@ -3,6 +3,7 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logError } from '@/lib/logger'
 import { ABSENCE_ALERT_THRESHOLDS, POOL_TICKET } from '@/config/constants'
+import { getDemoStudentIds } from '@/lib/demo-account'
 
 // Phase 15 — Rule-based dropout prediction (no LLM)
 // Cải thiện vs Phase 12: thêm `recommendation` per HV (priority + action + suggestion + template)
@@ -133,9 +134,15 @@ export async function GET() {
 
     const now = new Date()
 
+    // Phase 15.2: Exclude demo accounts khỏi dropout prediction (analytics integrity)
+    const demoStudentIds = await getDemoStudentIds(prisma)
+
     // Lấy học viên đang active/extension/enrolled
     const students = await prisma.student.findMany({
-      where: { status: { in: ['active', 'extension', 'enrolled'] } },
+      where: {
+        status: { in: ['active', 'extension', 'enrolled'] },
+        id: { notIn: demoStudentIds },
+      },
       include: {
         user: { select: { fullName: true, phone: true } },
         enrollments: {
