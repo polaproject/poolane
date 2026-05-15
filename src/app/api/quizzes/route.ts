@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireRole, getCurrentUser } from '@/lib/auth'
+import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logError } from '@/lib/logger'
 import { z } from 'zod'

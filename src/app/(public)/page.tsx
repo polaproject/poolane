@@ -257,7 +257,7 @@ export default async function LandingPage() {
             <GlassPanel edge className="p-8 sm:p-12 text-center">
               <Star className="h-6 w-6 mx-auto mb-5 text-accent motion-twinkle" strokeWidth={1.5} fill="currentColor" />
               <blockquote className="font-heading italic text-2xl sm:text-3xl leading-snug max-w-3xl mx-auto mb-4">
-                "Pola = Polaris — ngôi sao Bắc Đẩu, đứng yên giữa bầu trời, dẫn đường cho người lênh đênh trên biển khơi tìm đúng hướng đi."
+                &ldquo;Pola = Polaris — ngôi sao Bắc Đẩu, đứng yên giữa bầu trời, dẫn đường cho người lênh đênh trên biển khơi tìm đúng hướng đi.&rdquo;
               </blockquote>
               <p className="text-sm opacity-70">Triết lý của Pola Project</p>
             </GlassPanel>

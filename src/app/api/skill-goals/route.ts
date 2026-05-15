@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const user = await requireRole(['student', 'admin', 'staff'])
     const student = await prisma.student.findFirst({ where: { userId: user.id } })
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const user = await requireRole(['student', 'admin', 'staff'])
+    await requireRole(['student', 'admin', 'staff'])
     const { id, status } = await request.json()
 
     const goal = await prisma.skillGoal.update({

@@ -51,7 +51,7 @@ export default function RegistrationsPage() {
     finally { setLoading(false) }
   }, [sessionId])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => { fetchRegistrations() }, [fetchRegistrations])
 
   async function handleDecide(regId: string, action: 'approve' | 'reject', reason?: string, reasonText?: string) {

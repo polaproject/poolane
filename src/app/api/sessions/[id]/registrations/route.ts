@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { log, logError } from '@/lib/logger'
-import { registerSessionSchema, approveRegistrationSchema } from '@/lib/validations/session'
-import { CAPACITY } from '@/config/constants'
+import { registerSessionSchema } from '@/lib/validations/session'
 
 type Params = { params: Promise<{ id: string }> }
 

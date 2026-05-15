@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import { COURSE_PRICES, COURSE_NAMES, PAYMENT_DEPOSIT_RATE } from '@/config/constants'
+import { COURSE_PRICES, PAYMENT_DEPOSIT_RATE } from '@/config/constants'
 import { PageHeader } from '@/components/ui/PageHeader'
 
 type Course = { id: string; code: string; name: string; price: number }

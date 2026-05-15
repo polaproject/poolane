@@ -9,7 +9,7 @@ export default async function TeacherMetricsPage() {
   await requireRole(['admin'])
 
   const now = new Date()
-  // eslint-disable-next-line react-hooks/purity
+   
   const monthAgo = new Date(now.getTime() - 30 * 86400000)
 
   const teachers = await prisma.user.findMany({

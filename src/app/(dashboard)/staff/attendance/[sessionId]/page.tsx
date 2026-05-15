@@ -41,7 +41,7 @@ export default function AttendancePage() {
     finally { setLoading(false) }
   }, [sessionId])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => { loadData() }, [loadData])
 
   function setStatus(studentId: string, status: 'present' | 'absent') {

@@ -9,7 +9,6 @@ import { ABSENCE_ALERT_THRESHOLDS } from '@/config/constants'
 import { getDemoStudentIds } from '@/lib/demo-account'
 import { StatCard } from '@/components/ui/StatCard'
 import { StarField } from '@/components/brand/StarField'
-import { ScrollReveal } from '@/components/motion/ScrollReveal'
 import { Stagger } from '@/components/motion/Stagger'
 
 export default async function AdminDashboard() {
@@ -21,6 +20,11 @@ export default async function AdminDashboard() {
 
   // Phase 15.2: Exclude demo accounts khỏi all dashboard stats (data integrity)
   const demoStudentIds = await getDemoStudentIds(prisma)
+
+  // Phase 16.1: Tính sẵn cutoff để tránh Date.now() impure trong render scope
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000)
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
 
   const [
     totalStudents, activeStudents, pendingRegistrations,
@@ -59,9 +63,8 @@ export default async function AdminDashboard() {
       },
     }),
     prisma.student.findMany({
-      // eslint-disable-next-line react-hooks/purity
       where: {
-        createdAt: { gte: new Date(Date.now() - 7 * 86400000) },
+        createdAt: { gte: sevenDaysAgo },
         id: { notIn: demoStudentIds },
       },
       include: { user: { select: { fullName: true } } },
@@ -70,7 +73,7 @@ export default async function AdminDashboard() {
     }),
     prisma.classSession.findMany({
       where: {
-        date: { gte: new Date(now.setHours(0,0,0,0)), lte: new Date(now.setHours(23,59,59,999)) },
+        date: { gte: todayStart, lte: todayEnd },
         status: { not: 'cancelled' },
       },
       include: { registrations: { where: { status: 'approved' } } },

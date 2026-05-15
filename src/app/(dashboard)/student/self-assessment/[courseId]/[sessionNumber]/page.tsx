@@ -54,7 +54,7 @@ export default async function SelfAssessmentPage({ params }: Params) {
             sessionNumber={sn}
             skills={skills.map(s => ({ key: s.key, label: s.label }))}
             initial={existing ? {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+               
               scores: existing.scoresJson as Record<string, number>,
               notes: existing.notes ?? '',
             } : null}

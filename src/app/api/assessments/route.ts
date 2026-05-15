@@ -3,7 +3,7 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { log, logError } from '@/lib/logger'
 import { z } from 'zod'
-import { ASSESSMENT_CHECKPOINTS, COURSE_SKILLS, KEY_SKILLS_FOR_GRADUATION, ASSESSMENT_SCALE } from '@/config/constants'
+import { KEY_SKILLS_FOR_GRADUATION, ASSESSMENT_SCALE } from '@/config/constants'
 
 const createAssessmentSchema = z.object({
   studentId: z.string().uuid(),

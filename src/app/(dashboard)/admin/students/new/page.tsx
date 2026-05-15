@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
@@ -33,9 +32,9 @@ export default function NewStudentPage() {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } = useForm<CreateStudentInput, any, CreateStudentInput>({
+  } = useForm<CreateStudentInput>({
+    // Cast resolver — Zod 4 + RHF type narrow incompatibility (known issue)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(createStudentSchema) as any,
     defaultValues: {
       gender: 'male',

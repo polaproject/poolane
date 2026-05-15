@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
@@ -9,7 +8,6 @@ import { PolarisStar } from '@/components/brand/PolarisStar'
 import { GlassCard, GlassButton, GlassInput, AmbientMesh } from '@/components/ui/glass'
 
 export default function LoginPage() {
-  const router = useRouter()
   const supabase = createClient()
 
   const [phone, setPhone] = useState('')

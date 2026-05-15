@@ -30,7 +30,7 @@ export default function AssessPage() {
   const [loading, setLoading] = useState(false)
   const [showMetrics, setShowMetrics] = useState(mode === 'detailed')
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => {
     if (!studentId || !courseId) return
     fetch(`/api/assessments?studentId=${studentId}&courseId=${courseId}&latest=true`)

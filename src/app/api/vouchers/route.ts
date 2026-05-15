@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { log, logError } from '@/lib/logger'
+import { logError } from '@/lib/logger'
 import { createVoucherSchema } from '@/lib/validations/voucher'
 
 export async function GET(request: NextRequest) {

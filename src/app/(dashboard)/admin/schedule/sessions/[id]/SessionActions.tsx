@@ -106,7 +106,7 @@ export function SessionActions({ sessionId, status }: { sessionId: string; statu
             <h3 className="font-heading text-xl text-foreground mb-1">Huỷ buổi học</h3>
             <p className="text-sm text-foreground/60 mb-4">
               Hệ thống sẽ tự động hoàn lại 1 buổi vé cho mọi học viên đã được duyệt và gửi thông báo.
-              Nếu cần mở lại, click nút "Mở lại buổi" sau khi huỷ.
+              Nếu cần mở lại, click nút &quot;Mở lại buổi&quot; sau khi huỷ.
             </p>
 
             <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1.5">

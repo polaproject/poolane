@@ -3,7 +3,7 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { log, logError } from '@/lib/logger'
 import { createEnrollmentSchema } from '@/lib/validations/enrollment'
-import { COURSE_PRICES, POOL_TICKET, PAYMENT_DEPOSIT_RATE } from '@/config/constants'
+import { COURSE_PRICES, PAYMENT_DEPOSIT_RATE } from '@/config/constants'
 import type { CourseCode } from '@/types'
 
 // ─── POST /api/enrollments — Đăng ký khoá học ────────────

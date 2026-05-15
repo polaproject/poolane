@@ -41,7 +41,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem(STORAGE_KEY) as ThemeKey | null
       if (saved && VALID_THEMES.includes(saved)) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         setThemeState(saved)
       }
     } catch {

@@ -9,7 +9,7 @@ type Params = { params: Promise<{ id: string }> }
 // ─── GET /api/students/[id] ───────────────────────────
 export async function GET(_req: NextRequest, { params }: Params) {
   try {
-    const user = await requireRole(['admin', 'staff'])
+    await requireRole(['admin', 'staff'])
     const { id } = await params
 
     const student = await prisma.student.findUnique({

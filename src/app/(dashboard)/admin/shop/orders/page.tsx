@@ -59,7 +59,7 @@ export default function OrdersPage() {
     finally { setLoading(false) }
   }, [filter])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => { loadOrders() }, [loadOrders])
 
   async function handleAction(orderId: string, action: string, extra?: Record<string, unknown>) {

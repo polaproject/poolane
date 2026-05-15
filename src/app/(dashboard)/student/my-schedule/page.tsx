@@ -28,7 +28,7 @@ export default async function MySchedulePage() {
     )
   }
 
-  // eslint-disable-next-line react-hooks/purity
+   
   const since = new Date(Date.now() - 30 * 86400000)
   const registrations = await prisma.sessionRegistration.findMany({
     where: { studentId: student.id, registeredAt: { gte: since } },

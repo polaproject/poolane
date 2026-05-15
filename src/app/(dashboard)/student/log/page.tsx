@@ -36,7 +36,7 @@ export default function PracticeLogPage() {
     finally { setLoading(false) }
   }, [])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => { loadLogs() }, [loadLogs])
 
   async function handleAdd(e: React.FormEvent) {

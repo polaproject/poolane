@@ -3,7 +3,6 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { log, logError } from '@/lib/logger'
 import { createStudentSchema, studentListQuerySchema } from '@/lib/validations/student'
-import { createClient } from '@/lib/supabase/server'
 
 // ─── GET /api/students — Danh sách học viên ──────────────
 export async function GET(request: NextRequest) {
@@ -151,7 +150,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Tạo Supabase Auth user
-    const supabase = await createClient()
     const adminSupabase = await import('@/lib/supabase/server').then(m => m.createAdminClient())
 
     const { data: authData, error: authError } = await (await adminSupabase).auth.admin.createUser({

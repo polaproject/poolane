@@ -109,7 +109,7 @@ export default function PulsePage() {
     }
   }
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => { loadPulse() }, [])
 
   if (loading) {

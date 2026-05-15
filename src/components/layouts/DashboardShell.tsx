@@ -201,8 +201,9 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  const groups = NAV_GROUPS[userRole] ?? []
-  const bottomItems = BOTTOM_NAV[userRole] ?? []
+  // Phase 16.1: wrap trong useMemo để stable identity → useMemo dependencies không change mỗi render
+  const groups = useMemo(() => NAV_GROUPS[userRole] ?? [], [userRole])
+  const bottomItems = useMemo(() => BOTTOM_NAV[userRole] ?? [], [userRole])
 
   // Longest-match wins: ở /admin/finance/refunds chỉ /admin/finance/refunds active,
   // không phải cả /admin/finance lẫn child.

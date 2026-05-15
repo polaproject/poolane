@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { CheckCircle2 } from 'lucide-react'
 
-export function MarkAsTransferredButton({ orderId, memo }: { orderId: string; memo: string }) {
+export function MarkAsTransferredButton({ memo }: { orderId: string; memo: string }) {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
