@@ -1559,3 +1559,100 @@ body.lqg-body {
 .lqg-text-secondary { color: var(--lqg-text-secondary); }
 .lqg-text-tertiary  { color: var(--lqg-text-tertiary); }
 .lqg-text-accent    { color: var(--lqg-accent); }
+
+/* ════════════════════════════════════════════════════════════════
+   Phase 14 — Dark Mode Contrast Boost
+   ────────────────────────────────────────────────────────────────
+   Trong dark mode (.theme-dark, hoặc .lqg-dark) các utility opacity
+   foreground/N tạo border/ring/text quá mờ trên bg dark navy.
+   Lý do: cream `--foreground` × 8-20% alpha trên navy = nhìn không rõ.
+
+   Fix: override các pattern phổ biến với opacity TĂNG cho dark mode.
+   Light mode KHÔNG bị ảnh hưởng (rule chỉ active khi có class theme-dark).
+   ──────────────────────────────────────────────────────────────── */
+
+@layer utilities {
+  /* Borders — bump ~2x opacity trong dark */
+  .theme-dark .border-foreground\/5,
+  .lqg-dark   .border-foreground\/5   { border-color: color-mix(in srgb, var(--foreground) 14%, transparent); }
+  .theme-dark .border-foreground\/8,
+  .lqg-dark   .border-foreground\/8   { border-color: color-mix(in srgb, var(--foreground) 18%, transparent); }
+  .theme-dark .border-foreground\/10,
+  .lqg-dark   .border-foreground\/10  { border-color: color-mix(in srgb, var(--foreground) 22%, transparent); }
+  .theme-dark .border-foreground\/12,
+  .lqg-dark   .border-foreground\/12  { border-color: color-mix(in srgb, var(--foreground) 26%, transparent); }
+  .theme-dark .border-foreground\/15,
+  .lqg-dark   .border-foreground\/15  { border-color: color-mix(in srgb, var(--foreground) 32%, transparent); }
+  .theme-dark .border-foreground\/20,
+  .lqg-dark   .border-foreground\/20  { border-color: color-mix(in srgb, var(--foreground) 38%, transparent); }
+  .theme-dark .border-foreground\/25,
+  .lqg-dark   .border-foreground\/25  { border-color: color-mix(in srgb, var(--foreground) 42%, transparent); }
+  .theme-dark .border-foreground\/30,
+  .lqg-dark   .border-foreground\/30  { border-color: color-mix(in srgb, var(--foreground) 48%, transparent); }
+
+  /* Rings — cards lacking separation trong dark; bump ~2x */
+  .theme-dark .ring-foreground\/5,
+  .lqg-dark   .ring-foreground\/5     { --tw-ring-color: color-mix(in srgb, var(--foreground) 14%, transparent); }
+  .theme-dark .ring-foreground\/8,
+  .lqg-dark   .ring-foreground\/8     { --tw-ring-color: color-mix(in srgb, var(--foreground) 18%, transparent); }
+  .theme-dark .ring-foreground\/10,
+  .lqg-dark   .ring-foreground\/10    { --tw-ring-color: color-mix(in srgb, var(--foreground) 22%, transparent); }
+  .theme-dark .ring-foreground\/12,
+  .lqg-dark   .ring-foreground\/12    { --tw-ring-color: color-mix(in srgb, var(--foreground) 26%, transparent); }
+  .theme-dark .ring-foreground\/15,
+  .lqg-dark   .ring-foreground\/15    { --tw-ring-color: color-mix(in srgb, var(--foreground) 32%, transparent); }
+  .theme-dark .ring-foreground\/20,
+  .lqg-dark   .ring-foreground\/20    { --tw-ring-color: color-mix(in srgb, var(--foreground) 38%, transparent); }
+
+  /* Divides */
+  .theme-dark .divide-foreground\/5 > * + *,
+  .lqg-dark   .divide-foreground\/5 > * + *   { border-color: color-mix(in srgb, var(--foreground) 14%, transparent); }
+  .theme-dark .divide-foreground\/8 > * + *,
+  .lqg-dark   .divide-foreground\/8 > * + *   { border-color: color-mix(in srgb, var(--foreground) 18%, transparent); }
+  .theme-dark .divide-foreground\/10 > * + *,
+  .lqg-dark   .divide-foreground\/10 > * + *  { border-color: color-mix(in srgb, var(--foreground) 22%, transparent); }
+
+  /* Muted text — phải đủ contrast WCAG AA */
+  .theme-dark .text-foreground\/30,
+  .lqg-dark   .text-foreground\/30    { color: color-mix(in srgb, var(--foreground) 55%, transparent); }
+  .theme-dark .text-foreground\/35,
+  .lqg-dark   .text-foreground\/35    { color: color-mix(in srgb, var(--foreground) 58%, transparent); }
+  .theme-dark .text-foreground\/40,
+  .lqg-dark   .text-foreground\/40    { color: color-mix(in srgb, var(--foreground) 60%, transparent); }
+  .theme-dark .text-foreground\/45,
+  .lqg-dark   .text-foreground\/45    { color: color-mix(in srgb, var(--foreground) 62%, transparent); }
+  .theme-dark .text-foreground\/50,
+  .lqg-dark   .text-foreground\/50    { color: color-mix(in srgb, var(--foreground) 68%, transparent); }
+  .theme-dark .text-foreground\/55,
+  .lqg-dark   .text-foreground\/55    { color: color-mix(in srgb, var(--foreground) 70%, transparent); }
+  .theme-dark .text-foreground\/60,
+  .lqg-dark   .text-foreground\/60    { color: color-mix(in srgb, var(--foreground) 75%, transparent); }
+  .theme-dark .text-foreground\/65,
+  .lqg-dark   .text-foreground\/65    { color: color-mix(in srgb, var(--foreground) 78%, transparent); }
+  .theme-dark .text-foreground\/70,
+  .lqg-dark   .text-foreground\/70    { color: color-mix(in srgb, var(--foreground) 82%, transparent); }
+  .theme-dark .text-foreground\/75,
+  .lqg-dark   .text-foreground\/75    { color: color-mix(in srgb, var(--foreground) 85%, transparent); }
+  .theme-dark .text-foreground\/80,
+  .lqg-dark   .text-foreground\/80    { color: color-mix(in srgb, var(--foreground) 88%, transparent); }
+
+  /* opacity utility (Tailwind .opacity-X) — for non-Tailwind text wrappers */
+  .theme-dark .opacity-30,
+  .lqg-dark   .opacity-30   { opacity: 0.55; }
+  .theme-dark .opacity-40,
+  .lqg-dark   .opacity-40   { opacity: 0.62; }
+  .theme-dark .opacity-50,
+  .lqg-dark   .opacity-50   { opacity: 0.68; }
+  .theme-dark .opacity-60,
+  .lqg-dark   .opacity-60   { opacity: 0.75; }
+  .theme-dark .opacity-70,
+  .lqg-dark   .opacity-70   { opacity: 0.82; }
+
+  /* bg-foreground/N — rare but exists */
+  .theme-dark .bg-foreground\/5,
+  .lqg-dark   .bg-foreground\/5  { background-color: color-mix(in srgb, var(--foreground) 12%, transparent); }
+  .theme-dark .bg-foreground\/8,
+  .lqg-dark   .bg-foreground\/8  { background-color: color-mix(in srgb, var(--foreground) 15%, transparent); }
+  .theme-dark .bg-foreground\/10,
+  .lqg-dark   .bg-foreground\/10 { background-color: color-mix(in srgb, var(--foreground) 18%, transparent); }
+}
