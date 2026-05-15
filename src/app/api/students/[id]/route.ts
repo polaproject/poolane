@@ -154,12 +154,30 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     const user = await requireRole(['admin'])  // Chỉ admin mới được xoá
     const { id } = await params
 
-    const student = await prisma.student.findUnique({ where: { id } })
+    const student = await prisma.student.findUnique({
+      where: { id },
+      include: { user: { select: { phone: true } } },
+    })
 
     if (!student) {
       return NextResponse.json(
         { data: null, error: { code: 'NOT_FOUND', message: 'Không tìm thấy học viên' } },
         { status: 404 }
+      )
+    }
+
+    // Phase 15.2 — Block xoá demo account (phone bắt đầu 0900000)
+    const { isDemoAccount } = await import('@/lib/demo-account')
+    if (isDemoAccount(student.user.phone)) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: {
+            code: 'DEMO_ACCOUNT_PROTECTED',
+            message: 'Tài khoản demo không xoá được qua UI. Dùng "DELETE_DEMO=1 npm run db:seed-demo" để xoá local + re-seed nếu cần.',
+          },
+        },
+        { status: 403 }
       )
     }
 
