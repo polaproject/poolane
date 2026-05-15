@@ -101,12 +101,10 @@ export const typography = {
 }
 
 // ── Logo (placeholder — thay bằng logo chính thức sau) ────
+// Phase 16: bỏ waterLinePath + reflectionPath (PolarisStar không còn render reflection)
 export const logoConfig = {
   wordmark: 'POOLANE',
   tagline: 'a Pola Project',
   iconPath:
     'M26 2 C26 2 28.5 22 29.5 25.5 C33 26.5 50 26 50 26 C50 26 33 26 29.5 27.5 C28.5 31 26 50 26 50 C26 50 23.5 31 22.5 27.5 C19 26 2 26 2 26 C2 26 19 26 22.5 25.5 C23.5 22 26 2 26 2 Z',
-  waterLinePath: 'M8 58 L44 58',
-  reflectionPath:
-    'M26 62 C26 62 26.8 65.5 27.1 66.2 C27.8 66.4 31 66 31 66 C31 66 27.8 66 27.1 66.8 C26.8 67.5 26 71 26 71 C26 71 25.2 67.5 24.9 66.8 C24.2 66 21 66 21 66 C21 66 24.2 66 24.9 66.2 C25.2 65.5 26 62 26 62 Z',
 }

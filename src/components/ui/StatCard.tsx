@@ -19,7 +19,7 @@ interface StatCardProps {
 }
 
 const TONE_BG: Record<NonNullable<StatCardProps['tone']>, string> = {
-  /* Phase 10 — Liquid Glass: surface dùng glass-card có specular + lensing */
+  /* Surface variant — Liquid Glass frosted backdrop (Phase 16: bỏ specular) */
   surface: 'glass-card glass-card-hover text-[var(--surface-fg)]',
   dark:    'bg-ink/90 backdrop-blur-xl text-paper ring-1 ring-paper/15 glass-card-hover',
   accent:  'bg-accent-soft/85 backdrop-blur-md text-foreground ring-1 ring-accent/40',

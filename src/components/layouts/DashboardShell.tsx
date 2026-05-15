@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { ThemeSwitcher, ThemeSwitcherCompact } from '@/components/ui/ThemeSwitcher'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import type { UserRole } from '@/lib/auth'
@@ -199,7 +199,6 @@ interface DashboardShellProps {
 
 function ShellInner({ children, userRole, userFullName, userInitial }: DashboardShellProps) {
   const pathname = usePathname()
-  const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const groups = NAV_GROUPS[userRole] ?? []
