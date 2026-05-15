@@ -268,7 +268,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
   const logoSvg = <PolarisStar size={26} withReflection animated color="currentColor" />
 
   return (
-    <div className="pola-page min-h-screen relative lg:pl-64">
+    <div className="pola-page pola-shell">
       {/* Skip link cho keyboard user */}
       <a
         href="#main-content"
@@ -277,14 +277,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
         Bỏ qua điều hướng
       </a>
       {/* ── SIDEBAR (Notion-style: fixed luôn, nổi trên content) ── */}
-      <aside
-        className={`
-          fixed top-0 left-0 z-50 flex flex-col w-64 h-screen pola-nav
-          transition-transform duration-200 ease-in-out
-          lg:translate-x-0
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
-      >
+      <aside className={`pola-sidebar pola-nav ${sidebarOpen ? 'is-open' : ''}`}>
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-5 py-5 border-b" style={{ borderColor: 'var(--pola-nav-active)' }}>
           <span style={{ color: 'var(--pola-nav-text)' }}>{logoSvg}</span>
@@ -410,8 +403,8 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
         />
       )}
 
-      {/* ── MAIN CONTENT ── (parent có lg:pl-64 để chừa chỗ sidebar fixed) */}
-      <div className="flex flex-col min-w-0 min-h-screen">
+      {/* ── MAIN CONTENT ── (parent .pola-shell có padding-left chừa chỗ sidebar) */}
+      <div className="pola-main">
         {/* Mobile header */}
         <header
           className="lg:hidden flex items-center gap-3 px-4 py-3 pola-nav sticky top-0 z-30"
