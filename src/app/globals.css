@@ -1026,13 +1026,12 @@ html, body {
 }
 
 /* Specular streak overlay — apply qua ::before
- * Phase 13.1 fix: chỉ áp lên element NHỎ (button/pill) hoặc element opt-in (.glass-shimmer).
- * Card lớn (.glass-card) trước đây có streak → "vương vãi" khắp app (Phase 10 over-applied).
- * Bây giờ card mặc định tĩnh, có thể opt-in qua class .glass-shimmer nếu muốn.
+ * Phase 13.2 fix: tắt hoàn toàn cho button + pill (owner feedback "shimmer khắp hệ thống").
+ * Phase 13.1 đã tắt cho .glass-card + sidebar. Giờ chỉ giữ .glass-shimmer opt-in class
+ * cho component nào thật sự cần emphasize (vd hero CTA "Đăng ký ngay").
+ * Glass effect (blur + frosted bg + border) vẫn giữ — chỉ bỏ animation streak.
  */
 @media (prefers-reduced-motion: no-preference) {
-  .glass-button::before,
-  .glass-pill::before,
   .glass-shimmer::before {
     content: '';
     position: absolute;
