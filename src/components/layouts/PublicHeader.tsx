@@ -29,7 +29,7 @@ export function PublicHeader() {
               transitionTimingFunction: 'var(--lqg-ease-overshoot)',
             }}
           >
-            <PolarisStar size={18} withReflection={false} animated />
+            <PolarisStar size={18} animated />
           </span>
           <div className="hidden sm:block">
             <p className="font-body font-bold text-sm tracking-[0.16em] leading-none lqg-text-primary">POOLANE</p>
@@ -92,7 +92,7 @@ export function PublicFooter() {
                 color: 'var(--lqg-text-on-accent)',
               }}
             >
-              <PolarisStar size={14} withReflection={false} animated={false} />
+              <PolarisStar size={14} animated={false} />
             </span>
             <p className="font-body font-bold tracking-[0.18em] text-lg leading-none lqg-text-primary">POOLANE</p>
           </div>

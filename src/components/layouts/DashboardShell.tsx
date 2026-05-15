@@ -265,7 +265,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
     window.location.href = '/login'
   }
 
-  const logoSvg = <PolarisStar size={26} withReflection={false} animated color="currentColor" />
+  const logoSvg = <PolarisStar size={26} animated color="currentColor" />
 
   return (
     <div className="pola-page pola-shell">
@@ -419,7 +419,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
           </button>
           <div className="flex items-center gap-2">
             <span style={{ color: 'var(--pola-nav-text)' }}>
-              <PolarisStar size={18} withReflection={false} animated color="currentColor" />
+              <PolarisStar size={18} animated color="currentColor" />
             </span>
             <span className="font-body font-bold text-sm tracking-[0.16em]" style={{ color: 'var(--pola-nav-text)' }}>
               POOLANE

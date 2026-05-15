@@ -11,20 +11,18 @@ interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
   radius?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   /** Hover lift + accent glow. Default true. */
   interactive?: boolean
-  /** Specular streak animation. Default false (Phase 13.1 — opt-in only). */
-  specular?: boolean
 }
 
 /**
- * GlassCard — Apple Liquid Glass card primitive (Phase 12 production).
- * Built on `.lqg-*` token system. Theme-aware via root class `.lqg-dark`.
+ * GlassCard — Apple Liquid Glass card primitive.
+ * Phase 16: bỏ prop `specular` (lqg-specular animation).
+ * Card tĩnh — chỉ frosted bg + blur + border + hover.
  */
 export function GlassCard({
   children,
   tier = 'medium',
   radius = 'lg',
   interactive = true,
-  specular = false,
   className,
   ...rest
 }: GlassCardProps) {
@@ -34,7 +32,6 @@ export function GlassCard({
         'lqg-card',
         `lqg-card-${tier}`,
         `lqg-r-${radius}`,
-        specular && 'lqg-specular',
         interactive && 'lqg-card-hover',
         className
       )}

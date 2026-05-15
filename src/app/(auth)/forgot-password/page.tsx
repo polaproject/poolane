@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
         <div className="w-full max-w-sm relative z-10">
           <div className="flex flex-col items-center mb-8">
             <span className="mb-3 lqg-text-primary">
-              <PolarisStar size={48} withReflection={false} animated glow={false} />
+              <PolarisStar size={48} animated />
             </span>
             <h1 className="font-body font-bold text-lg tracking-[0.18em] lqg-text-primary">
               POOLANE
@@ -81,7 +81,7 @@ export default function ForgotPasswordPage() {
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <span className="mb-3 lqg-text-primary">
-            <PolarisStar size={48} withReflection animated glow />
+            <PolarisStar size={48} animated />
           </span>
           <h1 className="font-body font-bold text-lg tracking-[0.18em] lqg-text-primary">
             POOLANE

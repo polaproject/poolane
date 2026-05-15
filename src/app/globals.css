@@ -308,9 +308,7 @@ select.input-pola:focus {
   --glass-edge-light: rgba(255, 255, 255, 0.20);
   --glass-edge-dark:  rgba(0, 0, 0, 0.20);
 
-  /* Specular */
-  --specular-color: rgba(255, 255, 255, 0.22);
-  --specular-angle: 120deg;
+  /* Phase 16: bỏ --specular-color + --specular-angle (không còn rule nào dùng) */
 
   /* Legacy --pola-* mapping (cho code cũ vẫn chạy) — map sang adaptive tokens */
   --pola-nav-bg:     var(--nav-bg);
@@ -388,7 +386,6 @@ select.input-pola:focus {
   --glass-tint-3: rgba(255, 255, 255, 0.85);
   --glass-edge-light: rgba(255, 255, 255, 0.85);
   --glass-edge-dark:  rgba(45, 42, 74, 0.10);
-  --specular-color:   rgba(255, 255, 255, 0.55);
 
   --shadow-soft:  0 4px 20px -8px rgba(45, 42, 74, 0.12);
   --shadow-glass:
@@ -959,17 +956,7 @@ html, body {
   100% { transform: translate3d(-50%, 0, 0); }
 }
 
-@keyframes pola-glass-shimmer {
-  0%   { background-position: -150% 0; }
-  100% { background-position:  250% 0; }
-}
-
-@keyframes pola-glow-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent),
-                         var(--shadow-glass); }
-  50%      { box-shadow: 0 0 36px 8px color-mix(in srgb, var(--accent) 22%, transparent),
-                         var(--shadow-glass); }
-}
+/* Phase 16: bỏ @keyframes pola-glass-shimmer + pola-glow-pulse */
 
 @keyframes pola-rotate-slow {
   0%   { transform: rotate(0deg); }
@@ -981,26 +968,13 @@ html, body {
   .motion-float    { animation: pola-float 4s ease-in-out infinite; }
   .motion-sway     { animation: pola-sway 14s ease-in-out infinite; }
   .motion-twinkle  { animation: pola-twinkle 2.6s ease-in-out infinite; }
-  .motion-glow     { animation: pola-glow-pulse 3.4s ease-in-out infinite; }
   .motion-wave     { animation: pola-wave 8s linear infinite; }
   .motion-rotate-slow { animation: pola-rotate-slow 60s linear infinite; }
-
-  .motion-glass-shimmer {
-    background: linear-gradient(120deg,
-      transparent 35%,
-      color-mix(in srgb, var(--paper) 22%, transparent) 50%,
-      transparent 65%);
-    background-size: 220% 100%;
-    animation: pola-glass-shimmer 9s linear infinite;
-  }
+  /* Phase 16: bỏ .motion-glow + .motion-glass-shimmer (decoration noise) */
 }
 
 /* ═══ Phase 10 — Liquid Glass keyframes + utility classes ═══ */
-@keyframes liquid-specular {
-  0%   { background-position: -150% 0; opacity: 0.55; }
-  50%  { opacity: 0.85; }
-  100% { background-position:  250% 0; opacity: 0.55; }
-}
+/* Phase 16: bỏ @keyframes liquid-specular (specular streak animation) */
 
 @keyframes liquid-press {
   0%, 100% { filter: brightness(1); }
@@ -1025,31 +999,9 @@ html, body {
   z-index: 1;
 }
 
-/* Specular streak overlay — apply qua ::before
- * Phase 13.2 fix: tắt hoàn toàn cho button + pill (owner feedback "shimmer khắp hệ thống").
- * Phase 13.1 đã tắt cho .glass-card + sidebar. Giờ chỉ giữ .glass-shimmer opt-in class
- * cho component nào thật sự cần emphasize (vd hero CTA "Đăng ký ngay").
- * Glass effect (blur + frosted bg + border) vẫn giữ — chỉ bỏ animation streak.
- */
-@media (prefers-reduced-motion: no-preference) {
-  .glass-shimmer::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      var(--specular-angle),
-      transparent 35%,
-      var(--specular-color) 50%,
-      transparent 65%
-    );
-    background-size: 220% 100%;
-    pointer-events: none;
-    animation: liquid-specular 18s linear infinite;
-    z-index: 0;
-    border-radius: inherit;
-    opacity: 0.5;
-  }
-}
+/* Phase 16: bỏ .glass-shimmer::before — opt-in specular streak class
+ * Owner muốn xóa hoàn toàn shimmer/specular khỏi hệ thống. Glass effect
+ * (frosted bg + blur + border) vẫn giữ qua .glass-card / .glass-button. */
 
 /* Hover lift + glow cho glass-card (Phase 12 — LQG tokens) */
 .glass-card-hover {
@@ -1274,28 +1226,7 @@ body.lqg-body {
   transition: background 800ms var(--lqg-ease-soft), color 400ms var(--lqg-ease-soft);
 }
 
-/* Specular streak — apply qua .lqg-specular class */
-@keyframes lqg-specular-anim {
-  0%   { background-position: -150% 0; opacity: 0.5; }
-  50%  { opacity: 0.85; }
-  100% { background-position:  250% 0; opacity: 0.5; }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .lqg-specular::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(120deg, transparent 30%, var(--lqg-edge-hi) 50%, transparent 70%);
-    background-size: 220% 100%;
-    pointer-events: none;
-    animation: lqg-specular-anim 8s linear infinite;
-    border-radius: inherit;
-    mix-blend-mode: overlay;
-    opacity: 0.6;
-    z-index: 0;
-  }
-}
+/* Phase 16: bỏ .lqg-specular (Phase 12 LQG specular streak) hoàn toàn */
 
 /* ────── Display + Numeric typography ────── */
 .lqg-display {

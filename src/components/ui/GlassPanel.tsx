@@ -13,14 +13,8 @@ interface GlassPanelProps extends React.HTMLAttributes<HTMLDivElement> {
    * 3 = top (deep blur + glow shadow, dùng cho modal, hero CTA)
    */
   layer?: 1 | 2 | 3
-  /** Hover state: lift + glow accent. Default TRUE (Phase 10 — Liquid Glass everywhere) */
+  /** Hover state: lift + glow accent. Default TRUE. */
   interactive?: boolean
-  /**
-   * Specular shimmer overlay animation.
-   * Default FALSE (Phase 13.1 — Phase 10 over-applied, vệt sáng vương vãi khắp app).
-   * Opt-in `shimmer` khi cần emphasize (vd hero CTA, modal accent).
-   */
-  shimmer?: boolean
 }
 
 const SIZE_RADIUS = {
@@ -36,16 +30,15 @@ const LAYER_CLASS = {
 }
 
 /**
- * Frosted glass panel — Apple Liquid Glass (Phase 10).
- * Default: shimmer + interactive ON.
- * Đặt trên `.ambient-bg` để có hiệu ứng cinematic.
+ * Frosted glass panel — Apple Liquid Glass.
+ * Phase 16: bỏ prop `shimmer` (specular streak animation).
+ * Panel hoàn toàn tĩnh — chỉ frosted bg + blur + border + hover.
  */
 export function GlassPanel({
   edge = false,
   size = 'lg',
   layer = 2,
   interactive = true,
-  shimmer = false,
   className,
   children,
   ...rest
@@ -56,7 +49,6 @@ export function GlassPanel({
         LAYER_CLASS[layer],
         edge && 'glass-panel-edge',
         interactive && 'glass-panel-hover',
-        shimmer && 'glass-card', /* dùng .glass-card class để hưởng specular animation */
         SIZE_RADIUS[size],
         'relative isolate overflow-hidden',
         className
