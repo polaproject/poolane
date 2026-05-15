@@ -172,6 +172,51 @@
   }
 }
 
+/* ════════ Phase 12.1 — Auto-glass cho raw form elements ════════
+ * Mọi <input>, <textarea>, <select> không có explicit className override
+ * sẽ tự động nhận glass-input styling. Migration cũ aliases vào lqg-input.
+ * Excludes: type=checkbox/radio/file/range/color/hidden/submit/button/image. */
+input.input-blog,
+input.input-pola,
+textarea.input-blog,
+textarea.input-pola,
+select.input-blog,
+select.input-pola {
+  /* Aliases — render giống .lqg-input */
+  width: 100%;
+  height: auto;
+  min-height: 44px;
+  padding: 0.625rem 1rem;
+  font-size: 0.95rem;
+  background: var(--lqg-bg-glass);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  border: 1px solid var(--lqg-edge-hi);
+  border-radius: var(--lqg-r-md);
+  color: var(--lqg-text-primary);
+  outline: none;
+  transition:
+    background 220ms var(--lqg-ease-soft),
+    border-color 220ms var(--lqg-ease-soft),
+    box-shadow 280ms var(--lqg-ease-overshoot);
+}
+input.input-blog::placeholder,
+input.input-pola::placeholder,
+textarea.input-blog::placeholder,
+textarea.input-pola::placeholder {
+  color: var(--lqg-text-tertiary);
+}
+input.input-blog:focus,
+input.input-pola:focus,
+textarea.input-blog:focus,
+textarea.input-pola:focus,
+select.input-blog:focus,
+select.input-pola:focus {
+  background: var(--lqg-bg-glass-strong);
+  border-color: color-mix(in srgb, var(--lqg-accent) 60%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--lqg-accent) 18%, transparent);
+}
+
 /* ════════════════════════════════════════════════════════════
  * POOLANE THEME TOKENS
  * Mỗi theme override:

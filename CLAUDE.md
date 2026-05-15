@@ -1878,6 +1878,47 @@ Nếu phát hiện không khớp → email admin + log critical.
 
 Vercel monitor endpoint này → nếu fail → alert admin.
 
+### 14.5. Visual / CSS Bug Debugging Workflow (Phase 12 lesson)
+
+**RULE 1: Visual / CSS bug → inspect compiled CSS bundle FIRST, KHÔNG viết code fix trước.**
+
+Phase 12 sidebar fixed-positioning bug took **5 fix attempts** vì AI patch theo giả thuyết (flex stretch, inset conflict, ml-64 overflow, Tailwind purge, sticky cascade) — tất cả đều SAI. Root cause: `.pola-nav { position: relative }` (Phase 10 — host pseudo-element specular) silently override `.pola-sidebar { position: fixed }` (Phase 12) qua CSS cascade order (rule defined sau wins ở equal specificity).
+
+**Quy trình debug visual bug bắt buộc:**
+
+1. **Inspect built CSS** trước khi viết code:
+   ```bash
+   grep -oE "\.SELECTOR\s*\{[^}]*\}" .next/static/chunks/*.css | head -5
+   ```
+   Tìm TẤT CẢ rules apply lên element + xác định rule nào win (cascade order, specificity).
+
+2. **Khi fix attempt #1 không work → STOP, đào sâu**:
+   - KHÔNG thử variant #2, #3, #4 của cùng giả thuyết
+   - Khả năng cao có CSS override khác đang hoạt động silent
+
+3. **Nghi ngờ code phase trước**:
+   - Mỗi phase có thể đặt CSS override mà phase sau quên
+   - Đặc biệt khi 2+ classes apply cùng 1 element (vd `.pola-nav` + `.pola-sidebar`)
+
+4. **Yêu cầu DevTools output từ owner**:
+   - "Mở F12 → click element → tab Computed → screenshot values"
+   - Tiết kiệm hàng giờ patch trial-and-error
+
+5. **Verify trong built output trước khi claim fix done**:
+   - `grep` rule trong `.next/static/chunks/*.css` confirm rule đã đúng + không bị override
+   - Restart server clean (`rm -rf .next && npm run build`) nếu nghi ngờ stale cache
+
+**RULE 2: Khi 2 class cùng style 1 element, properties KHÔNG được xung đột.**
+
+Vd `.pola-nav { position: relative }` + `.pola-sidebar { position: fixed }` apply cùng element = **một trong hai sẽ thua silently**. Trùng property → phải xóa property duplicate hoặc dùng `!important` (last resort) hoặc tăng specificity rõ ràng.
+
+**RULE 3: Mass migration script (regex replace) RISKY khi CSS có cascade.**
+
+Phase 8-11 mass-applied class changes không kiểm tra context → tạo regression. Khi migrate visual classes:
+- Verify trong DevTools / built CSS sau mỗi batch
+- Commit checkpoint mỗi batch (revert dễ)
+- Không trust regex 100% — context matters
+
 ---
 
 ## 15. Security & Privacy
