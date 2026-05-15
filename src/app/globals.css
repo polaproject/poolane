@@ -2,7 +2,11 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* Phase 14 — recognize .theme-dark + .lqg-dark (project's actual class names)
+ * in addition to .dark (Tailwind default). Cũ chỉ check .dark → mọi dark:
+ * variant trong code (vd badge.tsx, shadcn primitives) đều không hoạt động.
+ */
+@custom-variant dark (&:is(.theme-dark *, .lqg-dark *, .dark *));
 
 /* ────────────────────────────────────────────────────────────
  * Poolane Design Tokens (Tailwind v4 @theme inline)
