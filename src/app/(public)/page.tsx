@@ -254,7 +254,7 @@ export default async function LandingPage() {
       <section className="relative mx-auto max-w-4xl px-4 pb-24">
         <ScrollReveal y={32} duration={0.7}>
           <TiltCard maxTilt={4}>
-            <GlassPanel edge shimmer className="p-8 sm:p-12 text-center">
+            <GlassPanel edge className="p-8 sm:p-12 text-center">
               <Star className="h-6 w-6 mx-auto mb-5 text-accent motion-twinkle" strokeWidth={1.5} fill="currentColor" />
               <blockquote className="font-heading italic text-2xl sm:text-3xl leading-snug max-w-3xl mx-auto mb-4">
                 "Pola = Polaris — ngôi sao Bắc Đẩu, đứng yên giữa bầu trời, dẫn đường cho người lênh đênh trên biển khơi tìm đúng hướng đi."

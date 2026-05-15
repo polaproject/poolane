@@ -12,7 +12,7 @@ export function PublicHeader() {
   return (
     <header className="sticky top-4 z-40 px-3 sm:px-4">
       <nav
-        className="mx-auto max-w-6xl px-3 py-2 flex items-center gap-2 lqg-card lqg-card-medium lqg-specular"
+        className="mx-auto max-w-6xl px-3 py-2 flex items-center gap-2 lqg-card lqg-card-medium"
         style={{ borderRadius: 'var(--lqg-r-pill)' }}
       >
         <Link
