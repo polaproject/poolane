@@ -8,6 +8,9 @@ const BRAND = {
   teal: '#5B8E9F',
 }
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://poolane.vn'
+const SUPPORT_EMAIL = process.env.EMAIL_FROM ?? 'support@polaproject.com'
+
 function layout(content: string, preheader = ''): string {
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -23,7 +26,7 @@ function layout(content: string, preheader = ''): string {
       </td></tr>
       <tr><td style="padding:32px 28px;">${content}</td></tr>
       <tr><td style="background:${BRAND.cream};padding:16px 28px;border-top:1px solid rgba(28,43,74,0.08);font-size:12px;color:rgba(28,43,74,0.5);text-align:center;">
-        Mọi thắc mắc liên hệ Zalo lớp hoặc <a href="mailto:support@poolane.vn" style="color:${BRAND.teal};">support@poolane.vn</a><br>
+        Mọi thắc mắc liên hệ Zalo lớp hoặc <a href="mailto:${SUPPORT_EMAIL}" style="color:${BRAND.teal};">${SUPPORT_EMAIL}</a><br>
         © Poolane — a Pola Project · poolane.vn
       </td></tr>
     </table>
@@ -46,13 +49,13 @@ export function welcomeEmail(input: { fullName: string; studentCode: string }) {
       Lớp sẽ liên hệ bạn trong 24h tới để tư vấn khoá học phù hợp. Trong khi chờ, bạn có thể đăng nhập để xem các khoá hiện có.
     </p>
     <p style="margin:24px 0;">
-      <a href="https://poolane.vn/login" style="display:inline-block;background:${BRAND.navy};color:${BRAND.cream};padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Đăng nhập ngay</a>
+      <a href="${APP_URL}/login" style="display:inline-block;background:${BRAND.navy};color:${BRAND.cream};padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Đăng nhập ngay</a>
     </p>
     <p style="font-size:13px;color:rgba(28,43,74,0.5);">Buổi tối bình yên — Poolane 💙</p>`
   return {
     subject: `Chào mừng ${input.fullName} đến với Poolane!`,
     html: layout(content, `Mã học viên ${input.studentCode}`),
-    text: `Chào ${input.fullName},\n\nCảm ơn bạn đã tạo tài khoản tại Poolane! Mã học viên: ${input.studentCode}.\n\nLớp sẽ liên hệ trong 24h.\n\nĐăng nhập: https://poolane.vn/login\n\nPoolane`,
+    text: `Chào ${input.fullName},\n\nCảm ơn bạn đã tạo tài khoản tại Poolane! Mã học viên: ${input.studentCode}.\n\nLớp sẽ liên hệ trong 24h.\n\nĐăng nhập: ${APP_URL}/login\n\nPoolane`,
   }
 }
 
@@ -75,11 +78,11 @@ export function paymentReceiptEmail(input: {
       <tr><td style="padding:10px 16px;font-size:13px;color:rgba(28,43,74,0.5);border-top:1px solid rgba(28,43,74,0.05);">Thời gian</td><td style="padding:10px 16px;text-align:right;font-size:13px;color:${BRAND.navy};border-top:1px solid rgba(28,43,74,0.05);">${input.recordedAt.toLocaleString('vi-VN')}</td></tr>
       ${input.referenceNumber ? `<tr><td style="padding:10px 16px;font-size:13px;color:rgba(28,43,74,0.5);border-top:1px solid rgba(28,43,74,0.05);">Mã GD</td><td style="padding:10px 16px;text-align:right;font-size:12px;color:${BRAND.navy};border-top:1px solid rgba(28,43,74,0.05);font-family:monospace;">${input.referenceNumber}</td></tr>` : ''}
     </table>
-    <p style="font-size:13px;color:rgba(28,43,74,0.5);">Xem lịch sử thanh toán đầy đủ tại <a href="https://poolane.vn/student/payments" style="color:${BRAND.teal};">poolane.vn/student/payments</a></p>`
+    <p style="font-size:13px;color:rgba(28,43,74,0.5);">Xem lịch sử thanh toán đầy đủ tại <a href="${APP_URL}/student/payments" style="color:${BRAND.teal};">poolane.vn/student/payments</a></p>`
   return {
     subject: `Biên lai thanh toán ${fmt(input.amount)} — Poolane`,
     html: layout(content, `Đã ghi nhận ${fmt(input.amount)}`),
-    text: `Biên lai thanh toán Poolane\n\nSố tiền: ${fmt(input.amount)}\nLoại: ${input.type}\nPhương thức: ${input.paymentMethod}\nThời gian: ${input.recordedAt.toLocaleString('vi-VN')}${input.referenceNumber ? `\nMã GD: ${input.referenceNumber}` : ''}\n\nXem lịch sử: https://poolane.vn/student/payments`,
+    text: `Biên lai thanh toán Poolane\n\nSố tiền: ${fmt(input.amount)}\nLoại: ${input.type}\nPhương thức: ${input.paymentMethod}\nThời gian: ${input.recordedAt.toLocaleString('vi-VN')}${input.referenceNumber ? `\nMã GD: ${input.referenceNumber}` : ''}\n\nXem lịch sử: ${APP_URL}/student/payments`,
   }
 }
 
@@ -90,13 +93,13 @@ export function absenceReminderEmail(input: { fullName: string; daysSince: numbe
       Đã ${input.daysSince} ngày bạn chưa xuống nước. Lớp luôn để dành chỗ cho bạn — hãy quay lại khi sẵn sàng nhé!
     </p>
     <p style="margin:20px 0;">
-      <a href="https://poolane.vn/student/schedule" style="display:inline-block;background:${BRAND.navy};color:${BRAND.cream};padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Đăng ký buổi học</a>
+      <a href="${APP_URL}/student/schedule" style="display:inline-block;background:${BRAND.navy};color:${BRAND.cream};padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Đăng ký buổi học</a>
     </p>
     <p style="font-size:13px;color:rgba(28,43,74,0.5);">Có gì khó khăn cứ nhắn cho lớp qua Zalo nhé.</p>`
   return {
     subject: `${input.fullName} ơi, lớp nhớ bạn 💙`,
     html: layout(content, `Đã ${input.daysSince} ngày chưa gặp nhau`),
-    text: `Chào ${input.fullName},\n\nĐã ${input.daysSince} ngày bạn chưa xuống nước. Lớp luôn để dành chỗ — quay lại khi sẵn sàng nhé!\n\nĐăng ký: https://poolane.vn/student/schedule`,
+    text: `Chào ${input.fullName},\n\nĐã ${input.daysSince} ngày bạn chưa xuống nước. Lớp luôn để dành chỗ — quay lại khi sẵn sàng nhé!\n\nĐăng ký: ${APP_URL}/student/schedule`,
   }
 }
 
