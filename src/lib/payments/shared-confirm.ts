@@ -43,6 +43,23 @@ export async function confirmOrderTransfer(
     return { ok: false, code: 'INVALID_STATUS', message: `Đơn ở trạng thái ${order.status}, chỉ xác nhận được đơn đã duyệt` }
   }
 
+  // STRICT amount check (Phase 14.1) — chỉ áp cho Sepay automated webhook
+  // VietQR cá nhân không lock được amount, user có thể sửa trước khi confirm chuyển.
+  // Sepay webhook nhận amount thực → so với order.finalAmount → nếu khác = reject.
+  // Admin manual confirm (source='manual') bypass check vì admin đã verify sao kê.
+  if (input.source === 'sepay' && input.amount !== order.finalAmount) {
+    log.warn('payment.confirm_order', `Sepay amount mismatch: ${input.amount} vs ${order.finalAmount}`, {
+      orderId: order.id,
+      transferAmount: input.amount,
+      expectedAmount: order.finalAmount,
+    })
+    return {
+      ok: false,
+      code: 'AMOUNT_MISMATCH',
+      message: `Số tiền chuyển khoản (${input.amount.toLocaleString('vi-VN')}đ) không khớp đơn hàng (${order.finalAmount.toLocaleString('vi-VN')}đ)`,
+    }
+  }
+
   const memo = buildMemo(order.id)
   const action = input.source === 'sepay' ? 'sepay.confirm_order' : 'order.confirm_transfer'
 
