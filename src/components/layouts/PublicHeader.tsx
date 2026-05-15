@@ -55,7 +55,7 @@ export function PublicHeader() {
           <ThemeSwitcherCompact className="p-2 rounded-full lqg-text-secondary hover:lqg-text-primary transition" />
           <Link
             href="/login"
-            className="hidden sm:inline-flex px-3 py-1.5 text-sm font-medium rounded-full lqg-text-secondary hover:lqg-text-primary transition"
+            className="inline-flex px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-full lqg-text-secondary hover:lqg-text-primary transition"
           >
             Đăng nhập
           </Link>
