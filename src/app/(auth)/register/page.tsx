@@ -127,6 +127,7 @@ export default function RegisterPage() {
               <Field label="Mật khẩu" required error={fieldErrors.password}>
                 <GlassInput
                   type="password"
+                  revealable
                   value={form.password}
                   onChange={e => update('password', e.target.value)}
                   placeholder="≥ 8 ký tự"
@@ -135,6 +136,7 @@ export default function RegisterPage() {
               <Field label="Xác nhận" required error={fieldErrors.confirmPassword}>
                 <GlassInput
                   type="password"
+                  revealable
                   value={form.confirmPassword}
                   onChange={e => update('confirmPassword', e.target.value)}
                   placeholder="Nhập lại"

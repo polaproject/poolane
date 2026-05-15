@@ -103,6 +103,7 @@ export default function LoginPage() {
               <GlassInput
                 id="password"
                 type="password"
+                revealable
                 placeholder="••••••••"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
