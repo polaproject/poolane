@@ -15,7 +15,8 @@
     "db:studio": "dotenv -e .env.local -- npx prisma studio",
     "db:generate": "npx prisma generate",
     "db:seed": "dotenv -e .env.local -- npx prisma db seed",
-    "db:seed-production": "dotenv -e .env.local -- npx tsx prisma/seed-production.ts"
+    "db:seed-production": "dotenv -e .env.local -- npx tsx prisma/seed-production.ts",
+    "db:seed-demo": "dotenv -e .env.local -- npx tsx prisma/seed-demo.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
