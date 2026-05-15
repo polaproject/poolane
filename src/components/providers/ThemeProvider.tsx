@@ -4,20 +4,14 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 
 export type ThemeKey = 'dark' | 'light'
 
-const STORAGE_KEY = 'poolane-theme'
+// Phase 13.2: bump key từ 'poolane-theme' → 'poolane-theme-v2' để force migrate
+// user cũ về default light (dark mode đang có bugs visual, chưa fix xong)
+const STORAGE_KEY = 'poolane-theme-v2'
 const VALID_THEMES: ThemeKey[] = ['dark', 'light']
 
 const THEME_CLASS: Record<ThemeKey, string> = {
   dark: 'theme-dark',
   light: 'theme-light',
-}
-
-// Migrate từ format cũ ('A'|'B') sang ('dark'|'light')
-function migrateLegacyTheme(raw: string | null): ThemeKey | null {
-  if (!raw) return null
-  if (raw === 'A' || raw === 'a' || raw === 'theme-a' || raw === 'dark') return 'dark'
-  if (raw === 'B' || raw === 'b' || raw === 'theme-b' || raw === 'light') return 'light'
-  return null
 }
 
 interface ThemeContextType {
@@ -27,7 +21,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'dark',
+  theme: 'light',
   setTheme: () => {},
   toggleTheme: () => {},
 })
@@ -37,27 +31,21 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeKey>('dark')
+  const [theme, setThemeState] = useState<ThemeKey>('light')
   const [mounted, setMounted] = useState(false)
 
-  // Hydrate theme từ localStorage khi mount + migrate format cũ
+  // Hydrate theme từ localStorage khi mount
+  // User mới HOẶC user cũ với key 'poolane-theme' (cũ) → default light
+  // Chỉ user explicit chọn lại theme SAU Phase 13.2 (key v2) mới giữ preference
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY)
-      const migrated = migrateLegacyTheme(saved)
-      if (migrated && VALID_THEMES.includes(migrated)) {
+      const saved = localStorage.getItem(STORAGE_KEY) as ThemeKey | null
+      if (saved && VALID_THEMES.includes(saved)) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setThemeState(migrated)
-        if (saved !== migrated) {
-          // Persist format mới
-          localStorage.setItem(STORAGE_KEY, migrated)
-        }
-      } else if (saved) {
-        // Theme cũ không match (vd 'D') → reset về dark
-        localStorage.setItem(STORAGE_KEY, 'dark')
+        setThemeState(saved)
       }
     } catch {
-      // localStorage không khả dụng — giữ default
+      // localStorage không khả dụng — giữ default light
     }
     setMounted(true)
   }, [])
