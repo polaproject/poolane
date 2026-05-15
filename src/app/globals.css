@@ -654,14 +654,13 @@ html, body {
   .pola-sidebar { transform: translateX(0) !important; }
 }
 
-/* Phase 12 — Sidebar Liquid Glass (family.co) */
+/* Phase 12 — Sidebar Liquid Glass (family.co) — KHÔNG override position */
 .pola-nav    {
   background: var(--lqg-bg-glass-strong);
   backdrop-filter: var(--lqg-lens-medium);
   -webkit-backdrop-filter: var(--lqg-lens-medium);
   color: var(--lqg-text-primary);
   border-right: 1px solid var(--lqg-edge-hi);
-  position: relative;
   isolation: isolate;
   transition: background 800ms var(--lqg-ease-soft),
               color 400ms var(--lqg-ease-soft),
