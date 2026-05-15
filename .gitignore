@@ -45,3 +45,5 @@ next-env.d.ts
 
 # QA artifacts (Phase 7)
 /qa/phase7/
+
+.vercel

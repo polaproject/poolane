@@ -11,7 +11,7 @@ interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
   radius?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   /** Hover lift + accent glow. Default true. */
   interactive?: boolean
-  /** Specular streak animation. Default true. */
+  /** Specular streak animation. Default false (Phase 13.1 — opt-in only). */
   specular?: boolean
 }
 
@@ -24,7 +24,7 @@ export function GlassCard({
   tier = 'medium',
   radius = 'lg',
   interactive = true,
-  specular = true,
+  specular = false,
   className,
   ...rest
 }: GlassCardProps) {

@@ -17,8 +17,8 @@ interface GlassPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   interactive?: boolean
   /**
    * Specular shimmer overlay animation.
-   * Default TRUE (Phase 10 — Apple Liquid Glass mọi panel có vệt sáng trượt).
-   * Tắt nếu muốn glass tĩnh (vd quote card).
+   * Default FALSE (Phase 13.1 — Phase 10 over-applied, vệt sáng vương vãi khắp app).
+   * Opt-in `shimmer` khi cần emphasize (vd hero CTA, modal accent).
    */
   shimmer?: boolean
 }
@@ -45,7 +45,7 @@ export function GlassPanel({
   size = 'lg',
   layer = 2,
   interactive = true,
-  shimmer = true,
+  shimmer = false,
   className,
   children,
   ...rest

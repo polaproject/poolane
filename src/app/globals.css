@@ -718,25 +718,9 @@ html, body {
   --pola-nav-active: color-mix(in srgb, var(--lqg-accent) 18%, transparent);
   --pola-nav-hover:  color-mix(in srgb, var(--lqg-text-primary) 8%, transparent);
 }
-/* Subtle specular streak chéo qua sidebar */
-@media (prefers-reduced-motion: no-preference) {
-  .pola-nav::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      160deg,
-      transparent 30%,
-      var(--specular-color) 50%,
-      transparent 70%
-    );
-    background-size: 100% 220%;
-    pointer-events: none;
-    z-index: 0;
-    animation: liquid-specular 18s linear infinite;
-    opacity: 0.4;
-  }
-}
+/* Phase 13.1 — Sidebar specular streak đã tắt
+ * Phase 10 thêm vệt sáng chạy chéo sidebar mỗi 18s → phiền khi user thao tác liên tục.
+ * Opt-in qua class .pola-nav.glass-shimmer nếu muốn bật lại. */
 .pola-nav > * {
   position: relative;
   z-index: 1;
@@ -1037,11 +1021,15 @@ html, body {
   z-index: 1;
 }
 
-/* Specular streak overlay — apply qua ::before */
+/* Specular streak overlay — apply qua ::before
+ * Phase 13.1 fix: chỉ áp lên element NHỎ (button/pill) hoặc element opt-in (.glass-shimmer).
+ * Card lớn (.glass-card) trước đây có streak → "vương vãi" khắp app (Phase 10 over-applied).
+ * Bây giờ card mặc định tĩnh, có thể opt-in qua class .glass-shimmer nếu muốn.
+ */
 @media (prefers-reduced-motion: no-preference) {
-  .glass-card::before,
   .glass-button::before,
-  .glass-pill::before {
+  .glass-pill::before,
+  .glass-shimmer::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -1053,9 +1041,10 @@ html, body {
     );
     background-size: 220% 100%;
     pointer-events: none;
-    animation: liquid-specular 11s linear infinite;
+    animation: liquid-specular 18s linear infinite;
     z-index: 0;
     border-radius: inherit;
+    opacity: 0.5;
   }
 }
 
