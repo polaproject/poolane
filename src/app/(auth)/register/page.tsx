@@ -4,16 +4,25 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Label } from '@/components/ui/label'
 import { PolarisStar } from '@/components/brand/PolarisStar'
+import { GlassCard, GlassButton, GlassInput, AmbientMesh } from '@/components/ui/glass'
 
 export default function RegisterPage() {
   const router = useRouter()
   const [form, setForm] = useState({
-    fullName: '', phone: '', password: '', confirmPassword: '',
-    dob: '', gender: 'male' as 'male' | 'female' | 'other',
-    email: '', ward: '', district: '', province: '',
-    photoConsent: false, termsAcknowledged: false,
+    fullName: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    dob: '',
+    gender: 'male' as 'male' | 'female' | 'other',
+    email: '',
+    ward: '',
+    district: '',
+    province: '',
+    photoConsent: false,
+    termsAcknowledged: false,
   })
   const [submitting, setSubmitting] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
@@ -21,7 +30,10 @@ export default function RegisterPage() {
   function update<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
     setForm(f => ({ ...f, [k]: v }))
     if (fieldErrors[k as string]) {
-      setFieldErrors(e => { const { [k as string]: _, ...rest } = e; return rest })
+      setFieldErrors(e => {
+        const { [k as string]: _, ...rest } = e
+        return rest
+      })
     }
   }
 
@@ -66,48 +78,84 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-paper p-4 py-10">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center p-4 py-10 relative">
+      <AmbientMesh />
+      <div className="w-full max-w-md relative z-10">
         {/* Logo */}
         <div className="flex flex-col items-center mb-6">
-          <span className="text-foreground mb-2">
-            <PolarisStar size={42} withReflection={false} animated glow />
+          <span className="mb-3 lqg-text-primary">
+            <PolarisStar size={48} withReflection animated glow />
           </span>
-          <h1 className="font-body font-bold text-lg tracking-[0.18em] text-foreground">POOLANE</h1>
+          <h1 className="font-body font-bold text-lg tracking-[0.18em] lqg-text-primary">
+            POOLANE
+          </h1>
+          <p className="text-xs tracking-[0.15em] uppercase mt-0.5 lqg-text-tertiary">
+            a Pola Project
+          </p>
         </div>
 
-        <div className="glass-card glass-card-hover p-6">
-          <h2 className="font-heading text-2xl text-foreground mb-1">Tạo tài khoản</h2>
-          <p className="text-sm text-foreground/50 mb-5">Bắt đầu hành trình bơi cùng Poolane 🌊</p>
+        {/* Register card */}
+        <GlassCard tier="heavy" radius="xl" interactive={false} className="p-6 sm:p-7">
+          <div className="mb-5">
+            <h2 className="lqg-display text-3xl mb-1">Tạo tài khoản</h2>
+            <p className="text-sm lqg-text-secondary">
+              Bắt đầu hành trình bơi cùng Poolane 🌊
+            </p>
+          </div>
 
-          <form onSubmit={onSubmit} className="space-y-3">
+          <form onSubmit={onSubmit} className="space-y-4">
             <Field label="Họ và tên" required error={fieldErrors.fullName}>
-              <input type="text" maxLength={100} value={form.fullName} onChange={e => update('fullName', e.target.value)}
-                className="input-pola" placeholder="Nguyễn Văn A" />
+              <GlassInput
+                type="text"
+                maxLength={100}
+                value={form.fullName}
+                onChange={e => update('fullName', e.target.value)}
+                placeholder="Nguyễn Văn A"
+              />
             </Field>
 
             <Field label="Số điện thoại" required error={fieldErrors.phone}>
-              <input type="tel" value={form.phone} onChange={e => update('phone', e.target.value)}
-                className="input-pola" placeholder="0912 345 678" />
+              <GlassInput
+                type="tel"
+                value={form.phone}
+                onChange={e => update('phone', e.target.value)}
+                placeholder="0912 345 678"
+              />
             </Field>
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="Mật khẩu" required error={fieldErrors.password}>
-                <input type="password" value={form.password} onChange={e => update('password', e.target.value)}
-                  className="input-pola" placeholder="≥ 8 ký tự" />
+                <GlassInput
+                  type="password"
+                  value={form.password}
+                  onChange={e => update('password', e.target.value)}
+                  placeholder="≥ 8 ký tự"
+                />
               </Field>
               <Field label="Xác nhận" required error={fieldErrors.confirmPassword}>
-                <input type="password" value={form.confirmPassword} onChange={e => update('confirmPassword', e.target.value)}
-                  className="input-pola" placeholder="Nhập lại" />
+                <GlassInput
+                  type="password"
+                  value={form.confirmPassword}
+                  onChange={e => update('confirmPassword', e.target.value)}
+                  placeholder="Nhập lại"
+                />
               </Field>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="Ngày sinh" required error={fieldErrors.dob}>
-                <input type="date" value={form.dob} onChange={e => update('dob', e.target.value)} className="input-pola" />
+                <GlassInput
+                  type="date"
+                  value={form.dob}
+                  onChange={e => update('dob', e.target.value)}
+                />
               </Field>
               <Field label="Giới tính" required error={fieldErrors.gender}>
-                <select value={form.gender} onChange={e => update('gender', e.target.value as 'male' | 'female' | 'other')} className="input-pola">
+                <select
+                  value={form.gender}
+                  onChange={e => update('gender', e.target.value as 'male' | 'female' | 'other')}
+                  className="lqg-input w-full"
+                >
                   <option value="male">Nam</option>
                   <option value="female">Nữ</option>
                   <option value="other">Khác</option>
@@ -116,77 +164,120 @@ export default function RegisterPage() {
             </div>
 
             <Field label="Email" error={fieldErrors.email}>
-              <input type="email" value={form.email} onChange={e => update('email', e.target.value)}
-                className="input-pola" placeholder="(tuỳ chọn)" />
+              <GlassInput
+                type="email"
+                value={form.email}
+                onChange={e => update('email', e.target.value)}
+                placeholder="(tuỳ chọn) email@example.com"
+              />
             </Field>
 
             <div className="grid grid-cols-3 gap-3">
               <Field label="Phường/Xã" required error={fieldErrors.ward}>
-                <input type="text" value={form.ward} onChange={e => update('ward', e.target.value)} className="input-pola" />
+                <GlassInput
+                  type="text"
+                  value={form.ward}
+                  onChange={e => update('ward', e.target.value)}
+                />
               </Field>
               <Field label="Quận/Huyện" required error={fieldErrors.district}>
-                <input type="text" value={form.district} onChange={e => update('district', e.target.value)} className="input-pola" />
+                <GlassInput
+                  type="text"
+                  value={form.district}
+                  onChange={e => update('district', e.target.value)}
+                />
               </Field>
               <Field label="Tỉnh" required error={fieldErrors.province}>
-                <input type="text" value={form.province} onChange={e => update('province', e.target.value)} className="input-pola" />
+                <GlassInput
+                  type="text"
+                  value={form.province}
+                  onChange={e => update('province', e.target.value)}
+                />
               </Field>
             </div>
 
-            <div className="space-y-2 pt-2 border-t border-foreground/10">
-              <label className="flex items-start gap-2 text-xs text-foreground/70 cursor-pointer">
-                <input type="checkbox" checked={form.photoConsent} onChange={e => update('photoConsent', e.target.checked)} className="mt-0.5" />
-                <span>Tôi đồng ý cho lớp ghi hình kỹ thuật bơi của mình để dạy học. <span className="text-danger">*</span></span>
+            {/* Consent */}
+            <div className="space-y-2 pt-3 border-t border-foreground/10">
+              <label className="flex items-start gap-2 text-xs lqg-text-secondary cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.photoConsent}
+                  onChange={e => update('photoConsent', e.target.checked)}
+                  className="mt-0.5 accent-[var(--lqg-accent)]"
+                />
+                <span>
+                  Tôi đồng ý cho lớp ghi hình kỹ thuật bơi của mình để dạy học.{' '}
+                  <span className="text-danger">*</span>
+                </span>
               </label>
-              <label className="flex items-start gap-2 text-xs text-foreground/70 cursor-pointer">
-                <input type="checkbox" checked={form.termsAcknowledged} onChange={e => update('termsAcknowledged', e.target.checked)} className="mt-0.5" />
-                <span>Tôi đã đọc và đồng ý <a href="/privacy" target="_blank" className="text-[#5B8E9F] underline">chính sách bảo mật & điều khoản sử dụng</a>. <span className="text-danger">*</span></span>
+              <label className="flex items-start gap-2 text-xs lqg-text-secondary cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.termsAcknowledged}
+                  onChange={e => update('termsAcknowledged', e.target.checked)}
+                  className="mt-0.5 accent-[var(--lqg-accent)]"
+                />
+                <span>
+                  Tôi đã đọc và đồng ý{' '}
+                  <Link href="/privacy" target="_blank" className="lqg-text-accent hover:underline">
+                    chính sách bảo mật & điều khoản sử dụng
+                  </Link>
+                  . <span className="text-danger">*</span>
+                </span>
               </label>
-              {fieldErrors.photoConsent && <p className="text-xs text-danger">{fieldErrors.photoConsent}</p>}
-              {fieldErrors.termsAcknowledged && <p className="text-xs text-danger">{fieldErrors.termsAcknowledged}</p>}
+              {fieldErrors.photoConsent && (
+                <p className="text-xs text-danger">{fieldErrors.photoConsent}</p>
+              )}
+              {fieldErrors.termsAcknowledged && (
+                <p className="text-xs text-danger">{fieldErrors.termsAcknowledged}</p>
+              )}
             </div>
 
-            <button type="submit" disabled={submitting}
-              className="w-full bg-ink-soft text-paper rounded-lg py-2.5 text-sm font-semibold hover:bg-foreground/90 disabled:opacity-50 mt-4">
-              {submitting ? <span className="inline-flex items-center"><Loader2 className="w-4 h-4 animate-spin mr-2" />Đang tạo...</span> : 'Tạo tài khoản'}
-            </button>
+            <GlassButton
+              type="submit"
+              variant="primary"
+              size="lg"
+              loading={submitting}
+              disabled={submitting || !form.photoConsent || !form.termsAcknowledged}
+              className="w-full mt-3"
+            >
+              {submitting ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
+            </GlassButton>
           </form>
-        </div>
+        </GlassCard>
 
-        <p className="text-center text-xs text-foreground/50 mt-4">
-          Đã có tài khoản? <Link href="/login" className="text-[#5B8E9F] hover:underline font-semibold">Đăng nhập</Link>
+        <p className="text-center text-sm mt-6 lqg-text-secondary">
+          Đã có tài khoản?{' '}
+          <Link href="/login" className="lqg-text-accent hover:underline font-semibold">
+            Đăng nhập
+          </Link>
         </p>
       </div>
-
-      <style jsx global>{`
-        .input-pola {
-          width: 100%;
-          padding: 0.5rem 0.75rem;
-          font-size: 0.875rem;
-          color: #1C2B4A;
-          background: #fff;
-          border: 1px solid rgba(28, 43, 74, 0.15);
-          border-radius: 0.5rem;
-          outline: none;
-        }
-        .input-pola:focus {
-          border-color: rgba(28, 43, 74, 0.4);
-          box-shadow: 0 0 0 3px rgba(28, 43, 74, 0.1);
-        }
-      `}</style>
     </div>
   )
 }
 
-function Field({ label, required, error, children }: {
-  label: string; required?: boolean; error?: string; children: React.ReactNode
+// ───────────────────────────────────────────────
+// Field — Label + children + error helper
+// ───────────────────────────────────────────────
+function Field({
+  label,
+  required,
+  error,
+  children,
+}: {
+  label: string
+  required?: boolean
+  error?: string
+  children: React.ReactNode
 }) {
   return (
-    <div>
-      <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1">
+    <div className="space-y-1.5">
+      <Label className="text-sm font-medium lqg-text-primary">
         {label} {required && <span className="text-danger">*</span>}
-      </label>
+      </Label>
       {children}
-      {error && <p className="text-xs text-danger mt-1">{error}</p>}
+      {error && <p className="text-xs text-danger">{error}</p>}
     </div>
   )
 }
