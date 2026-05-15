@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { PRODUCT_TYPES, PRODUCT_TYPE_LABELS, type ProductType } from '@/lib/validations/product'
 import { PhotoUploader } from '@/components/features/PhotoUploader'
 
@@ -117,9 +118,21 @@ export function ProductForm({ courses, mode, initial }: Props) {
         return
       }
 
+      // Phase 15.1 — Bug fix: edit trên cùng URL '/admin/shop/products/[id]'.
+      // Trước đây router.push(sameUrl) = no-op trên Next.js → setSubmitting(false)
+      // không chạy → button stuck "Đang lưu...". Giờ tách 2 flow:
       const productId = json.data?.id ?? initial?.id
-      router.push(productId ? `/admin/shop/products/${productId}` : '/admin/shop/products')
-      router.refresh()
+
+      if (mode === 'create') {
+        // Create: redirect to detail page mới
+        toast.success('Đã tạo sản phẩm')
+        router.push(productId ? `/admin/shop/products/${productId}` : '/admin/shop/products')
+      } else {
+        // Edit: stay on same page, refresh data + reset state + show toast
+        toast.success('Đã lưu thay đổi')
+        router.refresh()
+        setSubmitting(false)
+      }
     } catch {
       setError('Không thể kết nối tới máy chủ')
       setSubmitting(false)
