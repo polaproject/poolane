@@ -8,6 +8,14 @@ interface RadarChartProps {
   size?: number
 }
 
+/**
+ * RadarChart — Phase 13.2 dark mode fix:
+ *   Trước đây dùng hard-coded `rgba(28,43,74,...)` (--ink navy) + `#1C2B4A`
+ *   → invisible trong dark mode vì bg cũng dark navy.
+ *   Bây giờ dùng `currentColor` + wrapper inherit `var(--foreground)` →
+ *   tự adapt theme: navy trong light, paper trong dark.
+ *   Score dots vẫn dùng semantic colors (red/green) cho clarity.
+ */
 export function RadarChart({ skills, scores, previousScores, size = 200 }: RadarChartProps) {
   const center = size / 2
   const radius = size * 0.38
@@ -47,7 +55,7 @@ export function RadarChart({ skills, scores, previousScores, size = 200 }: Radar
   const prevPoints = previousScores ? makePolygon(previousScores) : null
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center text-foreground">
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {/* Grid */}
         {gridLevels.map(level => (
@@ -58,7 +66,8 @@ export function RadarChart({ skills, scores, previousScores, size = 200 }: Radar
               return `${p.x},${p.y}`
             }).join(' ')}
             fill="none"
-            stroke="rgba(28,43,74,0.08)"
+            stroke="currentColor"
+            strokeOpacity={0.15}
             strokeWidth={level === 5 ? 1.5 : 0.8}
           />
         ))}
@@ -71,41 +80,45 @@ export function RadarChart({ skills, scores, previousScores, size = 200 }: Radar
               key={i}
               x1={center} y1={center}
               x2={outer.x} y2={outer.y}
-              stroke="rgba(28,43,74,0.08)"
+              stroke="currentColor"
+              strokeOpacity={0.15}
               strokeWidth={0.8}
             />
           )
         })}
 
-        {/* Previous (if any) */}
+        {/* Previous (if any) — dashed teal */}
         {prevPoints && (
           <polygon
             points={prevPoints}
-            fill="rgba(91,142,159,0.08)"
-            stroke="rgba(91,142,159,0.4)"
+            fill="rgba(91,142,159,0.10)"
+            stroke="rgba(91,142,159,0.5)"
             strokeWidth={1.5}
             strokeDasharray="4 2"
           />
         )}
 
-        {/* Current */}
+        {/* Current — uses var(--accent) for brand gold polygon */}
         <polygon
           points={currentPoints}
-          fill="rgba(28,43,74,0.12)"
-          stroke="#1C2B4A"
+          fill="currentColor"
+          fillOpacity={0.18}
+          stroke="currentColor"
+          strokeOpacity={0.85}
           strokeWidth={2}
         />
 
-        {/* Score dots */}
+        {/* Score dots — semantic colors only (red/green/foreground) */}
         {skills.map((sk, i) => {
           const v = scores[sk.key] ?? 0
           if (!v) return null
           const p = getPoint(i, v)
+          const dotFill = v <= 2 ? '#EF4444' : v >= 4 ? '#22c55e' : 'currentColor'
           return (
             <circle
               key={sk.key}
               cx={p.x} cy={p.y} r={3}
-              fill={v <= 2 ? '#EF4444' : v >= 4 ? '#22c55e' : '#1C2B4A'}
+              fill={dotFill}
             />
           )
         })}
@@ -115,6 +128,7 @@ export function RadarChart({ skills, scores, previousScores, size = 200 }: Radar
           const lp = getLabelPoint(i)
           const v = scores[sk.key] ?? 0
           const shortLabel = sk.label.length > 10 ? sk.label.slice(0, 9) + '…' : sk.label
+          const isWeak = v <= 2 && v > 0
           return (
             <text
               key={sk.key}
@@ -122,13 +136,19 @@ export function RadarChart({ skills, scores, previousScores, size = 200 }: Radar
               textAnchor="middle"
               dominantBaseline="middle"
               fontSize={9}
-              fill={v <= 2 && v > 0 ? '#EF4444' : 'rgba(28,43,74,0.6)'}
+              fill={isWeak ? '#EF4444' : 'currentColor'}
+              fillOpacity={isWeak ? 1 : 0.75}
               fontFamily="Plus Jakarta Sans, sans-serif"
-              fontWeight={v <= 2 && v > 0 ? '600' : '400'}
+              fontWeight={isWeak ? 600 : 400}
             >
               {shortLabel}
               {v > 0 && (
-                <tspan fontSize={8} fill={v <= 2 ? '#EF4444' : v >= 4 ? '#22c55e' : '#1C2B4A'} dx={2}>
+                <tspan
+                  fontSize={8}
+                  fill={v <= 2 ? '#EF4444' : v >= 4 ? '#22c55e' : 'currentColor'}
+                  fillOpacity={1}
+                  dx={2}
+                >
                   {` ${v}`}
                 </tspan>
               )}
@@ -137,7 +157,7 @@ export function RadarChart({ skills, scores, previousScores, size = 200 }: Radar
         })}
 
         {/* Center dot */}
-        <circle cx={center} cy={center} r={2} fill="rgba(28,43,74,0.2)" />
+        <circle cx={center} cy={center} r={2} fill="currentColor" fillOpacity={0.35} />
       </svg>
     </div>
   )
