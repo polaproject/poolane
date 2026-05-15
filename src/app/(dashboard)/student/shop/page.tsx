@@ -141,8 +141,7 @@ export default function ShopPage() {
     <div className="min-h-screen bg-paper pb-32">
       {/* Hero */}
       <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
-        <div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">
+<div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
             <p className="eyebrow text-paper/55 mb-2">Cửa hàng · Poolane</p>
             <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Shop</h1>

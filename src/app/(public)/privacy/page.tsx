@@ -123,8 +123,7 @@ export default function PrivacyPage() {
 
         {/* Section 07 — Contact */}
         <article className="rounded-card-xl bg-ink text-paper p-6 sm:p-8 shadow-glass relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-accent/15 blur-3xl" />
-          <div className="relative flex items-start gap-4 mb-4">
+<div className="relative flex items-start gap-4 mb-4">
             <span className="lqg-headline text-3xl text-accent leading-none shrink-0">07</span>
             <h2 className="font-heading text-2xl sm:text-3xl italic leading-tight">Liên hệ</h2>
           </div>

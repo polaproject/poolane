@@ -63,7 +63,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <span className="mb-3 lqg-text-primary">
-            <PolarisStar size={56} withReflection animated glow />
+            <PolarisStar size={56} withReflection={false} animated glow={false} />
           </span>
           <h1 className="font-body font-bold text-xl tracking-[0.18em] lqg-text-primary">POOLANE</h1>
           <p className="text-xs tracking-[0.15em] uppercase mt-0.5 lqg-text-tertiary">a Pola Project</p>

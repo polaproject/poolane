@@ -58,8 +58,7 @@ export default async function PayOrderPage({ params }: Params) {
   return (
     <div className="min-h-screen bg-paper pb-12">
       <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
-        <div className="relative max-w-md mx-auto">
+<div className="relative max-w-md mx-auto">
           <Link
             href="/student/shop/orders"
             className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group"

@@ -158,8 +158,7 @@ export default function CoursesPage() {
       {/* ── TIÊU CHÍ TỐT NGHIỆP ──────────────────────────── */}
       <section className="mx-auto max-w-4xl px-4 pb-20">
         <div className="rounded-card-xl bg-ink text-paper p-8 sm:p-12 text-center shadow-glass relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-accent/15 blur-3xl" />
-          <Trophy className="relative h-8 w-8 mx-auto mb-4 text-accent" strokeWidth={1.5} />
+<Trophy className="relative h-8 w-8 mx-auto mb-4 text-accent" strokeWidth={1.5} />
           <h2 className="relative font-heading text-3xl sm:text-4xl italic mb-4">Tiêu chí tốt nghiệp</h2>
           <p className="relative text-paper/75 text-base leading-relaxed max-w-2xl mx-auto">
             Học viên cần đạt <strong className="text-paper">≥ 3/5</strong> ở mọi kỹ năng, <strong className="text-paper">≥ 4/5</strong> ở phối hợp và thở, bơi liên tục <strong className="text-paper">≥ 25m</strong> đúng kiểu, và được giáo viên xác nhận. Chưa đạt sau buổi 10? Bạn được học thêm trong giai đoạn ôn luyện — chỉ trả vé bơi, <strong className="text-paper">không tốn học phí</strong>.

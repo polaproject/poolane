@@ -84,7 +84,7 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="flex flex-col items-center mb-6">
           <span className="mb-3 lqg-text-primary">
-            <PolarisStar size={48} withReflection animated glow />
+            <PolarisStar size={48} withReflection={false} animated glow={false} />
           </span>
           <h1 className="font-body font-bold text-lg tracking-[0.18em] lqg-text-primary">
             POOLANE

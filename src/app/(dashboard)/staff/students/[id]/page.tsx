@@ -55,8 +55,7 @@ export default async function StaffStudentDetailPage({ params }: Params) {
   return (
     <div className="min-h-screen bg-paper pb-12">
       <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
-        <div className="relative max-w-4xl mx-auto">
+<div className="relative max-w-4xl mx-auto">
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
             <Link
               href="/staff/students"

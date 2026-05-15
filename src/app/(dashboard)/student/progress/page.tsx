@@ -53,9 +53,8 @@ export default async function ProgressPage() {
   return (
     <div className="min-h-screen bg-paper pb-12">
       <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-accent/15 -translate-y-1/3 translate-x-1/4 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 w-48 h-48 rounded-full bg-mist/10 translate-y-1/2 blur-3xl" />
-        <div className="relative max-w-3xl mx-auto">
+
+<div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">Tiến độ học tập</p>
           <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Hành trình của bạn</h1>
           <p className="text-sm text-paper/65 mt-3 max-w-lg">
@@ -109,8 +108,7 @@ export default async function ProgressPage() {
             <div key={enrollment.id} className="space-y-4">
               {/* Course header */}
               <div className="rounded-card-lg bg-ink text-paper p-6 relative overflow-hidden shadow-soft">
-                <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-accent/15 blur-3xl" />
-                <div className="relative flex justify-between items-start gap-4">
+<div className="relative flex justify-between items-start gap-4">
                   <div className="min-w-0">
                     <p className="eyebrow text-paper/55 mb-1">Khoá học</p>
                     <h2 className="lqg-headline text-3xl text-paper leading-tight">{enrollment.course.name}</h2>

@@ -158,8 +158,7 @@ export default async function SessionDetailPage({ params }: Params) {
     <div className="min-h-screen pb-12">
       {/* Hero */}
       <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-mist/10 -translate-y-1/3 translate-x-1/4 blur-3xl" />
-        <div className="relative max-w-5xl mx-auto">
+<div className="relative max-w-5xl mx-auto">
           <Link
             href="/admin/schedule"
             className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group"

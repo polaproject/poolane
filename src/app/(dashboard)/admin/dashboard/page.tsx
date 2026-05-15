@@ -148,9 +148,8 @@ export default async function AdminDashboard() {
         {/* Today sessions */}
         {todaySessions.length > 0 && (
           <div className="rounded-card-xl bg-ink text-paper p-6 sm:p-7 relative overflow-hidden shadow-soft">
-            <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-accent/15 blur-3xl" />
-            <div className="absolute -bottom-10 -left-5 h-32 w-32 rounded-full bg-mist/10 blur-3xl" />
-            <div className="relative">
+
+<div className="relative">
               <div className="flex items-center gap-2 mb-4">
                 <Calendar className="h-4 w-4 text-accent" strokeWidth={1.75} />
                 <p className="eyebrow text-paper/55">Buổi học hôm nay · {todaySessions.length}</p>

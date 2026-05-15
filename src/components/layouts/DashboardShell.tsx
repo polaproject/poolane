@@ -265,7 +265,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
     window.location.href = '/login'
   }
 
-  const logoSvg = <PolarisStar size={26} withReflection animated color="currentColor" />
+  const logoSvg = <PolarisStar size={26} withReflection={false} animated color="currentColor" />
 
   return (
     <div className="pola-page pola-shell">
