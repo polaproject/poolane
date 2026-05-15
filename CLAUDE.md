@@ -223,12 +223,27 @@ Theo thứ tự quan trọng (đã hoàn thành redesign sâu, giờ unblock inf
 13. **Phase 12.X — Sidebar fixed bug fix**: ✅ Root cause `.pola-nav { position: relative }` (Phase 10) silently override `.pola-sidebar { position: fixed }` qua CSS cascade. 5 fix attempts trước thất bại vì patch symptoms. Cuối cùng đào built CSS bundle (`grep -oE "\.pola-nav\s*{[^}]*}" .next/static/chunks/*.css`) tìm ra. Notion-style layout: `.pola-shell { padding-left: 16rem }` + `.pola-sidebar { position: fixed }`. Bài học → CLAUDE.md section 14.5.
 14. **Phase 12.1 — Form input auto-glass + Debugging Strategy docs**: ✅ Auto-glass cho `input-blog`/`input-pola` aliases qua base CSS rules. Tài liệu hoá Visual/CSS Bug Debugging Workflow ở section 14.5 (5-step procedure + 2 rules).
 15. **Phase 13 — Typography Discipline**: ✅ Italic Cormorant từ 204 lần dùng SAI → chỉ 1 (philosophy blockquote). Migration script `migrate-typography.mjs` context-aware (skip blockquote/greeting/blog/quote pattern) → 116 replacements/55 files. 2 utility class mới: `.lqg-headline` (sans bold 600 cho headings) + `.lqg-numeric-sans` (sans tabular 700 cho stats/currency, 7 size variants). Primitives update: `RefinedNumber` default `variant='sans'`, `PageHeader` cả 2 nhánh dùng `.lqg-headline`, `StatCard` value dùng `.lqg-numeric-sans`. Rule mới: italic CHỈ cho quote/citation, blog body, greeting message.
+16. **Phase 13.1 — Specular streak cleanup**: ✅ Phase 10 over-applied vệt sáng specular qua `.glass-card` (264 chỗ) + sidebar `.pola-nav` (18s loop) → "vương vãi" khắp app. Scope lại CSS chỉ cho `.glass-button` + `.glass-pill` (element nhỏ) + opt-in `.glass-shimmer`. Default `GlassPanel.shimmer = false`, `GlassCard.specular = false`. Sidebar specular tắt. `PublicHeader` bỏ class `lqg-specular`. 4 commit: `c36ac91`, `7b540d9`.
+17. **Phase 13.2 — Default light + mobile login**: ✅ ThemeProvider default `'dark'` → `'light'`. Bump localStorage key `poolane-theme` → `poolane-theme-v2` để force migrate user cũ (dark có visual bugs, không muốn user mắc kẹt). Bỏ legacy A/B migration. PublicHeader login button bỏ `hidden sm:inline-flex` → show mobile (compact px-2.5 text-xs). 2 commit: `105869c`, `e831be5`.
+18. **Phase 14 — Dark mode contrast boost**: ✅ Fix 4 BLOCKERS + 5 SHOULD-FIX qua CSS layer override trong `globals.css`. RadarChart hard-coded `rgba(28,43,74,...)` + `#1C2B4A` → `currentColor` adapt theme. Append 80 dòng CSS scope `.theme-dark`/`.lqg-dark` boost opacity utilities: border `/8` → 18%, `/15` → 32%; ring `/8` → 18%, `/15` → 32%; text `/30` → 55%, `/50` → 68%; bg/divide tương tự. Tailwind `@custom-variant dark` mở rộng recognize `.theme-dark + .lqg-dark + .dark` (trước chỉ `.dark` → mọi `dark:` variant trong code không hoạt động). 3 commit: `d9f6d64`, `0cc4ad2`, `326b10d`.
 
-### Còn lại trước deploy
-- **Xoá sandbox folder** (`src/app/sandbox/*`) hoặc move sang `qa/design-reference/` — owner còn polish nên defer
-- **Phase 6 Auth split-layout redesign** (login/register/forgot-password full layout với brand artwork)
+### 🟢 DEPLOY ĐÃ HOÀN TẤT (2026-05-15)
+
+- ✅ **GitHub repo**: `polaproject/poolane@master` (4 commit Phase 13.1-14)
+- ✅ **Supabase DB Singapore** (`frzqhredvgdmlwimctpy`): 44 tables + 3 courses + 1 admin (Nguyễn Ngọc Hoàng Việt — `0355553205`) + 8 FAQs
+- ✅ **Storage bucket** `poolane-public` + 4 policies (SELECT public / INSERT/UPDATE/DELETE authenticated)
+- ✅ **Vercel Pro team `pola-project`** ($20/mo) + project `poolane` + 19 env vars
+- ✅ **Production deploy** với region `sin1` (Singapore) — Fluid Compute
+- ✅ **Domain `poolane.vn` + `www.poolane.vn`** — Matbao DNS A record `216.150.1.1` + CNAME `f03179357ed4c972.vercel-dns-016.com.`
+- ✅ **SSL Let's Encrypt** apex + www, auto-renew
+- ✅ **Health check 4/4 pass**: database, auth, storage, email
+- ✅ **Security headers**: X-Content-Type-Options, X-Frame-Options SAMEORIGIN, Referrer-Policy, Permissions-Policy, HSTS
+
+### Còn lại sau deploy (owner manual)
+- **Sepay webhook save**: Owner chuẩn bị 4-tab config (Cơ bản/Tài khoản/Bảo mật/Cảnh báo) — DNS resolve được rồi, save webhook URL `https://poolane.vn/api/webhooks/sepay` + token `SEPAY_API_KEY` (Apikey auth)
+- **Smoke test 5 mục**: login 3 role, public landing, register HV thật, push notification subscribe, verify 4 cron jobs trên Vercel dashboard
+- **Phase 6 — Auth pages polish** (login/register/forgot-password redesign split-layout brand artwork — defer)
 - **Combo 3 khoá pricing** — chốt giá + implement
-- **AI tư vấn cá nhân hoá** (Claude API) — roadmap Phase 14+
 
 ### Việc đã hoàn thành lớn trong session redesign
 
