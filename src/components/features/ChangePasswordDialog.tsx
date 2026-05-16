@@ -4,7 +4,6 @@ import { useState, type ReactNode } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import { Loader2, Lock, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   trigger: ReactNode
@@ -13,23 +12,26 @@ interface Props {
 /**
  * ChangePasswordDialog — modal đổi mật khẩu self-service.
  *
+ * 3 fields: Mật khẩu hiện tại + Mật khẩu mới + Xác nhận.
+ * Server verify currentPassword khớp (qua signInWithPassword fresh client)
+ * trước khi update. Nếu sai → "Mật khẩu hiện tại không đúng".
+ *
  * Flow:
- * 1. User click trigger → modal mở
- * 2. Nhập newPassword + confirm
- * 3. Validate client (length, match)
- * 4. Supabase client `auth.updateUser({ password })` — không cần re-auth vì
- *    session hiện tại đã hợp lệ
- * 5. POST /api/auth/change-password (audit log only)
- * 6. Toast success + đóng modal
+ * 1. User nhập 3 field, validate client (length, match)
+ * 2. POST /api/auth/change-password với { currentPassword, newPassword }
+ * 3. Server verify + update + audit log
+ * 4. Toast success + đóng modal
  */
 export function ChangePasswordDialog({ trigger }: Props) {
   const [open, setOpen] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   function reset() {
+    setCurrentPassword('')
     setNewPassword('')
     setConfirm('')
     setError(null)
@@ -38,32 +40,43 @@ export function ChangePasswordDialog({ trigger }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+
+    if (!currentPassword) {
+      setError('Vui lòng nhập mật khẩu hiện tại')
+      return
+    }
     if (newPassword.length < 8) {
-      setError('Mật khẩu phải ít nhất 8 ký tự')
+      setError('Mật khẩu mới phải ít nhất 8 ký tự')
       return
     }
     if (newPassword !== confirm) {
       setError('Xác nhận không khớp')
       return
     }
+    if (newPassword === currentPassword) {
+      setError('Mật khẩu mới phải khác mật khẩu hiện tại')
+      return
+    }
 
     setSubmitting(true)
     try {
-      const supabase = createClient()
-      const { error: supaErr } = await supabase.auth.updateUser({ password: newPassword })
-      if (supaErr) {
-        setError(supaErr.message || 'Có lỗi xảy ra')
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error?.message ?? 'Có lỗi xảy ra')
         return
       }
-
-      // Ghi audit log (Supabase auth update không tự log vào DB của ta)
-      fetch('/api/auth/change-password', { method: 'POST' }).catch(() => {})
 
       toast.success('Đổi mật khẩu thành công 🎉')
       setOpen(false)
       reset()
     } catch {
-      setError('Có lỗi xảy ra. Vui lòng thử lại.')
+      setError('Không thể kết nối tới máy chủ')
     } finally {
       setSubmitting(false)
     }
@@ -87,10 +100,26 @@ export function ChangePasswordDialog({ trigger }: Props) {
           </div>
           <Dialog.Title className="lqg-headline text-xl text-foreground mb-1">Đổi mật khẩu</Dialog.Title>
           <Dialog.Description className="text-sm text-foreground/65 mb-4 leading-relaxed">
-            Nhập mật khẩu mới — tối thiểu 8 ký tự.
+            Vui lòng nhập mật khẩu hiện tại để xác minh, sau đó đặt mật khẩu mới (≥ 8 ký tự).
           </Dialog.Description>
 
           <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-foreground/55 font-semibold mb-1.5">
+                Mật khẩu hiện tại
+              </label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Mật khẩu đang dùng"
+                autoFocus
+                required
+                disabled={submitting}
+                autoComplete="current-password"
+                className="w-full px-3 h-10 text-sm rounded-card bg-paper-tint/30 ring-1 ring-foreground/15 focus:ring-accent/40 focus:outline-none transition"
+              />
+            </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-foreground/55 font-semibold mb-1.5">
                 Mật khẩu mới
@@ -100,16 +129,16 @@ export function ChangePasswordDialog({ trigger }: Props) {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="≥ 8 ký tự"
-                autoFocus
                 required
                 minLength={8}
                 disabled={submitting}
+                autoComplete="new-password"
                 className="w-full px-3 h-10 text-sm rounded-card bg-paper-tint/30 ring-1 ring-foreground/15 focus:ring-accent/40 focus:outline-none transition"
               />
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-foreground/55 font-semibold mb-1.5">
-                Xác nhận mật khẩu
+                Xác nhận mật khẩu mới
               </label>
               <input
                 type="password"
@@ -118,6 +147,7 @@ export function ChangePasswordDialog({ trigger }: Props) {
                 placeholder="Nhập lại"
                 required
                 disabled={submitting}
+                autoComplete="new-password"
                 className="w-full px-3 h-10 text-sm rounded-card bg-paper-tint/30 ring-1 ring-foreground/15 focus:ring-accent/40 focus:outline-none transition"
               />
             </div>

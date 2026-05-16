@@ -49,14 +49,7 @@ export default async function StudentProfilePage() {
       <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
 
 <div className="relative max-w-3xl mx-auto flex items-start gap-5">
-          <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-pill overflow-hidden bg-accent shrink-0 shadow-cta grid place-items-center">
-            {u.avatarUrl ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={u.avatarUrl} alt={u.fullName} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-ink lqg-headline text-3xl sm:text-4xl">{initial}</span>
-            )}
-          </div>
+          <AvatarUploader currentAvatarUrl={u.avatarUrl} fullName={u.fullName} size="lg" />
           <div className="min-w-0 flex-1">
             <p className="eyebrow text-paper/55 mb-1 font-mono normal-case tracking-[0.2em]">{student.studentCode}</p>
             <h1 className="font-heading text-3xl sm:text-4xl italic leading-tight truncate">{u.fullName}</h1>
@@ -139,34 +132,20 @@ export default async function StudentProfilePage() {
           </div>
         </Section>
 
-        {/* Account & Security — Avatar + Password (Phase 18.6) */}
+        {/* Account & Security — chỉ Password (avatar nay nằm ở hero) */}
         <Section eyebrow="Tài khoản" title="Tài khoản & Bảo mật" icon={Settings}>
-          <div className="space-y-5">
-            {/* Avatar */}
+          <div className="flex items-center justify-between gap-3 flex-wrap">
             <div>
-              <p className="text-xs uppercase tracking-wider text-foreground/55 font-semibold mb-3">Ảnh đại diện</p>
-              <AvatarUploader
-                currentAvatarUrl={u.avatarUrl}
-                fullName={u.fullName}
-              />
+              <p className="text-sm font-medium text-foreground">Mật khẩu</p>
+              <p className="text-xs text-foreground/55 mt-0.5">Đổi mật khẩu đăng nhập của bạn</p>
             </div>
-
-            <div className="border-t border-foreground/8" />
-
-            {/* Password */}
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div>
-                <p className="text-sm font-medium text-foreground">Mật khẩu</p>
-                <p className="text-xs text-foreground/55 mt-0.5">Đổi mật khẩu đăng nhập của bạn</p>
-              </div>
-              <ChangePasswordDialog
-                trigger={
-                  <button className="inline-flex items-center gap-1.5 px-4 h-10 rounded-pill ring-1 ring-foreground/15 hover:bg-foreground/5 transition text-sm cursor-pointer">
-                    <Lock className="h-4 w-4" strokeWidth={1.75} /> Đổi mật khẩu
-                  </button>
-                }
-              />
-            </div>
+            <ChangePasswordDialog
+              trigger={
+                <button className="inline-flex items-center gap-1.5 px-4 h-10 rounded-pill ring-1 ring-foreground/15 hover:bg-foreground/5 transition text-sm cursor-pointer">
+                  <Lock className="h-4 w-4" strokeWidth={1.75} /> Đổi mật khẩu
+                </button>
+              }
+            />
           </div>
         </Section>
 
