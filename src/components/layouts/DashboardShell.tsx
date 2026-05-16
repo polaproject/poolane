@@ -12,7 +12,7 @@ import {
   Star, BarChart2, Calendar, TrendingUp, Target, BookOpen,
   LogOut, Menu, X, Activity, UserCog, IdCard, HelpCircle,
   ChevronDown, ChevronRight, FileText, Video, Image as ImageIcon,
-  ReceiptText, Award, Tags, ShoppingCart, Package, Settings,
+  ReceiptText, Award, Tags, ShoppingCart, Package, Settings, Home,
 } from 'lucide-react'
 import { PolarisStar } from '@/components/brand/PolarisStar'
 import { FloatingActions } from './FloatingActions'
@@ -403,6 +403,38 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
 
         {/* Nav groups */}
         <nav className="flex-1 overflow-y-auto py-2 px-2">
+          {/* Trang chủ — top-level link cố định cho mọi role */}
+          {(() => {
+            const homeHref = userRole === 'admin'
+              ? '/admin/dashboard'
+              : userRole === 'staff'
+                ? '/staff/dashboard'
+                : '/student/dashboard'
+            const homeActive = isActive(homeHref)
+            return (
+              <Link
+                href={homeHref}
+                onClick={() => setSidebarOpen(false)}
+                className="group/nav flex items-center gap-2.5 px-3 py-2 rounded-lg mb-2 text-sm transition-all duration-200 [transition-timing-function:var(--ease-spring-soft)] hover:translate-x-1 hover:bg-[var(--pola-nav-hover)] hover:text-[var(--pola-nav-text)]"
+                style={{
+                  background: homeActive ? 'var(--pola-nav-active)' : 'transparent',
+                  color: homeActive ? 'var(--pola-nav-text)' : 'var(--pola-nav-muted)',
+                  borderLeft: homeActive ? `3px solid var(--pola-accent)` : '3px solid transparent',
+                  fontWeight: homeActive ? 600 : 500,
+                }}
+              >
+                <Home className="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover/nav:scale-110" />
+                <span className="flex-1 truncate">Trang chủ</span>
+                {homeActive && (
+                  <span
+                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                    style={{ background: 'var(--pola-accent)' }}
+                  />
+                )}
+              </Link>
+            )
+          })()}
+
           {groups.map(group => {
             const isOpen = expanded.has(group.key) || isGroupActive(group)
             const GroupIcon = group.icon
