@@ -126,7 +126,7 @@ export function NotificationFab({ open, onOpenChange }: NotificationFabProps) {
         )}
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner side="top" align="end" sideOffset={10} alignOffset={0} className="z-[60]">
+        <Popover.Positioner side="left" align="end" sideOffset={10} alignOffset={0} className="z-[60]">
           <Popover.Popup
             className="z-50 glass-panel rounded-card-lg w-[min(380px,calc(100vw-2.5rem))] max-h-[480px] flex flex-col origin-bottom-right shadow-glass overflow-hidden data-[closed]:hidden"
           >

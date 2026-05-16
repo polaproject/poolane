@@ -52,7 +52,7 @@ export function QuickAddFab({ role, open, onOpenChange }: QuickAddFabProps) {
         <Plus className="w-5 h-5" />
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner side="top" align="end" sideOffset={10} alignOffset={0} className="z-[60]">
+        <Popover.Positioner side="left" align="end" sideOffset={10} alignOffset={0} className="z-[60]">
           <Popover.Popup
             className="z-50 glass-panel rounded-card-lg p-1.5 w-[240px] origin-bottom-right shadow-glass data-[closed]:hidden"
           >
