@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ThemeSwitcher, ThemeSwitcherCompact } from '@/components/ui/ThemeSwitcher'
+import { AccountSettingsDialog } from '@/components/features/AccountSettingsDialog'
 import { Popover } from '@base-ui/react/popover'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import type { UserRole } from '@/lib/auth'
@@ -204,11 +205,13 @@ function AvatarPopoverButton({
   userInitial,
   userRole,
   userAvatarUrl,
+  userFullName,
   size = 'sm',
 }: {
   userInitial: string
   userRole: UserRole
   userAvatarUrl?: string | null
+  userFullName: string
   size?: 'sm' | 'md'
 }) {
   const [open, setOpen] = useState(false)
@@ -221,14 +224,23 @@ function AvatarPopoverButton({
     <span>{userInitial}</span>
   )
 
+  // Admin/staff: click → mở AccountSettingsDialog (đổi avatar + mật khẩu)
   if (userRole !== 'student') {
     return (
-      <div
-        className={`${dim} rounded-full flex items-center justify-center font-bold flex-shrink-0 overflow-hidden`}
-        style={{ background: 'var(--pola-accent)', color: '#000' }}
-      >
-        {avatarInner}
-      </div>
+      <AccountSettingsDialog
+        currentAvatarUrl={userAvatarUrl ?? null}
+        fullName={userFullName}
+        trigger={
+          <button
+            type="button"
+            aria-label="Cài đặt tài khoản"
+            className={`${dim} rounded-full flex items-center justify-center font-bold flex-shrink-0 overflow-hidden hover:opacity-90 transition cursor-pointer`}
+            style={{ background: 'var(--pola-accent)', color: '#000' }}
+          >
+            {avatarInner}
+          </button>
+        }
+      />
     )
   }
 
@@ -512,30 +524,42 @@ function ShellInner({ children, userRole, userFullName, userInitial, userAvatarU
           <ThemeSwitcher />
         </div>
 
-        {/* User info + icon logout (desktop only) */}
+        {/* User info + icon logout (desktop only) — click avatar/name để mở AccountSettings */}
         <div
           className="hidden lg:flex border-t px-3 py-3 items-center gap-2.5"
           style={{ borderColor: 'var(--pola-nav-active)' }}
         >
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 overflow-hidden"
-            style={{ background: 'var(--pola-accent)', color: '#000' }}
-          >
-            {userAvatarUrl ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={userAvatarUrl} alt="" className="w-full h-full object-cover" />
-            ) : (
-              userInitial
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium truncate" style={{ color: 'var(--pola-nav-text)' }}>
-              {userFullName}
-            </p>
-            <p className="text-xs capitalize" style={{ color: 'var(--pola-nav-muted)' }}>
-              {userRole === 'admin' ? 'Quản trị viên' : userRole === 'staff' ? 'Trợ lý' : 'Học viên'}
-            </p>
-          </div>
+          <AccountSettingsDialog
+            currentAvatarUrl={userAvatarUrl ?? null}
+            fullName={userFullName}
+            trigger={
+              <button
+                type="button"
+                aria-label="Cài đặt tài khoản"
+                className="flex items-center gap-2.5 flex-1 min-w-0 text-left hover:opacity-80 transition cursor-pointer"
+              >
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 overflow-hidden"
+                  style={{ background: 'var(--pola-accent)', color: '#000' }}
+                >
+                  {userAvatarUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={userAvatarUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    userInitial
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate" style={{ color: 'var(--pola-nav-text)' }}>
+                    {userFullName}
+                  </p>
+                  <p className="text-xs capitalize" style={{ color: 'var(--pola-nav-muted)' }}>
+                    {userRole === 'admin' ? 'Quản trị viên' : userRole === 'staff' ? 'Trợ lý' : 'Học viên'}
+                  </p>
+                </div>
+              </button>
+            }
+          />
           <button
             onClick={handleLogout}
             className="p-1.5 rounded-lg transition-colors hover:opacity-70"
@@ -591,7 +615,7 @@ function ShellInner({ children, userRole, userFullName, userInitial, userAvatarU
           </div>
           <div className="ml-auto flex items-center gap-1">
             <ThemeSwitcherCompact />
-            <AvatarPopoverButton userInitial={userInitial} userRole={userRole} userAvatarUrl={userAvatarUrl} size="md" />
+            <AvatarPopoverButton userInitial={userInitial} userRole={userRole} userAvatarUrl={userAvatarUrl} userFullName={userFullName} size="md" />
           </div>
         </header>
 
