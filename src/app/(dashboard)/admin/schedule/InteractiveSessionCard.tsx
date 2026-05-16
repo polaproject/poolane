@@ -1,12 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { toast } from 'sonner'
 import {
-  Users, Check, X as XIcon, AlertCircle, Loader2, ChevronRight,
-  UserMinus, ExternalLink,
+  Users, X as XIcon, AlertCircle, ChevronRight, Check,
 } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
 import { CAPACITY } from '@/config/constants'
@@ -17,9 +13,11 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
+export type RegStatus = 'pending' | 'approved' | 'waitlist' | 'withdrawn'
+
 export interface SessionRegData {
   id: string
-  status: 'pending' | 'approved' | 'waitlist'
+  status: RegStatus
   student: { id: string; fullName: string }
   course: { code: string } | null
 }
@@ -35,15 +33,21 @@ interface Props {
   session: SessionData
   cap: number
   slotLabel: string
+  /** Set regId đang chọn (managed by parent ScheduleGrid) */
+  selectedIds: Set<string>
+  onToggle: (regId: string) => void
 }
 
-export function InteractiveSessionCard({ session, cap, slotLabel }: Props) {
-  const router = useRouter()
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState<string | null>(null)
-
+/**
+ * Presentational session card với checkbox-driven multi-select.
+ * Click checkbox / row body để toggle selection.
+ * Action thực tế (Duyệt/Từ chối/Cho nghỉ/Phục hồi) do SelectionActionBar trigger
+ * — không expand inline trong card nữa.
+ */
+export function InteractiveSessionCard({ session, cap, slotLabel, selectedIds, onToggle }: Props) {
   const approved = session.registrations.filter(r => r.status === 'approved')
   const pending = session.registrations.filter(r => r.status === 'pending')
+  const withdrawn = session.registrations.filter(r => r.status === 'withdrawn')
   const isFull = approved.length >= cap
   const isLow =
     approved.length < (session.timeSlot === 'morning' ? CAPACITY.MORNING_MIN : CAPACITY.EVENING_MIN)
@@ -57,77 +61,66 @@ export function InteractiveSessionCard({ session, cap, slotLabel }: Props) {
         ? 'bg-warn/10 ring-warn/30'
         : 'bg-[var(--surface)] ring-foreground/8'
 
-  async function handleApprove(regId: string, studentName: string) {
-    setSubmitting(regId)
-    try {
-      const res = await fetch(`/api/sessions/${session.id}/registrations/${regId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'approve' }),
-      })
-      const json = await res.json()
-      if (!res.ok) {
-        toast.error(json.error?.message ?? 'Không thể duyệt')
-        return
-      }
-      toast.success(`Đã duyệt ${studentName}`)
-      setExpandedId(null)
-      router.refresh()
-    } catch {
-      toast.error('Không thể kết nối')
-    } finally {
-      setSubmitting(null)
-    }
+  function Row({ reg, variant }: { reg: SessionRegData; variant: 'approved' | 'pending' | 'withdrawn' }) {
+    const isSelected = selectedIds.has(reg.id)
+    const isWithdrawn = variant === 'withdrawn'
+    return (
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => !isCancelled && onToggle(reg.id)}
+          disabled={isCancelled}
+          aria-label={isSelected ? 'Bỏ chọn' : 'Chọn'}
+          aria-pressed={isSelected}
+          className={`grid place-items-center h-4 w-4 rounded-full border shrink-0 transition ${
+            isSelected
+              ? 'bg-accent border-accent text-ink'
+              : 'bg-transparent border-foreground/30 hover:border-accent/60'
+          } ${isCancelled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+        >
+          {isSelected && <Check className="h-2.5 w-2.5" strokeWidth={3} />}
+        </button>
+
+        <div
+          className={`grid place-items-center h-5 w-5 rounded-pill text-[9px] font-bold shrink-0 ${
+            variant === 'approved'
+              ? 'bg-mist text-paper'
+              : variant === 'pending'
+                ? 'ring-1 ring-dashed ring-accent text-accent'
+                : 'ring-1 ring-foreground/25 text-foreground/45 line-through'
+          }`}
+        >
+          {variant === 'pending' ? '?' : initials(reg.student.fullName)}
+        </div>
+
+        <span
+          className={`text-xs truncate flex-1 ${
+            isWithdrawn
+              ? 'text-foreground/40 line-through'
+              : variant === 'pending'
+                ? 'text-foreground/70 italic'
+                : 'text-foreground'
+          }`}
+        >
+          {reg.student.fullName}
+        </span>
+
+        {reg.course && variant !== 'withdrawn' && (
+          <Chip variant="neutral" className="text-[9px] px-1.5 py-0">
+            {reg.course.code}
+          </Chip>
+        )}
+        {variant === 'pending' && (
+          <span className="text-[9px] text-accent font-bold">CHỜ</span>
+        )}
+        {variant === 'withdrawn' && (
+          <span className="text-[9px] text-foreground/40 font-bold uppercase">Nghỉ</span>
+        )}
+      </div>
+    )
   }
 
-  async function handleReject(regId: string, studentName: string) {
-    setSubmitting(regId)
-    try {
-      const res = await fetch(`/api/sessions/${session.id}/registrations/${regId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'reject',
-          rejectedReason: 'teacher_decision',
-        }),
-      })
-      const json = await res.json()
-      if (!res.ok) {
-        toast.error(json.error?.message ?? 'Không thể từ chối')
-        return
-      }
-      toast.success(`Đã từ chối ${studentName}`)
-      setExpandedId(null)
-      router.refresh()
-    } catch {
-      toast.error('Không thể kết nối')
-    } finally {
-      setSubmitting(null)
-    }
-  }
-
-  async function handleWithdraw(regId: string, studentName: string) {
-    setSubmitting(regId)
-    try {
-      const res = await fetch(`/api/sessions/${session.id}/registrations/${regId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'withdraw' }),
-      })
-      const json = await res.json()
-      if (!res.ok) {
-        toast.error(json.error?.message ?? 'Không thể rút HV khỏi buổi')
-        return
-      }
-      toast.success(`Đã rút ${studentName} khỏi buổi học`)
-      setExpandedId(null)
-      router.refresh()
-    } catch {
-      toast.error('Không thể kết nối')
-    } finally {
-      setSubmitting(null)
-    }
-  }
+  const totalRegs = approved.length + pending.length + withdrawn.length
 
   return (
     <div
@@ -157,140 +150,18 @@ export function InteractiveSessionCard({ session, cap, slotLabel }: Props) {
       )}
 
       <div className="flex-1 space-y-1 min-h-0">
-        {approved.length === 0 && pending.length === 0 ? (
+        {totalRegs === 0 ? (
           <p className="text-xs text-foreground/30 italic">Chưa có HV</p>
         ) : (
           <>
-            {approved.map(r => {
-              const isExpanded = expandedId === r.id
-              const isBusy = submitting === r.id
-              return (
-                <div key={r.id}>
-                  <button
-                    type="button"
-                    onClick={() => !isCancelled && setExpandedId(isExpanded ? null : r.id)}
-                    disabled={isCancelled}
-                    className={`w-full text-left flex items-center gap-1.5 rounded-md -mx-1 px-1 py-0.5 transition ${
-                      isExpanded ? 'bg-mist/15' : 'hover:bg-foreground/5'
-                    } ${isCancelled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                  >
-                    <div className="grid place-items-center h-5 w-5 rounded-pill bg-mist text-paper text-[9px] font-bold shrink-0">
-                      {initials(r.student.fullName)}
-                    </div>
-                    <span className="text-xs text-foreground truncate flex-1">
-                      {r.student.fullName}
-                    </span>
-                    {r.course && (
-                      <Chip variant="neutral" className="text-[9px] px-1.5 py-0">
-                        {r.course.code}
-                      </Chip>
-                    )}
-                  </button>
-
-                  {isExpanded && !isCancelled && (
-                    <div className="flex items-center gap-1 mt-1 mb-1 px-1">
-                      <button
-                        type="button"
-                        onClick={() => handleWithdraw(r.id, r.student.fullName)}
-                        disabled={isBusy}
-                        title="Rút HV khỏi buổi học để mở slot cho người khác"
-                        className="flex-1 inline-flex items-center justify-center gap-1 h-7 px-2 rounded-md bg-warn/15 text-warn text-[10px] font-semibold ring-1 ring-warn/30 hover:bg-warn/25 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isBusy ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <>
-                            <UserMinus className="h-3 w-3" strokeWidth={2.25} /> Cho nghỉ buổi
-                          </>
-                        )}
-                      </button>
-                      <Link
-                        href={`/admin/students/${r.student.id}`}
-                        title={`Xem hồ sơ ${r.student.fullName}`}
-                        className="inline-flex items-center justify-center h-7 w-7 rounded-md bg-mist/10 text-mist hover:bg-mist/20 transition"
-                      >
-                        <ExternalLink className="h-3 w-3" strokeWidth={2.25} />
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => setExpandedId(null)}
-                        disabled={isBusy}
-                        aria-label="Huỷ thao tác"
-                        className="inline-flex items-center justify-center h-7 w-7 rounded-md text-foreground/55 hover:bg-foreground/10 transition disabled:opacity-50"
-                      >
-                        <XIcon className="h-3 w-3" strokeWidth={2} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-
-            {pending.map(r => {
-              const isExpanded = expandedId === r.id
-              const isBusy = submitting === r.id
-              return (
-                <div key={r.id}>
-                  <button
-                    type="button"
-                    onClick={() => !isCancelled && setExpandedId(isExpanded ? null : r.id)}
-                    disabled={isCancelled}
-                    className={`w-full text-left flex items-center gap-1.5 rounded-md -mx-1 px-1 py-0.5 transition ${
-                      isExpanded ? 'bg-accent/10' : 'hover:bg-foreground/5'
-                    } ${isCancelled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                  >
-                    <div className="grid place-items-center h-5 w-5 rounded-pill ring-1 ring-dashed ring-accent text-accent text-[9px] font-bold shrink-0">
-                      ?
-                    </div>
-                    <span className="text-xs text-foreground/70 truncate flex-1 italic">
-                      {r.student.fullName}
-                    </span>
-                    <span className="text-[9px] text-accent font-bold">CHỜ</span>
-                  </button>
-
-                  {isExpanded && !isCancelled && (
-                    <div className="flex items-center gap-1 mt-1 mb-1 px-1">
-                      <button
-                        type="button"
-                        onClick={() => handleApprove(r.id, r.student.fullName)}
-                        disabled={isBusy}
-                        className="flex-1 inline-flex items-center justify-center gap-1 h-7 px-2 rounded-md bg-success text-paper text-[10px] font-semibold hover:bg-success/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isBusy ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <>
-                            <Check className="h-3 w-3" strokeWidth={2.5} /> Duyệt
-                          </>
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleReject(r.id, r.student.fullName)}
-                        disabled={isBusy}
-                        className="flex-1 inline-flex items-center justify-center gap-1 h-7 px-2 rounded-md bg-danger/15 text-danger text-[10px] font-semibold ring-1 ring-danger/30 hover:bg-danger/25 transition disabled:opacity-50"
-                      >
-                        <XIcon className="h-3 w-3" strokeWidth={2.5} /> Từ chối
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setExpandedId(null)}
-                        disabled={isBusy}
-                        aria-label="Huỷ thao tác"
-                        className="inline-flex items-center justify-center h-7 w-7 rounded-md text-foreground/55 hover:bg-foreground/10 transition disabled:opacity-50"
-                      >
-                        <XIcon className="h-3 w-3" strokeWidth={2} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+            {approved.map(r => <Row key={r.id} reg={r} variant="approved" />)}
+            {pending.map(r => <Row key={r.id} reg={r} variant="pending" />)}
+            {withdrawn.map(r => <Row key={r.id} reg={r} variant="withdrawn" />)}
           </>
         )}
       </div>
 
-      {pending.length > 0 && expandedId === null && (
+      {pending.length > 0 && (
         <div className="text-xs text-accent mt-2 pt-2 border-t border-foreground/8 inline-flex items-center gap-1 font-medium">
           <AlertCircle className="h-3 w-3" strokeWidth={2.25} /> {pending.length} chờ duyệt
         </div>

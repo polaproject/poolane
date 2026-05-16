@@ -39,11 +39,22 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       )
     }
 
-    // Validate trạng thái hợp lệ cho từng action
+    // Validate transition: chỉ cho phép status chuyển đúng matrix
+    //   pending|waitlist → approve → approved
+    //   pending|waitlist → reject → rejected
+    //   approved → withdraw → withdrawn
+    //   withdrawn → restore → approved (cho HV đi học lại sau khi nghỉ)
     if (action === 'withdraw') {
       if (reg.status !== 'approved') {
         return NextResponse.json(
           { data: null, error: { code: 'INVALID_STATUS', message: 'Chỉ có thể rút HV đã được duyệt khỏi buổi học' } },
+          { status: 400 }
+        )
+      }
+    } else if (action === 'restore') {
+      if (reg.status !== 'withdrawn') {
+        return NextResponse.json(
+          { data: null, error: { code: 'INVALID_STATUS', message: 'Chỉ có thể phục hồi HV đã nghỉ buổi' } },
           { status: 400 }
         )
       }
@@ -54,7 +65,11 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       )
     }
 
-    const newStatus = action === 'approve' ? 'approved' : action === 'withdraw' ? 'withdrawn' : 'rejected'
+    const newStatus =
+      action === 'approve' ? 'approved'
+      : action === 'withdraw' ? 'withdrawn'
+      : action === 'restore' ? 'approved'
+      : 'rejected'
 
     const updated = await prisma.sessionRegistration.update({
       where: { id: regId },
@@ -89,6 +104,11 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         type: 'cancellation',
         title: 'Bạn đã được rút khỏi buổi học',
         body: `Lớp đã rút bạn khỏi ca ${slotLabel} ngày ${sessionDate} để mở slot cho HV khác.${rejectedReasonText ? ` Ghi chú: ${rejectedReasonText}.` : ''} Nếu cần điều chỉnh, vui lòng liên hệ lớp nhé 💙`,
+      },
+      restore: {
+        type: 'approval',
+        title: 'Bạn đã được sắp xếp lại vào buổi học 🌊',
+        body: `Lớp đã sắp xếp bạn quay lại ca ${slotLabel} ngày ${sessionDate}. Hẹn gặp bạn nhé!`,
       },
     } as const
     const notif = notifMap[action]

@@ -43,6 +43,9 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       key: 'tongquan', label: 'Tổng quan', icon: LayoutDashboard,
       items: [
         { label: 'Bảng điều khiển', href: '/admin/dashboard', icon: LayoutDashboard },
+        { label: 'AI dự báo', href: '/admin/ai', icon: Brain },
+        { label: 'Heatmap kỹ năng', href: '/admin/skill-heatmap', icon: BarChart2 },
+        { label: 'Hiệu quả giảng dạy', href: '/admin/teacher-metrics', icon: TrendingUp },
       ]
     },
     {
@@ -86,14 +89,6 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
         { label: 'Album ảnh', href: '/admin/photos', icon: ImageIcon },
         { label: 'Video bơi', href: '/admin/videos', icon: Video },
         { label: 'Thư viện bài tập', href: '/admin/exercises', icon: Award },
-      ]
-    },
-    {
-      key: 'phantich', label: 'Phân tích', icon: BarChart2,
-      items: [
-        { label: 'AI dự báo', href: '/admin/ai', icon: Brain },
-        { label: 'Heatmap kỹ năng', href: '/admin/skill-heatmap', icon: BarChart2 },
-        { label: 'Hiệu quả giảng dạy', href: '/admin/teacher-metrics', icon: TrendingUp },
       ]
     },
     {
