@@ -448,14 +448,6 @@ select.input-pola:focus {
 .ambient-bg {
   position: relative;
   background: var(--paper);
-  transition: background-color var(--motion-cinema) var(--ease-out-quart),
-              color var(--motion-slow) var(--ease-out-quart);
-}
-
-/* Smooth theme A↔B fade trên toàn page */
-html, body {
-  transition: background-color var(--motion-cinema) var(--ease-out-quart),
-              color var(--motion-slow) var(--ease-out-quart);
 }
 
 /* ═══ Phase 11 — Apple-style thin glass scrollbar ═══ */
@@ -1223,7 +1215,6 @@ html.lqg-dark {
 body.lqg-body {
   background: var(--lqg-bg-base);
   color: var(--lqg-text-primary);
-  transition: background 800ms var(--lqg-ease-soft), color 400ms var(--lqg-ease-soft);
 }
 
 /* Phase 16: bỏ .lqg-specular (Phase 12 LQG specular streak) hoàn toàn */
