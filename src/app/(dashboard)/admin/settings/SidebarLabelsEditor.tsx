@@ -1,6 +1,6 @@
 'use client'
 
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, ChevronUp, ChevronDown } from 'lucide-react'
 import type { UserRole } from '@/lib/auth'
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -14,7 +14,7 @@ const DEFAULT_LABELS: Record<UserRole, Record<string, string>> = {
   admin: {
     tongquan: 'Tổng quan', hocvien: 'Học viên', vanhanh: 'Vận hành',
     taichinh: 'Tài chính', banhang: 'Bán hàng', noidung: 'Nội dung',
-    lienlac: 'Liên lạc',
+    lienlac: 'Liên lạc', hethong: 'Hệ thống',
   },
   staff: {
     tongquan: 'Tổng quan', hocvien: 'Học viên', vanhanh: 'Vận hành',
@@ -27,32 +27,85 @@ const DEFAULT_LABELS: Record<UserRole, Record<string, string>> = {
 
 interface Props {
   groupKeys: Record<UserRole, string[]>
-  value: { admin: Record<string, string>; staff: Record<string, string>; student: Record<string, string> }
-  onChange: (role: UserRole, labels: Record<string, string>) => void
+  labels: { admin: Record<string, string>; staff: Record<string, string>; student: Record<string, string> }
+  order:  { admin: string[]; staff: string[]; student: string[] }
+  onLabelsChange: (role: UserRole, labels: Record<string, string>) => void
+  onOrderChange:  (role: UserRole, order: string[]) => void
 }
 
-export function SidebarLabelsEditor({ groupKeys, value, onChange }: Props) {
+/**
+ * Resolve hiển thị order: nếu user lưu order tuỳ chỉnh thì dùng order đó,
+ * thêm các key còn thiếu vào cuối (vd khi có nhóm mới thêm vào codebase).
+ */
+function resolveOrder(defaultKeys: string[], customOrder: string[]): string[] {
+  const known = new Set(defaultKeys)
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const k of customOrder) {
+    if (known.has(k) && !seen.has(k)) {
+      result.push(k)
+      seen.add(k)
+    }
+  }
+  for (const k of defaultKeys) {
+    if (!seen.has(k)) result.push(k)
+  }
+  return result
+}
+
+export function SidebarLabelsEditor({ groupKeys, labels, order, onLabelsChange, onOrderChange }: Props) {
   function setLabel(role: UserRole, key: string, label: string) {
-    const next = { ...value[role] }
+    const next = { ...labels[role] }
     if (label.trim()) next[key] = label.trim()
-    else delete next[key]  // empty → fall back to default
-    onChange(role, next)
+    else delete next[key]
+    onLabelsChange(role, next)
   }
 
-  function reset(role: UserRole, key: string) {
+  function resetLabel(role: UserRole, key: string) {
     setLabel(role, key, '')
   }
 
+  function move(role: UserRole, currentList: string[], index: number, dir: -1 | 1) {
+    const target = index + dir
+    if (target < 0 || target >= currentList.length) return
+    const next = [...currentList]
+    ;[next[index], next[target]] = [next[target], next[index]]
+    onOrderChange(role, next)
+  }
+
   function Section({ role }: { role: UserRole }) {
+    const resolvedOrder = resolveOrder(groupKeys[role], order[role])
     return (
       <div>
         <h3 className="lqg-headline text-base text-foreground mb-3">{ROLE_LABELS[role]}</h3>
         <div className="space-y-2">
-          {groupKeys[role].map(k => {
+          {resolvedOrder.map((k, idx) => {
             const defaultLabel = DEFAULT_LABELS[role][k] ?? k
-            const customLabel = value[role][k] ?? ''
+            const customLabel = labels[role][k] ?? ''
+            const isFirst = idx === 0
+            const isLast = idx === resolvedOrder.length - 1
             return (
               <div key={k} className="flex items-center gap-2">
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => move(role, resolvedOrder, idx, -1)}
+                    disabled={isFirst}
+                    aria-label="Đưa lên trên"
+                    className="grid place-items-center h-4 w-5 rounded hover:bg-foreground/8 transition text-foreground/60 disabled:opacity-25 disabled:cursor-not-allowed"
+                  >
+                    <ChevronUp className="h-3 w-3" strokeWidth={2.5} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => move(role, resolvedOrder, idx, 1)}
+                    disabled={isLast}
+                    aria-label="Đưa xuống dưới"
+                    className="grid place-items-center h-4 w-5 rounded hover:bg-foreground/8 transition text-foreground/60 disabled:opacity-25 disabled:cursor-not-allowed"
+                  >
+                    <ChevronDown className="h-3 w-3" strokeWidth={2.5} />
+                  </button>
+                </div>
                 <code className="text-[10px] text-foreground/40 font-mono w-16">{k}</code>
                 <input
                   type="text"
@@ -64,7 +117,7 @@ export function SidebarLabelsEditor({ groupKeys, value, onChange }: Props) {
                 {customLabel && (
                   <button
                     type="button"
-                    onClick={() => reset(role, k)}
+                    onClick={() => resetLabel(role, k)}
                     aria-label="Khôi phục mặc định"
                     title={`Mặc định: ${defaultLabel}`}
                     className="grid place-items-center h-8 w-8 rounded-md hover:bg-foreground/8 transition text-foreground/55"
@@ -83,9 +136,7 @@ export function SidebarLabelsEditor({ groupKeys, value, onChange }: Props) {
   return (
     <div className="space-y-6">
       <p className="text-sm text-foreground/65">
-        Đổi tên nhóm sidebar (vd <strong>Bán hàng</strong> → <strong>Doanh thu</strong>).
-        Để trống = dùng tên mặc định. Đổi thứ tự nhóm + xoá nhóm sẽ phát triển sau khi
-        owner xác nhận flow.
+        Đổi tên + sắp xếp thứ tự nhóm sidebar. Dùng <ChevronUp className="inline h-3 w-3" />/<ChevronDown className="inline h-3 w-3" /> để di chuyển nhóm. Để trống tên = dùng mặc định.
       </p>
       <Section role="admin" />
       <div className="border-t border-foreground/8" />

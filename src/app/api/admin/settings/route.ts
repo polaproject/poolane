@@ -39,6 +39,9 @@ const KEY_SCHEMAS: Record<SettingKey, z.ZodTypeAny> = {
   'sidebar_labels.admin':   z.record(z.string(), z.string().max(50)),
   'sidebar_labels.staff':   z.record(z.string(), z.string().max(50)),
   'sidebar_labels.student': z.record(z.string(), z.string().max(50)),
+  'sidebar_order.admin':    z.array(z.string().max(30)).max(20),
+  'sidebar_order.staff':    z.array(z.string().max(30)).max(20),
+  'sidebar_order.student':  z.array(z.string().max(30)).max(20),
 }
 
 // ─── PATCH /api/admin/settings — update 1 hoặc nhiều keys ───

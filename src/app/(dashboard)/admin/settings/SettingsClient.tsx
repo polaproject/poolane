@@ -115,12 +115,18 @@ export function SettingsClient({ initial, catalog, notifTypes, sidebarGroupKeys 
         {tab === 'sidebar' && (
           <SidebarLabelsEditor
             groupKeys={sidebarGroupKeys}
-            value={{
+            labels={{
               admin:   draft['sidebar_labels.admin'],
               staff:   draft['sidebar_labels.staff'],
               student: draft['sidebar_labels.student'],
             }}
-            onChange={(role, labels) => updateDraft(`sidebar_labels.${role}` as const, labels)}
+            order={{
+              admin:   draft['sidebar_order.admin'],
+              staff:   draft['sidebar_order.staff'],
+              student: draft['sidebar_order.student'],
+            }}
+            onLabelsChange={(role, labels) => updateDraft(`sidebar_labels.${role}` as const, labels)}
+            onOrderChange={(role, order) => updateDraft(`sidebar_order.${role}` as const, order)}
           />
         )}
         {tab === 'theme' && (

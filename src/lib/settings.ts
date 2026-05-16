@@ -54,9 +54,9 @@ export const NOTIFICATION_TYPES = [
 
 export type NotificationTypeKey = typeof NOTIFICATION_TYPES[number]['key']
 
-/** Sidebar group keys mặc định — owner có thể đổi label */
+/** Sidebar group keys mặc định — owner có thể đổi label + thứ tự */
 export const SIDEBAR_GROUP_KEYS: Record<UserRole, string[]> = {
-  admin:   ['tongquan', 'hocvien', 'vanhanh', 'taichinh', 'banhang', 'noidung', 'lienlac'],
+  admin:   ['tongquan', 'hocvien', 'vanhanh', 'taichinh', 'banhang', 'noidung', 'lienlac', 'hethong'],
   staff:   ['tongquan', 'hocvien', 'vanhanh'],
   student: ['canhan', 'hoctap', 'muctieu', 'congdong', 'muasam'],
 }
@@ -70,6 +70,11 @@ export interface SettingsMap {
   'sidebar_labels.admin':   Record<string, string>
   'sidebar_labels.staff':   Record<string, string>
   'sidebar_labels.student': Record<string, string>
+  // Order = array of group keys in desired order. Empty = use default NAV_GROUPS order.
+  // Missing keys are appended at end; unknown keys ignored.
+  'sidebar_order.admin':   string[]
+  'sidebar_order.staff':   string[]
+  'sidebar_order.student': string[]
 }
 
 export type SettingKey = keyof SettingsMap
@@ -83,6 +88,9 @@ export const SETTING_DEFAULTS: SettingsMap = {
   'sidebar_labels.admin':   {},
   'sidebar_labels.staff':   {},
   'sidebar_labels.student': {},
+  'sidebar_order.admin':   [],
+  'sidebar_order.staff':   [],
+  'sidebar_order.student': [],
 }
 
 /** Server-only: đọc setting từ DB, fallback default */

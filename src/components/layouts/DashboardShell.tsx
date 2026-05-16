@@ -209,22 +209,40 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // Admin có thể đổi label sidebar qua /admin/settings → fetch override map
+  // Admin có thể đổi label + thứ tự sidebar qua /admin/settings → fetch override
   const [labelOverrides, setLabelOverrides] = useState<Record<string, string>>({})
+  const [orderOverride, setOrderOverride] = useState<string[]>([])
   useEffect(() => {
     fetch('/api/admin/settings')
       .then(r => r.ok ? r.json() : null)
       .then(j => {
         if (!j?.data) return
-        const key = `sidebar_labels.${userRole}` as const
-        const overrides = j.data[key]
-        if (overrides && typeof overrides === 'object') setLabelOverrides(overrides)
+        const labelKey = `sidebar_labels.${userRole}` as const
+        const labels = j.data[labelKey]
+        if (labels && typeof labels === 'object') setLabelOverrides(labels)
+        const orderKey = `sidebar_order.${userRole}` as const
+        const ord = j.data[orderKey]
+        if (Array.isArray(ord)) setOrderOverride(ord)
       })
-      .catch(() => { /* not admin or fetch failed — fallback default labels */ })
+      .catch(() => { /* not admin or fetch failed — fallback default labels + order */ })
   }, [userRole])
 
-  // Phase 16.1: wrap trong useMemo để stable identity → useMemo dependencies không change mỗi render
-  const groups = useMemo(() => NAV_GROUPS[userRole] ?? [], [userRole])
+  // Apply orderOverride: keep custom order, append missing keys at end, drop unknown.
+  const groups = useMemo(() => {
+    const base = NAV_GROUPS[userRole] ?? []
+    if (orderOverride.length === 0) return base
+    const byKey = new Map(base.map(g => [g.key, g]))
+    const seen = new Set<string>()
+    const result: typeof base = []
+    for (const k of orderOverride) {
+      const g = byKey.get(k)
+      if (g && !seen.has(k)) { result.push(g); seen.add(k) }
+    }
+    for (const g of base) {
+      if (!seen.has(g.key)) result.push(g)
+    }
+    return result
+  }, [userRole, orderOverride])
   const bottomItems = useMemo(() => BOTTOM_NAV[userRole] ?? [], [userRole])
 
   // Longest-match wins: ở /admin/finance/refunds chỉ /admin/finance/refunds active,
