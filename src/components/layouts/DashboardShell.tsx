@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ThemeSwitcherCompact } from '@/components/ui/ThemeSwitcher'
+import { ThemeSwitcher, ThemeSwitcherCompact } from '@/components/ui/ThemeSwitcher'
 import { Popover } from '@base-ui/react/popover'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import type { UserRole } from '@/lib/auth'
@@ -133,6 +133,13 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
   ],
   student: [
     {
+      key: 'canhan', label: 'Cá nhân', icon: IdCard,
+      items: [
+        { label: 'Hồ sơ của tôi', href: '/student/profile', icon: IdCard },
+        { label: 'Lịch sử thanh toán', href: '/student/payments', icon: ReceiptText },
+      ]
+    },
+    {
       key: 'hoctap', label: 'Học tập', icon: Calendar,
       items: [
         { label: 'Đăng ký buổi học', href: '/student/schedule', icon: Calendar },
@@ -260,7 +267,7 @@ interface DashboardShellProps {
   userInitial: string
 }
 
-function ShellInner({ children, userRole, userInitial }: DashboardShellProps) {
+function ShellInner({ children, userRole, userFullName, userInitial }: DashboardShellProps) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -385,12 +392,6 @@ function ShellInner({ children, userRole, userInitial }: DashboardShellProps) {
               a Pola Project
             </p>
           </div>
-          {/* Desktop: ThemeSwitcherCompact + Avatar */}
-          <div className="hidden lg:flex items-center gap-1 ml-auto">
-            <ThemeSwitcherCompact />
-            <AvatarPopoverButton userInitial={userInitial} userRole={userRole} size="sm" />
-          </div>
-          {/* Mobile: close button */}
           <button
             className="ml-auto lg:hidden"
             onClick={() => setSidebarOpen(false)}
@@ -405,8 +406,10 @@ function ShellInner({ children, userRole, userInitial }: DashboardShellProps) {
           {groups.map(group => {
             const isOpen = expanded.has(group.key) || isGroupActive(group)
             const GroupIcon = group.icon
+            // Student "Cá nhân" group: chỉ hiện trên desktop. Mobile dùng avatar popover ở header.
+            const groupHidden = userRole === 'student' && group.key === 'canhan'
             return (
-              <div key={group.key} className="mb-0.5">
+              <div key={group.key} className={`mb-0.5 ${groupHidden ? 'hidden lg:block' : ''}`}>
                 {/* Group header */}
                 <button
                   onClick={() => toggleGroup(group.key)}
@@ -462,8 +465,42 @@ function ShellInner({ children, userRole, userInitial }: DashboardShellProps) {
           })}
         </nav>
 
-        {/* Logout */}
-        <div className="border-t px-3 py-3" style={{ borderColor: 'var(--pola-nav-active)' }}>
+        {/* Theme switcher (desktop only — mobile dùng ThemeSwitcherCompact ở header) */}
+        <div className="hidden lg:block border-t px-2 py-2" style={{ borderColor: 'var(--pola-nav-active)' }}>
+          <ThemeSwitcher />
+        </div>
+
+        {/* User info + icon logout (desktop only) */}
+        <div
+          className="hidden lg:flex border-t px-3 py-3 items-center gap-2.5"
+          style={{ borderColor: 'var(--pola-nav-active)' }}
+        >
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+            style={{ background: 'var(--pola-accent)', color: '#000' }}
+          >
+            {userInitial}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium truncate" style={{ color: 'var(--pola-nav-text)' }}>
+              {userFullName}
+            </p>
+            <p className="text-xs capitalize" style={{ color: 'var(--pola-nav-muted)' }}>
+              {userRole === 'admin' ? 'Quản trị viên' : userRole === 'staff' ? 'Trợ lý' : 'Học viên'}
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="p-1.5 rounded-lg transition-colors hover:opacity-70"
+            style={{ color: 'var(--pola-nav-muted)' }}
+            title="Đăng xuất"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Mobile: nút đăng xuất rõ ràng (thay user info) */}
+        <div className="lg:hidden border-t px-3 py-3" style={{ borderColor: 'var(--pola-nav-active)' }}>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-[var(--pola-nav-hover)] hover:opacity-90"
