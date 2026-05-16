@@ -725,6 +725,24 @@ select.input-pola:focus {
 .pola-sidebar.pola-nav {
   background: var(--lqg-bg-elevated) !important;
 }
+
+/* Auth pages (login/register/forgot-password): tắt backdrop-filter cho card
+ * vì iOS Safari 16.x có bug touch events trên element con khi parent có
+ * backdrop-filter (WebKit #237876, fix ở 16.4+). User iOS 16.3 không ấn
+ * được nút submit. Trade-off: mất hiệu ứng glass nhưng đảm bảo click 100%. */
+[data-auth-page] .lqg-card,
+[data-auth-page] .lqg-card-light,
+[data-auth-page] .lqg-card-medium,
+[data-auth-page] .lqg-card-heavy {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--lqg-bg-elevated) !important;
+}
+/* Mesh động cũng có thể gây vấn đề composite trên iOS cũ — tắt animation */
+[data-auth-page] .lqg-mesh-drift {
+  animation: none !important;
+}
+/* end auth-page fix */
 /* Override legacy nav vars to use LQG tokens */
 :root, html.lqg-dark {
   --pola-nav-text:   var(--lqg-text-primary);
