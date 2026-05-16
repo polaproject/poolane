@@ -5,6 +5,7 @@ import { UserPlus, Search, ArrowRight, AlertCircle, Users } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { Chip } from '@/components/ui/Chip'
+import { Avatar } from '@/components/ui/Avatar'
 
 type Variant = 'neutral' | 'accent' | 'mist' | 'success' | 'warn' | 'danger'
 const STATUS_CONFIG: Record<string, { label: string; variant: Variant }> = {
@@ -57,7 +58,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Sea
       take: pageSize,
       orderBy: { createdAt: 'desc' },
       include: {
-        user: { select: { fullName: true, phone: true, isActive: true } },
+        user: { select: { fullName: true, phone: true, isActive: true, avatarUrl: true } },
         enrollments: {
           where: { status: { in: ['active', 'extension'] } },
           include: { course: { select: { code: true, name: true } } },
@@ -161,9 +162,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Sea
                         <td className="px-5 py-3.5">
                           <Link href={`/admin/students/${student.id}`} className="block">
                             <div className="flex items-center gap-3">
-                              <div className="grid place-items-center h-9 w-9 rounded-pill bg-mist/15 text-mist lqg-headline text-sm shrink-0">
-                                {student.user.fullName.charAt(0).toUpperCase()}
-                              </div>
+                              <Avatar avatarUrl={student.user.avatarUrl} fullName={student.user.fullName} size="md" variant="mist" />
                               <div className="min-w-0">
                                 <p className="text-sm font-medium text-foreground truncate group-hover:text-accent transition">{student.user.fullName}</p>
                                 <p className="text-xs text-foreground/45 font-mono">{student.studentCode} · {student.user.phone}</p>

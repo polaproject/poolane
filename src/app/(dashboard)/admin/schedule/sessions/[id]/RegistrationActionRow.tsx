@@ -38,6 +38,7 @@ export interface RegRowData {
   studentId: string
   studentCode: string
   fullName: string
+  avatarUrl: string | null
   phone: string | null
   courseCode: string | null
   /** Vé bơi còn lại (n buổi) */
@@ -133,8 +134,13 @@ export function RegistrationActionRow({ reg, sessionId, showActions }: Props) {
     <>
       <div className="px-5 py-3.5 flex items-center gap-3 hover:bg-foreground/3 transition">
         {/* Avatar */}
-        <div className="grid place-items-center h-10 w-10 rounded-pill bg-mist text-paper text-xs font-bold shrink-0">
-          {initials}
+        <div className="h-10 w-10 rounded-pill bg-mist text-paper text-xs font-bold shrink-0 overflow-hidden grid place-items-center">
+          {reg.avatarUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={reg.avatarUrl} alt={reg.fullName} className="w-full h-full object-cover" />
+          ) : (
+            <span>{initials}</span>
+          )}
         </div>
 
         {/* Info */}

@@ -8,6 +8,7 @@ import {
 import { ABSENCE_ALERT_THRESHOLDS } from '@/config/constants'
 import { getDemoStudentIds } from '@/lib/demo-account'
 import { StatCard } from '@/components/ui/StatCard'
+import { Avatar } from '@/components/ui/Avatar'
 import { StarField } from '@/components/brand/StarField'
 import { Stagger } from '@/components/motion/Stagger'
 
@@ -67,7 +68,7 @@ export default async function AdminDashboard() {
         createdAt: { gte: sevenDaysAgo },
         id: { notIn: demoStudentIds },
       },
-      include: { user: { select: { fullName: true } } },
+      include: { user: { select: { fullName: true, avatarUrl: true } } },
       orderBy: { createdAt: 'desc' },
       take: 5,
     }),
@@ -210,9 +211,7 @@ export default async function AdminDashboard() {
                     href={`/admin/students/${s.id}`}
                     className="flex items-center px-5 py-3 hover:bg-paper-tint/40 transition group"
                   >
-                    <div className="grid place-items-center h-9 w-9 rounded-pill bg-mist/15 text-mist lqg-headline text-sm shrink-0 mr-3">
-                      {s.user.fullName.charAt(0).toUpperCase()}
-                    </div>
+                    <Avatar avatarUrl={s.user.avatarUrl} fullName={s.user.fullName} size="md" variant="mist" className="mr-3" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{s.user.fullName}</p>
                       <p className="text-xs text-foreground/45 font-mono">{s.studentCode}</p>

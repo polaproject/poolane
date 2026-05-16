@@ -5,6 +5,7 @@ import { Search, Users, AlertCircle } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { Chip } from '@/components/ui/Chip'
+import { Avatar } from '@/components/ui/Avatar'
 
 type SearchParams = Promise<{ search?: string; status?: string; page?: string }>
 
@@ -43,7 +44,7 @@ export default async function StaffStudentsPage({ searchParams }: { searchParams
       where, skip: (page - 1) * pageSize, take: pageSize,
       orderBy: { createdAt: 'desc' },
       include: {
-        user: { select: { fullName: true, phone: true } },
+        user: { select: { fullName: true, phone: true, avatarUrl: true } },
         enrollments: { where: { status: { in: ['active', 'extension'] } }, include: { course: { select: { code: true } } } },
         poolTickets: { where: { isActive: true }, orderBy: { purchasedAt: 'desc' }, take: 1, select: { sessionsUsed: true, maxSessions: true } },
       },
@@ -123,9 +124,7 @@ export default async function StaffStudentsPage({ searchParams }: { searchParams
                       <tr key={s.id} className="border-b border-foreground/5 last:border-b-0 hover:bg-paper-tint/20 transition group glass-table-row">
                         <td className="px-5 py-3.5">
                           <Link href={`/staff/students/${s.id}`} className="flex items-center gap-3">
-                            <div className="grid place-items-center h-9 w-9 rounded-pill bg-mist/15 text-mist lqg-headline text-sm shrink-0">
-                              {s.user.fullName.charAt(0).toUpperCase()}
-                            </div>
+                            <Avatar avatarUrl={s.user.avatarUrl} fullName={s.user.fullName} size="md" variant="mist" />
                             <div className="min-w-0">
                               <p className="text-sm font-medium text-foreground group-hover:text-accent transition truncate">{s.user.fullName}</p>
                               <p className="text-xs text-foreground/45 font-mono">{s.studentCode} · {s.user.phone}</p>

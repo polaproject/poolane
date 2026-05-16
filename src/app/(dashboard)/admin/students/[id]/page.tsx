@@ -82,8 +82,13 @@ export default async function StudentDetailPage({ params }: Params) {
             Danh sách học viên
           </Link>
           <div className="flex items-start gap-5">
-            <div className="grid place-items-center h-16 w-16 sm:h-20 sm:w-20 rounded-pill bg-accent text-ink lqg-headline text-3xl sm:text-4xl shrink-0 shadow-cta">
-              {initial}
+            <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-pill overflow-hidden bg-accent shrink-0 shadow-cta grid place-items-center">
+              {student.user.avatarUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={student.user.avatarUrl} alt={student.user.fullName} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-ink lqg-headline text-3xl sm:text-4xl">{initial}</span>
+              )}
             </div>
             <div className="min-w-0 flex-1">
               <p className="eyebrow text-paper/55 mb-1 font-mono normal-case tracking-[0.2em]">{student.studentCode}</p>

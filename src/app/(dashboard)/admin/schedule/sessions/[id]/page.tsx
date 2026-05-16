@@ -33,7 +33,7 @@ export default async function SessionDetailPage({ params }: Params) {
         include: {
           student: {
             include: {
-              user: { select: { fullName: true, phone: true } },
+              user: { select: { fullName: true, phone: true, avatarUrl: true } },
               poolTickets: {
                 where: { isActive: true },
                 orderBy: { purchasedAt: 'asc' },
@@ -152,6 +152,7 @@ export default async function SessionDetailPage({ params }: Params) {
       studentId: reg.student.id,
       studentCode: reg.student.studentCode,
       fullName: reg.student.user.fullName,
+      avatarUrl: reg.student.user.avatarUrl,
       phone: reg.student.user.phone,
       courseCode: reg.course?.code ?? null,
       sessionsLeft,
