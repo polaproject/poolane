@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { log } from '@/lib/logger'
+import { prisma } from '@/lib/prisma'
 
 export type UserRole = 'admin' | 'staff' | 'student'
 
@@ -25,13 +26,13 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     const jwtRole = (user.user_metadata?.role as UserRole) ?? 'student'
     const jwtFullName = (user.user_metadata?.full_name as string) ?? user.email ?? ''
 
-    // Try DB for richer data (phone, etc.) — fallback OK if fails
+    // Try Prisma for richer data — bypass RLS (Supabase JS với user JWT bị
+    // chặn vì table users có RLS enabled nhưng 0 policy)
     try {
-      const { data: profile } = await supabase
-        .from('users')
-        .select('role, full_name, phone, avatar_url')
-        .eq('id', user.id)
-        .single()
+      const profile = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { role: true, fullName: true, phone: true, avatarUrl: true },
+      })
 
       if (profile) {
         return {
@@ -39,13 +40,12 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
           email: user.email ?? '',
           phone: profile.phone,
           role: (profile.role ?? jwtRole) as UserRole,
-          fullName: profile.full_name ?? jwtFullName,
-          avatarUrl: profile.avatar_url ?? null,
+          fullName: profile.fullName ?? jwtFullName,
+          avatarUrl: profile.avatarUrl ?? null,
         }
       }
     } catch {
-      // DB query failed — dùng JWT metadata
-      log.warn('auth.getCurrentUser', 'DB query failed, using JWT metadata', { userId: user.id })
+      log.warn('auth.getCurrentUser', 'Prisma query failed, using JWT metadata', { userId: user.id })
     }
 
     // Fallback: dùng JWT metadata
