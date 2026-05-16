@@ -1,11 +1,11 @@
 'use client'
 
+import { useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import {
-  Users, X as XIcon, AlertCircle, ChevronRight, Check,
-} from 'lucide-react'
+import { Users, X as XIcon, AlertCircle } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
 import { CAPACITY } from '@/config/constants'
+import { useScheduleSelection } from './ScheduleSelectionContext'
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/)
@@ -18,7 +18,7 @@ export type RegStatus = 'pending' | 'approved' | 'waitlist' | 'withdrawn'
 export interface SessionRegData {
   id: string
   status: RegStatus
-  student: { id: string; fullName: string }
+  student: { id: string; fullName: string; avatarUrl: string | null }
   course: { code: string } | null
 }
 
@@ -32,19 +32,20 @@ export interface SessionData {
 interface Props {
   session: SessionData
   cap: number
-  slotLabel: string
-  /** Set regId đang chọn (managed by parent ScheduleGrid) */
-  selectedIds: Set<string>
-  onToggle: (regId: string) => void
 }
 
 /**
- * Presentational session card với checkbox-driven multi-select.
- * Click checkbox / row body để toggle selection.
- * Action thực tế (Duyệt/Từ chối/Cho nghỉ/Phục hồi) do SelectionActionBar trigger
- * — không expand inline trong card nữa.
+ * Session card với selection theo Context.
+ * Row HV: button toàn dòng. Click → toggle selection. Shift+click → range
+ * select. Avatar img + tên 1 dòng truncate. Border accent khi selected.
+ *
+ * Card header rút gọn: chỉ Chip capacity (X/Y) + chip border "Chi tiết →"
+ * link tới session detail. Bỏ slotLabel "5:30/18:00" (đã có trong header
+ * grid "Ca sáng · 5:30 – 7:30").
  */
-export function InteractiveSessionCard({ session, cap, slotLabel, selectedIds, onToggle }: Props) {
+export function InteractiveSessionCard({ session, cap }: Props) {
+  const { selectedIds, toggle, toggleRange, registerLookup } = useScheduleSelection()
+
   const approved = session.registrations.filter(r => r.status === 'approved')
   const pending = session.registrations.filter(r => r.status === 'pending')
   const withdrawn = session.registrations.filter(r => r.status === 'withdrawn')
@@ -52,6 +53,23 @@ export function InteractiveSessionCard({ session, cap, slotLabel, selectedIds, o
   const isLow =
     approved.length < (session.timeSlot === 'morning' ? CAPACITY.MORNING_MIN : CAPACITY.EVENING_MIN)
   const isCancelled = session.status === 'cancelled'
+
+  // Đăng ký regs vào context lookup khi mount/update (cho range select +
+  // bulk action handler trong header biết status từng reg)
+  useEffect(() => {
+    registerLookup(session.registrations.map(r => ({
+      id: r.id,
+      sessionId: session.id,
+      status: r.status,
+      fullName: r.student.fullName,
+    })))
+  }, [session, registerLookup])
+
+  // orderedIds = display order (approved → pending → withdrawn) cho range select
+  const orderedIds = useMemo(
+    () => [...approved, ...pending, ...withdrawn].map(r => r.id),
+    [approved, pending, withdrawn]
+  )
 
   const tone = isCancelled
     ? 'bg-danger/8 ring-danger/30'
@@ -64,38 +82,43 @@ export function InteractiveSessionCard({ session, cap, slotLabel, selectedIds, o
   function Row({ reg, variant }: { reg: SessionRegData; variant: 'approved' | 'pending' | 'withdrawn' }) {
     const isSelected = selectedIds.has(reg.id)
     const isWithdrawn = variant === 'withdrawn'
-    return (
-      <div className="flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={() => !isCancelled && onToggle(reg.id)}
-          disabled={isCancelled}
-          aria-label={isSelected ? 'Bỏ chọn' : 'Chọn'}
-          aria-pressed={isSelected}
-          className={`grid place-items-center h-4 w-4 rounded-full border shrink-0 transition ${
-            isSelected
-              ? 'bg-accent border-accent text-ink'
-              : 'bg-transparent border-foreground/30 hover:border-accent/60'
-          } ${isCancelled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
-        >
-          {isSelected && <Check className="h-2.5 w-2.5" strokeWidth={3} />}
-        </button>
 
-        <div
-          className={`grid place-items-center h-5 w-5 rounded-pill text-[9px] font-bold shrink-0 ${
-            variant === 'approved'
-              ? 'bg-mist text-paper'
-              : variant === 'pending'
-                ? 'ring-1 ring-dashed ring-accent text-accent'
-                : 'ring-1 ring-foreground/25 text-foreground/45 line-through'
-          }`}
-        >
-          {variant === 'pending' ? '?' : initials(reg.student.fullName)}
+    function handleClick(e: React.MouseEvent) {
+      if (isCancelled) return
+      if (e.shiftKey) toggleRange(reg.id, orderedIds)
+      else toggle(reg.id)
+    }
+
+    return (
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={isCancelled}
+        aria-pressed={isSelected}
+        className={`w-full flex items-center gap-1.5 px-1.5 py-1 rounded-card text-left transition-all ring-1 ${
+          isSelected
+            ? 'ring-2 ring-accent bg-accent/10'
+            : 'ring-transparent hover:ring-foreground/15 hover:bg-foreground/3'
+        } ${isCancelled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+      >
+        {/* Avatar */}
+        <div className={`h-6 w-6 rounded-pill overflow-hidden shrink-0 grid place-items-center bg-paper-tint ${
+          variant === 'pending' ? 'ring-1 ring-dashed ring-accent' : 'ring-1 ring-foreground/15'
+        } ${isWithdrawn ? 'opacity-50' : ''}`}>
+          {reg.student.avatarUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={reg.student.avatarUrl} alt={reg.student.fullName} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-[9px] font-bold text-foreground/70">
+              {initials(reg.student.fullName)}
+            </span>
+          )}
         </div>
 
+        {/* Tên 1 dòng truncate */}
         <span
           title={reg.student.fullName}
-          className={`text-xs flex-1 min-w-0 leading-tight break-words ${
+          className={`text-xs flex-1 min-w-0 truncate ${
             isWithdrawn
               ? 'text-foreground/40 line-through'
               : variant === 'pending'
@@ -106,18 +129,17 @@ export function InteractiveSessionCard({ session, cap, slotLabel, selectedIds, o
           {reg.student.fullName}
         </span>
 
+        {/* Course chip + status indicator */}
         {reg.course && variant !== 'withdrawn' && (
-          <Chip variant="neutral" className="text-[9px] px-1.5 py-0 shrink-0">
-            {reg.course.code}
-          </Chip>
+          <Chip variant="neutral" className="text-[9px] px-1.5 py-0 shrink-0">{reg.course.code}</Chip>
         )}
         {variant === 'pending' && (
-          <span className="text-[9px] text-accent font-bold">CHỜ</span>
+          <span className="text-[9px] text-accent font-bold shrink-0">CHỜ</span>
         )}
         {variant === 'withdrawn' && (
-          <span className="text-[9px] text-foreground/40 font-bold uppercase">Nghỉ</span>
+          <span className="text-[9px] text-foreground/40 font-bold uppercase shrink-0">Nghỉ</span>
         )}
-      </div>
+      </button>
     )
   }
 
@@ -127,21 +149,17 @@ export function InteractiveSessionCard({ session, cap, slotLabel, selectedIds, o
     <div
       className={`rounded-card p-3 ring-1 hover:-translate-y-0.5 hover:shadow-soft transition-all min-h-[180px] flex flex-col ${tone}`}
     >
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-foreground/65">{slotLabel}</span>
-        <div className="flex items-center gap-1.5">
-          <Chip variant={isFull ? 'mist' : isLow ? 'warn' : 'neutral'} className="text-[10px]">
-            <Users className="h-2.5 w-2.5" strokeWidth={2.25} /> {approved.length}/{cap}
-          </Chip>
-          <Link
-            href={`/admin/schedule/sessions/${session.id}`}
-            aria-label="Xem chi tiết buổi"
-            title="Chi tiết"
-            className="grid place-items-center h-5 w-5 rounded-pill hover:bg-foreground/10 transition"
-          >
-            <ChevronRight className="h-3 w-3 text-foreground/50" strokeWidth={2} />
-          </Link>
-        </div>
+      {/* Header rút gọn — chỉ capacity + "Chi tiết →" chip border */}
+      <div className="flex items-center justify-between mb-2 gap-1.5">
+        <Chip variant={isFull ? 'mist' : isLow ? 'warn' : 'neutral'} className="text-[10px]">
+          <Users className="h-2.5 w-2.5" strokeWidth={2.25} /> {approved.length}/{cap}
+        </Chip>
+        <Link
+          href={`/admin/schedule/sessions/${session.id}`}
+          className="inline-flex items-center gap-0.5 px-2 h-5 rounded-pill ring-1 ring-foreground/15 text-[10px] font-medium text-foreground/70 hover:bg-foreground/5 hover:ring-foreground/25 transition shrink-0"
+        >
+          Chi tiết →
+        </Link>
       </div>
 
       {isCancelled && (
