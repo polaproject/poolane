@@ -721,6 +721,10 @@ select.input-pola:focus {
               color 400ms var(--lqg-ease-soft),
               border-color 400ms var(--lqg-ease-soft);
 }
+/* Sidebar dày hơn glass thường — owner: text khó đọc khi quá trong */
+.pola-sidebar.pola-nav {
+  background: var(--lqg-bg-elevated) !important;
+}
 /* Override legacy nav vars to use LQG tokens */
 :root, html.lqg-dark {
   --pola-nav-text:   var(--lqg-text-primary);
