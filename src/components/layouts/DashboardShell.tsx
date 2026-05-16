@@ -15,7 +15,14 @@ import {
 } from 'lucide-react'
 import { PolarisStar } from '@/components/brand/PolarisStar'
 import { FloatingActions } from './FloatingActions'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useLayoutEffect, useMemo } from 'react'
+
+/**
+ * useLayoutEffect chạy SYNC sau DOM mutation, TRƯỚC browser paint → tránh
+ * FOUC khi state derived từ localStorage. useEffect chạy sau paint = flash.
+ * SSR không có window → fallback useEffect (no-op trong server, không warn).
+ */
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 interface NavItem {
   label: string
@@ -225,10 +232,12 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
     return group.items.some(i => isActive(i.href))
   }
 
-  // expanded groups: persist via localStorage; default mở group đang active
+  // expanded groups: persist via localStorage; default mở group đang active.
+  // useIsomorphicLayoutEffect đọc localStorage SYNC trước paint → tránh
+  // FOUC flicker khi groups expand muộn sau hard refresh.
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     let initial: Set<string>
     try {
       const raw = localStorage.getItem('pola.sidebarExpanded')
@@ -241,7 +250,6 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
       if (isGroupActive(g)) initial.add(g.key)
     }
     setExpanded(initial)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, userRole])
 
   function toggleGroup(key: string) {
