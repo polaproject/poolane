@@ -33,9 +33,6 @@ export function FloatingActions({ role, hidden = false }: FloatingActionsProps) 
   const onNotifChange = useCallback((open: boolean) => setOpenPanel(open ? 'notif' : null), [])
   const onAddChange = useCallback((open: boolean) => setOpenPanel(open ? 'add' : null), [])
 
-  /** Chiều cao cart sticky bar nếu đang hiện diện (`/student/shop`) — override baseline */
-  const [cartHeight, setCartHeight] = useState(0)
-
   /** Admin-configured settings (Quick Add items + notification filter) */
   const [settings, setSettings] = useState<PublicSettings | null>(null)
   useEffect(() => {
@@ -45,25 +42,11 @@ export function FloatingActions({ role, hidden = false }: FloatingActionsProps) 
       .catch(() => { /* silent — fallback default trong child component */ })
   }, [])
 
-  useEffect(() => {
-    function measure() {
-      const cart = document.querySelector('[data-shop-cart-bar]') as HTMLElement | null
-      setCartHeight(cart ? cart.getBoundingClientRect().height : 0)
-    }
-    measure()
-    const obs = new MutationObserver(measure)
-    obs.observe(document.body, { childList: true, subtree: true, attributes: true })
-    window.addEventListener('resize', measure)
-    return () => {
-      obs.disconnect()
-      window.removeEventListener('resize', measure)
-    }
-  }, [])
-
-  // Cart bar thay thế bottom-nav clearance (cùng vị trí bottom-0). Khi cart hiện:
-  // baseline = cart.height + 12. Khi không cart: baseline = 64 mobile / 0 desktop (bottom-nav).
-  const mobileBase = cartHeight > 0 ? `${cartHeight + 12}px` : '64px'
-  const desktopBase = cartHeight > 0 ? `${cartHeight + 12}px` : '0px'
+  // Phase 18.13: cart bar nay ngang hàng FAB+ (right padding chừa chỗ FAB)
+  // → FAB KHÔNG cần push up khi cart hiện. Giữ baseline ổn định:
+  // mobile = 64px (bottom-nav clearance), desktop = 0.
+  const mobileBase = '64px'
+  const desktopBase = '0px'
 
   return (
     <div

@@ -318,21 +318,28 @@ export default function ShopPage() {
         onRemove={removeFromCart}
       />
 
-      {/* Fixed cart bar bottom — tap để mở CartDrawer */}
+      {/* Fixed cart bar — đặt ngang hàng FAB+ (right padding chừa chỗ FAB).
+       * Mobile: bottom = bottom-nav(64) + gap(20) = 5.25rem
+       * Desktop: bottom = gap(20) = 1.25rem (không có bottom-nav)
+       * Right padding: FAB right-offset(20) + FAB width(52) + gap(12) = 5.25rem
+       * → khoảng cách cart-bar↔FAB+ = 12px = FAB+ ↔ FAB Bell vertical gap
+       */}
       {cartItems.length > 0 && (
         <button
           type="button"
           data-shop-cart-bar
           onClick={() => setCartDrawerOpen(true)}
-          className="fixed bottom-0 inset-x-0 z-30 p-4 max-w-3xl mx-auto block"
+          className="fixed left-0 right-0 z-30 px-4 pr-[5.25rem] max-w-3xl mx-auto block
+                     bottom-[calc(64px+1.25rem+env(safe-area-inset-bottom,0px))]
+                     lg:bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))]"
         >
-          <div className="rounded-card-xl bg-ink text-paper p-3 px-4 shadow-glass ring-1 ring-paper/12 flex items-center gap-3 hover:bg-foreground/95 transition cursor-pointer">
+          <div className="rounded-card-xl bg-ink text-paper py-2.5 px-4 shadow-glass ring-1 ring-paper/12 flex items-center gap-3 hover:bg-foreground/95 transition cursor-pointer">
             <div className="grid place-items-center h-9 w-9 rounded-pill bg-accent/20 shrink-0">
               <ShoppingCart className="h-4 w-4 text-accent" strokeWidth={2} />
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-xs text-paper/65">{cartItems.length} sản phẩm · Bấm để xem giỏ</p>
-              <p className="lqg-numeric-sans text-xl text-paper font-bold leading-none mt-0.5">{fmt(cartTotal)}</p>
+              <p className="text-[10px] text-paper/65 leading-tight">{cartItems.length} sản phẩm · Bấm để xem giỏ</p>
+              <p className="lqg-numeric-sans text-lg text-paper font-bold leading-none mt-0.5">{fmt(cartTotal)}</p>
             </div>
             <ChevronUp className="h-5 w-5 text-paper/65 shrink-0" strokeWidth={2.25} />
           </div>
