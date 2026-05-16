@@ -61,6 +61,9 @@ export const SIDEBAR_GROUP_KEYS: Record<UserRole, string[]> = {
   student: ['canhan', 'hoctap', 'muctieu', 'congdong', 'muasam'],
 }
 
+/** Format styles cho dashboard (Phase 17) */
+export type AmountStyleSetting = 'vn_full' | 'vn_compact' | 'no_symbol' | 'us'
+
 /** Map key → typed value */
 export interface SettingsMap {
   'quick_add.admin':   QuickAddItemKey[]
@@ -75,6 +78,10 @@ export interface SettingsMap {
   'sidebar_order.admin':   string[]
   'sidebar_order.staff':   string[]
   'sidebar_order.student': string[]
+  // Format defaults cho dashboard widgets (per-widget có thể override)
+  'format.amount_style':       AmountStyleSetting
+  'format.percent_decimals':   number  // 0 | 1 | 2
+  'format.thousand_separator': '.' | ','
 }
 
 export type SettingKey = keyof SettingsMap
@@ -91,6 +98,9 @@ export const SETTING_DEFAULTS: SettingsMap = {
   'sidebar_order.admin':   [],
   'sidebar_order.staff':   [],
   'sidebar_order.student': [],
+  'format.amount_style':       'vn_full',
+  'format.percent_decimals':   1,
+  'format.thousand_separator': '.',
 }
 
 /** Server-only: đọc setting từ DB, fallback default */

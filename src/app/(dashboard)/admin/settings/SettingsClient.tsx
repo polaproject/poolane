@@ -2,17 +2,18 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Loader2, Save, Zap, Bell, LayoutDashboard, Palette } from 'lucide-react'
+import { Loader2, Save, Zap, Bell, LayoutDashboard, Palette, Hash } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
 import type {
-  SettingsMap, QuickAddCatalogItem, NotificationTypeKey, QuickAddItemKey,
+  SettingsMap, QuickAddCatalogItem, NotificationTypeKey, QuickAddItemKey, AmountStyleSetting,
 } from '@/lib/settings'
 import type { UserRole } from '@/lib/auth'
 import { QuickAddEditor } from './QuickAddEditor'
 import { NotificationFilterEditor } from './NotificationFilterEditor'
 import { SidebarLabelsEditor } from './SidebarLabelsEditor'
+import { FormatEditor } from './FormatEditor'
 
-type Tab = 'quick_add' | 'notif_filter' | 'sidebar' | 'theme'
+type Tab = 'quick_add' | 'notif_filter' | 'sidebar' | 'format' | 'theme'
 
 interface NotifType { key: string; label: string; emoji: string }
 
@@ -75,6 +76,7 @@ export function SettingsClient({ initial, catalog, notifTypes, sidebarGroupKeys 
     { id: 'quick_add',   label: 'Thao tác nhanh', icon: Zap },
     { id: 'notif_filter', label: 'Lọc thông báo', icon: Bell },
     { id: 'sidebar',      label: 'Sidebar',        icon: LayoutDashboard },
+    { id: 'format',       label: 'Định dạng số',   icon: Hash },
     { id: 'theme',        label: 'Bộ màu',         icon: Palette },
   ]
 
@@ -127,6 +129,18 @@ export function SettingsClient({ initial, catalog, notifTypes, sidebarGroupKeys 
             }}
             onLabelsChange={(role, labels) => updateDraft(`sidebar_labels.${role}` as const, labels)}
             onOrderChange={(role, order) => updateDraft(`sidebar_order.${role}` as const, order)}
+          />
+        )}
+        {tab === 'format' && (
+          <FormatEditor
+            amountStyle={draft['format.amount_style']}
+            percentDecimals={draft['format.percent_decimals']}
+            thousandSeparator={draft['format.thousand_separator']}
+            onChange={(key, value) => {
+              if (key === 'format.amount_style') updateDraft(key, value as AmountStyleSetting)
+              else if (key === 'format.percent_decimals') updateDraft(key, value as number)
+              else updateDraft(key, value as '.' | ',')
+            }}
           />
         )}
         {tab === 'theme' && (

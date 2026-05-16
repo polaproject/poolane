@@ -42,6 +42,9 @@ const KEY_SCHEMAS: Record<SettingKey, z.ZodTypeAny> = {
   'sidebar_order.admin':    z.array(z.string().max(30)).max(20),
   'sidebar_order.staff':    z.array(z.string().max(30)).max(20),
   'sidebar_order.student':  z.array(z.string().max(30)).max(20),
+  'format.amount_style':       z.enum(['vn_full', 'vn_compact', 'no_symbol', 'us']),
+  'format.percent_decimals':   z.number().int().min(0).max(4),
+  'format.thousand_separator': z.enum(['.', ',']),
 }
 
 // ─── PATCH /api/admin/settings — update 1 hoặc nhiều keys ───

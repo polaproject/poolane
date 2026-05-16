@@ -1077,3 +1077,52 @@ model SystemSetting {
 
   @@map("system_settings")
 }
+
+// ────────────────────────────────────────────────────────────
+// Dashboard BI Tool (Phase 17)
+// Mini-Metabase trong app — admin tự build pivot/chart từ visual UI
+// ────────────────────────────────────────────────────────────
+
+enum WidgetType {
+  pivot
+  chart
+  heatmap
+  kpi
+}
+
+model Dashboard {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  ownerId     String   @map("owner_id")
+  name        String
+  description String?
+  isHome      Boolean  @default(false) @map("is_home")
+  layout      Json     @default("[]")           // [{ id, x, y, w, h }]
+  slicers     Json     @default("[]")           // [{ field, op, value }]
+  timeRange   Json     @default("{}") @map("time_range") // { preset, from?, to?, compare? }
+
+  widgets DashboardWidget[]
+
+  @@unique([ownerId, name])
+  @@index([ownerId])
+  @@map("dashboards")
+}
+
+model DashboardWidget {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  dashboardId String     @map("dashboard_id")
+  dashboard   Dashboard  @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+
+  title    String
+  type     WidgetType
+  config   Json
+  position Json   @default("{}")   // { x, y, w, h }
+
+  @@index([dashboardId])
+  @@map("dashboard_widgets")
+}
