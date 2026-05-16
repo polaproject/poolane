@@ -12,7 +12,7 @@ export const registerSessionSchema = z.object({
 })
 
 export const approveRegistrationSchema = z.object({
-  action: z.enum(['approve', 'reject']),
+  action: z.enum(['approve', 'reject', 'withdraw']),
   rejectedReason: z.enum(['capacity_full', 'skill_mismatch', 'teacher_decision', 'other']).optional(),
   rejectedReasonText: z.string().max(300).optional(),
 })

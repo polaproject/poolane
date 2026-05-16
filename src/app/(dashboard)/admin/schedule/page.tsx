@@ -187,7 +187,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
           <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-pill bg-mist" /> Đủ chỗ</span>
           <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-pill bg-accent" /> Có chờ duyệt</span>
           <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-pill bg-danger" /> Đã huỷ</span>
-          <span className="ml-auto opacity-65">Click vào HV chờ duyệt để Duyệt / Từ chối trực tiếp</span>
+          <span className="ml-auto opacity-65">Click vào HV: chờ duyệt → Duyệt/Từ chối · đã duyệt → Cho nghỉ buổi/Xem hồ sơ</span>
         </div>
       </div>
     </div>

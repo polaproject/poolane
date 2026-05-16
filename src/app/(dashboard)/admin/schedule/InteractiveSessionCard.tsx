@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 import {
   Users, Check, X as XIcon, AlertCircle, Loader2, ChevronRight,
+  UserMinus, ExternalLink,
 } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
 import { CAPACITY } from '@/config/constants'
@@ -105,6 +106,29 @@ export function InteractiveSessionCard({ session, cap, slotLabel }: Props) {
     }
   }
 
+  async function handleWithdraw(regId: string, studentName: string) {
+    setSubmitting(regId)
+    try {
+      const res = await fetch(`/api/sessions/${session.id}/registrations/${regId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'withdraw' }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        toast.error(json.error?.message ?? 'Không thể rút HV khỏi buổi')
+        return
+      }
+      toast.success(`Đã rút ${studentName} khỏi buổi học`)
+      setExpandedId(null)
+      router.refresh()
+    } catch {
+      toast.error('Không thể kết nối')
+    } finally {
+      setSubmitting(null)
+    }
+  }
+
   return (
     <div
       className={`rounded-card p-3 ring-1 hover:-translate-y-0.5 hover:shadow-soft transition-all min-h-[180px] flex flex-col ${tone}`}
@@ -137,26 +161,70 @@ export function InteractiveSessionCard({ session, cap, slotLabel }: Props) {
           <p className="text-xs text-foreground/30 italic">Chưa có HV</p>
         ) : (
           <>
-            {approved.map(r => (
-              <Link
-                key={r.id}
-                href={`/admin/students/${r.student.id}`}
-                title={`Xem hồ sơ ${r.student.fullName}`}
-                className="flex items-center gap-1.5 rounded-md hover:bg-foreground/5 -mx-1 px-1 py-0.5 transition"
-              >
-                <div className="grid place-items-center h-5 w-5 rounded-pill bg-mist text-paper text-[9px] font-bold shrink-0">
-                  {initials(r.student.fullName)}
+            {approved.map(r => {
+              const isExpanded = expandedId === r.id
+              const isBusy = submitting === r.id
+              return (
+                <div key={r.id}>
+                  <button
+                    type="button"
+                    onClick={() => !isCancelled && setExpandedId(isExpanded ? null : r.id)}
+                    disabled={isCancelled}
+                    className={`w-full text-left flex items-center gap-1.5 rounded-md -mx-1 px-1 py-0.5 transition ${
+                      isExpanded ? 'bg-mist/15' : 'hover:bg-foreground/5'
+                    } ${isCancelled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  >
+                    <div className="grid place-items-center h-5 w-5 rounded-pill bg-mist text-paper text-[9px] font-bold shrink-0">
+                      {initials(r.student.fullName)}
+                    </div>
+                    <span className="text-xs text-foreground truncate flex-1">
+                      {r.student.fullName}
+                    </span>
+                    {r.course && (
+                      <Chip variant="neutral" className="text-[9px] px-1.5 py-0">
+                        {r.course.code}
+                      </Chip>
+                    )}
+                  </button>
+
+                  {isExpanded && !isCancelled && (
+                    <div className="flex items-center gap-1 mt-1 mb-1 px-1">
+                      <button
+                        type="button"
+                        onClick={() => handleWithdraw(r.id, r.student.fullName)}
+                        disabled={isBusy}
+                        title="Rút HV khỏi buổi học để mở slot cho người khác"
+                        className="flex-1 inline-flex items-center justify-center gap-1 h-7 px-2 rounded-md bg-warn/15 text-warn text-[10px] font-semibold ring-1 ring-warn/30 hover:bg-warn/25 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isBusy ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <>
+                            <UserMinus className="h-3 w-3" strokeWidth={2.25} /> Cho nghỉ buổi
+                          </>
+                        )}
+                      </button>
+                      <Link
+                        href={`/admin/students/${r.student.id}`}
+                        title={`Xem hồ sơ ${r.student.fullName}`}
+                        className="inline-flex items-center justify-center h-7 w-7 rounded-md bg-mist/10 text-mist hover:bg-mist/20 transition"
+                      >
+                        <ExternalLink className="h-3 w-3" strokeWidth={2.25} />
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => setExpandedId(null)}
+                        disabled={isBusy}
+                        aria-label="Huỷ thao tác"
+                        className="inline-flex items-center justify-center h-7 w-7 rounded-md text-foreground/55 hover:bg-foreground/10 transition disabled:opacity-50"
+                      >
+                        <XIcon className="h-3 w-3" strokeWidth={2} />
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <span className="text-xs text-foreground truncate flex-1">
-                  {r.student.fullName}
-                </span>
-                {r.course && (
-                  <Chip variant="neutral" className="text-[9px] px-1.5 py-0">
-                    {r.course.code}
-                  </Chip>
-                )}
-              </Link>
-            ))}
+              )
+            })}
 
             {pending.map(r => {
               const isExpanded = expandedId === r.id
