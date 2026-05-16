@@ -1,8 +1,15 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
-import { X, Loader2, Save, Plus, Trash2, BarChart, Table, Grid3X3, Hash } from 'lucide-react'
+import {
+  X, Loader2, Save, Plus, Trash2, BarChart, Table, Grid3X3, Hash,
+  GripVertical, Search, ChevronRight, ChevronDown,
+} from 'lucide-react'
+import {
+  DndContext, DragOverlay, useDroppable, useDraggable,
+  pointerWithin, type DragEndEvent, type DragStartEvent,
+} from '@dnd-kit/core'
 import type {
   WidgetConfig, WidgetType, TimeRange, PivotField, PivotValue, PivotFilter,
   AggregationOp, FilterOp, ChartSubtype, DateGranularity,
@@ -12,6 +19,7 @@ import type { GlobalFormatSettings } from '@/lib/dashboard/format'
 import type { TableMeta, ColumnMeta } from '@/lib/dashboard/schema-registry'
 import { WidgetRenderer } from '@/components/dashboard/widgets/WidgetRenderer'
 
+// ─── Types ───
 interface WidgetData {
   id: string
   title: string
@@ -29,6 +37,17 @@ interface Props {
   onSaved: (widget: WidgetData) => void
 }
 
+type ZoneId = 'rows' | 'columns' | 'values' | 'filters'
+
+interface DragData {
+  source: 'picker' | ZoneId
+  table: string
+  column: string
+  /** Khi drag từ zone — index trong zone đó để di chuyển */
+  fromIndex?: number
+}
+
+// ─── Constants ───
 const AGG_LABELS: Record<AggregationOp, string> = {
   sum: 'Tổng',
   count: 'Đếm',
@@ -61,11 +80,11 @@ const CHART_SUBTYPES: Array<{ value: ChartSubtype; label: string }> = [
 ]
 
 const DATE_GRANS: Array<{ value: DateGranularity; label: string }> = [
-  { value: 'day',     label: 'Theo ngày' },
-  { value: 'week',    label: 'Theo tuần' },
-  { value: 'month',   label: 'Theo tháng' },
-  { value: 'quarter', label: 'Theo quý' },
-  { value: 'year',    label: 'Theo năm' },
+  { value: 'day',     label: 'Ngày' },
+  { value: 'week',    label: 'Tuần' },
+  { value: 'month',   label: 'Tháng' },
+  { value: 'quarter', label: 'Quý' },
+  { value: 'year',    label: 'Năm' },
 ]
 
 function emptyConfig(): WidgetConfig {
@@ -82,6 +101,13 @@ function emptyConfig(): WidgetConfig {
   }
 }
 
+function defaultAgg(col: ColumnMeta | undefined): AggregationOp {
+  if (!col) return 'count'
+  if (col.defaultAggregation) return col.defaultAggregation
+  return col.type === 'number' ? 'sum' : 'count'
+}
+
+// ─── Main component ───
 export function WidgetBuilderModal({ dashboardId, initial, timeRange, globalFormat, onClose, onSaved }: Props) {
   const [title, setTitle] = useState(initial?.title ?? 'Widget mới')
   const [config, setConfig] = useState<WidgetConfig>(initial?.config ?? emptyConfig())
@@ -90,8 +116,8 @@ export function WidgetBuilderModal({ dashboardId, initial, timeRange, globalForm
   const [previewLoading, setPreviewLoading] = useState(false)
   const [previewError, setPreviewError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [activeDrag, setActiveDrag] = useState<DragData | null>(null)
 
-  // Fetch schema once
   useEffect(() => {
     fetch('/api/admin/dashboards/schema')
       .then(r => r.json())
@@ -101,9 +127,16 @@ export function WidgetBuilderModal({ dashboardId, initial, timeRange, globalForm
 
   const rootTableMeta = useMemo(() => schema?.find(t => t.name === config.rootTable) ?? null, [schema, config.rootTable])
 
-  // Debounced preview
+  function getColMeta(table: string, column: string): ColumnMeta | undefined {
+    return schema?.find(t => t.name === table)?.columns.find(c => c.name === column)
+  }
+
+  // Debounced live preview
   useEffect(() => {
-    if (!config.rootTable || (config.values.length === 0 && config.visualization.type !== 'pivot')) return
+    if (!config.rootTable || (config.values.length === 0 && config.visualization.type !== 'pivot')) {
+      setPreviewData(null)
+      return
+    }
     setPreviewLoading(true)
     setPreviewError(null)
     const timer = setTimeout(async () => {
@@ -170,196 +203,235 @@ export function WidgetBuilderModal({ dashboardId, initial, timeRange, globalForm
     }
   }
 
-  function addRow(field: PivotField) {
-    setConfig(c => ({ ...c, rows: [...c.rows, field] }))
+  function handleDragStart(e: DragStartEvent) {
+    const data = e.active.data.current as DragData | undefined
+    if (data) setActiveDrag(data)
   }
-  function addColumn(field: PivotField) {
-    setConfig(c => ({ ...c, columns: [...c.columns, field] }))
-  }
-  function addValue(field: PivotField, agg: AggregationOp) {
-    setConfig(c => ({ ...c, values: [...c.values, { ...field, agg }] }))
-  }
-  function addFilter() {
-    if (!rootTableMeta) return
-    const col = rootTableMeta.columns[0]
+
+  function handleDragEnd(e: DragEndEvent) {
+    setActiveDrag(null)
+    const drag = e.active.data.current as DragData | undefined
+    const dropZone = e.over?.id as ZoneId | undefined
+    if (!drag || !dropZone) return
+    if (drag.source === dropZone) return  // dropped on same zone — no-op
+
+    const col = getColMeta(drag.table, drag.column)
     if (!col) return
-    setConfig(c => ({
-      ...c,
-      filters: [...c.filters, { field: { table: rootTableMeta.name, column: col.name }, op: 'eq', value: '' }],
-    }))
+    const field: PivotField = { table: drag.table, column: drag.column }
+
+    setConfig(c => {
+      let next = { ...c }
+      // Remove from source if it's a zone
+      if (drag.source === 'rows') next = { ...next, rows: next.rows.filter((_, i) => i !== drag.fromIndex) }
+      if (drag.source === 'columns') next = { ...next, columns: next.columns.filter((_, i) => i !== drag.fromIndex) }
+      if (drag.source === 'values') next = { ...next, values: next.values.filter((_, i) => i !== drag.fromIndex) }
+      if (drag.source === 'filters') next = { ...next, filters: next.filters.filter((_, i) => i !== drag.fromIndex) }
+
+      // Add to destination
+      if (dropZone === 'rows') next = { ...next, rows: [...next.rows, field] }
+      else if (dropZone === 'columns') next = { ...next, columns: [...next.columns, field] }
+      else if (dropZone === 'values') {
+        const v: PivotValue = { ...field, agg: defaultAgg(col) }
+        next = { ...next, values: [...next.values, v] }
+      } else if (dropZone === 'filters') {
+        const f: PivotFilter = { field, op: 'eq', value: col.enumValues?.[0]?.value ?? '' }
+        next = { ...next, filters: [...next.filters, f] }
+      }
+      return next
+    })
   }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="relative bg-paper rounded-card-xl ring-1 ring-foreground/15 w-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col shadow-2xl">
+    <div className="fixed inset-0 left-0 lg:left-64 top-0 z-40 bg-black/45 backdrop-blur-sm flex items-center justify-center p-3 lg:p-5">
+      <div className="relative bg-paper rounded-card-xl ring-1 ring-foreground/15 w-full max-w-6xl max-h-[92vh] overflow-hidden flex flex-col shadow-2xl">
         {/* Header */}
-        <div className="px-5 py-3 border-b border-foreground/10 flex items-center gap-3">
+        <div className="px-4 py-3 border-b border-foreground/10 flex items-center gap-3">
           <input
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder="Tên widget"
-            className="flex-1 px-3 py-2 text-base font-semibold bg-paper-tint/40 ring-1 ring-foreground/10 rounded-md focus:ring-accent/40 focus:outline-none"
+            className="flex-1 px-3 py-1.5 text-sm font-semibold bg-paper-tint/40 ring-1 ring-foreground/10 rounded-md focus:ring-accent/40 focus:outline-none"
           />
           <button
             type="button"
             onClick={save}
             disabled={saving || !config.rootTable}
-            className="inline-flex items-center gap-1.5 bg-accent text-ink font-semibold px-4 py-2 rounded-pill text-sm hover:bg-accent/90 transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 bg-accent text-ink font-semibold px-3.5 py-1.5 rounded-pill text-sm hover:bg-accent/90 transition disabled:opacity-50"
           >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
             Lưu
           </button>
           <button
             type="button"
             onClick={onClose}
             aria-label="Đóng"
-            className="p-2 rounded-md text-foreground/55 hover:text-foreground hover:bg-foreground/8"
+            className="p-1.5 rounded-md text-foreground/55 hover:text-foreground hover:bg-foreground/8"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-[280px_1fr_minmax(400px,1.2fr)] divide-x divide-foreground/10 overflow-hidden">
-          {/* Left: Field picker */}
-          <FieldPicker
-            schema={schema}
-            rootTable={config.rootTable}
-            onSelectRoot={t => setConfig(c => ({ ...c, rootTable: t, rows: [], columns: [], values: [], filters: [], joins: [] }))}
-            onAddRow={addRow}
-            onAddColumn={addColumn}
-            onAddValue={addValue}
-          />
+        {/* Body với DndContext bao toàn bộ */}
+        <DndContext
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={() => setActiveDrag(null)}
+          collisionDetection={pointerWithin}
+        >
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_minmax(0,1.1fr)] divide-x divide-foreground/10 overflow-hidden">
+            {/* Left: Field picker */}
+            <FieldPickerPanel
+              schema={schema}
+              rootTable={config.rootTable}
+              onSelectRoot={t => setConfig(c => ({ ...c, rootTable: t, rows: [], columns: [], values: [], filters: [], joins: [] }))}
+            />
 
-          {/* Middle: Config */}
-          <div className="overflow-y-auto p-4 space-y-4">
-            {/* Visualization type */}
-            <div>
-              <p className="text-xs uppercase tracking-wider text-foreground/55 mb-2 font-semibold">Loại hiển thị</p>
-              <div className="grid grid-cols-2 gap-2">
-                {WIDGET_TYPES.map(wt => {
-                  const Icon = wt.icon
-                  const active = config.visualization.type === wt.value
-                  return (
-                    <button
-                      key={wt.value}
-                      type="button"
-                      onClick={() => setConfig(c => ({ ...c, visualization: { ...c.visualization, type: wt.value } }))}
-                      className={[
-                        'px-3 py-2 rounded-md ring-1 transition text-xs flex items-center gap-1.5',
-                        active ? 'bg-accent/15 ring-accent text-foreground font-semibold' : 'bg-paper-tint/40 ring-foreground/10 text-foreground/70 hover:ring-foreground/25',
-                      ].join(' ')}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                      {wt.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {config.visualization.type === 'chart' && (
+            {/* Middle: Drop zones config */}
+            <div className="overflow-y-auto p-3 space-y-3">
+              {/* Visualization type */}
               <div>
-                <p className="text-xs uppercase tracking-wider text-foreground/55 mb-2 font-semibold">Kiểu biểu đồ</p>
-                <div className="flex gap-1 flex-wrap">
-                  {CHART_SUBTYPES.map(s => {
-                    const active = config.visualization.chartSubtype === s.value
+                <p className="text-[10px] uppercase tracking-wider text-foreground/55 mb-1.5 font-semibold">Loại hiển thị</p>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {WIDGET_TYPES.map(wt => {
+                    const Icon = wt.icon
+                    const active = config.visualization.type === wt.value
                     return (
                       <button
-                        key={s.value}
+                        key={wt.value}
                         type="button"
-                        onClick={() => setConfig(c => ({ ...c, visualization: { ...c.visualization, chartSubtype: s.value } }))}
+                        onClick={() => setConfig(c => ({ ...c, visualization: { ...c.visualization, type: wt.value } }))}
                         className={[
-                          'px-2.5 py-1 rounded-pill text-xs ring-1',
-                          active ? 'bg-accent/15 ring-accent' : 'bg-paper-tint/40 ring-foreground/10 hover:ring-foreground/25',
+                          'px-2.5 py-1.5 rounded-md ring-1 transition text-xs flex items-center gap-1.5',
+                          active ? 'bg-accent/15 ring-accent text-foreground font-semibold' : 'bg-paper-tint/40 ring-foreground/10 text-foreground/70 hover:ring-foreground/25',
                         ].join(' ')}
                       >
-                        {s.label}
+                        <Icon className="h-3 w-3" />
+                        {wt.label}
                       </button>
                     )
                   })}
                 </div>
               </div>
-            )}
 
-            {/* Rows */}
-            <DropZone
-              label="ROWS (chiều dọc)"
-              fields={config.rows}
-              onRemove={i => setConfig(c => ({ ...c, rows: c.rows.filter((_, idx) => idx !== i) }))}
-              onSetGranularity={(i, g) => setConfig(c => ({
-                ...c,
-                rows: c.rows.map((r, idx) => idx === i ? { ...r, dateGranularity: g } : r),
-              }))}
-              schema={schema}
-            />
-            {/* Columns */}
-            <DropZone
-              label="COLUMNS (chiều ngang)"
-              fields={config.columns}
-              onRemove={i => setConfig(c => ({ ...c, columns: c.columns.filter((_, idx) => idx !== i) }))}
-              onSetGranularity={(i, g) => setConfig(c => ({
-                ...c,
-                columns: c.columns.map((col, idx) => idx === i ? { ...col, dateGranularity: g } : col),
-              }))}
-              schema={schema}
-            />
-            {/* Values */}
-            <ValueZone
-              values={config.values}
-              schema={schema}
-              onUpdate={(i, agg) => setConfig(c => ({
-                ...c,
-                values: c.values.map((v, idx) => idx === i ? { ...v, agg } : v),
-              }))}
-              onRemove={i => setConfig(c => ({ ...c, values: c.values.filter((_, idx) => idx !== i) }))}
-            />
+              {config.visualization.type === 'chart' && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-foreground/55 mb-1.5 font-semibold">Kiểu biểu đồ</p>
+                  <div className="flex gap-1 flex-wrap">
+                    {CHART_SUBTYPES.map(s => {
+                      const active = config.visualization.chartSubtype === s.value
+                      return (
+                        <button
+                          key={s.value}
+                          type="button"
+                          onClick={() => setConfig(c => ({ ...c, visualization: { ...c.visualization, chartSubtype: s.value } }))}
+                          className={[
+                            'px-2 py-0.5 rounded-pill text-[11px] ring-1',
+                            active ? 'bg-accent/15 ring-accent' : 'bg-paper-tint/40 ring-foreground/10 hover:ring-foreground/25',
+                          ].join(' ')}
+                        >
+                          {s.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
 
-            {/* Filters */}
-            <FilterZone
-              filters={config.filters}
-              rootTableMeta={rootTableMeta}
-              schema={schema}
-              onAdd={addFilter}
-              onUpdate={(i, next) => setConfig(c => ({ ...c, filters: c.filters.map((f, idx) => idx === i ? next : f) }))}
-              onRemove={i => setConfig(c => ({ ...c, filters: c.filters.filter((_, idx) => idx !== i) }))}
-            />
+              <DropZoneFieldsList
+                id="rows"
+                label="ROWS — chiều dọc"
+                hint="Kéo field vào đây để thành nhóm theo dòng"
+                fields={config.rows}
+                getColMeta={getColMeta}
+                onRemove={i => setConfig(c => ({ ...c, rows: c.rows.filter((_, idx) => idx !== i) }))}
+                onSetGranularity={(i, g) => setConfig(c => ({
+                  ...c,
+                  rows: c.rows.map((r, idx) => idx === i ? { ...r, dateGranularity: g } : r),
+                }))}
+              />
+
+              <DropZoneFieldsList
+                id="columns"
+                label="COLUMNS — chiều ngang"
+                hint="Kéo field vào đây để thành nhóm theo cột"
+                fields={config.columns}
+                getColMeta={getColMeta}
+                onRemove={i => setConfig(c => ({ ...c, columns: c.columns.filter((_, idx) => idx !== i) }))}
+                onSetGranularity={(i, g) => setConfig(c => ({
+                  ...c,
+                  columns: c.columns.map((col, idx) => idx === i ? { ...col, dateGranularity: g } : col),
+                }))}
+              />
+
+              <DropZoneValues
+                values={config.values}
+                getColMeta={getColMeta}
+                onUpdate={(i, agg) => setConfig(c => ({
+                  ...c,
+                  values: c.values.map((v, idx) => idx === i ? { ...v, agg } : v),
+                }))}
+                onRemove={i => setConfig(c => ({ ...c, values: c.values.filter((_, idx) => idx !== i) }))}
+              />
+
+              <DropZoneFilters
+                filters={config.filters}
+                getColMeta={getColMeta}
+                onUpdate={(i, next) => setConfig(c => ({ ...c, filters: c.filters.map((f, idx) => idx === i ? next : f) }))}
+                onRemove={i => setConfig(c => ({ ...c, filters: c.filters.filter((_, idx) => idx !== i) }))}
+              />
+            </div>
+
+            {/* Right: Preview */}
+            <div className="overflow-y-auto p-3 bg-paper-tint/20">
+              <p className="text-[10px] uppercase tracking-wider text-foreground/55 mb-2 font-semibold">PREVIEW</p>
+              {!config.rootTable ? (
+                <div className="text-center py-12 text-foreground/55 text-sm">
+                  Chọn bảng gốc bên trái rồi kéo field vào các vùng để build pivot.
+                </div>
+              ) : previewLoading ? (
+                <div className="flex items-center justify-center h-40 text-foreground/55"><Loader2 className="h-5 w-5 animate-spin" /></div>
+              ) : previewError ? (
+                <div className="text-danger text-sm bg-danger/10 px-3 py-2 rounded-md">{previewError}</div>
+              ) : previewData ? (
+                <WidgetRenderer config={config} data={previewData} globalFormat={globalFormat} />
+              ) : (
+                <div className="text-center py-12 text-foreground/55 text-sm">
+                  Kéo field vào VALUES để xem preview.
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Right: Preview */}
-          <div className="overflow-y-auto p-4 bg-paper-tint/20">
-            <p className="text-xs uppercase tracking-wider text-foreground/55 mb-3 font-semibold">PREVIEW</p>
-            {!config.rootTable ? (
-              <div className="text-center py-12 text-foreground/55 text-sm">Chọn bảng gốc bên trái để bắt đầu.</div>
-            ) : previewLoading ? (
-              <div className="flex items-center justify-center h-40 text-foreground/55"><Loader2 className="h-5 w-5 animate-spin" /></div>
-            ) : previewError ? (
-              <div className="text-danger text-sm bg-danger/10 px-3 py-2 rounded-md">{previewError}</div>
-            ) : previewData ? (
-              <WidgetRenderer config={config} data={previewData} globalFormat={globalFormat} />
-            ) : (
-              <div className="text-center py-12 text-foreground/55 text-sm">Cấu hình values để xem preview.</div>
-            )}
-          </div>
-        </div>
+          {/* Drag overlay — visual ghost theo cursor */}
+          <DragOverlay dropAnimation={null}>
+            {activeDrag ? (
+              <div className="px-2.5 py-1.5 bg-accent text-ink rounded-md shadow-2xl ring-1 ring-ink/15 text-xs font-semibold inline-flex items-center gap-1.5 max-w-[200px]">
+                <GripVertical className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">{getColMeta(activeDrag.table, activeDrag.column)?.vietnameseName ?? activeDrag.column}</span>
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       </div>
     </div>
   )
 }
 
-// ─── Field Picker ───
-function FieldPicker({
-  schema, rootTable, onSelectRoot, onAddRow, onAddColumn, onAddValue,
-}: {
+// ─── Field picker panel (left) ───
+function FieldPickerPanel({ schema, rootTable, onSelectRoot }: {
   schema: TableMeta[] | null
   rootTable: string
-  onSelectRoot: (table: string) => void
-  onAddRow: (f: PivotField) => void
-  onAddColumn: (f: PivotField) => void
-  onAddValue: (f: PivotField, agg: AggregationOp) => void
+  onSelectRoot: (t: string) => void
 }) {
   const [search, setSearch] = useState('')
+  const [expandedTables, setExpandedTables] = useState<Set<string>>(new Set())
+
+  // Auto-expand rootTable
+  useEffect(() => {
+    if (rootTable) setExpandedTables(prev => new Set(prev).add(rootTable))
+  }, [rootTable])
+
   const filtered = useMemo(() => {
     if (!schema) return []
     const q = search.trim().toLowerCase()
@@ -367,215 +439,276 @@ function FieldPicker({
     return schema.map(t => ({
       ...t,
       columns: t.columns.filter(c =>
-        c.name.toLowerCase().includes(q) || c.vietnameseName.toLowerCase().includes(q)
+        c.name.toLowerCase().includes(q) || c.vietnameseName.toLowerCase().includes(q),
       ),
-    })).filter(t => t.columns.length > 0 || t.name.toLowerCase().includes(q) || t.vietnameseName.toLowerCase().includes(q))
+    })).filter(t =>
+      t.columns.length > 0 ||
+      t.name.toLowerCase().includes(q) ||
+      t.vietnameseName.toLowerCase().includes(q),
+    )
   }, [schema, search])
 
-  return (
-    <div className="overflow-y-auto p-3 space-y-3">
-      <p className="text-xs uppercase tracking-wider text-foreground/55 font-semibold">Bảng dữ liệu</p>
-      <input
-        type="search"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        placeholder="Tìm bảng/cột..."
-        className="w-full px-2 py-1.5 text-xs bg-paper-tint/40 ring-1 ring-foreground/10 rounded-md focus:ring-accent/40 focus:outline-none"
-      />
-      {filtered.length === 0 && <p className="text-xs text-foreground/55">Đang tải...</p>}
-      {filtered.map(table => {
-        const isRoot = table.name === rootTable
-        return (
-          <div key={table.name} className="text-xs">
-            <button
-              type="button"
-              onClick={() => onSelectRoot(table.name)}
-              className={[
-                'w-full text-left px-2 py-1.5 rounded-md font-semibold transition',
-                isRoot ? 'bg-accent/15 text-foreground ring-1 ring-accent/40' : 'text-foreground/85 hover:bg-foreground/5',
-              ].join(' ')}
-              title={table.description}
-            >
-              {table.vietnameseName}
-              <span className="text-foreground/45 font-normal font-mono text-[10px] ml-1">{table.name}</span>
-            </button>
-            {isRoot && (
-              <div className="ml-2 mt-1 space-y-0.5">
-                {table.columns.map(col => (
-                  <FieldRow
-                    key={col.name}
-                    table={table.name}
-                    column={col}
-                    onAddRow={() => onAddRow({ table: table.name, column: col.name })}
-                    onAddColumn={() => onAddColumn({ table: table.name, column: col.name })}
-                    onAddValue={(agg) => onAddValue({ table: table.name, column: col.name }, agg)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
+  function toggleTable(name: string) {
+    setExpandedTables(prev => {
+      const next = new Set(prev)
+      if (next.has(name)) next.delete(name)
+      else next.add(name)
+      return next
+    })
+  }
 
-function FieldRow({ table, column, onAddRow, onAddColumn, onAddValue }: {
-  table: string
-  column: ColumnMeta
-  onAddRow: () => void
-  onAddColumn: () => void
-  onAddValue: (agg: AggregationOp) => void
-}) {
-  void table
-  const [open, setOpen] = useState(false)
   return (
-    <div className="text-[11px]">
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        title={column.description}
-        className="w-full text-left px-2 py-1 rounded hover:bg-foreground/5 flex items-center justify-between gap-1"
-      >
-        <span className="text-foreground/80 truncate">{column.vietnameseName}</span>
-        <code className="text-foreground/35 font-mono text-[9px] flex-shrink-0">{column.type}</code>
-      </button>
-      {open && (
-        <div className="ml-2 mb-1 grid grid-cols-3 gap-1 pt-1">
-          <button type="button" onClick={onAddRow} className="text-[10px] px-1.5 py-0.5 rounded bg-mist/20 hover:bg-mist/30 text-foreground/80">+Row</button>
-          <button type="button" onClick={onAddColumn} className="text-[10px] px-1.5 py-0.5 rounded bg-mist/20 hover:bg-mist/30 text-foreground/80">+Col</button>
-          {column.type === 'number' ? (
-            <button type="button" onClick={() => onAddValue(column.defaultAggregation ?? 'sum')} className="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 hover:bg-accent/30 text-foreground/80">+Σ</button>
-          ) : (
-            <button type="button" onClick={() => onAddValue('count')} className="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 hover:bg-accent/30 text-foreground/80">+Đếm</button>
-          )}
-        </div>
+    <div className="overflow-y-auto p-3 space-y-2">
+      <p className="text-[10px] uppercase tracking-wider text-foreground/55 font-semibold">Bảng dữ liệu</p>
+      <div className="relative">
+        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-foreground/45" />
+        <input
+          type="search"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Tìm bảng/cột..."
+          className="w-full pl-7 pr-2 py-1.5 text-xs bg-paper-tint/40 ring-1 ring-foreground/10 rounded-md focus:ring-accent/40 focus:outline-none"
+        />
+      </div>
+      {filtered.length === 0 && (
+        <p className="text-xs text-foreground/55 py-4 text-center">{schema ? 'Không tìm thấy' : 'Đang tải...'}</p>
       )}
+      <div className="space-y-1">
+        {filtered.map(table => {
+          const isRoot = table.name === rootTable
+          const isExpanded = expandedTables.has(table.name) || isRoot
+          const ChevronIcon = isExpanded ? ChevronDown : ChevronRight
+          return (
+            <div key={table.name} className="text-xs">
+              <div className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => toggleTable(table.name)}
+                  aria-label={isExpanded ? 'Thu gọn' : 'Mở rộng'}
+                  className="p-0.5 text-foreground/45 hover:text-foreground"
+                >
+                  <ChevronIcon className="h-3 w-3" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSelectRoot(table.name)}
+                  className={[
+                    'flex-1 text-left px-2 py-1 rounded-md transition truncate',
+                    isRoot
+                      ? 'bg-accent/15 text-foreground ring-1 ring-accent/40 font-semibold'
+                      : 'text-foreground/85 hover:bg-foreground/5 font-medium',
+                  ].join(' ')}
+                  title={`${table.description} — click để chọn làm bảng gốc`}
+                >
+                  {table.vietnameseName}
+                </button>
+              </div>
+              {isExpanded && isRoot && (
+                <div className="ml-3 mt-0.5 space-y-0.5 pl-2 border-l border-foreground/8">
+                  {table.columns.map(col => (
+                    <DraggableField
+                      key={col.name}
+                      table={table.name}
+                      col={col}
+                    />
+                  ))}
+                </div>
+              )}
+              {isExpanded && !isRoot && (
+                <p className="ml-5 mt-0.5 text-[10px] text-foreground/45 italic">
+                  Click tên bảng để chọn làm gốc
+                </p>
+              )}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
 
-// ─── Drop zones (rows, columns) ───
-function DropZone({ label, fields, onRemove, onSetGranularity, schema }: {
+// ─── Draggable field (in picker) ───
+function DraggableField({ table, col }: { table: string; col: ColumnMeta }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `picker:${table}.${col.name}`,
+    data: { source: 'picker', table, column: col.name } satisfies DragData,
+  })
+  const typeIcon = col.type === 'number' ? '#' : col.type === 'date' ? '📅' : col.type === 'enum' ? '⊟' : col.type === 'boolean' ? '✓' : 'A'
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      title={col.description}
+      className={[
+        'flex items-center gap-1.5 px-1.5 py-1 rounded text-[11px] cursor-grab active:cursor-grabbing transition',
+        isDragging ? 'opacity-30' : 'hover:bg-accent/8',
+      ].join(' ')}
+    >
+      <span className="text-foreground/35 font-mono text-[10px] w-3">{typeIcon}</span>
+      <span className="text-foreground/85 truncate flex-1">{col.vietnameseName}</span>
+    </div>
+  )
+}
+
+// ─── Drop zone: rows / columns (PivotField list) ───
+function DropZoneFieldsList({
+  id, label, hint, fields, getColMeta, onRemove, onSetGranularity,
+}: {
+  id: ZoneId
   label: string
+  hint: string
   fields: PivotField[]
+  getColMeta: (t: string, c: string) => ColumnMeta | undefined
   onRemove: (i: number) => void
   onSetGranularity: (i: number, g: DateGranularity) => void
-  schema: TableMeta[] | null
 }) {
+  const { setNodeRef, isOver } = useDroppable({ id })
   return (
     <div>
-      <p className="text-xs uppercase tracking-wider text-foreground/55 mb-1.5 font-semibold">{label}</p>
-      {fields.length === 0 ? (
-        <div className="text-xs text-foreground/40 italic px-2 py-2 ring-1 ring-foreground/8 rounded-md">
-          Click +Row hoặc +Col trong field picker bên trái
-        </div>
-      ) : (
-        <div className="space-y-1">
-          {fields.map((f, i) => {
-            const col = schema?.find(t => t.name === f.table)?.columns.find(c => c.name === f.column)
-            const isDate = col?.type === 'date'
-            return (
-              <div key={i} className="flex items-center gap-1.5 px-2 py-1.5 bg-paper-tint/40 ring-1 ring-foreground/10 rounded-md text-xs">
-                <span className="text-foreground/85 flex-1 truncate">{col?.vietnameseName ?? f.column}</span>
-                {isDate && (
+      <p className="text-[10px] uppercase tracking-wider text-foreground/55 mb-1 font-semibold">{label}</p>
+      <div
+        ref={setNodeRef}
+        className={[
+          'min-h-[42px] rounded-md ring-1 p-1.5 transition space-y-1',
+          isOver
+            ? 'ring-accent bg-accent/8'
+            : fields.length === 0
+              ? 'ring-dashed ring-foreground/15 bg-paper-tint/30'
+              : 'ring-foreground/10 bg-paper-tint/30',
+        ].join(' ')}
+      >
+        {fields.length === 0 && (
+          <p className="text-[11px] text-foreground/40 italic px-1 py-1.5 text-center">{hint}</p>
+        )}
+        {fields.map((f, i) => {
+          const col = getColMeta(f.table, f.column)
+          const isDate = col?.type === 'date'
+          return (
+            <DraggableChip
+              key={`${id}-${i}`}
+              zone={id}
+              index={i}
+              field={f}
+              col={col}
+              extra={
+                isDate ? (
                   <select
                     value={f.dateGranularity ?? 'month'}
                     onChange={e => onSetGranularity(i, e.target.value as DateGranularity)}
-                    className="text-[10px] bg-transparent ring-1 ring-foreground/10 rounded px-1 py-0.5"
+                    onClick={e => e.stopPropagation()}
+                    className="text-[10px] bg-transparent ring-1 ring-foreground/15 rounded px-1 py-0.5"
                   >
                     {DATE_GRANS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
                   </select>
-                )}
-                <button type="button" onClick={() => onRemove(i)} aria-label="Xoá" className="text-foreground/45 hover:text-danger">
-                  <Trash2 className="h-3 w-3" />
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      )}
+                ) : null
+              }
+              onRemove={() => onRemove(i)}
+            />
+          )
+        })}
+      </div>
     </div>
   )
 }
 
-// ─── Value zone ───
-function ValueZone({ values, schema, onUpdate, onRemove }: {
+// ─── Drop zone: values (PivotValue list — có agg dropdown) ───
+function DropZoneValues({
+  values, getColMeta, onUpdate, onRemove,
+}: {
   values: PivotValue[]
-  schema: TableMeta[] | null
+  getColMeta: (t: string, c: string) => ColumnMeta | undefined
   onUpdate: (i: number, agg: AggregationOp) => void
   onRemove: (i: number) => void
 }) {
+  const { setNodeRef, isOver } = useDroppable({ id: 'values' })
   return (
     <div>
-      <p className="text-xs uppercase tracking-wider text-foreground/55 mb-1.5 font-semibold">VALUES (chỉ số đo)</p>
-      {values.length === 0 ? (
-        <div className="text-xs text-foreground/40 italic px-2 py-2 ring-1 ring-foreground/8 rounded-md">
-          Click +Σ hoặc +Đếm trong field picker
-        </div>
-      ) : (
-        <div className="space-y-1">
-          {values.map((v, i) => {
-            const col = schema?.find(t => t.name === v.table)?.columns.find(c => c.name === v.column)
-            return (
-              <div key={i} className="flex items-center gap-1.5 px-2 py-1.5 bg-accent/8 ring-1 ring-accent/20 rounded-md text-xs">
+      <p className="text-[10px] uppercase tracking-wider text-foreground/55 mb-1 font-semibold">VALUES — chỉ số đo</p>
+      <div
+        ref={setNodeRef}
+        className={[
+          'min-h-[42px] rounded-md ring-1 p-1.5 transition space-y-1',
+          isOver
+            ? 'ring-accent bg-accent/8'
+            : values.length === 0
+              ? 'ring-dashed ring-foreground/15 bg-paper-tint/30'
+              : 'ring-foreground/10 bg-paper-tint/30',
+        ].join(' ')}
+      >
+        {values.length === 0 && (
+          <p className="text-[11px] text-foreground/40 italic px-1 py-1.5 text-center">
+            Kéo field số vào đây — tự động chọn SUM hoặc COUNT
+          </p>
+        )}
+        {values.map((v, i) => {
+          const col = getColMeta(v.table, v.column)
+          return (
+            <DraggableChip
+              key={`values-${i}`}
+              zone="values"
+              index={i}
+              field={v}
+              col={col}
+              accent
+              prefix={
                 <select
                   value={v.agg}
                   onChange={e => onUpdate(i, e.target.value as AggregationOp)}
-                  className="text-[10px] bg-transparent ring-1 ring-foreground/15 rounded px-1 py-0.5 font-semibold"
+                  onClick={e => e.stopPropagation()}
+                  className="text-[10px] bg-transparent ring-1 ring-foreground/20 rounded px-1 py-0.5 font-semibold"
                 >
                   {Object.entries(AGG_LABELS).map(([k, lbl]) => (
                     <option key={k} value={k}>{lbl}</option>
                   ))}
                 </select>
-                <span className="text-foreground/85 flex-1 truncate">{col?.vietnameseName ?? v.column}</span>
-                <button type="button" onClick={() => onRemove(i)} aria-label="Xoá" className="text-foreground/45 hover:text-danger">
-                  <Trash2 className="h-3 w-3" />
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      )}
+              }
+              onRemove={() => onRemove(i)}
+            />
+          )
+        })}
+      </div>
     </div>
   )
 }
 
-// ─── Filter zone ───
-function FilterZone({ filters, rootTableMeta, schema, onAdd, onUpdate, onRemove }: {
+// ─── Drop zone: filters ───
+function DropZoneFilters({
+  filters, getColMeta, onUpdate, onRemove,
+}: {
   filters: PivotFilter[]
-  rootTableMeta: TableMeta | null
-  schema: TableMeta[] | null
-  onAdd: () => void
+  getColMeta: (t: string, c: string) => ColumnMeta | undefined
   onUpdate: (i: number, next: PivotFilter) => void
   onRemove: (i: number) => void
 }) {
-  void schema
+  const { setNodeRef, isOver } = useDroppable({ id: 'filters' })
   return (
     <div>
-      <div className="flex items-center justify-between mb-1.5">
-        <p className="text-xs uppercase tracking-wider text-foreground/55 font-semibold">FILTERS</p>
-        <button
-          type="button"
-          onClick={onAdd}
-          disabled={!rootTableMeta}
-          className="text-[10px] inline-flex items-center gap-0.5 text-accent hover:underline disabled:opacity-50"
-        >
-          <Plus className="h-2.5 w-2.5" /> Thêm
-        </button>
-      </div>
-      <div className="space-y-1">
+      <p className="text-[10px] uppercase tracking-wider text-foreground/55 mb-1 font-semibold">FILTERS</p>
+      <div
+        ref={setNodeRef}
+        className={[
+          'min-h-[42px] rounded-md ring-1 p-1.5 transition space-y-1',
+          isOver
+            ? 'ring-accent bg-accent/8'
+            : filters.length === 0
+              ? 'ring-dashed ring-foreground/15 bg-paper-tint/30'
+              : 'ring-foreground/10 bg-paper-tint/30',
+        ].join(' ')}
+      >
+        {filters.length === 0 && (
+          <p className="text-[11px] text-foreground/40 italic px-1 py-1.5 text-center">
+            Kéo field vào để thêm filter
+          </p>
+        )}
         {filters.map((f, i) => {
-          const col = rootTableMeta?.columns.find(c => c.name === f.field.column)
+          const col = getColMeta(f.field.table, f.field.column)
           return (
-            <div key={i} className="flex items-center gap-1 px-2 py-1.5 bg-paper-tint/40 ring-1 ring-foreground/10 rounded-md text-xs">
-              <select
-                value={f.field.column}
-                onChange={e => onUpdate(i, { ...f, field: { ...f.field, column: e.target.value } })}
-                className="text-[10px] bg-transparent ring-1 ring-foreground/15 rounded px-1 py-0.5 max-w-[80px]"
-              >
-                {rootTableMeta?.columns.map(c => <option key={c.name} value={c.name}>{c.vietnameseName}</option>)}
-              </select>
+            <div key={i} className="flex items-center gap-1 px-1.5 py-1 bg-paper ring-1 ring-foreground/10 rounded-md text-[11px]">
+              <GripVertical className="h-3 w-3 text-foreground/30 flex-shrink-0" />
+              <span className="text-foreground/85 font-medium truncate max-w-[100px]">
+                {col?.vietnameseName ?? f.field.column}
+              </span>
               <select
                 value={f.op}
                 onChange={e => onUpdate(i, { ...f, op: e.target.value as FilterOp })}
@@ -588,7 +721,7 @@ function FilterZone({ filters, rootTableMeta, schema, onAdd, onUpdate, onRemove 
                   <select
                     value={Array.isArray(f.value) ? '' : String(f.value ?? '')}
                     onChange={e => onUpdate(i, { ...f, value: e.target.value })}
-                    className="text-[10px] bg-transparent ring-1 ring-foreground/15 rounded px-1 py-0.5 flex-1"
+                    className="text-[10px] bg-transparent ring-1 ring-foreground/15 rounded px-1 py-0.5 flex-1 min-w-0"
                   >
                     <option value="">--</option>
                     {col.enumValues.map(ev => <option key={ev.value} value={ev.value}>{ev.label}</option>)}
@@ -598,18 +731,73 @@ function FilterZone({ filters, rootTableMeta, schema, onAdd, onUpdate, onRemove 
                     type="text"
                     value={Array.isArray(f.value) ? f.value.join(',') : String(f.value ?? '')}
                     onChange={e => onUpdate(i, { ...f, value: ['in', 'not_in'].includes(f.op) ? e.target.value.split(',').map(s => s.trim()) : e.target.value })}
-                    placeholder="..."
-                    className="text-[10px] bg-transparent ring-1 ring-foreground/15 rounded px-1 py-0.5 flex-1 min-w-[60px]"
+                    placeholder="giá trị..."
+                    className="text-[10px] bg-transparent ring-1 ring-foreground/15 rounded px-1 py-0.5 flex-1 min-w-0"
                   />
                 )
               )}
-              <button type="button" onClick={() => onRemove(i)} className="text-foreground/45 hover:text-danger">
+              <button
+                type="button"
+                onClick={() => onRemove(i)}
+                aria-label="Xoá filter"
+                className="text-foreground/45 hover:text-danger flex-shrink-0"
+              >
                 <Trash2 className="h-3 w-3" />
               </button>
             </div>
           )
         })}
       </div>
+    </div>
+  )
+}
+
+// ─── Chip draggable trong drop zone ───
+function DraggableChip({
+  zone, index, field, col, prefix, extra, accent, onRemove,
+}: {
+  zone: ZoneId
+  index: number
+  field: PivotField
+  col: ColumnMeta | undefined
+  prefix?: React.ReactNode
+  extra?: React.ReactNode
+  accent?: boolean
+  onRemove: () => void
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `${zone}:${index}:${field.table}.${field.column}`,
+    data: { source: zone, table: field.table, column: field.column, fromIndex: index } satisfies DragData,
+  })
+  return (
+    <div
+      ref={setNodeRef}
+      className={[
+        'flex items-center gap-1 px-1.5 py-1 rounded-md text-[11px] transition',
+        accent ? 'bg-accent/12 ring-1 ring-accent/30' : 'bg-paper ring-1 ring-foreground/10',
+        isDragging ? 'opacity-30' : '',
+      ].join(' ')}
+    >
+      <span
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing text-foreground/35 hover:text-foreground/65 flex-shrink-0"
+      >
+        <GripVertical className="h-3 w-3" />
+      </span>
+      {prefix}
+      <span className="text-foreground/85 font-medium truncate flex-1">
+        {col?.vietnameseName ?? field.column}
+      </span>
+      {extra}
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label="Xoá"
+        className="text-foreground/45 hover:text-danger flex-shrink-0"
+      >
+        <Trash2 className="h-3 w-3" />
+      </button>
     </div>
   )
 }
