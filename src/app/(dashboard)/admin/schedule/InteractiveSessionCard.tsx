@@ -94,7 +94,8 @@ export function InteractiveSessionCard({ session, cap, slotLabel, selectedIds, o
         </div>
 
         <span
-          className={`text-xs truncate flex-1 ${
+          title={reg.student.fullName}
+          className={`text-xs flex-1 min-w-0 leading-tight break-words ${
             isWithdrawn
               ? 'text-foreground/40 line-through'
               : variant === 'pending'
@@ -106,7 +107,7 @@ export function InteractiveSessionCard({ session, cap, slotLabel, selectedIds, o
         </span>
 
         {reg.course && variant !== 'withdrawn' && (
-          <Chip variant="neutral" className="text-[9px] px-1.5 py-0">
+          <Chip variant="neutral" className="text-[9px] px-1.5 py-0 shrink-0">
             {reg.course.code}
           </Chip>
         )}
