@@ -124,6 +124,26 @@ export async function POST(request: NextRequest, { params }: Params) {
       )
     }
 
+    // Validate HV có vé bơi đang hoạt động (defense in depth — UI cũng check
+    // disable button, nhưng API check để admin/staff không bypass được)
+    const activeTicket = await prisma.poolTicket.findFirst({
+      where: { studentId, isActive: true },
+      orderBy: { purchasedAt: 'desc' },
+    })
+    if (!activeTicket) {
+      return NextResponse.json(
+        { data: null, error: { code: 'NO_TICKET', message: 'Học viên chưa có vé bơi hoạt động. Vui lòng mua vé trước khi đăng ký buổi học.' } },
+        { status: 400 }
+      )
+    }
+    const sessionsLeft = activeTicket.maxSessions - activeTicket.sessionsUsed
+    if (sessionsLeft <= 0) {
+      return NextResponse.json(
+        { data: null, error: { code: 'TICKET_EXHAUSTED', message: 'Vé bơi của học viên đã hết buổi. Vui lòng mua thêm vé.' } },
+        { status: 400 }
+      )
+    }
+
     // Kiểm tra sức chứa để quyết định pending hay waitlist
     const approvedCount = await prisma.sessionRegistration.count({
       where: { sessionId, status: 'approved' }
