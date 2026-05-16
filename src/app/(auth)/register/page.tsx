@@ -7,6 +7,9 @@ import { toast } from 'sonner'
 import { Label } from '@/components/ui/label'
 import { PolarisStar } from '@/components/brand/PolarisStar'
 import { GlassCard, GlassButton, GlassInput, AmbientMesh } from '@/components/ui/glass'
+import { DateInput } from '@/components/forms/DateInput'
+import { VnAddressSelect } from '@/components/forms/VnAddressSelect'
+import { InfoTooltip } from '@/components/ui/InfoTooltip'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -19,11 +22,14 @@ export default function RegisterPage() {
     gender: 'male' as 'male' | 'female' | 'other',
     email: '',
     ward: '',
-    district: '',
     province: '',
     photoConsent: false,
     termsAcknowledged: false,
   })
+  // Track UI-only state cho address dropdown
+  const [provinceCode, setProvinceCode] = useState<number | null>(null)
+  const [wardCode, setWardCode] = useState<number | null>(null)
+  const [emailFocused, setEmailFocused] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
@@ -146,17 +152,16 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="Ngày sinh" required error={fieldErrors.dob}>
-                <GlassInput
-                  type="date"
+                <DateInput
                   value={form.dob}
-                  onChange={e => update('dob', e.target.value)}
+                  onChange={iso => update('dob', iso)}
                 />
               </Field>
               <Field label="Giới tính" required error={fieldErrors.gender}>
                 <select
                   value={form.gender}
                   onChange={e => update('gender', e.target.value as 'male' | 'female' | 'other')}
-                  className="lqg-input w-full"
+                  className="lqg-input lqg-input-md w-full"
                 >
                   <option value="male">Nam</option>
                   <option value="female">Nữ</option>
@@ -165,38 +170,35 @@ export default function RegisterPage() {
               </Field>
             </div>
 
-            <Field label="Email" error={fieldErrors.email}>
+            <Field label="Email" required error={fieldErrors.email}>
+              {emailFocused && (
+                <p className="text-xs lqg-text-secondary -mt-1 mb-1.5 px-1 leading-relaxed">
+                  💡 Email dùng để nhận hoá đơn, thông báo đăng ký lớp bơi, lịch học và các cập nhật quan trọng.
+                </p>
+              )}
               <GlassInput
                 type="email"
                 value={form.email}
                 onChange={e => update('email', e.target.value)}
-                placeholder="(tuỳ chọn) email@example.com"
+                onFocus={() => setEmailFocused(true)}
+                onBlur={() => setEmailFocused(false)}
+                placeholder="email@example.com"
               />
             </Field>
 
-            <div className="grid grid-cols-3 gap-3">
-              <Field label="Phường/Xã" required error={fieldErrors.ward}>
-                <GlassInput
-                  type="text"
-                  value={form.ward}
-                  onChange={e => update('ward', e.target.value)}
-                />
-              </Field>
-              <Field label="Quận/Huyện" required error={fieldErrors.district}>
-                <GlassInput
-                  type="text"
-                  value={form.district}
-                  onChange={e => update('district', e.target.value)}
-                />
-              </Field>
-              <Field label="Tỉnh" required error={fieldErrors.province}>
-                <GlassInput
-                  type="text"
-                  value={form.province}
-                  onChange={e => update('province', e.target.value)}
-                />
-              </Field>
-            </div>
+            {/* Address — đơn vị hành chính mới: Tỉnh + Phường/Xã */}
+            <VnAddressSelect
+              provinceCode={provinceCode}
+              wardCode={wardCode}
+              onChange={data => {
+                setProvinceCode(data.provinceCode)
+                setWardCode(data.wardCode)
+                setForm(f => ({ ...f, province: data.province, ward: data.ward }))
+                if (fieldErrors.province) setFieldErrors(e => ({ ...e, province: '' }))
+              }}
+              errorProvince={fieldErrors.province}
+              errorWard={fieldErrors.ward}
+            />
 
             {/* Consent */}
             <div className="space-y-2 pt-3 border-t border-foreground/10">
@@ -207,9 +209,18 @@ export default function RegisterPage() {
                   onChange={e => update('photoConsent', e.target.checked)}
                   className="mt-0.5 accent-[var(--lqg-accent)]"
                 />
-                <span>
-                  Tôi đồng ý cho lớp ghi hình kỹ thuật bơi của mình để dạy học.{' '}
-                  <span className="text-danger">*</span>
+                <span className="inline-flex items-start gap-1.5 flex-wrap">
+                  Tôi đồng ý cho lớp ghi hình kỹ thuật bơi của mình để dạy học.
+                  <InfoTooltip label="Vì sao nên đồng ý">
+                    <p className="font-semibold mb-1.5 text-foreground">Tại sao bạn nên đồng ý?</p>
+                    <p className="mb-1.5">Khi giáo viên có thể quay video kỹ thuật của bạn, bạn sẽ:</p>
+                    <ul className="list-disc pl-4 space-y-0.5 mb-2">
+                      <li>Xem lại tư thế bơi sai để tự điều chỉnh</li>
+                      <li>So sánh tiến bộ qua các buổi học</li>
+                      <li>Học nhanh hơn nhờ feedback trực quan</li>
+                    </ul>
+                    <p className="italic text-foreground/65">Video chỉ dùng nội bộ lớp, không đăng public trừ khi bạn đồng ý riêng.</p>
+                  </InfoTooltip>
                 </span>
               </label>
               <label className="flex items-start gap-2 text-xs lqg-text-secondary cursor-pointer">
@@ -227,9 +238,6 @@ export default function RegisterPage() {
                   . <span className="text-danger">*</span>
                 </span>
               </label>
-              {fieldErrors.photoConsent && (
-                <p className="text-xs text-danger">{fieldErrors.photoConsent}</p>
-              )}
               {fieldErrors.termsAcknowledged && (
                 <p className="text-xs text-danger">{fieldErrors.termsAcknowledged}</p>
               )}
@@ -240,7 +248,7 @@ export default function RegisterPage() {
               variant="primary"
               size="lg"
               loading={submitting}
-              disabled={submitting || !form.photoConsent || !form.termsAcknowledged}
+              disabled={submitting || !form.termsAcknowledged}
               className="w-full mt-3"
             >
               {submitting ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}

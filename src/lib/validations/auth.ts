@@ -13,11 +13,13 @@ export const registerSchema = z.object({
     return age >= 5 && age <= 100
   }, { message: 'Ngày sinh không hợp lệ' }),
   gender: z.enum(['male', 'female', 'other']),
-  email: z.string().email({ message: 'Email không hợp lệ' }).optional().or(z.literal('')),
-  ward: z.string().min(1, { message: 'Vui lòng nhập phường/xã' }).max(100),
-  district: z.string().min(1, { message: 'Vui lòng nhập quận/huyện' }).max(100),
-  province: z.string().min(1, { message: 'Vui lòng nhập tỉnh/thành phố' }).max(100),
-  photoConsent: z.boolean().refine(v => v === true, { message: 'Cần đồng ý điều khoản hình ảnh' }),
+  email: z.string().email({ message: 'Email không hợp lệ' }),
+  // Cấu trúc đơn vị hành chính mới (sau 01/07/2025): bỏ cấp huyện. Chỉ
+  // Tỉnh/Thành phố (bắt buộc) + Phường/Xã (tuỳ chọn).
+  ward: z.string().max(100).optional(),
+  district: z.string().max(100).optional().nullable(),
+  province: z.string().min(1, { message: 'Vui lòng chọn tỉnh/thành phố' }).max(100),
+  photoConsent: z.boolean(),
   termsAcknowledged: z.boolean().refine(v => v === true, { message: 'Cần xác nhận điều khoản sử dụng' }),
 })
 

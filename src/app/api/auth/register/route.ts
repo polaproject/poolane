@@ -63,13 +63,14 @@ export async function POST(request: NextRequest) {
       const newUser = await tx.user.create({
         data: {
           id: authData.user.id,
-          email: input.email || emailForAuth,
+          email: input.email,
           phone: input.phone,
           fullName: input.fullName,
           dob: new Date(input.dob),
           gender: input.gender,
-          ward: input.ward,
-          district: input.district,
+          // Cấu trúc hành chính mới: bỏ cấp huyện. district = null.
+          ward: input.ward || null,
+          district: null,
           province: input.province,
           role: 'student',
           accountSource: 'online_signup',
@@ -121,11 +122,10 @@ export async function POST(request: NextRequest) {
 
     log.info('auth.register', `New self-registered student ${studentCode}`, { studentId: result.student.id })
 
-    // Send welcome email (fire-and-forget — không block response)
-    if (input.email) {
-      const tmpl = welcomeEmail({ fullName: input.fullName, studentCode })
-      sendEmail({ to: input.email, ...tmpl }).catch(() => {})
-    }
+    // Send welcome email (fire-and-forget — không block response). Email là
+    // required từ Phase 18 nên luôn gửi.
+    const tmpl = welcomeEmail({ fullName: input.fullName, studentCode })
+    sendEmail({ to: input.email, ...tmpl }).catch(() => {})
 
     return NextResponse.json(
       { data: { studentCode, fullName: input.fullName, phone: input.phone }, error: null },

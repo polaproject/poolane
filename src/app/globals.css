@@ -742,6 +742,15 @@ select.input-pola:focus {
 [data-auth-page] .lqg-mesh-drift {
   animation: none !important;
 }
+/* Phase 18: viền input rõ ràng hơn cho auth (register form nhiều field —
+ * border subtle khiến user khó phân biệt từng ô). Tăng từ var(--lqg-edge-hi)
+ * (~6%) lên ~22% text-primary. Focus ring gold giữ nguyên. */
+[data-auth-page] .lqg-input {
+  border-color: color-mix(in srgb, var(--lqg-text-primary) 22%, transparent);
+}
+[data-auth-page] .lqg-input:hover:not(:disabled):not(:focus) {
+  border-color: color-mix(in srgb, var(--lqg-text-primary) 34%, transparent);
+}
 /* end auth-page fix */
 /* Override legacy nav vars to use LQG tokens */
 :root, html.lqg-dark {
