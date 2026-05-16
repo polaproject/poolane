@@ -232,6 +232,26 @@ Theo thứ tự quan trọng (đã hoàn thành redesign sâu, giờ unblock inf
 22. **Phase 15.3 — UX micro-fixes**: ✅ Password reveal toggle (GlassInput prop `revealable`), session restore button (`/api/sessions/[id]/restore` + UI), admin tương tác duyệt HV trực tiếp tại `/admin/schedule/sessions/[id]` (RegistrationActionRow client component), ProductForm router.push same-URL bug fix (stay on page + setSubmitting(false) cho mode='edit'). Commits: `2b3373b`, `6a3d914`, `a5b5f6a`, `144840d`.
 23. **Phase 16 — Quiet luxury UI**: ✅ Xoá HOÀN TOÀN code (không chỉ disable): `glow` + `withReflection` props (PolarisStar), `shimmer` + `specular` props (GlassPanel/GlassCard), 4 keyframes (`liquid-specular`, `lqg-specular-anim`, `pola-glass-shimmer`, `pola-glow-pulse`), 4 utility classes (`.motion-glow`, `.glass-shimmer`, `.lqg-specular`, `.motion-glass-shimmer`), 2 CSS vars (`--specular-color`, `--specular-angle`), `waterLinePath` + `reflectionPath` từ theme.config.ts. **68 decoration blur blob `<div>` xoá khỏi 61 file** (mass migration script). **12 loading.tsx skeleton xoá** (Next.js convention, owner muốn instant navigate). Apple Liquid Glass framework giữ (frosted bg + blur + border + hover) — chỉ bỏ animation loop. Net: -148 lines code, +30 lines comment. Commits: `c36ac91`, `7b540d9`, `dd6eb32`, `ef6b632`, `b7edf23`, `e162d32`, `0f83195`.
 24. **Phase 16.1 — Code clean discipline**: ✅ Lint 0 errors + 0 warnings (từ 44 problems). ESLint config: ignore `qa/`/`scripts/`/`prisma/`, disable `react-hooks/set-state-in-effect` + `react-hooks/purity` (React 19 strict overkill cho client component fetch pattern + Server Component Date.now() acceptable), accept `_` prefix unused convention. Fix actual: 4 unescaped quotes (`"` → `&ldquo;`/`&rdquo;`), `Date.now()` impure → extract `const sevenDaysAgo`, 10+ unused imports, `useMemo` wrap `groups`+`bottomItems` trong DashboardShell. Commit: `a78662e`.
+25. **Phase 16.2 — Bỏ theme transition cinematic fade**: ✅ Xoá `transition: background-color/color` 800ms từ `.ambient-bg`, `html, body`, `.lqg-body`. Theme switch (Sun/Moon) bây giờ instant. Lý do: cảm giác lag, app focus mode không cần animation. Commit: `cad4ee3`.
+26. **Phase 17 — Floating Action System (Bell + Quick Add FAB)**: ✅ 2 FAB stacked dọc bottom-right desktop+mobile. **NotificationFab** (Bell) — badge 99+, poll 60s pause khi tab hidden, click item mark-read + navigate actionUrl. **QuickAddFab** (`+`) — popover menu items per role (admin 4 / staff 3 / student 3, tần suất cao nhất). FAB style: `bg-ink dark:bg-paper` + `bg-accent text-ink` solid (contrast cao). `side="left"` popover (tránh che FAB phía trên). Single-popover state ở `FloatingActions` (chỉ 1 mở 1 lúc). Cart-bar push-up: `data-shop-cart-bar` MutationObserver detect → đẩy FAB lên cart.height + 12. Hide khi mobile sidebar mở (`hidden={sidebarOpen}`). Z-index: FAB z-40, Popover.Positioner z-[60], popup z-50. Xoá Bell mobile header + sidebar item "Thông báo" student. Commits: `c29108f`, `2d7f219`, `b47651b`.
+27. **Phase 17 — Notification deep-link audit + actionUrl backfill**: ✅ Trang `/shared/notifications` items giờ clickable navigate `actionUrl` (wrap `<button>`, icon `ArrowRight →`). AUDIT toàn bộ `prisma.notification.create`: 12 creator thiếu actionUrl — thêm (assessments → `/student/progress`, payments → `/student/payments`, sessions cancel/restore/registrations → `/student/my-schedule`, shop orders → conditional approve/list, momo webhook → `/student/payments`, etc). Script `prisma/backfill-notification-action-urls.ts` rule-based match title → 16 rules + special case "Đơn hàng được duyệt" lookup metadata.orderId → deep-link `/student/shop/orders/{id}/pay`. Production DB chạy 1 lần → 10/10 noti có actionUrl. Commits: `8255e2d`, `5af27ac`.
+28. **Phase 17 — Hydration fix: Chip asButton nested**: ✅ Lỗi "button cannot be descendant of button" trong 14 chỗ (`<button><Chip asButton>` × 2 + `<Link><Chip asButton>` × 12). Fix: bỏ outer button → Chip asButton onClick trực tiếp; bỏ `asButton` khi parent là Link/a → Chip render span. Files: admin/shop/orders, admin/password-resets, admin/finance/{unmatched,refunds}, admin/profile-requests, admin/exercises, admin/students, admin/shop/products, admin/skill-heatmap, staff/students, student/exercises, public/blog. Commit: `3573b1c`.
+29. **Phase 17.1 — Schedule inline approve/reject** (deprecated bởi 17.5): ✅ Owner click HV pending → expand inline 3 button (Duyệt/Từ chối/Huỷ) → PATCH API + router.refresh. Default reject reason `teacher_decision`. Owner sau muốn multi-select → refactor sang 17.5. Commit: `8516797`.
+30. **Phase 17.2 — Withdraw action (approved → withdrawn)**: ✅ Mở rộng `approveRegistrationSchema.action` enum thêm `withdraw`. API validate status='approved' trước rút. Notification type='cancellation', title 'Bạn đã được rút khỏi buổi học', body kèm ngày + slot. Approved row click expand → 3 button (Cho nghỉ buổi / Xem hồ sơ / Huỷ). Commit: `b2119ab`.
+31. **Phase 17.2 — Theme FOUC fix**: ✅ Inline blocking `<script>` trong `<head>` root layout — đọc localStorage `poolane-theme-v2` SYNC trước first paint, add class `theme-light`/`theme-dark` + `lqg-dark` + `data-theme` attr. Storage key đồng bộ với ThemeProvider. Tránh flash dark→light khi hard refresh. Cũng fix sidebar expansion FOUC qua `useIsomorphicLayoutEffect` (useLayoutEffect client + useEffect SSR fallback) cho `pola.sidebarExpanded` localStorage read. Commits: `3ee3d42`, `b915b29`.
+32. **Phase 17.2 — Hero-block adaptive bg + text-paper override**: ✅ Bug: 61 page dùng `.hero-block` với `text-paper/55` eyebrow — nhưng `.hero-block { background: transparent }` (Phase 9 legacy) → text cream@55% trên nền cream-paper light mode → invisible. Fix single CSS thay vì sửa 61 file: `.hero-block { background: var(--hero-bg); color: var(--hero-fg) }` + override 7 opacity variants (text-paper, /40, /45, /55, /60, /65, /70, /80) qua `color-mix(in srgb, var(--hero-fg) N%, transparent)` trong scope `.hero-block`. Light: ink purple @ 55% trên peach gradient — readable. Dark: cream @ 55% trên navy — readable. Commit: `990c4ab`.
+33. **Phase 17.3 — Admin Settings system (dynamic config)**: ✅ DB table `SystemSetting (key, value Json, updatedAt, updatedBy)`. API `GET /api/admin/settings` + `PATCH` (zod per-key schema validation). Page `/admin/settings` 5 tab (Chip-style):  
+   - **Thao tác nhanh**: catalog `QUICK_ADD_CATALOG` (14 items × roles) + per-role pick max 5 + reorder ↑↓  
+   - **Lọc thông báo**: 9 notification types checkbox (empty = show all)  
+   - **Sidebar**: rename labels per group key (vd `banhang` → "Doanh thu") + reorder ChevronUp/Down  
+   - **Định dạng số**: amount style (`vn_full` `1.300.000đ` / `vn_compact` `1,3M` / `no_symbol` / `us`), percent decimals (0/1/2), thousand separator (`.` VN / `,` US) — defaults cho widget builder  
+   - **Bộ màu**: placeholder ("Sáng/Tối qua ThemeSwitcher")  
+   `lib/settings.ts` exports `SettingsMap`, `SETTING_DEFAULTS`, `getSetting<K>(key)`, `getAllSettings()`. FAB + DashboardShell fetch `/api/settings` (public) + `/api/admin/settings` (admin) → wire sidebar labels, quick add items, notif filter. Pattern: lift dynamic config từ hardcode → DB. Sidebar item "Thiết lập" trong group "Hệ thống". Commits: nhiều — xem `6a96359` series.
+34. **Phase 17.3 — Sidebar restructure**: ✅ Admin: gộp 3 item nhóm cũ "Phân tích" (AI / Heatmap / Hiệu quả giảng dạy) vào "Tổng quan" → xoá nhóm "Phân tích" (8 → 7 groups). Đổi tên "Cửa hàng" → **"Bán hàng"** + thêm item "Cửa hàng" (preview) trỏ `/admin/shop`. Item "Sản phẩm" icon Package thay ShoppingBag (đỡ nhầm với group icon). Thêm group mới "Hệ thống" chứa "Thiết lập". Commits: `6a96359`, `8a41a72`.
+35. **Phase 17.3 — Shop preview Shopee-style + reorder**: ✅ Schema `Product.displayOrder Int @default(0)` + index. Init script `prisma/init-display-order.ts` gán 10, 20, 30... step 10 cho dễ insert middle. API `GET /api/shop/products` orderBy displayOrder ASC. NEW `PATCH /api/shop/products/reorder` swap với neighbor via $transaction (atomic, audit log, admin only). NEW page `/admin/shop` (preview grid 2/3/4 col mobile/tablet/desktop) với badge `#1, #2...` góc trên phải, 2 nút ↑↓ overlay góc trên trái, badge "ĐÃ TẮT" khi inactive, "Hết hàng" khi out-of-stock. Optimistic UI: setItems trước, rollback nếu API fail. Student `/student/shop` cũng convert sang grid layout match preview. Commit: `6a96359`.
+36. **Phase 17.4 — Schedule multi-select bulk action**: ✅ Replace inline expand pattern (Phase 17.1) bằng checkbox-based selection cross-session. Schema action enum thêm `restore` (withdrawn → approved). New components: `ScheduleGrid.tsx` (client wrapper quản lý `selectedIds: Set<string>` + regLookup + counts memo + handle bulk Promise.all PATCH), `SelectionActionBar.tsx` (sticky top, 4 button: Duyệt / Không duyệt / Cho nghỉ / Cho đi học lại với count per status), `InteractiveSessionCard.tsx` (rewrite: checkbox button per row, render 3 nhóm approved/pending/withdrawn visual khác nhau). Query include `'withdrawn'` (trước chỉ approved/pending/waitlist). Action-status matrix: pending→approve→approved, pending→reject→rejected, approved→withdraw→withdrawn, **withdrawn→restore→approved**. Bỏ container hover lift `glass-card-hover`. Commit: `8a41a72`.
+37. **Phase 17.4 — Dashboard Builder Power BI style**: ✅ **Pivot fix**: `pointerWithin` → `closestCenter` (zones stack dọc, closestCenter ít ambiguous), stable DraggableChip key `${zone}:${field.table}.${field.column}:${i}` (bỏ phantom reuse khi field move zone), if-else if cho handleDragEnd remove section (mutual exclusive defensive), drop zone isOver `ring-2 ring-accent bg-accent/15 shadow-soft`. **Canvas free-form**: install `react-grid-layout@^1.5.0` (v2 đổi API hoàn toàn — bỏ WidthProvider HOC → hooks pattern; downgrade về v1.5 stable). DashboardViewClient replace static grid bằng `<ResponsiveGridLayout>` (cols lg=12 md=10 sm=6 xs=4, rowHeight=60, margin 12px), draggableHandle `.widget-drag-handle`, draggableCancel `.widget-actions`, compactType vertical. NEW API `PATCH /api/admin/dashboards/[id]/layout` batch update positions via transaction + audit log. Default widget position `{x:0, y:9999, w:6, h:5}` (compactType đẩy về vị trí khả dụng). Visual: dotted grid bg `.dashboard-canvas` qua radial-gradient theme-aware, hover-reveal resize handle (custom chevron qua CSS border), placeholder dashed accent ring khi drag. Commits: `e973d63`, `4f3418a` (hotfix `prisma.widget` → `prisma.dashboardWidget` model name).
+38. **Phase 17.4 — Notification popover polish**: ✅ Owner feedback: (1) cursor pointer hover, (2) noti không biến mất sau click, (3) viewport 4 items có scroll, (4) "Đánh dấu đọc tất cả" button. ROOT CAUSE biến mất: logic cũ `preview = (unread.length > 0 ? unread : filtered).slice(0, 7)` — khi còn unread, list CHỈ show unread → noti vừa đọc bị filter out → "biến mất". FIX: luôn show `filtered` (sort unread đầu, read sau), slice 20 (DOM limit), scroll area `max-h-[304px]` (~4 items × 76px). Unread visual: `bg-accent/8 ring-1 ring-accent/15 + dot accent + bold`. Read: `opacity 55% + dimmer` — vẫn ở list, phân biệt với unread. Mark-all-read button header phải khi `unreadCount > 0`, optimistic UI + Promise.all PATCH. Commit: `b47651b`.
 
 ### 🟢 DEPLOY ĐÃ HOÀN TẤT (2026-05-15)
 
@@ -849,7 +869,8 @@ price, cost,
 stock_quantity (nullable for non-physical),
 low_stock_threshold,
 photos (json array of urls),
-description, is_active
+description, is_active,
+display_order (Phase 17.3 — admin sắp xếp vị trí hiển thị, step 10, ASC = đầu shop)
 ```
 
 **`orders`**
@@ -1004,7 +1025,43 @@ id, question, answer, category, order_index, is_active
 id, source_label, month, new_signups, conversions, revenue
 ```
 
-### 6.12. Indexes Bắt Buộc
+### 6.12. Settings & Dashboard Builder (Phase 17.3-17.4)
+
+**`system_settings`** — Admin-configurable dynamic config (key/value JSON pattern)
+```
+key (string, PK), value (Json), updated_at, updated_by
+```
+Keys hiện có (TypeScript `SettingsMap` trong `src/lib/settings.ts`):
+- `quick_add.{admin,staff,student}` — array of QuickAddItemKey, max 5
+- `notif_filter.types` — array of NotificationTypeKey (empty = show all)
+- `sidebar_labels.{admin,staff,student}` — Record<groupKey, customLabel>
+- `sidebar_order.{admin,staff,student}` — array string (custom reorder)
+- `format.amount_style` — 'vn_full'|'vn_compact'|'no_symbol'|'us'
+- `format.percent_decimals` — int 0-4
+- `format.thousand_separator` — '.'|','
+
+API: `GET /api/admin/settings` + `PATCH` (zod validate per-key). Public read endpoint `GET /api/settings` cho FAB/sidebar client consumption.
+
+**`dashboards`** — Report dashboard tự build (Phase 17 — BI tool)
+```
+id, owner_id (FK user), name, description (nullable),
+is_home (boolean — set 1 dashboard làm trang chủ thay /admin/dashboard),
+layout (Json — legacy, unused. Single source of truth = widget.position),
+slicers (Json — global filters cross-widget, chưa wire UI),
+time_range (Json — { preset, from, to, compare, field }),
+created_at, updated_at
+```
+
+**`dashboard_widgets`** (Prisma model name: `DashboardWidget`, accessor `prisma.dashboardWidget`)
+```
+id, dashboard_id (FK), title, type (enum: pivot/chart/heatmap/kpi),
+config (Json — WidgetConfig: rootTable, joins, rows, columns, values, filters, sort, visualization),
+position (Json — { x, y, w, h } cho react-grid-layout v1.5),
+created_at, updated_at
+```
+Config types ở `src/lib/dashboard/types.ts`. SQL builder ở `src/lib/dashboard/query-builder.ts` — schema-validated whitelist + parameterized query + LIMIT 10000.
+
+### 6.13. Indexes Bắt Buộc
 
 ```sql
 -- Tăng tốc các query phổ biến
@@ -2006,6 +2063,58 @@ Yêu cầu:
 
 **Trade-off:** prompt cụ thể = 1 round-trip; prompt mơ hồ ("bỏ hiệu ứng này") = 3-5 round-trip.
 
+### 14.7. FOUC (Flash Of Unstyled Content) Audit Pattern (Phase 17.2 lesson)
+
+**MỤC TIÊU**: Mọi giá trị derived từ `localStorage`/`sessionStorage` mà ảnh hưởng UI phải apply TRƯỚC first paint, không trong `useEffect` (chạy SAU paint = flash).
+
+**Audit thường xuyên** — grep `localStorage.getItem` trong `src/`:
+
+| State scope | Fix pattern |
+|---|---|
+| Toàn trang (theme bg/text) | Inline blocking `<script>` trong `<head>` root layout — chạy trước cả React mount |
+| Element nhỏ (sidebar, dropdown) | `useIsomorphicLayoutEffect` — `useLayoutEffect` client + `useEffect` SSR fallback (tránh warn) |
+| Local UI (cart, form) | `useState` thường — không persist thì không FOUC |
+| Async fetch (API data) | Loading state acceptable, hiện skeleton/spinner |
+
+Ví dụ inline script cho theme (root layout.tsx, BẮT BUỘC khi default theme mode khác system default):
+```html
+<script dangerouslySetInnerHTML={{ __html: `(function(){try{var s=localStorage.getItem('poolane-theme-v2');var t=(s==='dark'||s==='light')?s:'light';var h=document.documentElement;h.classList.add('theme-'+t);if(t==='dark')h.classList.add('lqg-dark');h.setAttribute('data-theme',t);}catch(e){...}})();` }} />
+```
+Đồng bộ storage key + class names với ThemeProvider; bump key version khi reset preference (Phase 13.2 → `poolane-theme-v2`). `suppressHydrationWarning` trên `<html>` bắt buộc vì script mutate className trước React mount.
+
+### 14.8. Library Version Pinning Discipline (Phase 17.4 hotfix lesson)
+
+**Khi `npm install` lib mới**: LUÔN check MAJOR version semver. Latest có thể là breaking change.
+
+**Trường hợp `react-grid-layout`**: `npm i react-grid-layout` mặc định install latest v2.2.3. **v2 đã rewrite hoàn toàn API** — bỏ `WidthProvider` HOC pattern, thay bằng hooks (`useContainerWidth`, `useResponsiveLayout`). Code v1 pattern (`import { Responsive, WidthProvider }`) build fail:
+```
+Export WidthProvider doesn't exist in target module
+```
+
+**Fix**: downgrade `^1.5.0` (stable CJS). Pin explicit range cho stable, không `latest` mà chưa migrate API.
+
+**Pre-commit checklist khi install new lib**:
+1. `npm view <lib> versions --json | tail -5` — xem latest version
+2. Đọc CHANGELOG → check breaking changes giữa major
+3. Test `npm run build` local TRƯỚC commit
+4. Nếu Vercel deploy lỗi → owner thấy site down
+
+### 14.9. Prisma Model Accessor Discipline (Phase 17.4 hotfix lesson)
+
+**Model name = camelCase trên `prisma.*` accessor.**
+
+| Prisma schema | Accessor đúng | Sai (catch ở compile) |
+|---|---|---|
+| `model DashboardWidget` | `prisma.dashboardWidget` | `prisma.widget` |
+| `model SessionRegistration` | `prisma.sessionRegistration` | `prisma.registration` |
+| `model SystemSetting` | `prisma.systemSetting` | `prisma.setting` |
+
+**Workflow sau khi sửa schema**:
+1. `npx prisma db push` — sync schema lên DB
+2. `npx prisma generate` — regenerate client với types mới
+3. **RESTART dev server** (Turbopack cache stale Prisma client)
+4. `npm run build` — full pipeline (compile + typecheck + static gen). Sandbox có thể fail ở static gen do DB unreachable — acceptable, Vercel sẽ pass
+
 ---
 
 ## 15. Operational Principles (Production Discipline)
@@ -2436,7 +2545,7 @@ Những điều CHƯA chốt, cần quyết định trước khi build:
 
 ---
 
-**Phiên bản:** 1.4 — Phase 15-16.1 (AI + payment + data integrity + quiet luxury + lint clean)
+**Phiên bản:** 1.5 — Phase 16.2-17.4 (FAB system + notification deep-link + dynamic settings + bulk schedule actions + Power BI dashboard builder + Shop preview/reorder + hero-block fix + FOUC fixes + lessons)
 **Cập nhật cuối:** 2026-05-16
 **Maintainer:** Owner + AI
 
