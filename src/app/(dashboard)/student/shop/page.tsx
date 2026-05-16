@@ -5,11 +5,12 @@ import { toast } from 'sonner'
 import {
   ShoppingCart, Plus, Minus, Package, Loader2, CheckCircle, Search, History,
   BookOpen, Waves, Sparkles, Box, ArrowRight, X, ChevronLeft, ChevronRight,
-  Ticket,
+  ChevronUp, Ticket,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Dialog } from '@base-ui/react/dialog'
 import { Chip } from '@/components/ui/Chip'
+import { CartDrawer, type CartDrawerItem } from '@/components/features/CartDrawer'
 
 type Product = {
   id: string
@@ -53,6 +54,7 @@ export default function ShopPage() {
   const [typeFilter, setTypeFilter] = useState('')
   const [search, setSearch] = useState('')
   const [detailProduct, setDetailProduct] = useState<Product | null>(null)
+  const [cartDrawerOpen, setCartDrawerOpen] = useState(false)
 
   useEffect(() => {
     fetch('/api/shop/products?isActive=true&pageSize=100')
@@ -86,6 +88,14 @@ export default function ShopPage() {
     })
   }
 
+  function removeAllFromCart(id: string) {
+    setCart(prev => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
+  }
+
   const cartItems = Object.entries(cart).filter(([, qty]) => qty > 0)
   const cartTotal = cartItems.reduce((sum, [id, qty]) => {
     const p = products.find(p => p.id === id)
@@ -108,6 +118,7 @@ export default function ShopPage() {
       if (!res.ok || data.error) { toast.error(data.error?.message ?? 'Lỗi'); return }
       setOrdered(true)
       setCart({})
+      setCartDrawerOpen(false)
       toast.success('Đặt hàng thành công! Chờ duyệt nhé')
     } catch {
       toast.error('Không thể kết nối')
@@ -230,6 +241,12 @@ export default function ShopPage() {
                         <TypeIcon className="h-12 w-12 text-accent opacity-50" strokeWidth={1.5} />
                       </div>
                     )}
+                    {/* Qty badge nếu trong giỏ — góc trên trái, prominent */}
+                    {qty > 0 && (
+                      <span className="absolute top-2 left-2 inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-pill bg-accent text-ink text-sm font-bold shadow-cta ring-2 ring-paper">
+                        {qty}
+                      </span>
+                    )}
                     {/* Multi-photo badge */}
                     {p.photos && p.photos.length > 1 && (
                       <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-pill bg-ink/70 text-paper text-[10px] font-semibold backdrop-blur-sm">
@@ -270,37 +287,19 @@ export default function ShopPage() {
                     </div>
 
                     <div className="mt-auto">
-                      {qty === 0 ? (
-                        <button
-                          onClick={() => !isOutOfStock && addToCart(p.id)}
-                          disabled={isOutOfStock}
-                          className={`w-full h-9 rounded-pill text-xs font-semibold transition ${
-                            isOutOfStock
-                              ? 'bg-foreground/5 text-foreground/30 cursor-not-allowed'
+                      <button
+                        onClick={() => !isOutOfStock && addToCart(p.id)}
+                        disabled={isOutOfStock}
+                        className={`w-full h-9 rounded-pill text-xs font-semibold transition ${
+                          isOutOfStock
+                            ? 'bg-foreground/5 text-foreground/30 cursor-not-allowed'
+                            : qty > 0
+                              ? 'bg-success/15 text-success ring-1 ring-success/30 hover:bg-success/25'
                               : 'bg-ink text-paper hover:bg-foreground/90'
-                          }`}
-                        >
-                          {isOutOfStock ? 'Hết hàng' : '+ Thêm'}
-                        </button>
-                      ) : (
-                        <div className="flex items-center justify-between bg-paper-tint rounded-pill px-1.5 py-1">
-                          <button
-                            onClick={() => removeFromCart(p.id)}
-                            aria-label="Bớt 1"
-                            className="h-7 w-7 rounded-pill bg-[var(--surface)] ring-1 ring-foreground/10 grid place-items-center hover:bg-danger/10 hover:ring-danger/30 transition"
-                          >
-                            <Minus className="h-3 w-3" strokeWidth={2.25} />
-                          </button>
-                          <span className="lqg-numeric-sans text-sm text-foreground font-bold">{qty}</span>
-                          <button
-                            onClick={() => addToCart(p.id)}
-                            aria-label="Thêm 1"
-                            className="h-7 w-7 rounded-pill bg-ink text-paper grid place-items-center hover:bg-foreground/90 transition"
-                          >
-                            <Plus className="h-3 w-3" strokeWidth={2.5} />
-                          </button>
-                        </div>
-                      )}
+                        }`}
+                      >
+                        {isOutOfStock ? 'Hết hàng' : qty > 0 ? `Đã thêm (${qty}) · Thêm 1` : '+ Thêm vào giỏ'}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -319,39 +318,51 @@ export default function ShopPage() {
         onRemove={removeFromCart}
       />
 
-      {/* Fixed cart bottom */}
+      {/* Fixed cart bar bottom — tap để mở CartDrawer */}
       {cartItems.length > 0 && (
-        <div data-shop-cart-bar className="fixed bottom-0 inset-x-0 z-30 p-4 max-w-3xl mx-auto">
-          <div className="rounded-card-xl bg-ink text-paper p-4 shadow-glass ring-1 ring-paper/12">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="grid place-items-center h-9 w-9 rounded-pill bg-accent/20">
-                <ShoppingCart className="h-4 w-4 text-accent" strokeWidth={2} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-paper/65">{cartItems.length} sản phẩm trong giỏ</p>
-                <p className="lqg-numeric-sans text-2xl text-paper font-bold leading-none mt-1">{fmt(cartTotal)}</p>
-              </div>
+        <button
+          type="button"
+          data-shop-cart-bar
+          onClick={() => setCartDrawerOpen(true)}
+          className="fixed bottom-0 inset-x-0 z-30 p-4 max-w-3xl mx-auto block"
+        >
+          <div className="rounded-card-xl bg-ink text-paper p-3 px-4 shadow-glass ring-1 ring-paper/12 flex items-center gap-3 hover:bg-foreground/95 transition cursor-pointer">
+            <div className="grid place-items-center h-9 w-9 rounded-pill bg-accent/20 shrink-0">
+              <ShoppingCart className="h-4 w-4 text-accent" strokeWidth={2} />
             </div>
-            <input
-              placeholder="Ghi chú cho lớp (tuỳ chọn)"
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              className="w-full h-9 px-3 text-sm rounded-pill bg-paper/10 ring-1 ring-paper/15 placeholder:text-paper/40 text-paper mb-3 focus:outline-none focus:ring-accent/40 transition"
-            />
-            <button
-              className="w-full bg-accent text-ink font-semibold h-11 rounded-pill hover:bg-accent/90 transition disabled:opacity-60 inline-flex items-center justify-center gap-2"
-              disabled={ordering}
-              onClick={placeOrder}
-            >
-              {ordering ? (
-                <><Loader2 className="h-4 w-4 animate-spin" /> Đang đặt...</>
-              ) : (
-                <>Đặt hàng · {fmt(cartTotal)}</>
-              )}
-            </button>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-xs text-paper/65">{cartItems.length} sản phẩm · Bấm để xem giỏ</p>
+              <p className="lqg-numeric-sans text-xl text-paper font-bold leading-none mt-0.5">{fmt(cartTotal)}</p>
+            </div>
+            <ChevronUp className="h-5 w-5 text-paper/65 shrink-0" strokeWidth={2.25} />
           </div>
-        </div>
+        </button>
       )}
+
+      {/* Cart drawer — bottom sheet quản lý qty + đặt hàng */}
+      <CartDrawer
+        open={cartDrawerOpen}
+        onOpenChange={setCartDrawerOpen}
+        items={cartItems.map<CartDrawerItem>(([id, qty]) => {
+          const p = products.find(p => p.id === id)
+          return {
+            productId: id,
+            name: p?.name ?? 'Sản phẩm',
+            price: p?.price ?? 0,
+            qty,
+            photo: p?.photos?.[0] ?? null,
+            isOutOfStock: p?.type === 'physical' && p?.stockQuantity !== null && (p?.stockQuantity ?? 0) <= 0,
+          }
+        })}
+        total={cartTotal}
+        note={note}
+        onNoteChange={setNote}
+        onAdd={addToCart}
+        onRemove={removeFromCart}
+        onRemoveAll={removeAllFromCart}
+        onCheckout={placeOrder}
+        ordering={ordering}
+      />
     </div>
   )
 }
