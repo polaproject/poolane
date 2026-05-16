@@ -10,6 +10,7 @@ export interface AuthUser {
   phone: string | null
   role: UserRole
   fullName: string
+  avatarUrl: string | null
 }
 
 // Lấy user hiện tại từ JWT + DB (fallback to JWT nếu DB fail)
@@ -28,7 +29,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     try {
       const { data: profile } = await supabase
         .from('users')
-        .select('role, full_name, phone')
+        .select('role, full_name, phone, avatar_url')
         .eq('id', user.id)
         .single()
 
@@ -39,6 +40,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
           phone: profile.phone,
           role: (profile.role ?? jwtRole) as UserRole,
           fullName: profile.full_name ?? jwtFullName,
+          avatarUrl: profile.avatar_url ?? null,
         }
       }
     } catch {
@@ -53,6 +55,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       phone: null,
       role: jwtRole,
       fullName: jwtFullName,
+      avatarUrl: null,
     }
 
   } catch (error) {

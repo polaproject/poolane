@@ -32,5 +32,17 @@ export const resetPasswordSchema = z.object({
   requestId: z.string().uuid(),
 })
 
+export const changePasswordSchema = z.object({
+  newPassword: z.string().min(8, { message: 'Mật khẩu phải ít nhất 8 ký tự' }).max(100),
+  confirmPassword: z.string(),
+}).refine(d => d.newPassword === d.confirmPassword, {
+  message: 'Xác nhận mật khẩu không khớp',
+  path: ['confirmPassword'],
+})
+
+export const updateAvatarSchema = z.object({
+  avatarUrl: z.string().url().nullable(),
+})
+
 export type RegisterInput = z.infer<typeof registerSchema>
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>

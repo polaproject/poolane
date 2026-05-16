@@ -17,6 +17,7 @@ export default async function DashboardLayout({
       userRole={user.role}
       userFullName={user.fullName}
       userInitial={initial}
+      userAvatarUrl={user.avatarUrl}
     >
       {children}
     </DashboardShell>

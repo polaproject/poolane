@@ -203,22 +203,31 @@ const BOTTOM_NAV: Record<UserRole, NavItem[]> = {
 function AvatarPopoverButton({
   userInitial,
   userRole,
+  userAvatarUrl,
   size = 'sm',
 }: {
   userInitial: string
   userRole: UserRole
+  userAvatarUrl?: string | null
   size?: 'sm' | 'md'
 }) {
   const [open, setOpen] = useState(false)
   const dim = size === 'md' ? 'w-9 h-9 text-sm' : 'w-8 h-8 text-sm'
 
+  const avatarInner = userAvatarUrl ? (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img src={userAvatarUrl} alt="" className="w-full h-full object-cover" />
+  ) : (
+    <span>{userInitial}</span>
+  )
+
   if (userRole !== 'student') {
     return (
       <div
-        className={`${dim} rounded-full flex items-center justify-center font-bold flex-shrink-0`}
+        className={`${dim} rounded-full flex items-center justify-center font-bold flex-shrink-0 overflow-hidden`}
         style={{ background: 'var(--pola-accent)', color: '#000' }}
       >
-        {userInitial}
+        {avatarInner}
       </div>
     )
   }
@@ -227,10 +236,10 @@ function AvatarPopoverButton({
     <Popover.Root open={open} onOpenChange={setOpen} modal={false}>
       <Popover.Trigger
         aria-label="Tài khoản cá nhân"
-        className={`${dim} rounded-full flex items-center justify-center font-bold flex-shrink-0 hover:opacity-90 transition-opacity cursor-pointer`}
+        className={`${dim} rounded-full flex items-center justify-center font-bold flex-shrink-0 hover:opacity-90 transition-opacity cursor-pointer overflow-hidden`}
         style={{ background: 'var(--pola-accent)', color: '#000' }}
       >
-        {userInitial}
+        {avatarInner}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="end" sideOffset={8} className="z-[60]">
@@ -265,9 +274,10 @@ interface DashboardShellProps {
   userRole: UserRole
   userFullName: string
   userInitial: string
+  userAvatarUrl?: string | null
 }
 
-function ShellInner({ children, userRole, userFullName, userInitial }: DashboardShellProps) {
+function ShellInner({ children, userRole, userFullName, userInitial, userAvatarUrl }: DashboardShellProps) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -508,10 +518,15 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
           style={{ borderColor: 'var(--pola-nav-active)' }}
         >
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 overflow-hidden"
             style={{ background: 'var(--pola-accent)', color: '#000' }}
           >
-            {userInitial}
+            {userAvatarUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img src={userAvatarUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              userInitial
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium truncate" style={{ color: 'var(--pola-nav-text)' }}>
@@ -576,7 +591,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
           </div>
           <div className="ml-auto flex items-center gap-1">
             <ThemeSwitcherCompact />
-            <AvatarPopoverButton userInitial={userInitial} userRole={userRole} size="md" />
+            <AvatarPopoverButton userInitial={userInitial} userRole={userRole} userAvatarUrl={userAvatarUrl} size="md" />
           </div>
         </header>
 
