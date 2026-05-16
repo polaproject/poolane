@@ -49,9 +49,26 @@ export async function GET(request: NextRequest) {
       prisma.product.count({ where })
     ])
 
+    // Tính số đã bán mỗi product = SUM(orderItem.quantity) WHERE order.status
+    // IN ('paid', 'fulfilled'). Bỏ pending/approved/cancelled (chưa thực sự
+    // bán xong). Group theo productId rồi map ngược về items.
+    const productIds = items.map(i => i.id)
+    const soldGroups = productIds.length > 0
+      ? await prisma.orderItem.groupBy({
+          by: ['productId'],
+          where: {
+            productId: { in: productIds },
+            order: { status: { in: ['paid', 'fulfilled'] } },
+          },
+          _sum: { quantity: true },
+        })
+      : []
+    const soldMap = new Map(soldGroups.map(g => [g.productId, g._sum.quantity ?? 0]))
+    const itemsWithSold = items.map(it => ({ ...it, soldCount: soldMap.get(it.id) ?? 0 }))
+
     return NextResponse.json({
       data: {
-        items,
+        items: itemsWithSold,
         total,
         page,
         pageSize,

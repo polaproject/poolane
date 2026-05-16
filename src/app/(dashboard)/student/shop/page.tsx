@@ -20,6 +20,8 @@ type Product = {
   description: string | null
   sessionsCount: number | null
   photos: string[]
+  /** Số lượng đã bán (sum orderItem.quantity với order paid/fulfilled). */
+  soldCount: number
 }
 
 const TYPE_META: Record<string, { label: string; Icon: typeof BookOpen }> = {
@@ -238,10 +240,15 @@ export default function ShopPage() {
 
                   {/* Info */}
                   <div className="p-3 flex-1 flex flex-col">
-                    <div className="flex items-center gap-1.5 mb-1.5">
+                    <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
                       <Chip variant="mist" className="text-[10px]">
                         <TypeIcon className="h-2.5 w-2.5" strokeWidth={2.25} /> {typeMeta.label}
                       </Chip>
+                      {p.soldCount > 0 && (
+                        <span className="text-[10px] text-foreground/55">
+                          · Đã bán {p.soldCount}
+                        </span>
+                      )}
                       {p.sessionsCount && (
                         <span className="text-[10px] text-foreground/55">· {p.sessionsCount} buổi</span>
                       )}
@@ -473,7 +480,7 @@ function ProductDetailModal({
                 <X className="h-4 w-4" strokeWidth={2} />
               </Dialog.Close>
 
-              <div className="flex items-center gap-2 mb-2 pr-10">
+              <div className="flex items-center gap-2 mb-2 pr-10 flex-wrap">
                 <Chip variant="mist" className="text-[10px]">
                   <TypeIcon className="h-2.5 w-2.5" strokeWidth={2.25} /> {typeMeta.label}
                 </Chip>
@@ -481,6 +488,11 @@ function ProductDetailModal({
                   <Chip variant="accent" className="text-[10px]">
                     {product.sessionsCount} buổi
                   </Chip>
+                )}
+                {product.soldCount > 0 && (
+                  <span className="text-xs text-foreground/55">
+                    · Đã bán {product.soldCount}
+                  </span>
                 )}
               </div>
 
