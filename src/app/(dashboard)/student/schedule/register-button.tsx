@@ -3,10 +3,15 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Loader2, Plus, Clock, Check, X, Hourglass } from 'lucide-react'
+import { format } from 'date-fns'
+import { vi } from 'date-fns/locale'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 interface RegisterPlusProps {
   sessionId: string
   studentId: string
+  sessionDate: Date
+  timeSlot: 'morning' | 'evening' | string
   disabled?: boolean
   disabledReason?: string
   enrollmentId?: string
@@ -15,12 +20,14 @@ interface RegisterPlusProps {
 
 /**
  * Compact `+` button cho mỗi session row.
+ * Click → mở confirm dialog (tránh misclick mobile) → submit.
  * Sau khi đăng ký → morph thành Clock icon (pending status, vàng).
- * Disabled (hết vé / full) → opacity giảm + tooltip.
  */
 export function RegisterPlusButton({
   sessionId,
   studentId,
+  sessionDate,
+  timeSlot,
   disabled,
   disabledReason,
   enrollmentId,
@@ -47,7 +54,12 @@ export function RegisterPlusButton({
       }
 
       setRegistered(true)
-      toast.success('Đã đăng ký! Chờ giáo viên duyệt 😊')
+      const pos = data.data?.waitlistPosition as number | null | undefined
+      if (typeof pos === 'number' && pos > 0) {
+        toast.success(`Bạn đang ở vị trí #${pos} trong danh sách chờ`)
+      } else {
+        toast.success('Đã đăng ký! Chờ giáo viên duyệt 😊')
+      }
     } catch {
       toast.error('Không thể kết nối')
     } finally {
@@ -55,7 +67,7 @@ export function RegisterPlusButton({
     }
   }
 
-  // After registration → show pending status icon
+  // After registration → pending icon
   if (registered) {
     return (
       <span
@@ -68,7 +80,7 @@ export function RegisterPlusButton({
     )
   }
 
-  // Full session — show muted X
+  // Full session — muted X
   if (isFull) {
     return (
       <span
@@ -81,10 +93,17 @@ export function RegisterPlusButton({
     )
   }
 
-  return (
+  const isMorning = timeSlot === 'morning'
+  const timeText = isMorning ? 'sáng (5:30 – 7:30)' : 'chiều (18:00 – 20:00)'
+  const dateText = format(sessionDate, 'EEEE, dd/MM/yyyy', { locale: vi })
+  const confirmTitle = `Đăng ký buổi ${timeText}?`
+  const confirmDesc = `${dateText.charAt(0).toUpperCase() + dateText.slice(1)} — giáo viên sẽ duyệt sau khi bạn đăng ký.`
+
+  // Trigger button — sẽ được ConfirmDialog "render" thay vì wrap.
+  // Phải KHÔNG có onClick fetch — onClick mở dialog tự động qua AlertDialog.Trigger.
+  const triggerButton = (
     <button
       type="button"
-      onClick={handleRegister}
       disabled={disabled || loading}
       title={disabledReason ?? 'Đăng ký buổi này'}
       aria-label={disabledReason ?? 'Đăng ký buổi này'}
@@ -101,6 +120,20 @@ export function RegisterPlusButton({
         : <Plus className="h-5 w-5" strokeWidth={2.5} />
       }
     </button>
+  )
+
+  // Nếu disabled, trả button thường (không mở dialog).
+  if (disabled) return triggerButton
+
+  return (
+    <ConfirmDialog
+      trigger={triggerButton}
+      title={confirmTitle}
+      description={confirmDesc}
+      confirmLabel="Đăng ký"
+      cancelLabel="Huỷ"
+      onConfirm={handleRegister}
+    />
   )
 }
 

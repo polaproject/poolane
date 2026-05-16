@@ -46,6 +46,16 @@ export default async function MySchedulePage() {
   })
   const attendanceMap = new Map(attendance.map(a => [a.sessionId, a.status]))
 
+  // Tính vị trí waitlist cho mỗi reg đang ở waitlist (FIFO theo registeredAt)
+  const waitlistRegs = upcoming.filter(r => r.status === 'waitlist')
+  const waitlistPositions = new Map<string, number>()
+  for (const r of waitlistRegs) {
+    const pos = await prisma.sessionRegistration.count({
+      where: { sessionId: r.sessionId, status: 'waitlist', registeredAt: { lte: r.registeredAt } },
+    })
+    waitlistPositions.set(r.id, pos)
+  }
+
   return (
     <div className="min-h-screen bg-paper pb-12">
       {/* Hero */}
@@ -74,16 +84,20 @@ export default async function MySchedulePage() {
           {upcoming.map(r => {
             const cfg = STATUS_CONFIG[r.status] ?? STATUS_CONFIG.pending
             const cancelled = r.session.status === 'cancelled'
+            const waitPos = r.status === 'waitlist' ? waitlistPositions.get(r.id) : undefined
+            const statusLabel = typeof waitPos === 'number' ? `Vị trí #${waitPos}` : cfg.label
+            const showFindOther = r.status === 'rejected' || r.status === 'withdrawn'
             return (
               <RegRow
                 key={r.id}
                 date={r.session.date}
                 timeSlot={r.session.timeSlot}
-                statusLabel={cfg.label}
+                statusLabel={statusLabel}
                 statusVariant={cfg.variant}
                 StatusIcon={cfg.Icon}
                 cancelled={cancelled}
                 rejectedReason={r.rejectedReasonText ?? null}
+                showFindOther={showFindOther}
               />
             )
           })}
@@ -150,7 +164,7 @@ function Section({
 }
 
 function RegRow({
-  date, timeSlot, statusLabel, statusVariant, StatusIcon, cancelled, past, rejectedReason,
+  date, timeSlot, statusLabel, statusVariant, StatusIcon, cancelled, past, rejectedReason, showFindOther,
 }: {
   date: Date
   timeSlot: string
@@ -160,6 +174,7 @@ function RegRow({
   cancelled?: boolean
   past?: boolean
   rejectedReason?: string | null
+  showFindOther?: boolean
 }) {
   const isMorning = timeSlot === 'morning'
   return (
@@ -193,6 +208,14 @@ function RegRow({
         )}
         {rejectedReason && (
           <p className="text-xs text-danger mt-1.5">Lý do: {rejectedReason}</p>
+        )}
+        {showFindOther && (
+          <Link
+            href="/student/schedule"
+            className="text-xs text-accent hover:underline inline-flex items-center gap-1 mt-1.5"
+          >
+            Tìm buổi khác <ArrowRight className="h-3 w-3" strokeWidth={2.25} />
+          </Link>
         )}
       </div>
       <Chip variant={statusVariant} active className="shrink-0">

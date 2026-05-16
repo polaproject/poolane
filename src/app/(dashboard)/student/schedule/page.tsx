@@ -4,7 +4,8 @@ import { format, startOfWeek, addDays, isSameWeek, isToday, isTomorrow, isPast, 
 import { vi } from 'date-fns/locale'
 import { RegisterPlusButton, StatusIcon } from './register-button'
 import { SESSION_TIMES } from '@/config/constants'
-import { Calendar, Sunrise, Sunset, Ticket, AlertCircle, Users } from 'lucide-react'
+import { Calendar, Sunrise, Sunset, Ticket, AlertCircle, Users, Clock as ClockIcon } from 'lucide-react'
+import { getAverageApprovalHours } from '@/lib/registration-sla'
 
 export default async function StudentSchedulePage() {
   const user = await requireRole(['admin', 'staff', 'student'])
@@ -42,6 +43,10 @@ export default async function StudentSchedulePage() {
   const ticketLow = sessionsLeft !== null && sessionsLeft <= 2
   const noTicket = !ticket
   const outOfTicket = sessionsLeft === 0
+
+  const { hoursAvg, sampleSize } = await getAverageApprovalHours()
+  const showSla = sampleSize >= 5
+  const slaLabel = hoursAvg < 1 ? '<1' : String(Math.round(hoursAvg))
 
   // Group sessions by date string (yyyy-MM-dd)
   const byDate = new Map<string, typeof sessions>()
@@ -105,6 +110,13 @@ export default async function StudentSchedulePage() {
               </p>
             </div>
           </div>
+        )}
+
+        {showSla && (
+          <p className="inline-flex items-center gap-1.5 text-xs text-foreground/65 px-1">
+            <ClockIcon className="h-3.5 w-3.5 text-mist" strokeWidth={2} />
+            Giáo viên thường duyệt trong ~{slaLabel} giờ
+          </p>
         )}
 
         {sessions.length === 0 ? (
@@ -281,6 +293,8 @@ function SessionRow({
           <RegisterPlusButton
             sessionId={session.id}
             studentId={student.id}
+            sessionDate={session.date}
+            timeSlot={session.timeSlot}
             disabled={disabled}
             disabledReason={disabledReason}
             enrollmentId={student.enrollments[0]?.courseId}

@@ -3,13 +3,14 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import {
   Calendar, TrendingUp, Bell, ShoppingBag, ArrowRight, Ticket,
-  BookOpen, Sparkles, Sunrise, Sunset,
+  BookOpen, Sparkles, Sunrise, Sunset, AlertCircle,
 } from 'lucide-react'
 import { format, isToday } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { Chip } from '@/components/ui/Chip'
 import { StarField } from '@/components/brand/StarField'
 import { Stagger } from '@/components/motion/Stagger'
+import { getStudentDebt } from '@/lib/student-finance'
 
 export default async function StudentDashboard() {
   const user = await requireRole(['student'])
@@ -60,6 +61,9 @@ export default async function StudentDashboard() {
   const ticketProgress = ticket ? Math.min(100, (ticket.sessionsUsed / ticket.maxSessions) * 100) : 0
   const ticketLow = sessionsLeft !== null && sessionsLeft <= 2
 
+  const debts = student ? await getStudentDebt(student.id) : []
+  const totalDebt = debts.reduce((s, d) => s + d.debt, 0)
+
   const greeting = (() => {
     const hour = new Date().getHours()
     if (hour < 6) return 'Bơi sáng sớm cùng Poolane,'
@@ -94,6 +98,30 @@ export default async function StudentDashboard() {
       </div>
 
       <div className="px-4 sm:px-8 -mt-10 max-w-3xl mx-auto space-y-4 relative z-10">
+        {/* ── DEBT WARNING (nếu có) ──────────────────────── */}
+        {debts.length > 0 && (
+          <Link
+            href="/student/payments"
+            className="block rounded-card-lg bg-warn/10 ring-1 ring-warn/30 p-4 hover:ring-warn/50 transition group"
+          >
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-warn shrink-0 mt-0.5" strokeWidth={1.75} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">
+                  Khoản cần đóng ({debts.length})
+                </p>
+                <p className="lqg-headline text-2xl text-warn mt-0.5">
+                  {totalDebt.toLocaleString('vi-VN')}đ
+                </p>
+                <p className="inline-flex items-center gap-1 text-xs text-accent mt-1 group-hover:underline">
+                  Xem chi tiết và thanh toán
+                  <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" strokeWidth={2.25} />
+                </p>
+              </div>
+            </div>
+          </Link>
+        )}
+
         {/* ── TICKET + NEXT SESSION (2 col) ──────────────── */}
         <div className="grid sm:grid-cols-2 gap-4">
           {/* Pool ticket */}

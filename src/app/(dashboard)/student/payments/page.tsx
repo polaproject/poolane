@@ -9,6 +9,7 @@ import {
 import Link from 'next/link'
 import { Chip } from '@/components/ui/Chip'
 import { StatCard } from '@/components/ui/StatCard'
+import { getStudentDebt } from '@/lib/student-finance'
 
 type IconType = typeof Ticket
 const TYPE_CONFIG: Record<string, { label: string; Icon: IconType }> = {
@@ -36,29 +37,14 @@ export default async function StudentPaymentsPage() {
     return <div className="p-8 text-center text-foreground/55">Không tìm thấy hồ sơ</div>
   }
 
-  const [payments, pendingEnrollments] = await Promise.all([
+  const [payments, debtEnrollments] = await Promise.all([
     prisma.payment.findMany({
       where: { studentId: student.id },
       orderBy: { recordedAt: 'desc' },
       take: 100,
     }),
-    prisma.enrollment.findMany({
-      where: { studentId: student.id, status: { in: ['active', 'extension'] } },
-      include: { course: { select: { name: true, code: true, price: true } } },
-    }),
+    getStudentDebt(student.id),
   ])
-
-  const debtEnrollments = pendingEnrollments
-    .map(e => ({
-      id: e.id,
-      courseName: e.course.name,
-      courseCode: e.course.code,
-      coursePrice: e.course.price,
-      totalPaid: e.totalPaid,
-      debt: e.course.price - e.totalPaid,
-      deadline: e.paymentDeadline,
-    }))
-    .filter(e => e.debt > 0)
 
   const totalIn = payments.filter(p => p.amount > 0).reduce((s, p) => s + p.amount, 0)
   const totalOut = payments.filter(p => p.amount < 0).reduce((s, p) => s + Math.abs(p.amount), 0)
@@ -84,7 +70,7 @@ export default async function StudentPaymentsPage() {
             </div>
             <div className="divide-y divide-warn/20">
               {debtEnrollments.map(e => (
-                <div key={e.id} className="px-5 py-4 space-y-3">
+                <div key={e.enrollmentId} className="px-5 py-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="lqg-headline text-xl text-foreground leading-tight">{e.courseName}</p>
@@ -100,7 +86,7 @@ export default async function StudentPaymentsPage() {
                     <p className="lqg-headline text-2xl text-warn shrink-0">{fmt(e.debt)}</p>
                   </div>
                   <Link
-                    href={`/student/payments/enrollment/${e.id}/pay`}
+                    href={`/student/payments/enrollment/${e.enrollmentId}/pay`}
                     className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-ink text-paper rounded-pill text-sm font-semibold hover:bg-foreground/90 transition shadow-soft"
                   >
                     <QrCode className="h-4 w-4" strokeWidth={1.75} /> Thanh toán qua chuyển khoản

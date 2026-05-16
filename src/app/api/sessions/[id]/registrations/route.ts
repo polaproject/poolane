@@ -140,12 +140,24 @@ export async function POST(request: NextRequest, { params }: Params) {
       }
     })
 
+    // Nếu vào waitlist, tính vị trí (FIFO: registeredAt sớm hơn = position thấp hơn)
+    let waitlistPosition: number | null = null
+    if (registration.status === 'waitlist') {
+      waitlistPosition = await prisma.sessionRegistration.count({
+        where: {
+          sessionId,
+          status: 'waitlist',
+          registeredAt: { lte: registration.registeredAt },
+        },
+      })
+    }
+
     log.info('registrations.create', `Student ${studentId} registered for session ${sessionId}`, {
-      status: registration.status, registeredBy: user.id
+      status: registration.status, registeredBy: user.id, waitlistPosition
     })
 
     return NextResponse.json(
-      { data: registration, error: null },
+      { data: { ...registration, waitlistPosition }, error: null },
       { status: 201 }
     )
 
