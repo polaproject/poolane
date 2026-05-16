@@ -435,10 +435,27 @@ select.input-pola:focus {
 /* Phase 9 — Hero block: transparent để blend với ambient-bg, không tạo "band cut".
  * Text color inherit từ ambient-bg theme.
  * Decorative blob + StarField vẫn render trong hero, tạo focus area phía trên page. */
+/* ════════════════════════════════════════════════════════════
+ * HERO BLOCK — band header trên đầu mỗi page (eyebrow + h1)
+ * Background + color đổi theo theme:
+ *   dark  → bg navy đậm (--ink), text cream
+ *   light → bg gradient peach, text ink đậm
+ * Override Tailwind text-paper/N utilities (hardcode cream) để adapt:
+ *   trong hero scope, text-paper → --hero-fg (cream trong dark, ink trong light)
+ * ════════════════════════════════════════════════════════════ */
 .hero-block {
-  background: transparent;
+  background: var(--hero-bg);
+  color: var(--hero-fg);
   position: relative;
 }
+.hero-block .text-paper       { color: var(--hero-fg); }
+.hero-block .text-paper\/40   { color: color-mix(in srgb, var(--hero-fg) 40%, transparent); }
+.hero-block .text-paper\/45   { color: color-mix(in srgb, var(--hero-fg) 45%, transparent); }
+.hero-block .text-paper\/55   { color: color-mix(in srgb, var(--hero-fg) 55%, transparent); }
+.hero-block .text-paper\/60   { color: color-mix(in srgb, var(--hero-fg) 60%, transparent); }
+.hero-block .text-paper\/65   { color: color-mix(in srgb, var(--hero-fg) 65%, transparent); }
+.hero-block .text-paper\/70   { color: color-mix(in srgb, var(--hero-fg) 70%, transparent); }
+.hero-block .text-paper\/80   { color: color-mix(in srgb, var(--hero-fg) 80%, transparent); }
 
 /* ════════════════════════════════════════════════════════════
  * AMBIENT BACKGROUND
