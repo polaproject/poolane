@@ -252,6 +252,75 @@ Theo thứ tự quan trọng (đã hoàn thành redesign sâu, giờ unblock inf
 36. **Phase 17.4 — Schedule multi-select bulk action**: ✅ Replace inline expand pattern (Phase 17.1) bằng checkbox-based selection cross-session. Schema action enum thêm `restore` (withdrawn → approved). New components: `ScheduleGrid.tsx` (client wrapper quản lý `selectedIds: Set<string>` + regLookup + counts memo + handle bulk Promise.all PATCH), `SelectionActionBar.tsx` (sticky top, 4 button: Duyệt / Không duyệt / Cho nghỉ / Cho đi học lại với count per status), `InteractiveSessionCard.tsx` (rewrite: checkbox button per row, render 3 nhóm approved/pending/withdrawn visual khác nhau). Query include `'withdrawn'` (trước chỉ approved/pending/waitlist). Action-status matrix: pending→approve→approved, pending→reject→rejected, approved→withdraw→withdrawn, **withdrawn→restore→approved**. Bỏ container hover lift `glass-card-hover`. Commit: `8a41a72`.
 37. **Phase 17.4 — Dashboard Builder Power BI style**: ✅ **Pivot fix**: `pointerWithin` → `closestCenter` (zones stack dọc, closestCenter ít ambiguous), stable DraggableChip key `${zone}:${field.table}.${field.column}:${i}` (bỏ phantom reuse khi field move zone), if-else if cho handleDragEnd remove section (mutual exclusive defensive), drop zone isOver `ring-2 ring-accent bg-accent/15 shadow-soft`. **Canvas free-form**: install `react-grid-layout@^1.5.0` (v2 đổi API hoàn toàn — bỏ WidthProvider HOC → hooks pattern; downgrade về v1.5 stable). DashboardViewClient replace static grid bằng `<ResponsiveGridLayout>` (cols lg=12 md=10 sm=6 xs=4, rowHeight=60, margin 12px), draggableHandle `.widget-drag-handle`, draggableCancel `.widget-actions`, compactType vertical. NEW API `PATCH /api/admin/dashboards/[id]/layout` batch update positions via transaction + audit log. Default widget position `{x:0, y:9999, w:6, h:5}` (compactType đẩy về vị trí khả dụng). Visual: dotted grid bg `.dashboard-canvas` qua radial-gradient theme-aware, hover-reveal resize handle (custom chevron qua CSS border), placeholder dashed accent ring khi drag. Commits: `e973d63`, `4f3418a` (hotfix `prisma.widget` → `prisma.dashboardWidget` model name).
 38. **Phase 17.4 — Notification popover polish**: ✅ Owner feedback: (1) cursor pointer hover, (2) noti không biến mất sau click, (3) viewport 4 items có scroll, (4) "Đánh dấu đọc tất cả" button. ROOT CAUSE biến mất: logic cũ `preview = (unread.length > 0 ? unread : filtered).slice(0, 7)` — khi còn unread, list CHỈ show unread → noti vừa đọc bị filter out → "biến mất". FIX: luôn show `filtered` (sort unread đầu, read sau), slice 20 (DOM limit), scroll area `max-h-[304px]` (~4 items × 76px). Unread visual: `bg-accent/8 ring-1 ring-accent/15 + dot accent + bold`. Read: `opacity 55% + dimmer` — vẫn ở list, phân biệt với unread. Mark-all-read button header phải khi `unreadCount > 0`, optimistic UI + Promise.all PATCH. Commit: `b47651b`.
+39. **Phase 18 — Register polish + Sprint 1 schedule UX (launch prep)**: ✅ Trang register là first impression khi owner thông báo lớp + ưu đãi 2 buổi miễn phí. 6 thay đổi:
+   - **Border input visible** — scope `[data-auth-page] .lqg-input` border-color 22% text-primary (trước ~6%)
+   - **Ngày sinh dd/mm/yyyy masked** — `src/components/forms/DateInput.tsx` NEW: tự format gõ (15011990 → 15/01/1990), validate 31/02 reject, emit ISO. Bỏ native `<input type="date">` (locale inconsistent)
+   - **Giới tính cùng height Date** (lqg-input-md 42px)
+   - **Email required + helper text on focus** — schema `z.email()`, "💡 Sử dụng để nhận hoá đơn..."
+   - **Photo consent OPTIONAL + (i) tooltip** — `src/components/ui/InfoTooltip.tsx` NEW Popover @base-ui/react với content thuyết phục
+   - **Address 2 cấp mới (đơn vị hành chính 01/07/2025)** — `src/components/forms/VnAddressSelect.tsx` NEW cascading Tỉnh + Phường/Xã từ provinces.open-api.vn (free, no key). Bỏ Quận/Huyện. Flatten wards từ all districts. Cache sessionStorage. DB district=null cho HV mới
+   - Sprint 1 schedule UX: SLA badge "Thường duyệt ~X giờ" (cache 1h), waitlist position, ConfirmDialog confirmation step trước register, "Tìm buổi khác" CTA cho rejected/withdrawn, hero debt card student dashboard.
+   Commit: `19a75a1`.
+40. **Phase 18.1 — Modal portal + Huỷ đơn + Shop polish + iOS Safari**: ✅ Modal "Xác nhận chuyển khoản" bị clip trong order card. ROOT CAUSE: `.lqg-card-hover` dùng `will-change: transform` → CSS spec scope `position: fixed` vào parent stacking context. FIX: refactor `ConfirmTransferButton` sang `@base-ui/react/dialog` với Portal → render document.body. Áp tương tự shop ProductDetailModal (photo gallery + description + qty stepper + multi-photo badge). Cart price contrast `text-accent` → `text-paper`. NEW nút "Huỷ đơn" cho admin duyệt nhầm: status `approved` → `cancelled` + restore stock physical. Sidebar bottom user info wrap button trigger AccountSettingsDialog. **iOS 16.3 Safari fix**: HV iPhone 11 không ấn được Login/Register button. WebKit bug #237876 — touch events fail trên child khi parent có `backdrop-filter` (fix ở 16.4+). NEW `(auth)/layout.tsx` wrap `data-auth-page` + CSS override tắt `backdrop-filter` cho auth `.lqg-card-*`. **Sidebar opacity** bump 78%→94% (`--lqg-bg-elevated`). Commits: `3a98ffc`, `e7d4768`, `05b4bc3`, `7fc577f`.
+41. **Phase 18.2 — PoolTicket auto-create từ shop order + backfill**: ✅ HV Hoàng Thị Huyền Trang mua 3× "Vé bơi 01 Lượt" qua shop, paid, nhưng `/student/schedule` hiện "Chưa có vé". ROOT CAUSE: `confirmOrderTransfer()` chỉ handle `improvement_pack` + `physical`. Product "Vé bơi" type=`service` → bị skip. Fix:
+   - ProductType enum thêm `pool_ticket` (Prisma `db push` lên prod Supabase)
+   - Helper `src/lib/payments/pool-ticket-from-order.ts` NEW: subtype detect SKU prefix `TICKET-FIRST/SINGLE/WEEKLY/DAILY/MONTHLY`, fallback name regex `/^(vé|thẻ)\s+bơi/i` cho data cũ. 'First' guard 1 ticket lifetime.
+   - Wire vào `shared-confirm.ts` + admin pay action
+   - Backfill: `prisma/backfill-pool-tickets.ts` + API `POST /api/admin/backfill-pool-tickets` + button "🎫 Quét vé thiếu" trong `/admin/shop/orders` hero. Idempotent dedupe theo `studentId + pricePaid + ±1 day` (tránh conflict với manual create — không dùng subtype vì manual=single, auto-detect=subsequent dễ trùng).
+   Commits: `637b363`, `bea7c1b`, `e1b86b8`.
+42. **Phase 18.3 — Registration schema mismatch fix**: ✅ BUG: mọi HV đăng ký buổi học đều fail "Thông tin không hợp lệ". ROOT CAUSE: `registerSessionSchema` yêu cầu `sessionId` UUID trong body nhưng client chỉ gửi `{studentId, courseId}` (sessionId nằm trong URL params). Zod safeParse fail → 400. Fix: bỏ `sessionId` khỏi schema (đã có trong URL `/api/sessions/[id]/registrations`), thêm `studentId` optional + `courseId` nullable. Commit: `79dc606`. **BÀI HỌC**: schema body validation phải đồng nhất với client payload — không yêu cầu field đã có ở URL params.
+43. **Phase 18.4 — Registration API ticket validation (defense-in-depth)**: ✅ Trước phase UI disable button khi noTicket, nhưng admin/staff bypass UI hoặc race condition có thể tạo registration cho HV không vé. Thêm 2 check trong POST `/api/sessions/[id]/registrations`: `NO_TICKET` (400) nếu không poolTicket active, `TICKET_EXHAUSTED` (400) nếu sessionsLeft ≤ 0. End-to-end simulation HV Hoàng Thị Huyền Trang: pass → admin schedule hiện đúng "Hoàng Thị Huyền Trang (approved) · ECH". Commit: `0b7a777`.
+44. **Phase 18.5 — Multi-ticket aggregate UI + breakdown**: ✅ BUG: HV có 2 active tickets (manual first 12 + auto-created single 3) → UI hiện "Vé còn 3" thay 15. ROOT CAUSE: 6 chỗ query `poolTickets` với `take: 1, orderBy desc` → chỉ lấy thằng mới nhất, ignore vé first cũ.
+   NEW `src/lib/ticket-aggregate.ts`: `getTicketAggregate()` gộp sessions across ALL active, `getTicketBreakdown()` format `["Vé lần đầu 12/12", "Vé lẻ 3/3"]`. Trả primaryTicket (oldest active) + isLow/isOutOfTicket/isNoTicket counts.
+   Update 6 files (student schedule, dashboard, admin/staff student detail, API registrations queue, admin schedule session detail). UI render breakdown subline khi ≥2 vé. Attendance API KHÔNG đổi (deduct newest-first → linear UX). Commit: `c99102c`.
+45. **Phase 18.6 — HV self-service avatar + change password**: ✅ Schema `User.avatarUrl String?` migration. NEW `AvatarUploader.tsx` (PhotoUploader wrap, max=1, variant=single), `ChangePasswordDialog.tsx`. NEW API `PATCH /api/users/avatar` + `POST /api/auth/change-password`. Section "Tài khoản & Bảo mật" trên `/student/profile`. Avatar hiển thị: hero profile + mobile header AvatarPopoverButton + sidebar bottom (desktop). AuthUser interface thêm avatarUrl. Commit: `3ccd61f`.
+46. **Phase 18.7 — Avatar system-wide display**: ✅ Owner: avatar phải có giá trị toàn hệ thống. Audit + wire:
+   - NEW `src/components/ui/Avatar.tsx` reusable (size xs/sm/md/lg/xl, variant default/hero/mist/accent/ink, initialsStyle first/both)
+   - 4 Prisma query thêm `avatarUrl`: admin/students list, admin/dashboard recentStudents, staff/students, admin/schedule/sessions/[id]
+   - 6 location render: admin/staff list + detail hero, admin dashboard widget, admin schedule session detail RegistrationActionRow
+   - Schedule grid mini-initials (h-5 w-5) KHÔNG đổi (quá nhỏ)
+   - Admin/staff: click avatar (sidebar bottom desktop hoặc mobile header) → mở `AccountSettingsDialog` (NEW — avatar + password trong 1 modal cho mọi role, vì admin/staff không có `/profile` page)
+   Commits: `957783f`, `08a50f9`.
+47. **Phase 18.8 — RLS bypass via Prisma trong getCurrentUser**: ✅ BUG: HV upload avatar → hero profile đúng nhưng sidebar/header vẫn show initial. ROOT CAUSE: table `users` có RLS enabled (`relrowsecurity=true`) nhưng **0 policy** → Postgres deny mọi query cho non-superuser. `getCurrentUser` dùng Supabase JS với user JWT → bị chặn → fallback JWT metadata (không có avatarUrl) → null. Prisma không ảnh hưởng vì dùng admin DB connection. Fix: đổi `getCurrentUser` từ Supabase JS query sang Prisma. Vừa consistent codebase vừa bypass RLS. Commit: `df53ba4`. **BÀI HỌC**: trên Supabase tables có RLS bật + 0 policy = deny all → server-side queries phải dùng admin connection (Prisma trực tiếp hoặc service_role client).
+48. **Phase 18.9 — Schedule week view 5 cải tiến**: ✅ Owner báo:
+   - "Hôm nay" lúc có lúc không → pill nav xô lệch
+   - Avatar HV không hiện trên session card
+   - Giờ "5:30/18:00" lặp với header row
+   - Tên HV wrap nhiều dòng + checkbox thừa
+   - Selection action bar dòng riêng xô lệch grid
+   Fix:
+   - Tách "Hôm nay" khỏi pill, luôn render + disabled khi current
+   - Query `user.avatarUrl`, render img 24px row (fallback 2-letter)
+   - Bỏ slotLabel, thay chevron → chip border "Chi tiết →"
+   - Row toàn bộ là button (no checkbox), click toggle, Shift+click range, ring-2 accent selected, tên truncate
+   - NEW `ScheduleSelectionContext.tsx` + `ScheduleHeaderControls.tsx`: Context share state. Header toggle nav buttons / action bar cùng row position
+   - DELETE `SelectionActionBar.tsx`
+   Commit: `6b8a767`.
+49. **Phase 18.10 + 18.13 — Shop e-commerce UX overhaul**: ✅ CTA "Đặt hàng" dark text trên dark cart bar khó đọc + inline +/- bị FAB che + không match Shopee/Tiki:
+   - **Card grid**: bỏ inline stepper. LUÔN 1 button "+ Thêm vào giỏ" (bg-ink) hoặc "Đã thêm (N) · Thêm 1" (bg-success/15). Badge qty `N` góc trên trái ảnh (bg-accent ring-paper shadow-cta)
+   - **NEW `CartDrawer.tsx`** bottom sheet (Dialog @base-ui/react translate-y-full anim): list items thumbnail 56px + tên + giá + stepper -/+/Trash, note input, button "Đặt hàng" bg-accent shadow-cta h-12 bold
+   - **Cart bar bottom strip**: tap → mở drawer. NEW helper `removeAllFromCart(id)`
+   - **Vị trí (Phase 18.13)**: ngang hàng FAB+ thay `bottom-0` (overlap bottom-nav). `bottom-[5.25rem]` (= 64+20) + `pr-[5.25rem]` (= 20+52+12 chừa FAB). FloatingActions bỏ MutationObserver cart-detect-push
+   - **Shop API**: `soldCount` per product (groupBy orderItem WHERE order.status IN ('paid','fulfilled') _sum.quantity). Display `· Đã bán N` cạnh type chip
+   Commits: `c83beaa`, `7721fa2`, `9500015`.
+50. **Phase 18.11 — Avatar editor: "Sửa" popover + crop dialog**: ✅ Thay 2 button "Đổi ảnh" + "Xoá" bằng 1 button "Sửa" → popover 2 option Cập nhật/Xoá. Cập nhật mở crop dialog (Instagram/Facebook style):
+   - Install `react-easy-crop@^5.5.7` (~10KB gzip, battle-tested)
+   - NEW `src/lib/image-crop.ts`: `getCroppedBlob(src, area)` → square JPEG 90% max 512px qua canvas
+   - NEW `AvatarCropDialog.tsx`: Cropper `aspect=1 cropShape="round" showGrid=false objectFit="cover"`. ResizeObserver đo container → `cropSize = containerWidth - 8` → vòng tròn nearly full vuông. Zoom slider 1.0-3.0 + 2 button. Outside circle = darkened tự render
+   - REWRITE `AvatarUploader.tsx`: vertical (circle + button "✏️ Sửa"). Popover: "Cập nhật" (Upload icon) → file picker → crop; "Xoá ảnh" (Trash danger) LUÔN render — disabled khi không có avatar
+   Commits: `70cffcb`, `dcc6333`.
+51. **Phase 18.12 — RequestChangeForm validation upgrade**: ✅ Per-field smart inputs cho `/student/profile/request-change`:
+   - `dob` → `<DateInput>` (Phase 18 masked) + validate ISO + age 5-100
+   - `phone` → `inputMode="numeric"` + strip whitespace + regex VN
+   - `idCardNumber` → filter `/\D/g` + maxLength 12 + validate 9/12 số
+   - `ward + province` → group dùng `<VnAddressSelect>` khi user tick. District giữ text input (legacy — đơn vị hành chính mới bỏ cấp huyện)
+   Submit handler validate type-specific per field. Commit: `74bbf9b`.
+52. **Phase 18.X — Misc fixes during session**:
+   - **TZ timezone fix**: NEW `src/instrumentation.ts` set `process.env.TZ = 'Asia/Ho_Chi_Minh'` cho Node.js runtime. **Vercel cấm TZ env var qua dashboard** ("reserved name"). HV Phạm Minh Anh đặt đơn 16:59 chiều VN nhưng dashboard hiện 09:59 UTC → fix → đúng VN. Commit: `33d9736`.
+   - **Sidebar mobile-only**: bỏ ThemeSwitcher + "Cá nhân" group + user info bottom CHỈ mobile (`lg:hidden`/`hidden lg:block`). Desktop giữ nguyên. Nút "Đăng xuất" rõ ràng mobile. Commit: `81d6823`.
+   - **Home button cố định sidebar**: link top-level "Trang chủ" trên đầu nav (mọi role) → tránh chôn trong "Tổng quan" group. Commit: `e7dc7bf`.
+   - **Schedule banner "Vé bơi" → shop**: thay "Liên hệ Zalo" bằng CTA "🛍️ Mua vé bơi" → `/student/shop`. Commit: `7ab141d`.
+   - **AvatarFOUC fix**: Phase 18.7 owner gửi screenshot avatar không sync mobile/desktop sidebar → trace ra RLS issue (Phase 18.8). Tốn 2 round-trip để xác định gốc rễ.
 
 ### 🟢 DEPLOY ĐÃ HOÀN TẤT (2026-05-15)
 
@@ -2545,8 +2614,8 @@ Những điều CHƯA chốt, cần quyết định trước khi build:
 
 ---
 
-**Phiên bản:** 1.5 — Phase 16.2-17.4 (FAB system + notification deep-link + dynamic settings + bulk schedule actions + Power BI dashboard builder + Shop preview/reorder + hero-block fix + FOUC fixes + lessons)
-**Cập nhật cuối:** 2026-05-16
+**Phiên bản:** 1.6 — Phase 18 (Register UX + pool ticket auto-create + multi-ticket aggregate + avatar system-wide + RLS Prisma bypass + schedule UX overhaul + shop e-commerce UX + crop dialog + TZ fix + iOS Safari fix)
+**Cập nhật cuối:** 2026-05-17
 **Maintainer:** Owner + AI
 
 > Mọi quyết định nghiệp vụ phải được phản ánh ở đây. Code đi theo file này, không ngược lại.
