@@ -45,7 +45,7 @@ export default async function UnmatchedTransactionsPage({ searchParams }: { sear
         <div className="flex gap-2 flex-wrap">
           {STATUS_TABS.map(t => (
             <Link key={t.value} href={`/admin/finance/unmatched?status=${t.value}`}>
-              <Chip asButton active={status === t.value}>{t.label}</Chip>
+              <Chip active={status === t.value}>{t.label}</Chip>
             </Link>
           ))}
         </div>

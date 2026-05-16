@@ -49,7 +49,7 @@ export default async function ProfileRequestsPage({ searchParams }: { searchPara
         <div className="flex gap-2 flex-wrap">
           {STATUS_TABS.map(tab => (
             <Link key={tab.value} href={`/admin/profile-requests?status=${tab.value}`}>
-              <Chip asButton active={status === tab.value}>{tab.label}</Chip>
+              <Chip active={status === tab.value}>{tab.label}</Chip>
             </Link>
           ))}
         </div>

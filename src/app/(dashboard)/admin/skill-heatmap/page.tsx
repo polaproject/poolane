@@ -67,7 +67,7 @@ export default async function SkillHeatmapPage({ searchParams }: { searchParams:
         <div className="flex gap-2 flex-wrap">
           {(['ECH', 'SAI', 'BUOM'] as const).map(code => (
             <a key={code} href={`/admin/skill-heatmap?course=${code}`}>
-              <Chip asButton active={courseCode === code}>
+              <Chip active={courseCode === code}>
                 {code === 'ECH' ? 'Bơi Ếch' : code === 'SAI' ? 'Bơi Sải' : 'Bơi Bướm'}
               </Chip>
             </a>

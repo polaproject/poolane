@@ -58,11 +58,11 @@ export default async function StudentExercisesPage({ searchParams }: { searchPar
         {/* Filter chips */}
         <div className="flex gap-2 flex-wrap">
           <Link href="/student/exercises">
-            <Chip asButton active={!params.difficulty}>Tất cả</Chip>
+            <Chip active={!params.difficulty}>Tất cả</Chip>
           </Link>
           {DIFFICULTY_LEVELS.map(d => (
             <Link key={d} href={`/student/exercises?difficulty=${d}`}>
-              <Chip asButton active={params.difficulty === d}>{DIFFICULTY_LABELS[d]}</Chip>
+              <Chip active={params.difficulty === d}>{DIFFICULTY_LABELS[d]}</Chip>
             </Link>
           ))}
         </div>

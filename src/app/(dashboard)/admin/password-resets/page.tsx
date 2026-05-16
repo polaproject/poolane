@@ -35,7 +35,7 @@ export default async function PasswordResetsPage({ searchParams }: { searchParam
         <div className="flex gap-2 flex-wrap">
           {STATUS_TABS.map(t => (
             <a key={t.value} href={`/admin/password-resets?status=${t.value}`}>
-              <Chip asButton active={status === t.value}>{t.label}</Chip>
+              <Chip active={status === t.value}>{t.label}</Chip>
             </a>
           ))}
         </div>

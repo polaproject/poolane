@@ -55,11 +55,11 @@ export default async function BlogPage({
       <section className="mx-auto max-w-5xl px-4 pb-8">
         <div className="flex gap-2 flex-wrap">
           <Link href="/blog">
-            <Chip asButton active={!category}>Tất cả</Chip>
+            <Chip active={!category}>Tất cả</Chip>
           </Link>
           {Object.entries(CATEGORIES).map(([cat, cfg]) => (
             <Link key={cat} href={`/blog?category=${cat}`}>
-              <Chip asButton active={category === cat}>{cfg.label}</Chip>
+              <Chip active={category === cat}>{cfg.label}</Chip>
             </Link>
           ))}
         </div>

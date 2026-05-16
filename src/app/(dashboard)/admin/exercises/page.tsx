@@ -57,11 +57,11 @@ export default async function AdminExercisesPage({ searchParams }: { searchParam
       <div className="px-4 sm:px-8 -mt-6 max-w-6xl mx-auto space-y-4 relative z-10">
         <div className="flex gap-2 flex-wrap">
           <Link href="/admin/exercises">
-            <Chip asButton active={!params.skill && !params.difficulty}>Tất cả</Chip>
+            <Chip active={!params.skill && !params.difficulty}>Tất cả</Chip>
           </Link>
           {DIFFICULTY_LEVELS.map(d => (
             <Link key={d} href={`/admin/exercises?difficulty=${d}`}>
-              <Chip asButton active={params.difficulty === d}>{DIFFICULTY_LABELS[d]}</Chip>
+              <Chip active={params.difficulty === d}>{DIFFICULTY_LABELS[d]}</Chip>
             </Link>
           ))}
         </div>

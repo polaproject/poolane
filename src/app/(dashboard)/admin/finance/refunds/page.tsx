@@ -90,7 +90,7 @@ export default async function RefundsPage({ searchParams }: { searchParams: Sear
         <div className="flex gap-2 flex-wrap">
           {STATUS_TABS.map(tab => (
             <Link key={tab.value} href={`/admin/finance/refunds?status=${tab.value}`}>
-              <Chip asButton active={status === tab.value}>
+              <Chip active={status === tab.value}>
                 {tab.label}
                 {totalByStatus[tab.value] != null && totalByStatus[tab.value] > 0 && (
                   <span className="opacity-70">· {totalByStatus[tab.value]}</span>

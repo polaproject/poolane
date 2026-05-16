@@ -86,7 +86,7 @@ export default async function StaffStudentsPage({ searchParams }: { searchParams
           <div className="flex gap-2 flex-wrap">
             {FILTERS.map(f => (
               <Link key={f.value} href={buildHref({ status: f.value, page: '1' })}>
-                <Chip asButton active={statusFilter === f.value}>{f.label}</Chip>
+                <Chip active={statusFilter === f.value}>{f.label}</Chip>
               </Link>
             ))}
           </div>

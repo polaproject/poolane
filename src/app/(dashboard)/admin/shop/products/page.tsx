@@ -74,11 +74,11 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           </form>
           <div className="flex gap-2 flex-wrap">
             <Link href={buildHref({ type: '', page: '1' })}>
-              <Chip asButton active={!typeFilter}>Tất cả loại</Chip>
+              <Chip active={!typeFilter}>Tất cả loại</Chip>
             </Link>
             {PRODUCT_TYPES.map(t => (
               <Link key={t} href={buildHref({ type: t, page: '1' })}>
-                <Chip asButton active={typeFilter === t}>{PRODUCT_TYPE_LABELS[t]}</Chip>
+                <Chip active={typeFilter === t}>{PRODUCT_TYPE_LABELS[t]}</Chip>
               </Link>
             ))}
           </div>

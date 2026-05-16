@@ -118,9 +118,14 @@ export default function OrdersPage() {
       <div className="px-4 sm:px-8 -mt-6 max-w-5xl mx-auto space-y-4 relative z-10">
         <div className="flex gap-2 flex-wrap">
           {Object.entries(STATUS_CONFIG).map(([status, cfg]) => (
-            <button key={status} onClick={() => setFilter(status)}>
-              <Chip asButton active={filter === status}>{cfg.label}</Chip>
-            </button>
+            <Chip
+              key={status}
+              asButton
+              active={filter === status}
+              onClick={() => setFilter(status)}
+            >
+              {cfg.label}
+            </Chip>
           ))}
         </div>
 
@@ -172,13 +177,15 @@ export default function OrdersPage() {
                         <p className="eyebrow text-foreground/55 mb-2">Phương thức thanh toán</p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                           {PAYMENT_METHODS.map(m => (
-                            <button
+                            <Chip
                               key={m.value}
-                              type="button"
+                              asButton
+                              active={paymentMethod === m.value}
+                              className="w-full justify-center"
                               onClick={() => setPaymentMethod(m.value)}
                             >
-                              <Chip asButton active={paymentMethod === m.value} className="w-full justify-center">{m.label}</Chip>
-                            </button>
+                              {m.label}
+                            </Chip>
                           ))}
                         </div>
                       </div>
