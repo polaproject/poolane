@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import {
   DndContext, DragOverlay, useDroppable, useDraggable,
-  pointerWithin, type DragEndEvent, type DragStartEvent,
+  closestCenter, type DragEndEvent, type DragStartEvent,
 } from '@dnd-kit/core'
 import type {
   WidgetConfig, WidgetType, TimeRange, PivotField, PivotValue, PivotFilter,
@@ -180,7 +180,9 @@ export function WidgetBuilderModal({ dashboardId, initial, timeRange, globalForm
           title,
           type: config.visualization.type,
           config,
-          position: initial?.position ?? { x: 0, y: 0, w: 6, h: 4 },
+          // Default cho widget mới: append cuối canvas (y=9999 — react-grid-layout
+          // sẽ compactType='vertical' đẩy về y khả dụng đầu tiên). Half-width 6 col.
+          position: initial?.position ?? { x: 0, y: 9999, w: 6, h: 5 },
         }),
       })
       const json = await res.json()
@@ -219,13 +221,29 @@ export function WidgetBuilderModal({ dashboardId, initial, timeRange, globalForm
     if (!col) return
     const field: PivotField = { table: drag.table, column: drag.column }
 
+    // Validate fromIndex hợp lệ khi source là zone
+    const validFromIndex = typeof drag.fromIndex === 'number' && drag.fromIndex >= 0
+    if (drag.source !== 'picker' && !validFromIndex) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('[WidgetBuilder] drag from zone without valid fromIndex — abort', drag)
+      }
+      return
+    }
+
     setConfig(c => {
       let next = { ...c }
-      // Remove from source if it's a zone
-      if (drag.source === 'rows') next = { ...next, rows: next.rows.filter((_, i) => i !== drag.fromIndex) }
-      if (drag.source === 'columns') next = { ...next, columns: next.columns.filter((_, i) => i !== drag.fromIndex) }
-      if (drag.source === 'values') next = { ...next, values: next.values.filter((_, i) => i !== drag.fromIndex) }
-      if (drag.source === 'filters') next = { ...next, filters: next.filters.filter((_, i) => i !== drag.fromIndex) }
+      // Remove from source (mutually exclusive — if-else if để defensive khi dnd-kit gửi
+      // data corrupt thì chỉ 1 nhánh fire, không xoá nhầm zone khác)
+      if (drag.source === 'rows') {
+        next = { ...next, rows: next.rows.filter((_, i) => i !== drag.fromIndex) }
+      } else if (drag.source === 'columns') {
+        next = { ...next, columns: next.columns.filter((_, i) => i !== drag.fromIndex) }
+      } else if (drag.source === 'values') {
+        next = { ...next, values: next.values.filter((_, i) => i !== drag.fromIndex) }
+      } else if (drag.source === 'filters') {
+        next = { ...next, filters: next.filters.filter((_, i) => i !== drag.fromIndex) }
+      }
+      // (source === 'picker' → không xoá gì)
 
       // Add to destination
       if (dropZone === 'rows') next = { ...next, rows: [...next.rows, field] }
@@ -277,7 +295,7 @@ export function WidgetBuilderModal({ dashboardId, initial, timeRange, globalForm
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDragCancel={() => setActiveDrag(null)}
-          collisionDetection={pointerWithin}
+          collisionDetection={closestCenter}
         >
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_minmax(0,1.1fr)] divide-x divide-foreground/10 overflow-hidden">
             {/* Left: Field picker */}
@@ -572,7 +590,7 @@ function DropZoneFieldsList({
         className={[
           'min-h-[42px] rounded-md ring-1 p-1.5 transition space-y-1',
           isOver
-            ? 'ring-accent bg-accent/8'
+            ? 'ring-accent ring-2 bg-accent/15 shadow-soft'
             : fields.length === 0
               ? 'ring-dashed ring-foreground/15 bg-paper-tint/30'
               : 'ring-foreground/10 bg-paper-tint/30',
@@ -586,7 +604,9 @@ function DropZoneFieldsList({
           const isDate = col?.type === 'date'
           return (
             <DraggableChip
-              key={`${id}-${i}`}
+              // Key include zone + field identity + index để React không reuse instance
+              // nhầm khi field move giữa zones (vd rows[0] → columns[0] không phantom).
+              key={`${id}:${f.table}.${f.column}:${i}`}
               zone={id}
               index={i}
               field={f}
@@ -630,7 +650,7 @@ function DropZoneValues({
         className={[
           'min-h-[42px] rounded-md ring-1 p-1.5 transition space-y-1',
           isOver
-            ? 'ring-accent bg-accent/8'
+            ? 'ring-accent ring-2 bg-accent/15 shadow-soft'
             : values.length === 0
               ? 'ring-dashed ring-foreground/15 bg-paper-tint/30'
               : 'ring-foreground/10 bg-paper-tint/30',
@@ -645,7 +665,7 @@ function DropZoneValues({
           const col = getColMeta(v.table, v.column)
           return (
             <DraggableChip
-              key={`values-${i}`}
+              key={`values:${v.table}.${v.column}:${i}`}
               zone="values"
               index={i}
               field={v}
@@ -690,7 +710,7 @@ function DropZoneFilters({
         className={[
           'min-h-[42px] rounded-md ring-1 p-1.5 transition space-y-1',
           isOver
-            ? 'ring-accent bg-accent/8'
+            ? 'ring-accent ring-2 bg-accent/15 shadow-soft'
             : filters.length === 0
               ? 'ring-dashed ring-foreground/15 bg-paper-tint/30'
               : 'ring-foreground/10 bg-paper-tint/30',
