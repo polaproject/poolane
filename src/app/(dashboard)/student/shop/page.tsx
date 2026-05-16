@@ -4,9 +4,10 @@ import { useState, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
   ShoppingCart, Plus, Minus, Package, Loader2, CheckCircle, Search, History,
-  BookOpen, Waves, Sparkles, Box, ArrowRight,
+  BookOpen, Waves, Sparkles, Box, ArrowRight, X, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import Link from 'next/link'
+import { Dialog } from '@base-ui/react/dialog'
 import { Chip } from '@/components/ui/Chip'
 
 type Product = {
@@ -46,6 +47,7 @@ export default function ShopPage() {
   const [ordered, setOrdered] = useState(false)
   const [typeFilter, setTypeFilter] = useState('')
   const [search, setSearch] = useState('')
+  const [detailProduct, setDetailProduct] = useState<Product | null>(null)
 
   useEffect(() => {
     fetch('/api/shop/products?isActive=true&pageSize=100')
@@ -204,18 +206,32 @@ export default function ShopPage() {
               const typeMeta = TYPE_META[p.type] ?? { label: p.type, Icon: Box }
               const TypeIcon = typeMeta.Icon
               return (
-                <div key={p.id} className="rounded-card-lg bg-[var(--surface)] ring-1 ring-foreground/10 overflow-hidden shadow-soft hover:shadow-glass hover:-translate-y-0.5 transition flex flex-col">
-                  {/* Photo */}
-                  <div className="aspect-square w-full bg-paper-tint overflow-hidden">
+                <div
+                  key={p.id}
+                  className="rounded-card-lg bg-[var(--surface)] ring-1 ring-foreground/10 overflow-hidden shadow-soft hover:shadow-glass hover:-translate-y-0.5 transition flex flex-col"
+                >
+                  {/* Photo — click để xem chi tiết */}
+                  <button
+                    type="button"
+                    onClick={() => setDetailProduct(p)}
+                    aria-label={`Xem chi tiết ${p.name}`}
+                    className="block aspect-square w-full bg-paper-tint overflow-hidden cursor-pointer relative group/photo"
+                  >
                     {p.photos && p.photos.length > 0 ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={p.photos[0]} alt={p.name} className="w-full h-full object-cover" />
+                      <img src={p.photos[0]} alt={p.name} className="w-full h-full object-cover transition-transform duration-300 group-hover/photo:scale-105" />
                     ) : (
                       <div className="w-full h-full grid place-items-center">
                         <TypeIcon className="h-12 w-12 text-accent opacity-50" strokeWidth={1.5} />
                       </div>
                     )}
-                  </div>
+                    {/* Multi-photo badge */}
+                    {p.photos && p.photos.length > 1 && (
+                      <span className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-pill bg-ink/70 text-paper text-[10px] font-semibold backdrop-blur-sm">
+                        +{p.photos.length - 1}
+                      </span>
+                    )}
+                  </button>
 
                   {/* Info */}
                   <div className="p-3 flex-1 flex flex-col">
@@ -227,7 +243,13 @@ export default function ShopPage() {
                         <span className="text-[10px] text-foreground/55">· {p.sessionsCount} buổi</span>
                       )}
                     </div>
-                    <p className="font-medium text-foreground text-sm leading-tight line-clamp-2 mb-1.5">{p.name}</p>
+                    <button
+                      type="button"
+                      onClick={() => setDetailProduct(p)}
+                      className="font-medium text-foreground text-sm leading-tight line-clamp-2 mb-1.5 text-left hover:text-accent transition-colors"
+                    >
+                      {p.name}
+                    </button>
                     <div className="flex items-baseline justify-between gap-2 mb-2">
                       <p className="lqg-numeric-sans text-base text-accent font-bold">{fmt(p.price)}</p>
                       {p.type === 'physical' && p.stockQuantity !== null && (
@@ -278,17 +300,26 @@ export default function ShopPage() {
         )}
       </div>
 
+      {/* Product detail modal */}
+      <ProductDetailModal
+        product={detailProduct}
+        onClose={() => setDetailProduct(null)}
+        qty={detailProduct ? cart[detailProduct.id] ?? 0 : 0}
+        onAdd={addToCart}
+        onRemove={removeFromCart}
+      />
+
       {/* Fixed cart bottom */}
       {cartItems.length > 0 && (
         <div data-shop-cart-bar className="fixed bottom-0 inset-x-0 z-30 p-4 max-w-3xl mx-auto">
           <div className="rounded-card-xl bg-ink text-paper p-4 shadow-glass ring-1 ring-paper/12">
             <div className="flex items-center gap-3 mb-3">
-              <div className="grid place-items-center h-9 w-9 rounded-pill bg-accent/15">
-                <ShoppingCart className="h-4 w-4 text-accent" strokeWidth={1.75} />
+              <div className="grid place-items-center h-9 w-9 rounded-pill bg-accent/20">
+                <ShoppingCart className="h-4 w-4 text-accent" strokeWidth={2} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-paper/55">{cartItems.length} sản phẩm trong giỏ</p>
-                <p className="lqg-headline text-xl text-accent leading-none mt-0.5">{fmt(cartTotal)}</p>
+                <p className="text-xs text-paper/65">{cartItems.length} sản phẩm trong giỏ</p>
+                <p className="lqg-numeric-sans text-2xl text-paper font-bold leading-none mt-1">{fmt(cartTotal)}</p>
               </div>
             </div>
             <input
@@ -312,5 +343,204 @@ export default function ShopPage() {
         </div>
       )}
     </div>
+  )
+}
+
+// ───────────────────────────────────────────────────────────
+// ProductDetailModal — Photo gallery + description + cart
+// ───────────────────────────────────────────────────────────
+function ProductDetailModal({
+  product,
+  onClose,
+  qty,
+  onAdd,
+  onRemove,
+}: {
+  product: Product | null
+  onClose: () => void
+  qty: number
+  onAdd: (id: string) => void
+  onRemove: (id: string) => void
+}) {
+  const [photoIdx, setPhotoIdx] = useState(0)
+
+  // Reset photo index khi đổi product
+  useEffect(() => { setPhotoIdx(0) }, [product?.id])
+
+  if (!product) return null
+
+  const typeMeta = TYPE_META[product.type] ?? { label: product.type, Icon: Box }
+  const TypeIcon = typeMeta.Icon
+  const isOutOfStock = product.type === 'physical' && product.stockQuantity !== null && product.stockQuantity <= 0
+  const photos = product.photos && product.photos.length > 0 ? product.photos : null
+
+  function nextPhoto() {
+    if (!photos) return
+    setPhotoIdx(i => (i + 1) % photos.length)
+  }
+  function prevPhoto() {
+    if (!photos) return
+    setPhotoIdx(i => (i - 1 + photos.length) % photos.length)
+  }
+
+  return (
+    <Dialog.Root open={!!product} onOpenChange={open => !open && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-ink/55 backdrop-blur-sm data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 transition-opacity duration-200" />
+        <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[min(720px,calc(100vw-1.5rem))] max-h-[calc(100vh-3rem)] overflow-y-auto bg-[var(--surface)] rounded-card-xl shadow-glass ring-1 ring-foreground/10 data-[starting-style]:opacity-0 data-[starting-style]:scale-95 data-[ending-style]:opacity-0 data-[ending-style]:scale-95 transition-all duration-200">
+          <div className="grid md:grid-cols-2">
+            {/* Photo gallery */}
+            <div className="relative bg-paper-tint">
+              <div className="aspect-square w-full overflow-hidden">
+                {photos ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={photos[photoIdx]}
+                    alt={`${product.name} - ảnh ${photoIdx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full grid place-items-center">
+                    <TypeIcon className="h-20 w-20 text-accent opacity-40" strokeWidth={1.25} />
+                  </div>
+                )}
+              </div>
+              {/* Photo nav */}
+              {photos && photos.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={prevPhoto}
+                    aria-label="Ảnh trước"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-pill bg-ink/60 text-paper grid place-items-center hover:bg-ink/80 backdrop-blur-sm transition"
+                  >
+                    <ChevronLeft className="h-5 w-5" strokeWidth={2} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextPhoto}
+                    aria-label="Ảnh sau"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-pill bg-ink/60 text-paper grid place-items-center hover:bg-ink/80 backdrop-blur-sm transition"
+                  >
+                    <ChevronRight className="h-5 w-5" strokeWidth={2} />
+                  </button>
+                  {/* Dots indicator */}
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+                    {photos.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setPhotoIdx(i)}
+                        aria-label={`Đến ảnh ${i + 1}`}
+                        className={`h-1.5 rounded-pill transition-all ${
+                          i === photoIdx
+                            ? 'w-6 bg-paper'
+                            : 'w-1.5 bg-paper/50 hover:bg-paper/70'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+              {/* Thumbnail strip (desktop) */}
+              {photos && photos.length > 1 && (
+                <div className="hidden md:flex gap-2 p-3 border-t border-foreground/8 overflow-x-auto">
+                  {photos.map((src, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setPhotoIdx(i)}
+                      aria-label={`Ảnh ${i + 1}`}
+                      className={`shrink-0 h-14 w-14 rounded-card overflow-hidden ring-2 transition ${
+                        i === photoIdx ? 'ring-accent' : 'ring-transparent hover:ring-foreground/20'
+                      }`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={src} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Info side */}
+            <div className="p-5 sm:p-6 flex flex-col relative">
+              <Dialog.Close
+                aria-label="Đóng"
+                className="absolute top-3 right-3 h-9 w-9 rounded-pill bg-foreground/5 hover:bg-foreground/10 grid place-items-center transition"
+              >
+                <X className="h-4 w-4" strokeWidth={2} />
+              </Dialog.Close>
+
+              <div className="flex items-center gap-2 mb-2 pr-10">
+                <Chip variant="mist" className="text-[10px]">
+                  <TypeIcon className="h-2.5 w-2.5" strokeWidth={2.25} /> {typeMeta.label}
+                </Chip>
+                {product.sessionsCount && (
+                  <Chip variant="accent" className="text-[10px]">
+                    {product.sessionsCount} buổi
+                  </Chip>
+                )}
+              </div>
+
+              <Dialog.Title className="lqg-headline text-2xl text-foreground leading-tight mb-2">
+                {product.name}
+              </Dialog.Title>
+
+              <div className="flex items-baseline gap-2 mb-4">
+                <p className="lqg-numeric-sans text-3xl text-accent font-bold">{fmt(product.price)}</p>
+                {product.type === 'physical' && product.stockQuantity !== null && (
+                  <span className={`text-xs ${product.stockQuantity <= 3 ? 'text-warn font-semibold' : 'text-foreground/55'}`}>
+                    {product.stockQuantity <= 0 ? '· hết hàng' : `· còn ${product.stockQuantity}`}
+                  </span>
+                )}
+              </div>
+
+              {/* Description */}
+              {product.description ? (
+                <Dialog.Description className="text-sm text-foreground/75 leading-relaxed mb-6 whitespace-pre-line">
+                  {product.description}
+                </Dialog.Description>
+              ) : (
+                <p className="text-sm text-foreground/40 italic mb-6">Chưa có mô tả chi tiết cho sản phẩm này.</p>
+              )}
+
+              {/* Add to cart actions */}
+              <div className="mt-auto pt-4 border-t border-foreground/8">
+                {qty === 0 ? (
+                  <button
+                    onClick={() => !isOutOfStock && onAdd(product.id)}
+                    disabled={isOutOfStock}
+                    className={`w-full h-12 rounded-pill text-sm font-semibold transition ${
+                      isOutOfStock
+                        ? 'bg-foreground/5 text-foreground/30 cursor-not-allowed'
+                        : 'bg-accent text-ink hover:scale-[1.01] active:scale-[0.99] shadow-soft'
+                    }`}
+                  >
+                    {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
+                  </button>
+                ) : (
+                  <div className="flex items-center justify-between bg-paper-tint rounded-pill p-2">
+                    <button
+                      onClick={() => onRemove(product.id)}
+                      aria-label="Bớt 1"
+                      className="h-9 w-9 rounded-pill bg-[var(--surface)] ring-1 ring-foreground/10 grid place-items-center hover:bg-danger/10 hover:ring-danger/30 transition"
+                    >
+                      <Minus className="h-4 w-4" strokeWidth={2.25} />
+                    </button>
+                    <span className="lqg-numeric-sans text-lg text-foreground font-bold">{qty}</span>
+                    <button
+                      onClick={() => onAdd(product.id)}
+                      aria-label="Thêm 1"
+                      className="h-9 w-9 rounded-pill bg-ink text-paper grid place-items-center hover:bg-foreground/90 transition"
+                    >
+                      <Plus className="h-4 w-4" strokeWidth={2.5} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
   )
 }
