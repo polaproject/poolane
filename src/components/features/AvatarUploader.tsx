@@ -1,69 +1,53 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { Popover } from '@base-ui/react/popover'
+import { Pencil, Upload, Trash2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Loader2, Upload } from 'lucide-react'
+import { AvatarCropDialog } from './AvatarCropDialog'
 
 interface Props {
   currentAvatarUrl: string | null
   fullName: string
-  /** Kích thước circle. 'lg' = 80px (default), 'xl' = 96px. */
   size?: 'lg' | 'xl'
 }
 
 /**
- * AvatarUploader — circular preview lớn + nút "Đổi ảnh" ngay dưới.
+ * AvatarUploader (Phase 18.11) — circular avatar + 1 nút "Sửa" duy nhất.
  *
- * Click button → mở file picker → upload qua /api/upload → PATCH
- * /api/users/avatar lưu URL → reload page để sidebar/header refresh.
+ * Flow:
+ *   - Click "Sửa" → Popover hiện 2 option:
+ *     - "Cập nhật" → file picker → AvatarCropDialog (zoom + drag + crop)
+ *     - "Xoá ảnh" → PATCH null → fallback initials
+ *   - Crop dialog: vuông + overlay tròn, output qua canvas (max 512px)
  *
- * Layout: vertical (circle trên, button dưới) cho gọn + hero-friendly.
+ * Trước Phase 18.11: 2 button rời "Đổi ảnh" + "Xoá" tốn diện tích.
  */
 export function AvatarUploader({ currentAvatarUrl, fullName, size = 'lg' }: Props) {
   const [avatarUrl, setAvatarUrl] = useState(currentAvatarUrl)
-  const [uploading, setUploading] = useState(false)
+  const [popoverOpen, setPopoverOpen] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [sourceImage, setSourceImage] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const initial = fullName.charAt(0).toUpperCase()
   const dim = size === 'xl' ? 'h-24 w-24' : 'h-20 w-20'
   const initialSize = size === 'xl' ? 'text-4xl' : 'text-3xl'
 
-  async function handleFile(file: File) {
-    setUploading(true)
-    try {
-      const form = new FormData()
-      form.append('file', file)
-      form.append('folder', 'avatars')
-      const uploadRes = await fetch('/api/upload', { method: 'POST', body: form })
-      const uploadJson = await uploadRes.json()
-      if (!uploadRes.ok) {
-        toast.error(uploadJson.error?.message ?? 'Upload thất bại')
-        return
-      }
-      const newUrl = uploadJson.data.url as string
-
-      const patchRes = await fetch('/api/users/avatar', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ avatarUrl: newUrl }),
-      })
-      const patchJson = await patchRes.json()
-      if (!patchRes.ok) {
-        toast.error(patchJson.error?.message ?? 'Lỗi cập nhật avatar')
-        return
-      }
-
-      setAvatarUrl(newUrl)
-      toast.success('Đã cập nhật avatar 🎉')
-      setTimeout(() => window.location.reload(), 500)
-    } catch {
-      toast.error('Không thể kết nối')
-    } finally {
-      setUploading(false)
+  function onFilePick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      setSourceImage(ev.target?.result as string)
+      setPopoverOpen(false)
     }
+    reader.readAsDataURL(file)
   }
 
   async function handleRemove() {
-    setUploading(true)
+    setPopoverOpen(false)
+    setBusy(true)
     try {
       const res = await fetch('/api/users/avatar', {
         method: 'PATCH',
@@ -80,19 +64,50 @@ export function AvatarUploader({ currentAvatarUrl, fullName, size = 'lg' }: Prop
     } catch {
       toast.error('Không thể kết nối')
     } finally {
-      setUploading(false)
+      setBusy(false)
     }
   }
 
-  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    e.target.value = ''
-    if (file) handleFile(file)
+  async function handleCropped(blob: Blob) {
+    setSourceImage(null)
+    setBusy(true)
+    try {
+      const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' })
+      const form = new FormData()
+      form.append('file', file)
+      form.append('folder', 'avatars')
+      const upRes = await fetch('/api/upload', { method: 'POST', body: form })
+      const upJson = await upRes.json()
+      if (!upRes.ok) {
+        toast.error(upJson.error?.message ?? 'Upload thất bại')
+        return
+      }
+      const newUrl = upJson.data.url as string
+
+      const patchRes = await fetch('/api/users/avatar', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatarUrl: newUrl }),
+      })
+      if (!patchRes.ok) {
+        toast.error('Lỗi lưu avatar')
+        return
+      }
+
+      setAvatarUrl(newUrl)
+      toast.success('Đã cập nhật avatar 🎉')
+      setTimeout(() => window.location.reload(), 500)
+    } catch {
+      toast.error('Không thể kết nối')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
     <div className="inline-flex flex-col items-center gap-2">
-      <input ref={inputRef} type="file" accept="image/*" hidden onChange={onFileChange} />
+      <input ref={inputRef} type="file" accept="image/*" hidden onChange={onFilePick} />
+
       <div className={`${dim} rounded-pill overflow-hidden ring-2 ring-foreground/10 bg-accent grid place-items-center shrink-0`}>
         {avatarUrl ? (
           /* eslint-disable-next-line @next/next/no-img-element */
@@ -101,31 +116,52 @@ export function AvatarUploader({ currentAvatarUrl, fullName, size = 'lg' }: Prop
           <span className={`${initialSize} font-bold text-ink`}>{initial}</span>
         )}
       </div>
-      <div className="flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={uploading}
-          className="inline-flex items-center gap-1 px-3 py-1 rounded-pill ring-1 ring-foreground/15 hover:bg-foreground/5 transition text-xs font-medium disabled:opacity-50"
+
+      <Popover.Root open={popoverOpen} onOpenChange={setPopoverOpen} modal={false}>
+        <Popover.Trigger
+          disabled={busy}
+          className="inline-flex items-center gap-1 px-3 py-1 rounded-pill ring-1 ring-foreground/15 hover:bg-foreground/5 transition text-xs font-medium disabled:opacity-50 cursor-pointer"
         >
-          {uploading ? (
+          {busy ? (
             <Loader2 className="h-3 w-3 animate-spin" />
           ) : (
-            <Upload className="h-3 w-3" strokeWidth={2} />
+            <Pencil className="h-3 w-3" strokeWidth={2} />
           )}
-          {avatarUrl ? 'Đổi ảnh' : 'Tải ảnh'}
-        </button>
-        {avatarUrl && (
-          <button
-            type="button"
-            onClick={handleRemove}
-            disabled={uploading}
-            className="text-xs text-foreground/55 hover:text-danger transition disabled:opacity-50"
-          >
-            Xoá
-          </button>
-        )}
-      </div>
+          Sửa
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Positioner side="bottom" align="center" sideOffset={6} className="z-[60]">
+            <Popover.Popup className="z-50 glass-panel rounded-card-lg w-44 py-1 shadow-glass overflow-hidden">
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="flex items-center gap-2.5 px-4 py-2.5 text-sm w-full text-left hover:bg-foreground/5 transition cursor-pointer"
+              >
+                <Upload className="w-4 h-4 text-accent" strokeWidth={1.75} />
+                Cập nhật
+              </button>
+              {avatarUrl && (
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-sm w-full text-left text-danger hover:bg-danger/5 transition cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" strokeWidth={1.75} />
+                  Xoá ảnh
+                </button>
+              )}
+            </Popover.Popup>
+          </Popover.Positioner>
+        </Popover.Portal>
+      </Popover.Root>
+
+      {sourceImage && (
+        <AvatarCropDialog
+          src={sourceImage}
+          onCancel={() => setSourceImage(null)}
+          onCropped={handleCropped}
+        />
+      )}
     </div>
   )
 }
