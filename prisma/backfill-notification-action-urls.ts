@@ -103,17 +103,40 @@ const RULES: Rule[] = [
     match: t => t.includes('Bài tập') && (t.includes('giao') || t.includes('mới')),
     actionUrl: '/student/exercises/my',
   },
+  // Shop order action — pay/fulfill/reject/cancel → list (approve handled riêng vì cần orderId)
+  {
+    label: 'Đơn hàng đã thanh toán/hoàn thành/huỷ/từ chối',
+    match: t =>
+      t.includes('Đã ghi nhận thanh toán') ||
+      t.includes('Đơn hàng hoàn thành') ||
+      t.includes('Đơn hàng không được duyệt') ||
+      t.includes('Đơn hàng đã huỷ'),
+    actionUrl: '/student/shop/orders',
+  },
 ]
 
 async function main() {
   const orphans = await prisma.notification.findMany({
     where: { actionUrl: null },
-    select: { id: true, title: true, body: true },
+    select: { id: true, title: true, body: true, metadata: true },
   })
   console.log(`Found ${orphans.length} notifications without actionUrl.`)
 
   const buckets: Record<string, string[]> = {}
+  // Special: "Đơn hàng được duyệt" cần actionUrl per-noti (kèm orderId từ metadata)
+  const approvedOrderUpdates: Array<{ id: string; url: string }> = []
   for (const n of orphans) {
+    // Special handling: approved order → deep-link to pay page
+    if (n.title.includes('Đơn hàng được duyệt')) {
+      const meta = n.metadata as { orderId?: string } | null
+      if (meta?.orderId) {
+        approvedOrderUpdates.push({ id: n.id, url: `/student/shop/orders/${meta.orderId}/pay` })
+      } else {
+        // Fallback if no orderId
+        approvedOrderUpdates.push({ id: n.id, url: '/student/shop/orders' })
+      }
+      continue
+    }
     const rule = RULES.find(r => r.match(n.title, n.body))
     if (!rule) continue
     if (!buckets[rule.label]) buckets[rule.label] = []
@@ -130,6 +153,15 @@ async function main() {
     })
     console.log(`  ${rule.label}: ${res.count} updated → ${rule.actionUrl}`)
     total += res.count
+  }
+
+  // Apply per-notification updates for approved orders (each has unique URL)
+  if (approvedOrderUpdates.length > 0) {
+    for (const upd of approvedOrderUpdates) {
+      await prisma.notification.update({ where: { id: upd.id }, data: { actionUrl: upd.url } })
+    }
+    console.log(`  Đơn hàng được duyệt (per-orderId deep-link): ${approvedOrderUpdates.length} updated`)
+    total += approvedOrderUpdates.length
   }
 
   console.log(`\nDone. Updated ${total} notifications.`)
