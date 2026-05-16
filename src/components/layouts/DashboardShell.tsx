@@ -43,6 +43,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       key: 'tongquan', label: 'Tổng quan', icon: LayoutDashboard,
       items: [
         { label: 'Bảng điều khiển', href: '/admin/dashboard', icon: LayoutDashboard },
+        { label: 'Báo cáo tuỳ chỉnh', href: '/admin/dashboards', icon: BarChart2 },
         { label: 'AI dự báo', href: '/admin/ai', icon: Brain },
         { label: 'Heatmap kỹ năng', href: '/admin/skill-heatmap', icon: BarChart2 },
         { label: 'Hiệu quả giảng dạy', href: '/admin/teacher-metrics', icon: TrendingUp },
