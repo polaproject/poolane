@@ -57,7 +57,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     // Verify all widgets belong to this dashboard (tránh inject id widget khác)
     const widgetIds = parsed.data.items.map(i => i.id)
-    const validCount = await prisma.widget.count({
+    const validCount = await prisma.dashboardWidget.count({
       where: { id: { in: widgetIds }, dashboardId },
     })
     if (validCount !== widgetIds.length) {
@@ -69,7 +69,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     await prisma.$transaction(
       parsed.data.items.map(item =>
-        prisma.widget.update({
+        prisma.dashboardWidget.update({
           where: { id: item.id },
           data: { position: { x: item.x, y: item.y, w: item.w, h: item.h } },
         })
