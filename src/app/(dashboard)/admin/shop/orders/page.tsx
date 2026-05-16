@@ -4,11 +4,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import {
   Loader2, RefreshCw, ShoppingBag, CheckCircle, X as XIcon,
-  DollarSign, Truck,
+  DollarSign, Truck, Trash2,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { ConfirmTransferButton } from '@/components/features/ConfirmTransferButton'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Chip } from '@/components/ui/Chip'
 
 type Order = {
@@ -257,6 +258,23 @@ export default function OrdersPage() {
                           >
                             <DollarSign className="h-4 w-4 text-accent" strokeWidth={1.75} /> Tiền mặt/khác
                           </button>
+                          <ConfirmDialog
+                            trigger={
+                              <button
+                                disabled={processing === order.id}
+                                className="px-4 h-10 rounded-pill ring-1 ring-danger/30 text-danger text-sm hover:bg-danger/5 transition inline-flex items-center gap-1.5 disabled:opacity-50"
+                                title="Huỷ đơn này"
+                              >
+                                <Trash2 className="h-4 w-4" strokeWidth={1.75} /> Huỷ đơn
+                              </button>
+                            }
+                            title="Huỷ đơn hàng?"
+                            description={`Đơn ${fmt(order.finalAmount)} của ${order.student.user.fullName} sẽ chuyển sang Đã huỷ. Stock vật phẩm (nếu có) sẽ được hoàn lại. Học viên sẽ nhận thông báo. Thao tác này không thể hoàn tác.`}
+                            confirmLabel="Huỷ đơn"
+                            cancelLabel="Đóng"
+                            variant="danger"
+                            onConfirm={() => handleAction(order.id, 'cancel')}
+                          />
                         </>
                       )}
                       {order.status === 'paid' && (

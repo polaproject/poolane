@@ -76,6 +76,20 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         }
       }
 
+      // Hoàn stock khi huỷ đơn đã duyệt (approved → cancelled). Đơn pending
+      // chưa trừ stock nên không cần hoàn. Đơn paid/fulfilled không cho huỷ (đã
+      // chặn ở guard `ALREADY_FINALIZED` phía trên + paid không có flow cancel).
+      if (action === 'cancel' && order.status === 'approved') {
+        for (const item of order.orderItems) {
+          if (item.product.type === 'physical' && item.product.stockQuantity !== null) {
+            await tx.product.update({
+              where: { id: item.productId },
+              data: { stockQuantity: { increment: item.quantity } }
+            })
+          }
+        }
+      }
+
       // Ghi nhận thanh toán vào bảng Payment khi action='pay'
       if (action === 'pay' && paymentMethod) {
         await tx.payment.create({
