@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import Cropper, { type Area } from 'react-easy-crop'
 import { X, ZoomIn, ZoomOut, Loader2 } from 'lucide-react'
@@ -27,6 +27,22 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  // Đo container để force cropSize gần sát mép → vòng tròn to nhất có thể
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [cropSize, setCropSize] = useState<{ width: number; height: number } | null>(null)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width ?? 0
+      // -8px chừa biên rất mỏng → vòng tròn nearly full container
+      const size = Math.max(0, w - 8)
+      setCropSize({ width: size, height: size })
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   const onCropComplete = useCallback((_: Area, areaPixels: Area) => {
     setCroppedAreaPixels(areaPixels)
@@ -62,20 +78,23 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
             Kéo ảnh để di chuyển vào vùng tròn. Dùng thanh trượt để phóng to / thu nhỏ.
           </Dialog.Description>
 
-          {/* Crop area — vuông, ảnh fill, overlay tròn ở giữa */}
-          <div className="relative w-full aspect-square rounded-card overflow-hidden bg-ink mb-3">
-            <Cropper
-              image={src}
-              crop={crop}
-              zoom={zoom}
-              aspect={1}
-              cropShape="round"
-              showGrid={false}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
-              objectFit="contain"
-            />
+          {/* Crop area — vuông, ảnh fill, vòng tròn nearly full container */}
+          <div ref={containerRef} className="relative w-full aspect-square rounded-card overflow-hidden bg-ink mb-3">
+            {cropSize && (
+              <Cropper
+                image={src}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                cropSize={cropSize}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+                objectFit="cover"
+              />
+            )}
           </div>
 
           {/* Zoom slider */}

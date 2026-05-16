@@ -140,16 +140,15 @@ export function AvatarUploader({ currentAvatarUrl, fullName, size = 'lg' }: Prop
                 <Upload className="w-4 h-4 text-accent" strokeWidth={1.75} />
                 Cập nhật
               </button>
-              {avatarUrl && (
-                <button
-                  type="button"
-                  onClick={handleRemove}
-                  className="flex items-center gap-2.5 px-4 py-2.5 text-sm w-full text-left text-danger hover:bg-danger/5 transition cursor-pointer"
-                >
-                  <Trash2 className="w-4 h-4" strokeWidth={1.75} />
-                  Xoá ảnh
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleRemove}
+                disabled={!avatarUrl}
+                className="flex items-center gap-2.5 px-4 py-2.5 text-sm w-full text-left text-danger hover:bg-danger/5 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              >
+                <Trash2 className="w-4 h-4" strokeWidth={1.75} />
+                Xoá ảnh
+              </button>
             </Popover.Popup>
           </Popover.Positioner>
         </Popover.Portal>
