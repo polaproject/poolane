@@ -42,7 +42,7 @@ interface NotificationFabProps {
 export function NotificationFab({ open, onOpenChange, allowedTypes }: NotificationFabProps) {
   const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
-  const [unreadCount, setUnreadCount] = useState(0)
+  const [, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
   const fetchNotifications = useCallback(async () => {

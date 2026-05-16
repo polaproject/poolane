@@ -10,11 +10,11 @@
 
 import { prisma } from '@/lib/prisma'
 import { evaluateFormula } from './formula-parser'
-import { getTableMeta, getColumnMeta, type ColumnMeta } from './schema-registry'
+import { getColumnMeta, type ColumnMeta } from './schema-registry'
 import { QUERY_LIMITS } from './safety'
 import type {
-  WidgetConfig, PivotField, PivotValue, PivotFilter, PivotJoin, TimeRange,
-  AggregationOp, FilterOp, DateGranularity,
+  WidgetConfig, PivotField, PivotValue, PivotFilter, TimeRange,
+  AggregationOp,
 } from './types'
 
 // ─── Identifier quoting ───

@@ -34,7 +34,7 @@ export function PivotTableWidget({ config, data, globalFormat, onCellClick }: Pr
   }, [config])
 
   const valueLabels = useMemo(() => {
-    const labels = config.values.map((v, i) => {
+    const labels = config.values.map((v) => {
       const cm = getColumnMeta(v.table, v.column)
       const baseName = v.alias ?? cm?.vietnameseName ?? v.column
       const aggLabels: Record<string, string> = {
