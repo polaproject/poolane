@@ -163,6 +163,7 @@ export async function POST(request: NextRequest) {
             type: 'general',
             title: '✓ Thanh toán MoMo thành công',
             body: `Đã ghi nhận ${gt.amount.toLocaleString('vi-VN')}đ. Cảm ơn bạn 💙`,
+            actionUrl: '/student/payments',
             metadata: { paymentId: payment.id, amount: gt.amount },
           }
         })

@@ -132,6 +132,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
             type: 'general',
             title: notif.title,
             body: notif.body,
+            actionUrl: action === 'approve' ? `/student/shop/orders/${id}/pay` : '/student/shop/orders',
             metadata: { orderId: id, action }
           }
         })

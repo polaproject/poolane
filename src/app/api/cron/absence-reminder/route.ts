@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
           type: 'absence',
           title: '🌊 Lớp nhớ bạn',
           body: `Đã ${daysSince} ngày bạn chưa xuống nước. Quay lại khi sẵn sàng nhé!`,
+          actionUrl: '/student/schedule',
         }
       })
 

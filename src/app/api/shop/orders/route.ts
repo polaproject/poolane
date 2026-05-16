@@ -128,6 +128,7 @@ export async function POST(request: NextRequest) {
           type: 'general',
           title: `Đơn hàng mới từ ${student?.user.fullName}`,
           body: `${newOrder.orderItems.length} sản phẩm · ${finalAmount.toLocaleString('vi-VN')}đ · Chờ duyệt`,
+          actionUrl: '/admin/shop/orders?status=pending',
           metadata: { orderId: newOrder.id, finalAmount }
         }))
       })

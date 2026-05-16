@@ -135,6 +135,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         type: 'general',
         title: action === 'transfer' ? '💸 Đã chuyển tiền hoàn' : action === 'approve' ? '✓ Yêu cầu hoàn tiền được duyệt' : 'Yêu cầu hoàn tiền',
         body: notifBody,
+        actionUrl: '/student/payments',
         metadata: { refundId: id, action, amount: refund.totalRefundAmount }
       }
     })

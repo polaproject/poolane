@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
 import { vi } from 'date-fns/locale'
-import { Bell, Check, CheckCheck, Loader2, RefreshCw } from 'lucide-react'
+import { Bell, Check, CheckCheck, Loader2, RefreshCw, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
@@ -29,6 +30,7 @@ const TYPE_ICONS: Record<string, string> = {
 }
 
 export default function NotificationsPage() {
+  const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -53,6 +55,15 @@ export default function NotificationsPage() {
       n.id === id ? { ...n, readAt: new Date().toISOString() } : n
     ))
     setUnreadCount(prev => Math.max(0, prev - 1))
+  }
+
+  async function handleItemClick(n: Notification) {
+    if (!n.readAt) {
+      try { await fetch(`/api/notifications/${n.id}`, { method: 'PATCH' }) } catch {}
+      setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, readAt: new Date().toISOString() } : x))
+      setUnreadCount(prev => Math.max(0, prev - 1))
+    }
+    if (n.actionUrl) router.push(n.actionUrl)
   }
 
   async function markAllRead() {
@@ -98,15 +109,9 @@ export default function NotificationsPage() {
         </div>
       ) : (
         <div className="space-y-2">
-          {notifications.map(n => (
-            <div
-              key={n.id}
-              className={`glass-card border p-4 transition-colors ${
-                !n.readAt
-                  ? 'border-foreground/20 bg-ink/2'
-                  : 'border-foreground/8 opacity-75'
-              }`}
-            >
+          {notifications.map(n => {
+            const clickable = !!n.actionUrl
+            const Inner = (
               <div className="flex gap-3">
                 <span className="text-xl flex-shrink-0 mt-0.5">
                   {TYPE_ICONS[n.type] ?? '💙'}
@@ -116,14 +121,20 @@ export default function NotificationsPage() {
                     <p className={`text-sm font-semibold ${!n.readAt ? 'text-foreground' : 'text-foreground/60'}`}>
                       {n.title}
                     </p>
-                    {!n.readAt && (
-                      <button
-                        onClick={() => markRead(n.id)}
-                        className="flex-shrink-0 p-1 hover:bg-foreground/8 rounded-lg transition-colors"
-                      >
-                        <Check className="w-3.5 h-3.5 text-[#5B8E9F]" />
-                      </button>
-                    )}
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {!n.readAt && (
+                        <button
+                          onClick={e => { e.stopPropagation(); markRead(n.id) }}
+                          aria-label="Đánh dấu đã đọc"
+                          className="p-1 hover:bg-foreground/8 rounded-lg transition-colors"
+                        >
+                          <Check className="w-3.5 h-3.5 text-[#5B8E9F]" />
+                        </button>
+                      )}
+                      {clickable && (
+                        <ArrowRight className="w-3.5 h-3.5 text-foreground/40" />
+                      )}
+                    </div>
                   </div>
                   <p className="text-sm text-foreground/60 mt-0.5 leading-relaxed">{n.body}</p>
                   <p className="text-xs text-foreground/35 mt-2">
@@ -131,8 +142,22 @@ export default function NotificationsPage() {
                   </p>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+            const baseCls = `glass-card border p-4 transition-colors w-full text-left ${
+              !n.readAt ? 'border-foreground/20 bg-ink/2' : 'border-foreground/8 opacity-75'
+            } ${clickable ? 'hover:bg-foreground/[0.04] cursor-pointer' : ''}`
+            return clickable ? (
+              <button
+                key={n.id}
+                onClick={() => handleItemClick(n)}
+                className={baseCls}
+              >
+                {Inner}
+              </button>
+            ) : (
+              <div key={n.id} className={baseCls}>{Inner}</div>
+            )
+          })}
         </div>
       )}
     </div>

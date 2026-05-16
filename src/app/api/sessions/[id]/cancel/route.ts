@@ -88,6 +88,7 @@ export async function POST(request: NextRequest, { params }: Params) {
           type: 'cancellation',
           title: 'Ca học hôm nay bị huỷ',
           body: `Xin lỗi bạn nha! ${reason}. Buổi vé của bạn đã được cộng lại. Hẹn gặp buổi sau! 💙`,
+          actionUrl: '/student/my-schedule',
           metadata: { sessionId, reason }
         }
       })

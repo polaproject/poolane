@@ -110,6 +110,7 @@ export async function POST(request: NextRequest, { params }: Params) {
                 type: 'general',
                 title: `Vé bơi sắp hết!`,
                 body: `Bạn còn ${remaining} buổi vé bơi. Nhớ sắp xếp mua thêm để không bị gián đoạn nhé 🌊`,
+                actionUrl: '/student/payments',
               }
             })
           }
@@ -136,6 +137,7 @@ export async function POST(request: NextRequest, { params }: Params) {
               type: 'absence',
               title: 'Hôm nay bạn vắng học',
               body: `Chúng mình nhớ bạn! Nếu có gì trở ngại, cứ nhắn tin cho lớp nhé 😊`,
+              actionUrl: '/student/schedule',
             }
           })
         }

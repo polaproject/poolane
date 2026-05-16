@@ -119,6 +119,7 @@ export async function POST(request: NextRequest) {
             type: 'badge',
             title: `🎉 Tốt nghiệp khoá ${course?.name}!`,
             body: `Chúc mừng bạn đã hoàn thành khoá học! Mình thấy bạn tiến bộ rất nhiều từ buổi đầu đến giờ. Hẹn gặp bạn ở khoá tiếp theo nhé 💙`,
+            actionUrl: '/student/progress',
           }
         })
       }
@@ -137,6 +138,7 @@ export async function POST(request: NextRequest) {
           type: 'general',
           title: 'Kết quả đánh giá mới 📊',
           body: `Mình vừa cập nhật đánh giá buổi ${sessionNumber} cho bạn. Vào app xem tiến độ nhé 🌊`,
+          actionUrl: '/student/progress',
           metadata: { assessmentId: assessment.id, sessionNumber }
         }
       })

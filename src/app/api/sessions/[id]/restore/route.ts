@@ -76,6 +76,7 @@ export async function POST(_request: NextRequest, { params }: Params) {
           type: 'general',
           title: 'Buổi học đã được mở lại',
           body: `Lớp đã mở lại buổi học bị huỷ trước đó. Bạn vẫn ở danh sách ${reg.status === 'approved' ? 'đã duyệt' : 'chờ duyệt'}. Hẹn gặp bạn nhé! 🌊`,
+          actionUrl: '/student/my-schedule',
           metadata: { sessionId, restoredFrom: 'cancelled' },
         },
       })

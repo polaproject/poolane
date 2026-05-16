@@ -103,6 +103,7 @@ export async function POST(request: NextRequest) {
           type: 'general',
           title: 'Đã ghi nhận thanh toán ✓',
           body: `Thanh toán ${input.amount.toLocaleString('vi-VN')}đ đã được ghi nhận. Cảm ơn bạn nhé! 💙`,
+          actionUrl: '/student/payments',
           metadata: { paymentId: payment.id, amount: input.amount, type: input.type }
         }
       })

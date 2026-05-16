@@ -70,6 +70,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         body: action === 'approve'
           ? `Tuyệt! Bạn đã có mặt trong danh sách ca học. Nhớ đến đúng giờ và mang theo đồ bơi nhé 🌊`
           : `Ca học này không thể duyệt bạn. Lý do: ${rejectedReasonText || rejectedReason || 'Không đủ điều kiện'}`,
+        actionUrl: '/student/my-schedule',
         metadata: { sessionId, registrationId: regId, action }
       }
     })
