@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ThemeSwitcher, ThemeSwitcherCompact } from '@/components/ui/ThemeSwitcher'
+import { ThemeSwitcherCompact } from '@/components/ui/ThemeSwitcher'
+import { Popover } from '@base-ui/react/popover'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import type { UserRole } from '@/lib/auth'
 import {
@@ -132,13 +133,6 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
   ],
   student: [
     {
-      key: 'canhan', label: 'Cá nhân', icon: IdCard,
-      items: [
-        { label: 'Hồ sơ của tôi', href: '/student/profile', icon: IdCard },
-        { label: 'Lịch sử thanh toán', href: '/student/payments', icon: ReceiptText },
-      ]
-    },
-    {
       key: 'hoctap', label: 'Học tập', icon: Calendar,
       items: [
         { label: 'Đăng ký buổi học', href: '/student/schedule', icon: Calendar },
@@ -199,6 +193,66 @@ const BOTTOM_NAV: Record<UserRole, NavItem[]> = {
   ],
 }
 
+function AvatarPopoverButton({
+  userInitial,
+  userRole,
+  size = 'sm',
+}: {
+  userInitial: string
+  userRole: UserRole
+  size?: 'sm' | 'md'
+}) {
+  const [open, setOpen] = useState(false)
+  const dim = size === 'md' ? 'w-9 h-9 text-sm' : 'w-8 h-8 text-sm'
+
+  if (userRole !== 'student') {
+    return (
+      <div
+        className={`${dim} rounded-full flex items-center justify-center font-bold flex-shrink-0`}
+        style={{ background: 'var(--pola-accent)', color: '#000' }}
+      >
+        {userInitial}
+      </div>
+    )
+  }
+
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen} modal={false}>
+      <Popover.Trigger
+        aria-label="Tài khoản cá nhân"
+        className={`${dim} rounded-full flex items-center justify-center font-bold flex-shrink-0 hover:opacity-90 transition-opacity cursor-pointer`}
+        style={{ background: 'var(--pola-accent)', color: '#000' }}
+      >
+        {userInitial}
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Positioner side="bottom" align="end" sideOffset={8} className="z-[60]">
+          <Popover.Popup className="z-50 glass-panel rounded-card-lg w-52 py-1 shadow-glass overflow-hidden">
+            <Link
+              href="/student/profile"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors hover:bg-[var(--pola-nav-hover)]"
+              style={{ color: 'var(--pola-nav-text)' }}
+            >
+              <IdCard className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--pola-accent)' }} />
+              Hồ sơ của tôi
+            </Link>
+            <Link
+              href="/student/payments"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors hover:bg-[var(--pola-nav-hover)]"
+              style={{ color: 'var(--pola-nav-text)' }}
+            >
+              <ReceiptText className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--pola-accent)' }} />
+              Lịch sử thanh toán
+            </Link>
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
+  )
+}
+
 interface DashboardShellProps {
   children: React.ReactNode
   userRole: UserRole
@@ -206,7 +260,7 @@ interface DashboardShellProps {
   userInitial: string
 }
 
-function ShellInner({ children, userRole, userFullName, userInitial }: DashboardShellProps) {
+function ShellInner({ children, userRole, userInitial }: DashboardShellProps) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -331,6 +385,12 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
               a Pola Project
             </p>
           </div>
+          {/* Desktop: ThemeSwitcherCompact + Avatar */}
+          <div className="hidden lg:flex items-center gap-1 ml-auto">
+            <ThemeSwitcherCompact />
+            <AvatarPopoverButton userInitial={userInitial} userRole={userRole} size="sm" />
+          </div>
+          {/* Mobile: close button */}
           <button
             className="ml-auto lg:hidden"
             onClick={() => setSidebarOpen(false)}
@@ -402,37 +462,15 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
           })}
         </nav>
 
-        {/* Theme switcher */}
-        <div className="border-t px-2 py-2" style={{ borderColor: 'var(--pola-nav-active)' }}>
-          <ThemeSwitcher />
-        </div>
-
-        {/* User + Logout */}
-        <div
-          className="border-t px-3 py-3 flex items-center gap-2.5"
-          style={{ borderColor: 'var(--pola-nav-active)' }}
-        >
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-            style={{ background: 'var(--pola-accent)', color: '#000' }}
-          >
-            {userInitial}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium truncate" style={{ color: 'var(--pola-nav-text)' }}>
-              {userFullName}
-            </p>
-            <p className="text-xs capitalize" style={{ color: 'var(--pola-nav-muted)' }}>
-              {userRole === 'admin' ? 'Quản trị viên' : userRole === 'staff' ? 'Trợ lý' : 'Học viên'}
-            </p>
-          </div>
+        {/* Logout */}
+        <div className="border-t px-3 py-3" style={{ borderColor: 'var(--pola-nav-active)' }}>
           <button
             onClick={handleLogout}
-            className="p-1.5 rounded-lg transition-colors hover:opacity-70"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-[var(--pola-nav-hover)] hover:opacity-90"
             style={{ color: 'var(--pola-nav-muted)' }}
-            title="Đăng xuất"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-4 h-4 flex-shrink-0" />
+            <span>Đăng xuất</span>
           </button>
         </div>
       </aside>
@@ -469,13 +507,7 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
           </div>
           <div className="ml-auto flex items-center gap-1">
             <ThemeSwitcherCompact />
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
-              style={{ background: 'var(--pola-accent)', color: '#000' }}
-              aria-label={`Tài khoản ${userFullName}`}
-            >
-              {userInitial}
-            </div>
+            <AvatarPopoverButton userInitial={userInitial} userRole={userRole} size="md" />
           </div>
         </header>
 
