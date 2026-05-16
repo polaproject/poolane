@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Popover } from '@base-ui/react/popover'
-import { Bell, Loader2, ArrowRight } from 'lucide-react'
+import { Bell, Loader2, ArrowRight, CheckCheck } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { vi } from 'date-fns/locale'
 
@@ -92,6 +92,8 @@ export function NotificationFab({ open, onOpenChange, allowedTypes }: Notificati
   }, [fetchNotifications])
 
   async function handleItemClick(n: Notification) {
+    // Mark read optimistic — noti VẪN ở trong list (chỉ đổi visual đã đọc/chưa đọc).
+    // Owner muốn giữ noti để user phòng bấm nhầm — chỉ visual change, không filter out.
     if (!n.readAt) {
       try {
         await fetch(`/api/notifications/${n.id}`, { method: 'PATCH' })
@@ -107,14 +109,36 @@ export function NotificationFab({ open, onOpenChange, allowedTypes }: Notificati
     if (n.actionUrl) router.push(n.actionUrl)
   }
 
-  // Filter theo admin settings: allowedTypes empty = show all, else chỉ hiện types trong list
+  async function markAllRead() {
+    const unreadList = notifications.filter(n => !n.readAt)
+    if (unreadList.length === 0) return
+    // Optimistic: mark all read trong state trước, gửi PATCH song song
+    const nowIso = new Date().toISOString()
+    setNotifications(prev => prev.map(x => x.readAt ? x : { ...x, readAt: nowIso }))
+    setUnreadCount(0)
+    await Promise.all(
+      unreadList.map(n =>
+        fetch(`/api/notifications/${n.id}`, { method: 'PATCH' }).catch(() => null)
+      )
+    )
+  }
+
+  // Filter theo admin settings: allowedTypes empty = show all, else chỉ hiện types trong list.
+  // KHÔNG filter unread riêng — luôn show toàn bộ filtered để noti vẫn ở list sau khi đọc
+  // (owner muốn user phân biệt visual read/unread, không bị "biến mất").
   const filtered = allowedTypes.length === 0
     ? notifications
     : notifications.filter(n => allowedTypes.includes(n.type))
-  const unread = filtered.filter(n => !n.readAt)
-  const preview = (unread.length > 0 ? unread : filtered).slice(0, 7)
-  // Badge count: dùng filtered unread count (không phải global unreadCount)
-  const filteredUnreadCount = unread.length
+  // Sort: unread đầu, sau đó read; trong mỗi nhóm theo createdAt desc (mặc định từ API)
+  const sorted = [...filtered].sort((a, b) => {
+    const aUnread = !a.readAt ? 0 : 1
+    const bUnread = !b.readAt ? 0 : 1
+    return aUnread - bUnread
+  })
+  // Owner: "hiển thị 4 tin là hợp lý, có thể cuộn lên xuống"
+  // Giữ 20 noti trong DOM (perf limit) — viewport scroll area = ~4 items chiều cao
+  const preview = sorted.slice(0, 20)
+  const filteredUnreadCount = filtered.filter(n => !n.readAt).length
   const badgeText = filteredUnreadCount > 99 ? '99+' : String(filteredUnreadCount)
 
   return (
@@ -138,18 +162,30 @@ export function NotificationFab({ open, onOpenChange, allowedTypes }: Notificati
           <Popover.Popup
             className="z-50 glass-panel rounded-card-lg w-[min(380px,calc(100vw-2.5rem))] max-h-[480px] flex flex-col origin-bottom-right shadow-glass overflow-hidden data-[closed]:hidden"
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-foreground/8">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-foreground/8">
+              <div className="flex items-center gap-2 min-w-0">
                 <p className="font-semibold text-sm text-foreground">Thông báo</p>
                 {filteredUnreadCount > 0 && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-foreground/10 text-foreground/70">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-foreground/10 text-foreground/70 flex-shrink-0">
                     {filteredUnreadCount} chưa đọc
                   </span>
                 )}
               </div>
+              {filteredUnreadCount > 0 && (
+                <button
+                  type="button"
+                  onClick={markAllRead}
+                  title="Đánh dấu tất cả là đã đọc"
+                  className="cursor-pointer inline-flex items-center gap-1 text-[11px] font-medium text-accent hover:underline transition-colors flex-shrink-0"
+                >
+                  <CheckCheck className="w-3 h-3" strokeWidth={2.25} />
+                  Đánh dấu đọc tất cả
+                </button>
+              )}
             </div>
 
-            <div className="flex-1 overflow-y-auto px-1.5 py-1.5">
+            {/* Scroll area — viewport ~4 items (~76px mỗi item); 20 items max trong DOM */}
+            <div className="overflow-y-auto px-1.5 py-1.5 max-h-[304px]">
               {loading ? (
                 <div className="flex justify-center py-10">
                   <Loader2 className="w-4 h-4 animate-spin text-foreground/40" />
@@ -165,8 +201,10 @@ export function NotificationFab({ open, onOpenChange, allowedTypes }: Notificati
                     <li key={n.id}>
                       <button
                         onClick={() => handleItemClick(n)}
-                        className={`w-full text-left px-3 py-2.5 rounded-lg flex gap-2.5 transition-colors hover:bg-foreground/5 ${
-                          !n.readAt ? 'bg-foreground/[0.03]' : ''
+                        className={`w-full text-left px-3 py-2.5 rounded-lg flex gap-2.5 transition-colors cursor-pointer ${
+                          !n.readAt
+                            ? 'bg-accent/8 hover:bg-accent/12 ring-1 ring-accent/15'
+                            : 'hover:bg-foreground/5'
                         }`}
                       >
                         <span className="text-base flex-shrink-0 mt-0.5" aria-hidden>
@@ -176,7 +214,7 @@ export function NotificationFab({ open, onOpenChange, allowedTypes }: Notificati
                           <div className="flex items-start gap-2">
                             <p
                               className={`text-sm flex-1 min-w-0 truncate ${
-                                !n.readAt ? 'font-semibold text-foreground' : 'text-foreground/65'
+                                !n.readAt ? 'font-semibold text-foreground' : 'text-foreground/55'
                               }`}
                             >
                               {n.title}
@@ -185,7 +223,9 @@ export function NotificationFab({ open, onOpenChange, allowedTypes }: Notificati
                               <span className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0 mt-1.5" aria-hidden />
                             )}
                           </div>
-                          <p className="text-xs text-foreground/55 mt-0.5 line-clamp-2 leading-snug">
+                          <p className={`text-xs mt-0.5 line-clamp-2 leading-snug ${
+                            !n.readAt ? 'text-foreground/70' : 'text-foreground/45'
+                          }`}>
                             {n.body}
                           </p>
                           <p className="text-[10px] text-foreground/35 mt-1">
