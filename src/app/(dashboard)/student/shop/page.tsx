@@ -156,7 +156,7 @@ export default function ShopPage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto relative z-10 space-y-4">
+      <div className="px-4 sm:px-8 -mt-6 max-w-6xl mx-auto relative z-10 space-y-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" strokeWidth={1.75} />
@@ -197,77 +197,79 @@ export default function ShopPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {filteredProducts.map(p => {
               const qty = cart[p.id] ?? 0
               const isOutOfStock = p.type === 'physical' && p.stockQuantity !== null && p.stockQuantity <= 0
               const typeMeta = TYPE_META[p.type] ?? { label: p.type, Icon: Box }
               const TypeIcon = typeMeta.Icon
               return (
-                <div key={p.id} className="glass-card glass-card-hover p-4 transition hover:ring-accent/30">
-                  <div className="flex gap-3">
+                <div key={p.id} className="rounded-card-lg bg-[var(--surface)] ring-1 ring-foreground/10 overflow-hidden shadow-soft hover:shadow-glass hover:-translate-y-0.5 transition flex flex-col">
+                  {/* Photo */}
+                  <div className="aspect-square w-full bg-paper-tint overflow-hidden">
                     {p.photos && p.photos.length > 0 ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={p.photos[0]} alt={p.name} className="w-20 h-20 rounded-card object-cover shrink-0" />
+                      <img src={p.photos[0]} alt={p.name} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-20 h-20 rounded-card bg-paper-tint grid place-items-center shrink-0">
-                        <TypeIcon className="h-7 w-7 text-accent opacity-70" strokeWidth={1.5} />
+                      <div className="w-full h-full grid place-items-center">
+                        <TypeIcon className="h-12 w-12 text-accent opacity-50" strokeWidth={1.5} />
                       </div>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className="font-medium text-foreground text-sm leading-tight">{p.name}</p>
-                        <p className="font-heading text-base text-foreground shrink-0">{fmt(p.price)}</p>
-                      </div>
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <Chip variant="mist" className="text-[10px]">
-                          <TypeIcon className="h-2.5 w-2.5" strokeWidth={2.25} /> {typeMeta.label}
-                        </Chip>
-                        {p.sessionsCount && (
-                          <span className="text-[10px] text-foreground/55">· {p.sessionsCount} buổi</span>
-                        )}
-                      </div>
-                      {p.description && (
-                        <p className="text-xs text-foreground/55 line-clamp-2 leading-relaxed">{p.description}</p>
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-3 flex-1 flex flex-col">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <Chip variant="mist" className="text-[10px]">
+                        <TypeIcon className="h-2.5 w-2.5" strokeWidth={2.25} /> {typeMeta.label}
+                      </Chip>
+                      {p.sessionsCount && (
+                        <span className="text-[10px] text-foreground/55">· {p.sessionsCount} buổi</span>
                       )}
+                    </div>
+                    <p className="font-medium text-foreground text-sm leading-tight line-clamp-2 mb-1.5">{p.name}</p>
+                    <div className="flex items-baseline justify-between gap-2 mb-2">
+                      <p className="lqg-numeric-sans text-base text-accent font-bold">{fmt(p.price)}</p>
                       {p.type === 'physical' && p.stockQuantity !== null && (
-                        <p className={`text-[10px] mt-1 ${p.stockQuantity <= 3 ? 'text-warn' : 'text-foreground/45'}`}>
-                          Còn {p.stockQuantity} sp
+                        <p className={`text-[10px] ${p.stockQuantity <= 3 ? 'text-warn font-semibold' : 'text-foreground/45'}`}>
+                          Còn {p.stockQuantity}
                         </p>
                       )}
                     </div>
-                  </div>
 
-                  <div className="mt-3">
-                    {qty === 0 ? (
-                      <button
-                        onClick={() => !isOutOfStock && addToCart(p.id)}
-                        disabled={isOutOfStock}
-                        className={`w-full py-2.5 rounded-pill text-sm font-medium ring-1 transition ${
-                          isOutOfStock
-                            ? 'ring-foreground/8 text-foreground/30 cursor-not-allowed'
-                            : 'ring-foreground/20 text-foreground hover:bg-ink hover:text-paper hover:ring-ink'
-                        }`}
-                      >
-                        {isOutOfStock ? 'Hết hàng' : '+ Thêm vào giỏ'}
-                      </button>
-                    ) : (
-                      <div className="flex items-center gap-3 justify-between bg-paper-tint rounded-pill px-2 py-1.5">
+                    <div className="mt-auto">
+                      {qty === 0 ? (
                         <button
-                          onClick={() => removeFromCart(p.id)}
-                          className="h-8 w-8 rounded-pill bg-[var(--surface)] ring-1 ring-foreground/10 grid place-items-center hover:bg-danger/10 hover:ring-danger/30 transition"
+                          onClick={() => !isOutOfStock && addToCart(p.id)}
+                          disabled={isOutOfStock}
+                          className={`w-full h-9 rounded-pill text-xs font-semibold transition ${
+                            isOutOfStock
+                              ? 'bg-foreground/5 text-foreground/30 cursor-not-allowed'
+                              : 'bg-ink text-paper hover:bg-foreground/90'
+                          }`}
                         >
-                          <Minus className="h-3.5 w-3.5" strokeWidth={2.25} />
+                          {isOutOfStock ? 'Hết hàng' : '+ Thêm'}
                         </button>
-                        <span className="font-heading text-lg text-foreground">{qty}</span>
-                        <button
-                          onClick={() => addToCart(p.id)}
-                          className="h-8 w-8 rounded-pill bg-ink text-paper grid place-items-center hover:bg-foreground/90 transition"
-                        >
-                          <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-                        </button>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="flex items-center justify-between bg-paper-tint rounded-pill px-1.5 py-1">
+                          <button
+                            onClick={() => removeFromCart(p.id)}
+                            aria-label="Bớt 1"
+                            className="h-7 w-7 rounded-pill bg-[var(--surface)] ring-1 ring-foreground/10 grid place-items-center hover:bg-danger/10 hover:ring-danger/30 transition"
+                          >
+                            <Minus className="h-3 w-3" strokeWidth={2.25} />
+                          </button>
+                          <span className="lqg-numeric-sans text-sm text-foreground font-bold">{qty}</span>
+                          <button
+                            onClick={() => addToCart(p.id)}
+                            aria-label="Thêm 1"
+                            className="h-7 w-7 rounded-pill bg-ink text-paper grid place-items-center hover:bg-foreground/90 transition"
+                          >
+                            <Plus className="h-3 w-3" strokeWidth={2.5} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )

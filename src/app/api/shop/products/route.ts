@@ -43,7 +43,8 @@ export async function GET(request: NextRequest) {
         where,
         skip: (page - 1) * pageSize,
         take: pageSize,
-        orderBy: { createdAt: 'desc' },
+        // Sort theo displayOrder admin set (ASC = đầu danh sách). Fallback createdAt khi tie.
+        orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
       }),
       prisma.product.count({ where })
     ])

@@ -11,7 +11,7 @@ import {
   Star, BarChart2, Calendar, TrendingUp, Target, BookOpen,
   LogOut, Menu, X, Activity, UserCog, IdCard, HelpCircle,
   ChevronDown, ChevronRight, FileText, Video, Image as ImageIcon,
-  ReceiptText, Award, Tags, ShoppingCart,
+  ReceiptText, Award, Tags, ShoppingCart, Package,
 } from 'lucide-react'
 import { PolarisStar } from '@/components/brand/PolarisStar'
 import { FloatingActions } from './FloatingActions'
@@ -73,9 +73,10 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       ]
     },
     {
-      key: 'cuahang', label: 'Cửa hàng', icon: ShoppingBag,
+      key: 'banhang', label: 'Bán hàng', icon: ShoppingBag,
       items: [
-        { label: 'Sản phẩm', href: '/admin/shop/products', icon: ShoppingBag },
+        { label: 'Cửa hàng', href: '/admin/shop', icon: ShoppingBag },
+        { label: 'Sản phẩm', href: '/admin/shop/products', icon: Package },
         { label: 'Đơn hàng', href: '/admin/shop/orders', icon: ShoppingCart },
         { label: 'Mã giảm giá', href: '/admin/vouchers', icon: Tags },
       ]

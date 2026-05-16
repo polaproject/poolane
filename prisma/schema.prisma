@@ -561,9 +561,12 @@ model Product {
   photos            Json        @default("[]")
   description       String?
   isActive          Boolean     @default(true) @map("is_active")
+  /** Vị trí hiển thị (admin sắp xếp). ASC = đầu danh sách trên student shop. */
+  displayOrder      Int         @default(0) @map("display_order")
 
   orderItems OrderItem[]
 
+  @@index([displayOrder])
   @@map("products")
 }
 
