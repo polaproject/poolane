@@ -1598,3 +1598,55 @@ body.lqg-body {
   .theme-dark .bg-foreground\/10,
   .lqg-dark   .bg-foreground\/10 { background-color: color-mix(in srgb, var(--foreground) 18%, transparent); }
 }
+
+/* ════════════════════════════════════════════════════════════
+ * DASHBOARD CANVAS — Power BI / Tableau style grid (Phase 17.4)
+ * ════════════════════════════════════════════════════════════ */
+.dashboard-canvas {
+  /* Dotted grid background — subtle ánh báo grid 12 col */
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--foreground) 12%, transparent) 1px, transparent 1px);
+  background-size: 16px 16px;
+  background-position: 0 0;
+  background-color: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+/* react-grid-layout overrides — fit design system tokens */
+.dashboard-canvas .react-grid-item {
+  transition: transform 200ms ease-out, opacity 150ms ease;
+}
+.dashboard-canvas .react-grid-item.react-grid-placeholder {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius-card-lg);
+  opacity: 0.6;
+  transition-duration: 100ms;
+}
+.dashboard-canvas .react-grid-item.react-draggable-dragging {
+  z-index: 10;
+  box-shadow: 0 20px 60px -10px color-mix(in srgb, var(--ink) 35%, transparent);
+  opacity: 0.95;
+}
+.dashboard-canvas .react-grid-item.resizing {
+  opacity: 0.85;
+  z-index: 5;
+}
+.dashboard-canvas .react-resizable-handle {
+  background-image: none;  /* tắt default gradient handle xấu */
+  opacity: 0;
+  transition: opacity 150ms;
+}
+.dashboard-canvas .react-grid-item:hover .react-resizable-handle {
+  opacity: 1;
+}
+.dashboard-canvas .react-resizable-handle::after {
+  /* Custom resize chevron icon — bottom-right corner */
+  content: '';
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid color-mix(in srgb, var(--foreground) 55%, transparent);
+  border-bottom: 2px solid color-mix(in srgb, var(--foreground) 55%, transparent);
+  border-bottom-right-radius: 2px;
+}
