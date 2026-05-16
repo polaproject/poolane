@@ -7,6 +7,12 @@ import { QuickAddFab } from './QuickAddFab'
 
 type OpenPanel = 'notif' | 'add' | null
 
+/** Settings từ /api/settings — null khi đang loading, default object khi fetch xong */
+interface PublicSettings {
+  quick_add: { admin: string[]; staff: string[]; student: string[] }
+  notif_filter: { types: string[] }
+}
+
 interface FloatingActionsProps {
   role: UserRole
   /** Khi sidebar mobile mở → ẩn FAB để không peek qua backdrop (cùng z-40) */
@@ -29,6 +35,15 @@ export function FloatingActions({ role, hidden = false }: FloatingActionsProps) 
 
   /** Chiều cao cart sticky bar nếu đang hiện diện (`/student/shop`) — override baseline */
   const [cartHeight, setCartHeight] = useState(0)
+
+  /** Admin-configured settings (Quick Add items + notification filter) */
+  const [settings, setSettings] = useState<PublicSettings | null>(null)
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(j => { if (j.data) setSettings(j.data) })
+      .catch(() => { /* silent — fallback default trong child component */ })
+  }, [])
 
   useEffect(() => {
     function measure() {
@@ -66,10 +81,19 @@ export function FloatingActions({ role, hidden = false }: FloatingActionsProps) 
                   ${hidden ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
     >
       <div className={hidden ? '' : 'pointer-events-auto'}>
-        <NotificationFab open={openPanel === 'notif'} onOpenChange={onNotifChange} />
+        <NotificationFab
+          open={openPanel === 'notif'}
+          onOpenChange={onNotifChange}
+          allowedTypes={settings?.notif_filter.types ?? []}
+        />
       </div>
       <div className={hidden ? '' : 'pointer-events-auto'}>
-        <QuickAddFab role={role} open={openPanel === 'add'} onOpenChange={onAddChange} />
+        <QuickAddFab
+          role={role}
+          open={openPanel === 'add'}
+          onOpenChange={onAddChange}
+          itemKeys={settings?.quick_add[role] ?? null}
+        />
       </div>
     </div>
   )

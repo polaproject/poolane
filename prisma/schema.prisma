@@ -1063,3 +1063,17 @@ model ExerciseAssignment {
   @@map("exercise_assignments")
   @@index([studentId, status])
 }
+
+// ────────────────────────────────────────────────────────────
+// SystemSetting — admin self-service config (Phase 17.3)
+// Owner đổi label sidebar, quick add items, notification filter, theme
+// override... mà không cần dev. Key/value JSON pattern.
+// ────────────────────────────────────────────────────────────
+model SystemSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedBy String?  @map("updated_by")
+
+  @@map("system_settings")
+}

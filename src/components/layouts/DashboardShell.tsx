@@ -11,7 +11,7 @@ import {
   Star, BarChart2, Calendar, TrendingUp, Target, BookOpen,
   LogOut, Menu, X, Activity, UserCog, IdCard, HelpCircle,
   ChevronDown, ChevronRight, FileText, Video, Image as ImageIcon,
-  ReceiptText, Award, Tags, ShoppingCart, Package,
+  ReceiptText, Award, Tags, ShoppingCart, Package, Settings,
 } from 'lucide-react'
 import { PolarisStar } from '@/components/brand/PolarisStar'
 import { FloatingActions } from './FloatingActions'
@@ -96,6 +96,12 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       key: 'lienlac', label: 'Liên lạc', icon: BellRing,
       items: [
         { label: 'Gửi thông báo chung', href: '/admin/broadcast', icon: BellRing },
+      ]
+    },
+    {
+      key: 'hethong', label: 'Hệ thống', icon: Settings,
+      items: [
+        { label: 'Thiết lập', href: '/admin/settings', icon: Settings },
       ]
     },
   ],
@@ -202,6 +208,20 @@ interface DashboardShellProps {
 function ShellInner({ children, userRole, userFullName, userInitial }: DashboardShellProps) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Admin có thể đổi label sidebar qua /admin/settings → fetch override map
+  const [labelOverrides, setLabelOverrides] = useState<Record<string, string>>({})
+  useEffect(() => {
+    fetch('/api/admin/settings')
+      .then(r => r.ok ? r.json() : null)
+      .then(j => {
+        if (!j?.data) return
+        const key = `sidebar_labels.${userRole}` as const
+        const overrides = j.data[key]
+        if (overrides && typeof overrides === 'object') setLabelOverrides(overrides)
+      })
+      .catch(() => { /* not admin or fetch failed — fallback default labels */ })
+  }, [userRole])
 
   // Phase 16.1: wrap trong useMemo để stable identity → useMemo dependencies không change mỗi render
   const groups = useMemo(() => NAV_GROUPS[userRole] ?? [], [userRole])
@@ -312,14 +332,14 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
                 <button
                   onClick={() => toggleGroup(group.key)}
                   aria-expanded={isOpen}
-                  aria-label={`${isOpen ? 'Thu gọn' : 'Mở rộng'} nhóm ${group.label}`}
+                  aria-label={`${isOpen ? 'Thu gọn' : 'Mở rộng'} nhóm ${(labelOverrides[group.key] || group.label)}`}
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs uppercase tracking-wider font-semibold transition-colors hover:bg-[var(--pola-nav-hover)] hover:text-[var(--pola-nav-text)]"
                   style={{
                     color: 'var(--pola-nav-muted)',
                   }}
                 >
                   <GroupIcon className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span className="flex-1 text-left">{group.label}</span>
+                  <span className="flex-1 text-left">{(labelOverrides[group.key] || group.label)}</span>
                   {isOpen
                     ? <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" />
                     : <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />

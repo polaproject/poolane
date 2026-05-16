@@ -35,9 +35,11 @@ const POLL_MS = 60_000
 interface NotificationFabProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Allowed notification types (empty = show all). Admin tự config qua /admin/settings */
+  allowedTypes: string[]
 }
 
-export function NotificationFab({ open, onOpenChange }: NotificationFabProps) {
+export function NotificationFab({ open, onOpenChange, allowedTypes }: NotificationFabProps) {
   const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
@@ -105,18 +107,24 @@ export function NotificationFab({ open, onOpenChange }: NotificationFabProps) {
     if (n.actionUrl) router.push(n.actionUrl)
   }
 
-  const unread = notifications.filter(n => !n.readAt)
-  const preview = (unread.length > 0 ? unread : notifications).slice(0, 7)
-  const badgeText = unreadCount > 99 ? '99+' : String(unreadCount)
+  // Filter theo admin settings: allowedTypes empty = show all, else chỉ hiện types trong list
+  const filtered = allowedTypes.length === 0
+    ? notifications
+    : notifications.filter(n => allowedTypes.includes(n.type))
+  const unread = filtered.filter(n => !n.readAt)
+  const preview = (unread.length > 0 ? unread : filtered).slice(0, 7)
+  // Badge count: dùng filtered unread count (không phải global unreadCount)
+  const filteredUnreadCount = unread.length
+  const badgeText = filteredUnreadCount > 99 ? '99+' : String(filteredUnreadCount)
 
   return (
     <Popover.Root open={open} onOpenChange={onOpenChange} modal={false}>
       <Popover.Trigger
-        aria-label={`Thông báo${unreadCount > 0 ? ` (${unreadCount} chưa đọc)` : ''}`}
+        aria-label={`Thông báo${filteredUnreadCount > 0 ? ` (${filteredUnreadCount} chưa đọc)` : ''}`}
         className="relative grid place-items-center w-[52px] h-[52px] rounded-full bg-ink text-paper dark:bg-paper dark:text-ink ring-1 ring-ink/30 dark:ring-paper/30 shadow-xl shadow-black/30 hover:scale-[1.04] active:scale-[0.97] transition-transform"
       >
         <Bell className="w-5 h-5" />
-        {unreadCount > 0 && (
+        {filteredUnreadCount > 0 && (
           <span
             className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-danger text-paper text-[10px] font-bold grid place-items-center leading-none shadow-soft"
             aria-hidden
@@ -133,9 +141,9 @@ export function NotificationFab({ open, onOpenChange }: NotificationFabProps) {
             <div className="flex items-center justify-between px-4 py-3 border-b border-foreground/8">
               <div className="flex items-center gap-2">
                 <p className="font-semibold text-sm text-foreground">Thông báo</p>
-                {unreadCount > 0 && (
+                {filteredUnreadCount > 0 && (
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-foreground/10 text-foreground/70">
-                    {unreadCount} chưa đọc
+                    {filteredUnreadCount} chưa đọc
                   </span>
                 )}
               </div>
