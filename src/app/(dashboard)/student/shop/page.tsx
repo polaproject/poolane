@@ -278,7 +278,7 @@ export default function ShopPage() {
 
       {/* Fixed cart bottom */}
       {cartItems.length > 0 && (
-        <div className="fixed bottom-0 inset-x-0 z-30 p-4 max-w-3xl mx-auto">
+        <div data-shop-cart-bar className="fixed bottom-0 inset-x-0 z-30 p-4 max-w-3xl mx-auto">
           <div className="rounded-card-xl bg-ink text-paper p-4 shadow-glass ring-1 ring-paper/12">
             <div className="flex items-center gap-3 mb-3">
               <div className="grid place-items-center h-9 w-9 rounded-pill bg-accent/15">

@@ -9,11 +9,12 @@ import {
   LayoutDashboard, Users, CalendarDays, DollarSign, Zap,
   BellRing, Brain, ShoppingBag, CheckSquare, ClipboardList,
   Star, BarChart2, Calendar, TrendingUp, Target, BookOpen,
-  Bell, LogOut, Menu, X, Activity, UserCog, IdCard, HelpCircle,
+  LogOut, Menu, X, Activity, UserCog, IdCard, HelpCircle,
   ChevronDown, ChevronRight, FileText, Video, Image as ImageIcon,
   ReceiptText, Award, Tags, ShoppingCart,
 } from 'lucide-react'
 import { PolarisStar } from '@/components/brand/PolarisStar'
+import { FloatingActions } from './FloatingActions'
 import { useState, useEffect, useMemo } from 'react'
 
 interface NavItem {
@@ -125,7 +126,6 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       items: [
         { label: 'Hồ sơ của tôi', href: '/student/profile', icon: IdCard },
         { label: 'Lịch sử thanh toán', href: '/student/payments', icon: ReceiptText },
-        { label: 'Thông báo', href: '/shared/notifications', icon: Bell },
       ]
     },
     {
@@ -186,7 +186,6 @@ const BOTTOM_NAV: Record<UserRole, NavItem[]> = {
     { label: 'Tiến độ', href: '/student/progress', icon: TrendingUp },
     { label: 'Mục tiêu', href: '/student/goals', icon: Target },
     { label: 'Cửa hàng', href: '/student/shop', icon: ShoppingBag },
-    { label: 'Thông báo', href: '/shared/notifications', icon: Bell },
   ],
 }
 
@@ -427,11 +426,6 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
           </div>
           <div className="ml-auto flex items-center gap-1">
             <ThemeSwitcherCompact />
-            <Link href="/shared/notifications" aria-label="Thông báo"
-              className="p-2 rounded-lg"
-              style={{ color: 'var(--pola-nav-muted)' }}>
-              <Bell className="w-5 h-5" />
-            </Link>
             <div
               className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
               style={{ background: 'var(--pola-accent)', color: '#000' }}
@@ -471,6 +465,9 @@ function ShellInner({ children, userRole, userFullName, userInitial }: Dashboard
           })}
         </nav>
       </div>
+
+      {/* Floating action buttons (notification + quick add) */}
+      <FloatingActions role={userRole} hidden={sidebarOpen} />
     </div>
   )
 }
