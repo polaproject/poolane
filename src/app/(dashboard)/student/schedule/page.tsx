@@ -4,8 +4,9 @@ import { format, startOfWeek, addDays, isSameWeek, isToday, isTomorrow, isPast, 
 import { vi } from 'date-fns/locale'
 import { RegisterPlusButton, StatusIcon } from './register-button'
 import { SESSION_TIMES } from '@/config/constants'
-import { Calendar, Sunrise, Sunset, Ticket, AlertCircle, Users, Clock as ClockIcon } from 'lucide-react'
+import { Calendar, Sunrise, Sunset, Ticket, AlertCircle, Users, Clock as ClockIcon, ShoppingBag, ArrowRight } from 'lucide-react'
 import { getAverageApprovalHours } from '@/lib/registration-sla'
+import Link from 'next/link'
 
 export default async function StudentSchedulePage() {
   const user = await requireRole(['admin', 'staff', 'student'])
@@ -99,16 +100,24 @@ export default async function StudentSchedulePage() {
       <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto relative z-10 space-y-6">
         {/* Warning banner nếu hết / chưa có vé */}
         {(noTicket || outOfTicket) && (
-          <div className="rounded-card-lg bg-warn/10 ring-1 ring-warn/30 p-4 flex items-start gap-3">
+          <div className="rounded-card-lg bg-warn/10 ring-1 ring-warn/30 p-4 flex flex-col sm:flex-row items-start gap-3">
             <AlertCircle className="h-5 w-5 text-warn shrink-0 mt-0.5" strokeWidth={1.75} />
-            <div className="text-sm">
+            <div className="text-sm flex-1 min-w-0">
               <p className="font-medium text-foreground">
                 {noTicket ? 'Bạn chưa có vé bơi' : 'Vé bơi đã hết'}
               </p>
               <p className="text-foreground/70 mt-0.5">
-                Liên hệ lớp qua Zalo để mua vé tiếp theo trước khi đăng ký buổi.
+                Bạn cần có vé bơi để đăng ký buổi học. Ghé cửa hàng chọn gói phù hợp với mình.
               </p>
             </div>
+            <Link
+              href="/student/shop"
+              className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-accent text-ink rounded-pill text-sm font-semibold hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-soft"
+            >
+              <ShoppingBag className="h-4 w-4" strokeWidth={2} />
+              Mua vé bơi
+              <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.25} />
+            </Link>
           </div>
         )}
 
