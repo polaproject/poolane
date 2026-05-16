@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { Chip } from '@/components/ui/Chip'
+import { getTicketAggregate, getTicketBreakdown } from '@/lib/ticket-aggregate'
 
 type Params = { params: Promise<{ id: string }> }
 type Variant = 'neutral' | 'accent' | 'mist' | 'success' | 'warn' | 'danger'
@@ -38,16 +39,18 @@ export default async function StaffStudentDetailPage({ params }: Params) {
     include: {
       user: true,
       enrollments: { include: { course: { select: { code: true, name: true } } }, orderBy: { enrolledAt: 'desc' } },
-      poolTickets: { where: { isActive: true }, orderBy: { purchasedAt: 'desc' }, take: 1 },
+      poolTickets: { where: { isActive: true }, orderBy: { purchasedAt: 'asc' } },
       studentNotes: { where: { isPrivate: false }, orderBy: { createdAt: 'desc' }, take: 5 },
     },
   })
 
   if (!student) notFound()
 
-  const activeTicket = student.poolTickets[0]
-  const sessionsLeft = activeTicket ? activeTicket.maxSessions - activeTicket.sessionsUsed : null
-  const isLow = sessionsLeft !== null && sessionsLeft <= 2
+  const ticketAgg = getTicketAggregate(student.poolTickets)
+  const activeTicket = ticketAgg.primaryTicket
+  const sessionsLeft = ticketAgg.isNoTicket ? null : ticketAgg.sessionsLeft
+  const isLow = ticketAgg.isLow
+  const ticketBreakdown = getTicketBreakdown(ticketAgg)
   const cfg = STATUS[student.status] ?? STATUS.prospect
   const initial = student.user.fullName?.charAt(0).toUpperCase() ?? '?'
   const activeEnr = student.enrollments.filter(e => ['active', 'extension'].includes(e.status))
@@ -106,9 +109,12 @@ export default async function StaffStudentDetailPage({ params }: Params) {
                   {sessionsLeft}<span className="text-sm font-body not-italic text-foreground/55 ml-1.5">buổi</span>
                 </p>
                 <div className="h-1.5 bg-ink/8 rounded-full mt-3 overflow-hidden">
-                  <div className={`h-full rounded-full ${isLow ? 'bg-danger' : 'bg-mist'}`} style={{ width: `${(activeTicket.sessionsUsed / activeTicket.maxSessions) * 100}%` }} />
+                  <div className={`h-full rounded-full ${isLow ? 'bg-danger' : 'bg-mist'}`} style={{ width: ticketAgg.maxSessions > 0 ? `${(ticketAgg.sessionsUsed / ticketAgg.maxSessions) * 100}%` : '0%' }} />
                 </div>
-                <p className="text-xs text-foreground/55 mt-2">Đã dùng {activeTicket.sessionsUsed}/{activeTicket.maxSessions}</p>
+                <p className="text-xs text-foreground/55 mt-2">Đã dùng {ticketAgg.sessionsUsed}/{ticketAgg.maxSessions}</p>
+                {ticketBreakdown.length >= 2 && (
+                  <p className="text-xs text-foreground/55 mt-1">{ticketBreakdown.join(' · ')}</p>
+                )}
               </>
             ) : <p className="text-sm text-foreground/45">Chưa có vé</p>}
           </div>

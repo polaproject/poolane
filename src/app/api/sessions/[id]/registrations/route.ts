@@ -3,6 +3,7 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { log, logError } from '@/lib/logger'
 import { registerSessionSchema } from '@/lib/validations/session'
+import { getTicketAggregate } from '@/lib/ticket-aggregate'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -25,9 +26,18 @@ export async function GET(_req: NextRequest, { params }: Params) {
             },
             poolTickets: {
               where: { isActive: true },
-              orderBy: { purchasedAt: 'desc' },
-              take: 1,
-              select: { sessionsUsed: true, maxSessions: true }
+              orderBy: { purchasedAt: 'asc' },
+              // Cần đủ field cho getTicketAggregate
+              select: {
+                id: true,
+                ticketType: true,
+                totalSessions: true,
+                maxSessions: true,
+                sessionsUsed: true,
+                pricePaid: true,
+                purchasedAt: true,
+                isActive: true,
+              }
             }
           }
         },
@@ -47,8 +57,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
         ? latestAssessment.scores.reduce((sum, s) => sum + s.score, 0) / latestAssessment.scores.length
         : null
 
-      const ticket = reg.student.poolTickets[0]
-      const sessionsLeft = ticket ? ticket.maxSessions - ticket.sessionsUsed : null
+      const ticketAgg = getTicketAggregate(reg.student.poolTickets)
+      const sessionsLeft = ticketAgg.isNoTicket ? null : ticketAgg.sessionsLeft
 
       return {
         ...reg,
@@ -59,7 +69,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
           sessionsLeft,
           lastAttendedAt: reg.student.lastAttendedAt,
           activeEnrollments: reg.student.enrollments,
-          isLowTicket: sessionsLeft !== null && sessionsLeft <= 2,
+          isLowTicket: ticketAgg.isLow,
         }
       }
     }))

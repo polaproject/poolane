@@ -6,6 +6,7 @@ import { ArrowLeft, Sunrise, Sunset, Users, AlertCircle, FileText } from 'lucide
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { CAPACITY } from '@/config/constants'
+import { getTicketAggregate } from '@/lib/ticket-aggregate'
 import { SessionActions } from './SessionActions'
 import { RegistrationActionRow, type RegRowData } from './RegistrationActionRow'
 import { Chip } from '@/components/ui/Chip'
@@ -35,9 +36,17 @@ export default async function SessionDetailPage({ params }: Params) {
               user: { select: { fullName: true, phone: true } },
               poolTickets: {
                 where: { isActive: true },
-                orderBy: { purchasedAt: 'desc' },
-                take: 1,
-                select: { sessionsUsed: true, maxSessions: true },
+                orderBy: { purchasedAt: 'asc' },
+                select: {
+                  id: true,
+                  ticketType: true,
+                  totalSessions: true,
+                  maxSessions: true,
+                  sessionsUsed: true,
+                  pricePaid: true,
+                  purchasedAt: true,
+                  isActive: true,
+                },
               },
               enrollments: {
                 where: { status: { in: ['active', 'extension', 'completed'] } },
@@ -116,8 +125,8 @@ export default async function SessionDetailPage({ params }: Params) {
 
   /** Build display data cho mỗi registration */
   function buildRowData(reg: RegWithStudent): RegRowData {
-    const ticket = reg.student.poolTickets[0]
-    const sessionsLeft = ticket ? ticket.maxSessions - ticket.sessionsUsed : null
+    const ticketAgg = getTicketAggregate(reg.student.poolTickets)
+    const sessionsLeft = ticketAgg.isNoTicket ? null : ticketAgg.sessionsLeft
 
     // Tìm enrollment match với courseId của registration (hoặc enrollment đầu tiên nếu reg không có course)
     const matchedEnrollment = reg.courseId

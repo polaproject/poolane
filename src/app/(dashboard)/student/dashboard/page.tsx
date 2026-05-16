@@ -11,6 +11,7 @@ import { Chip } from '@/components/ui/Chip'
 import { StarField } from '@/components/brand/StarField'
 import { Stagger } from '@/components/motion/Stagger'
 import { getStudentDebt } from '@/lib/student-finance'
+import { getTicketAggregate, getTicketBreakdown } from '@/lib/ticket-aggregate'
 
 export default async function StudentDashboard() {
   const user = await requireRole(['student'])
@@ -26,8 +27,7 @@ export default async function StudentDashboard() {
       },
       poolTickets: {
         where: { isActive: true },
-        orderBy: { purchasedAt: 'desc' },
-        take: 1,
+        orderBy: { purchasedAt: 'asc' },
       },
     },
   })
@@ -56,10 +56,13 @@ export default async function StudentDashboard() {
     ? (latestAssessment.scores.reduce((s, x) => s + x.score, 0) / latestAssessment.scores.length).toFixed(1)
     : null
 
-  const ticket = student?.poolTickets[0]
-  const sessionsLeft = ticket ? ticket.maxSessions - ticket.sessionsUsed : null
-  const ticketProgress = ticket ? Math.min(100, (ticket.sessionsUsed / ticket.maxSessions) * 100) : 0
-  const ticketLow = sessionsLeft !== null && sessionsLeft <= 2
+  const ticketAgg = getTicketAggregate(student?.poolTickets ?? [])
+  const sessionsLeft = ticketAgg.isNoTicket ? null : ticketAgg.sessionsLeft
+  const ticketProgress = ticketAgg.maxSessions > 0
+    ? Math.min(100, (ticketAgg.sessionsUsed / ticketAgg.maxSessions) * 100)
+    : 0
+  const ticketLow = ticketAgg.isLow
+  const ticketBreakdown = getTicketBreakdown(ticketAgg)
 
   const debts = student ? await getStudentDebt(student.id) : []
   const totalDebt = debts.reduce((s, d) => s + d.debt, 0)
@@ -138,7 +141,7 @@ export default async function StudentDashboard() {
               {ticketLow && <Chip variant="danger" active>Sắp hết</Chip>}
             </div>
 
-            {ticket ? (
+            {!ticketAgg.isNoTicket ? (
               <>
                 <p className="lqg-headline text-5xl text-foreground leading-none">
                   {sessionsLeft}
@@ -153,8 +156,13 @@ export default async function StudentDashboard() {
                   />
                 </div>
                 <p className="text-xs text-foreground/55 mt-2">
-                  Đã dùng {ticket.sessionsUsed}/{ticket.maxSessions} buổi
+                  Đã dùng {ticketAgg.sessionsUsed}/{ticketAgg.maxSessions} buổi
                 </p>
+                {ticketBreakdown.length >= 2 && (
+                  <p className="text-xs text-foreground/55 mt-1">
+                    {ticketBreakdown.join(' · ')}
+                  </p>
+                )}
               </>
             ) : (
               <>

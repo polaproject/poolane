@@ -6,6 +6,7 @@ import { RegisterPlusButton, StatusIcon } from './register-button'
 import { SESSION_TIMES } from '@/config/constants'
 import { Calendar, Sunrise, Sunset, Ticket, AlertCircle, Users, Clock as ClockIcon, ShoppingBag, ArrowRight } from 'lucide-react'
 import { getAverageApprovalHours } from '@/lib/registration-sla'
+import { getTicketAggregate, getTicketBreakdown } from '@/lib/ticket-aggregate'
 import Link from 'next/link'
 
 export default async function StudentSchedulePage() {
@@ -14,7 +15,7 @@ export default async function StudentSchedulePage() {
   const student = await prisma.student.findFirst({
     where: { userId: user.id },
     include: {
-      poolTickets: { where: { isActive: true }, take: 1 },
+      poolTickets: { where: { isActive: true }, orderBy: { purchasedAt: 'asc' } },
       enrollments: {
         where: { status: { in: ['active', 'extension'] } },
         include: { course: true },
@@ -39,11 +40,13 @@ export default async function StudentSchedulePage() {
     : []
   const myRegMap = new Map(myRegistrations.map(r => [r.sessionId, r]))
 
-  const ticket = student?.poolTickets[0]
-  const sessionsLeft = ticket ? ticket.maxSessions - ticket.sessionsUsed : null
-  const ticketLow = sessionsLeft !== null && sessionsLeft <= 2
-  const noTicket = !ticket
-  const outOfTicket = sessionsLeft === 0
+  const ticketAgg = getTicketAggregate(student?.poolTickets ?? [])
+  const ticket = ticketAgg.primaryTicket ?? undefined
+  const sessionsLeft = ticketAgg.isNoTicket ? null : ticketAgg.sessionsLeft
+  const ticketLow = ticketAgg.isLow
+  const noTicket = ticketAgg.isNoTicket
+  const outOfTicket = ticketAgg.isOutOfTicket
+  const ticketBreakdown = getTicketBreakdown(ticketAgg)
 
   const { hoursAvg, sampleSize } = await getAverageApprovalHours()
   const showSla = sampleSize >= 5
@@ -78,20 +81,27 @@ export default async function StudentSchedulePage() {
 <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">2 tuần tới · Click + để đăng ký</p>
           <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Lịch học</h1>
-          <div className="mt-4 inline-flex items-center gap-2 text-sm">
-            <Ticket className="h-4 w-4 text-accent" strokeWidth={1.75} />
-            {sessionsLeft !== null ? (
-              <span className={ticketLow ? 'text-danger' : 'text-paper/80'}>
-                Vé còn{' '}
-                <strong className={ticketLow ? 'text-danger' : 'text-accent'}>
-                  {sessionsLeft}
-                </strong>{' '}
-                buổi
-              </span>
-            ) : (
-              <span className="text-warn inline-flex items-center gap-1">
-                <AlertCircle className="h-3.5 w-3.5" strokeWidth={2} /> Chưa có vé bơi
-              </span>
+          <div className="mt-4">
+            <div className="inline-flex items-center gap-2 text-sm">
+              <Ticket className="h-4 w-4 text-accent" strokeWidth={1.75} />
+              {sessionsLeft !== null ? (
+                <span className={ticketLow ? 'text-danger' : 'text-paper/80'}>
+                  Vé còn{' '}
+                  <strong className={ticketLow ? 'text-danger' : 'text-accent'}>
+                    {sessionsLeft}
+                  </strong>{' '}
+                  buổi
+                </span>
+              ) : (
+                <span className="text-warn inline-flex items-center gap-1">
+                  <AlertCircle className="h-3.5 w-3.5" strokeWidth={2} /> Chưa có vé bơi
+                </span>
+              )}
+            </div>
+            {ticketBreakdown.length >= 2 && (
+              <p className="text-xs text-paper/55 mt-1">
+                {ticketBreakdown.join(' · ')}
+              </p>
             )}
           </div>
         </div>

@@ -10,6 +10,7 @@ import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { ConfirmEnrollmentTransferButton } from '@/components/features/ConfirmEnrollmentTransferButton'
 import { Chip } from '@/components/ui/Chip'
+import { getTicketAggregate, getTicketBreakdown } from '@/lib/ticket-aggregate'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -57,9 +58,11 @@ export default async function StudentDetailPage({ params }: Params) {
 
   if (!student) notFound()
 
-  const activeTicket = student.poolTickets.find(t => t.isActive)
-  const sessionsLeft = activeTicket ? activeTicket.maxSessions - activeTicket.sessionsUsed : null
-  const isLow = sessionsLeft !== null && sessionsLeft <= 2
+  const ticketAgg = getTicketAggregate(student.poolTickets)
+  const activeTicket = ticketAgg.primaryTicket
+  const sessionsLeft = ticketAgg.isNoTicket ? null : ticketAgg.sessionsLeft
+  const isLow = ticketAgg.isLow
+  const ticketBreakdown = getTicketBreakdown(ticketAgg)
   const statusCfg = STATUS_CONFIG[student.status] ?? STATUS_CONFIG.prospect
   const initial = student.user.fullName?.charAt(0).toUpperCase() ?? '?'
 
@@ -122,10 +125,15 @@ export default async function StudentDetailPage({ params }: Params) {
                 <div className="h-1.5 bg-ink/8 rounded-full mt-3 overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${isLow ? 'bg-danger' : 'bg-mist'}`}
-                    style={{ width: `${(activeTicket.sessionsUsed / activeTicket.maxSessions) * 100}%` }}
+                    style={{ width: ticketAgg.maxSessions > 0 ? `${(ticketAgg.sessionsUsed / ticketAgg.maxSessions) * 100}%` : '0%' }}
                   />
                 </div>
-                <p className="text-xs text-foreground/55 mt-2">Đã dùng {activeTicket.sessionsUsed}/{activeTicket.maxSessions}</p>
+                <p className="text-xs text-foreground/55 mt-2">Đã dùng {ticketAgg.sessionsUsed}/{ticketAgg.maxSessions}</p>
+                {ticketBreakdown.length >= 2 && (
+                  <p className="text-xs text-foreground/55 mt-1">
+                    {ticketBreakdown.join(' · ')}
+                  </p>
+                )}
               </>
             ) : (
               <p className="text-sm text-foreground/45">Chưa có vé</p>
