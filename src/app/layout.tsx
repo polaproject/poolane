@@ -66,6 +66,14 @@ export const viewport = {
   maximumScale: 5,
 }
 
+/**
+ * Inline blocking script — apply theme class lên <html> NGAY trước khi
+ * paint đầu tiên để tránh FOUC (Flash Of Unstyled Content). Phải chạy
+ * sync trước React hydrate, nếu không sẽ flash dark/light vài chục ms.
+ * Đồng bộ logic với ThemeProvider (key 'poolane-theme-v2', default 'light').
+ */
+const themeInitScript = `(function(){try{var s=localStorage.getItem('poolane-theme-v2');var t=(s==='dark'||s==='light')?s:'light';var h=document.documentElement;h.classList.add('theme-'+t);if(t==='dark')h.classList.add('lqg-dark');h.setAttribute('data-theme',t);}catch(e){document.documentElement.classList.add('theme-light');document.documentElement.setAttribute('data-theme','light');}})();`
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -73,6 +81,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body
         className={`${cormorantGaramond.variable} ${plusJakartaSans.variable} font-body antialiased`}
       >
