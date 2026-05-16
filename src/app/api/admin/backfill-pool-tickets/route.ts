@@ -62,12 +62,14 @@ export async function POST() {
       for (const item of ticketItems) {
         const subtype = detectTicketSubtype(item.product.sku, item.product.name)
         const orderTime = order.createdAt.getTime()
+        const expectedPrice = item.unitPrice * item.quantity
 
-        // Dedupe ±1 day
+        // Dedupe: any ticket cho student trong ±1 day VÀ pricePaid khớp
+        // (subtype có thể khác do owner manual create vs backfill detect khác)
         const existing = await prisma.poolTicket.findFirst({
           where: {
             studentId: order.studentId,
-            ticketType: subtype,
+            pricePaid: expectedPrice,
             purchasedAt: {
               gte: new Date(orderTime - 86400000),
               lte: new Date(orderTime + 86400000),

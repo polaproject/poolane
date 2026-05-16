@@ -71,13 +71,15 @@ async function main() {
          /lẻ|lượt|01\s*lượt/i.test(item.product.name) ? 'single' :
          'subsequent')
 
-      // Dedupe: với cùng student + cùng subtype, đã có ticket purchasedAt trong
-      // khoảng ±1 ngày so với order → coi như đã backfill, skip.
+      // Dedupe: any ticket cho student trong ±1 day VÀ pricePaid khớp.
+      // Subtype có thể khác (owner manual create vs backfill detect heuristic
+      // khác) → check theo price + time là chính xác nhất.
       const orderTime = order.createdAt.getTime()
+      const expectedPrice = item.unitPrice * item.quantity
       const existing = await prisma.poolTicket.findFirst({
         where: {
           studentId: order.studentId,
-          ticketType: subtype,
+          pricePaid: expectedPrice,
           purchasedAt: {
             gte: new Date(orderTime - 86400000),
             lte: new Date(orderTime + 86400000),
