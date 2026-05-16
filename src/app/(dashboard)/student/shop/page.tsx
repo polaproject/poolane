@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import {
   ShoppingCart, Plus, Minus, Package, Loader2, CheckCircle, Search, History,
   BookOpen, Waves, Sparkles, Box, ArrowRight, X, ChevronLeft, ChevronRight,
+  Ticket,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Dialog } from '@base-ui/react/dialog'
@@ -26,10 +27,12 @@ const TYPE_META: Record<string, { label: string; Icon: typeof BookOpen }> = {
   improvement_pack: { label: 'Pack cải thiện', Icon: Waves },
   service: { label: 'Dịch vụ', Icon: Sparkles },
   physical: { label: 'Vật phẩm', Icon: Box },
+  pool_ticket: { label: 'Vé bơi', Icon: Ticket },
 }
 
 const FILTER_TABS = [
   { value: '', label: 'Tất cả' },
+  { value: 'pool_ticket', label: 'Vé bơi' },
   { value: 'course', label: 'Khoá học' },
   { value: 'improvement_pack', label: 'Pack' },
   { value: 'service', label: 'Dịch vụ' },

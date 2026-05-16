@@ -4,6 +4,7 @@ import { log } from '@/lib/logger'
 import { buildMemo, buildEnrollmentMemo } from '@/lib/payments/vietqr'
 import { sendEmail } from '@/lib/email/client'
 import { paymentReceiptEmail } from '@/lib/email/templates'
+import { createPoolTicketsFromOrder } from '@/lib/payments/pool-ticket-from-order'
 
 interface ConfirmInput {
   amount: number
@@ -106,6 +107,23 @@ export async function confirmOrderTransfer(
         })
       }
     }
+
+    // Auto-create PoolTicket cho item type='pool_ticket' (Phase 18.2 fix)
+    await createPoolTicketsFromOrder(tx, {
+      id: order.id,
+      studentId: order.studentId,
+      orderItems: order.orderItems.map(it => ({
+        productId: it.productId,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        product: {
+          type: it.product.type,
+          sku: it.product.sku,
+          sessionsCount: it.product.sessionsCount,
+          name: it.product.name,
+        },
+      })),
+    })
 
     await tx.notification.create({
       data: {

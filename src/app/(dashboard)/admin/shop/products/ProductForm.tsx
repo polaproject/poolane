@@ -87,6 +87,9 @@ export function ProductForm({ courses, mode, initial }: Props) {
       if (form.type === 'improvement_pack') {
         payload.sessionsCount = form.sessionsCount ? Number(form.sessionsCount) : null
       }
+      if (form.type === 'pool_ticket') {
+        payload.sessionsCount = form.sessionsCount ? Number(form.sessionsCount) : null
+      }
       if (form.type === 'physical') {
         payload.stockQuantity = form.stockQuantity !== '' ? Number(form.stockQuantity) : null
         payload.lowStockThreshold = form.lowStockThreshold ? Number(form.lowStockThreshold) : 3
@@ -255,6 +258,30 @@ export function ProductForm({ courses, mode, initial }: Props) {
           </p>
           <Input type="number" value={form.sessionsCount} onChange={v => update('sessionsCount', v)} placeholder="VD: 5 hoặc 10" />
           <FieldError msg={fieldErrors.sessionsCount} />
+        </div>
+      )}
+
+      {form.type === 'pool_ticket' && (
+        <div className="glass-card glass-card-hover p-5 space-y-3">
+          <div>
+            <Label>Số buổi mỗi vé <Req /></Label>
+            <p className="text-xs text-foreground/50 mt-1 mb-2">
+              1 buổi cho vé lẻ · 10 cho vé lần đầu · 30 cho vé tháng. Khi HV mua + thanh toán
+              xong, hệ thống tự tạo PoolTicket cho HV với tổng buổi = số buổi × số lượng.
+            </p>
+            <Input type="number" value={form.sessionsCount} onChange={v => update('sessionsCount', v)} placeholder="VD: 1 hoặc 10" />
+            <FieldError msg={fieldErrors.sessionsCount} />
+          </div>
+          <div className="text-xs text-foreground/65 bg-mist/10 ring-1 ring-mist/30 rounded-card p-3">
+            <p className="font-semibold mb-1">💡 Quy ước SKU để hệ thống phân loại đúng:</p>
+            <ul className="space-y-0.5 list-disc pl-4">
+              <li><code className="bg-foreground/8 px-1 rounded">TICKET-FIRST-*</code> → vé lần đầu (tối đa 12 buổi)</li>
+              <li><code className="bg-foreground/8 px-1 rounded">TICKET-SINGLE-*</code> → vé lẻ 1 buổi</li>
+              <li><code className="bg-foreground/8 px-1 rounded">TICKET-WEEKLY-*</code> → vé tuần</li>
+              <li><code className="bg-foreground/8 px-1 rounded">TICKET-MONTHLY-*</code> → vé tháng</li>
+              <li><code className="bg-foreground/8 px-1 rounded">TICKET-DAILY-*</code> → vé ngày</li>
+            </ul>
+          </div>
         </div>
       )}
 

@@ -3,6 +3,7 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logError, log } from '@/lib/logger'
 import { z } from 'zod'
+import { createPoolTicketsFromOrder } from '@/lib/payments/pool-ticket-from-order'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -121,6 +122,23 @@ export async function PATCH(request: NextRequest, { params }: Params) {
             }
           }
         }
+
+        // Auto-create PoolTicket cho item type='pool_ticket' (Phase 18.2 fix)
+        await createPoolTicketsFromOrder(tx, {
+          id: order.id,
+          studentId: order.studentId,
+          orderItems: order.orderItems.map(it => ({
+            productId: it.productId,
+            quantity: it.quantity,
+            unitPrice: it.unitPrice,
+            product: {
+              type: it.product.type,
+              sku: it.product.sku,
+              sessionsCount: it.product.sessionsCount,
+              name: it.product.name,
+            },
+          })),
+        })
       }
 
       return updatedOrder

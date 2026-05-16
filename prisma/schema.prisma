@@ -575,6 +575,7 @@ enum ProductType {
   improvement_pack
   service
   physical
+  pool_ticket
 
   @@map("product_type")
 }

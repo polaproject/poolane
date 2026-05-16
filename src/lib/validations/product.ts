@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const PRODUCT_TYPES = ['course', 'improvement_pack', 'service', 'physical'] as const
+export const PRODUCT_TYPES = ['course', 'improvement_pack', 'service', 'physical', 'pool_ticket'] as const
 export type ProductType = (typeof PRODUCT_TYPES)[number]
 
 export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
@@ -8,6 +8,7 @@ export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
   improvement_pack: 'Pack buổi cải thiện',
   service: 'Dịch vụ',
   physical: 'Đồ vật lý',
+  pool_ticket: 'Vé bơi',
 }
 
 const baseSchema = z.object({
@@ -39,6 +40,13 @@ function refineByType(data: z.infer<typeof baseSchema>, ctx: z.RefinementCtx) {
       code: z.ZodIssueCode.custom,
       path: ['sessionsCount'],
       message: 'Pack buổi cải thiện phải có số buổi',
+    })
+  }
+  if (data.type === 'pool_ticket' && !data.sessionsCount) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['sessionsCount'],
+      message: 'Vé bơi phải có số buổi mỗi vé (1 cho vé lẻ, 10 cho vé lần đầu)',
     })
   }
   if (data.type === 'physical') {
