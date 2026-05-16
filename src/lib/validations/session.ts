@@ -6,9 +6,12 @@ export const createSessionSchema = z.object({
   notes: z.string().max(500).optional(),
 })
 
+// sessionId nằm trong URL params (/api/sessions/[id]/registrations) — không cần body.
+// studentId optional: HV tự đăng ký thì derive từ session; admin/staff đăng ký hộ
+// thì phải truyền studentId trong body.
 export const registerSessionSchema = z.object({
-  sessionId: z.string().uuid(),
-  courseId: z.string().uuid().optional(),
+  studentId: z.string().uuid().optional(),
+  courseId: z.string().uuid().optional().nullable(),
 })
 
 export const approveRegistrationSchema = z.object({
