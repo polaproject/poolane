@@ -2,20 +2,14 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import {
-  Plus, Users, Sunrise, Sunset, AlertCircle, X as XIcon, ChevronLeft, ChevronRight,
+  Plus, Sunrise, Sunset, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { format, startOfWeek, addDays, addWeeks } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { CAPACITY } from '@/config/constants'
-import { Chip } from '@/components/ui/Chip'
+import { InteractiveSessionCard, type SessionData } from './InteractiveSessionCard'
 
 type SearchParams = Promise<{ week?: string }>
-
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/)
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-}
 
 export default async function SchedulePage({ searchParams }: { searchParams: SearchParams }) {
   await requireRole(['admin', 'staff'])
@@ -50,84 +44,18 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
     )
   }
 
-  function SessionCard({
-    session, cap, slotLabel,
-  }: {
-    session: NonNullable<ReturnType<typeof getSession>>
-    cap: number
-    slotLabel: string
-  }) {
-    const approved = session.registrations.filter(r => r.status === 'approved')
-    const pending = session.registrations.filter(r => r.status === 'pending')
-    const isFull = approved.length >= cap
-    const isLow = approved.length < (session.timeSlot === 'morning' ? CAPACITY.MORNING_MIN : CAPACITY.EVENING_MIN)
-    const isCancelled = session.status === 'cancelled'
-
-    const tone = isCancelled
-      ? 'bg-danger/8 ring-danger/30'
-      : isFull
-        ? 'bg-mist/10 ring-mist/30'
-        : isLow
-          ? 'bg-warn/10 ring-warn/30'
-          : 'bg-[var(--surface)] ring-foreground/8'
-
-    return (
-      <Link href={`/admin/schedule/sessions/${session.id}`} className="block group">
-        <div className={`rounded-card p-3 ring-1 hover:-translate-y-0.5 hover:shadow-soft transition-all min-h-[180px] flex flex-col ${tone}`}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-foreground/65">{slotLabel}</span>
-            <Chip variant={isFull ? 'mist' : isLow ? 'warn' : 'neutral'} className="text-[10px]">
-              <Users className="h-2.5 w-2.5" strokeWidth={2.25} /> {approved.length}/{cap}
-            </Chip>
-          </div>
-
-          {isCancelled && (
-            <div className="text-xs text-danger inline-flex items-center gap-1 mb-2 font-medium">
-              <XIcon className="h-3 w-3" strokeWidth={2.25} /> Đã huỷ
-            </div>
-          )}
-
-          <div className="flex-1 space-y-1 min-h-0">
-            {approved.length === 0 && pending.length === 0 ? (
-              <p className="text-xs text-foreground/30 italic">Chưa có HV</p>
-            ) : (
-              <>
-                {approved.map(r => (
-                  <div key={r.id} className="flex items-center gap-1.5">
-                    <div className="grid place-items-center h-5 w-5 rounded-pill bg-mist text-paper text-[9px] font-bold shrink-0">
-                      {initials(r.student.user.fullName)}
-                    </div>
-                    <span className="text-xs text-foreground truncate flex-1">
-                      {r.student.user.fullName}
-                    </span>
-                    {r.course && (
-                      <Chip variant="neutral" className="text-[9px] px-1.5 py-0">{r.course.code}</Chip>
-                    )}
-                  </div>
-                ))}
-                {pending.map(r => (
-                  <div key={r.id} className="flex items-center gap-1.5 opacity-65">
-                    <div className="grid place-items-center h-5 w-5 rounded-pill ring-1 ring-dashed ring-accent text-accent text-[9px] font-bold shrink-0">
-                      ?
-                    </div>
-                    <span className="text-xs text-foreground/70 truncate flex-1 italic">
-                      {r.student.user.fullName}
-                    </span>
-                    <span className="text-[9px] text-accent font-bold">CHỜ</span>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
-
-          {pending.length > 0 && (
-            <div className="text-xs text-accent mt-2 pt-2 border-t border-foreground/8 inline-flex items-center gap-1 font-medium">
-              <AlertCircle className="h-3 w-3" strokeWidth={2.25} /> {pending.length} chờ duyệt
-            </div>
-          )}
-        </div>
-      </Link>
-    )
+  function toSessionData(s: NonNullable<ReturnType<typeof getSession>>): SessionData {
+    return {
+      id: s.id,
+      timeSlot: s.timeSlot as 'morning' | 'evening',
+      status: s.status,
+      registrations: s.registrations.map(r => ({
+        id: r.id,
+        status: r.status as 'pending' | 'approved' | 'waitlist',
+        student: { id: r.student.id, fullName: r.student.user.fullName },
+        course: r.course ? { code: r.course.code } : null,
+      })),
+    }
   }
 
   function EmptySlotLink({ date, slot }: { date: Date; slot: 'morning' | 'evening' }) {
@@ -187,7 +115,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
       </div>
 
       <div className="px-4 sm:px-8 -mt-6 max-w-7xl mx-auto relative z-10">
-        <div className="glass-card glass-card-hover p-4 sm:p-5">
+        <div className="rounded-card-lg bg-[var(--surface)] ring-1 ring-foreground/10 p-4 sm:p-5">
           <div className="overflow-x-auto pb-2">
             <div className="min-w-[820px]">
               {/* Day headers */}
@@ -226,7 +154,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
                   return (
                     <div key={`morning-${day.toISOString()}`}>
                       {session
-                        ? <SessionCard session={session} cap={CAPACITY.MORNING_MAX} slotLabel="5:30" />
+                        ? <InteractiveSessionCard session={toSessionData(session)} cap={CAPACITY.MORNING_MAX} slotLabel="5:30" />
                         : <EmptySlotLink date={day} slot="morning" />}
                     </div>
                   )
@@ -243,7 +171,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
                   return (
                     <div key={`evening-${day.toISOString()}`}>
                       {session
-                        ? <SessionCard session={session} cap={CAPACITY.EVENING_MAX} slotLabel="18:00" />
+                        ? <InteractiveSessionCard session={toSessionData(session)} cap={CAPACITY.EVENING_MAX} slotLabel="18:00" />
                         : <EmptySlotLink date={day} slot="evening" />}
                     </div>
                   )
@@ -259,7 +187,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
           <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-pill bg-mist" /> Đủ chỗ</span>
           <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-pill bg-accent" /> Có chờ duyệt</span>
           <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-pill bg-danger" /> Đã huỷ</span>
-          <span className="ml-auto opacity-65">Click vào ô để xem chi tiết + duyệt</span>
+          <span className="ml-auto opacity-65">Click vào HV chờ duyệt để Duyệt / Từ chối trực tiếp</span>
         </div>
       </div>
     </div>
