@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import {
   Loader2, RefreshCw, ShoppingBag, CheckCircle, X as XIcon,
-  DollarSign, Truck, Trash2,
+  DollarSign, Truck, Trash2, Ticket,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
@@ -49,6 +49,25 @@ export default function OrdersPage() {
   const [payingOrderId, setPayingOrderId] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'bank_transfer' | 'card' | 'other'>('cash')
   const [referenceNumber, setReferenceNumber] = useState('')
+  const [backfilling, setBackfilling] = useState(false)
+
+  async function backfillTickets() {
+    if (!confirm('Quét toàn bộ đơn paid/fulfilled, tạo PoolTicket còn thiếu? An toàn chạy nhiều lần (dedupe theo studentId + ticketType + ±1 day).')) return
+    setBackfilling(true)
+    try {
+      const res = await fetch('/api/admin/backfill-pool-tickets', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok || data.error) { toast.error(data.error?.message ?? 'Lỗi backfill'); return }
+      const { created, skipped, scanned } = data.data
+      if (created === 0) {
+        toast.success(`Không có vé thiếu (đã quét ${scanned} đơn, skip ${skipped} đã có)`)
+      } else {
+        toast.success(`Đã tạo ${created} vé bơi! (quét ${scanned} đơn, skip ${skipped})`)
+      }
+      loadOrders()
+    } catch { toast.error('Không thể kết nối') }
+    finally { setBackfilling(false) }
+  }
 
   const loadOrders = useCallback(async () => {
     setLoading(true)
@@ -106,13 +125,27 @@ export default function OrdersPage() {
             <p className="eyebrow text-paper/55 mb-2">Duyệt · Thanh toán · Giao hàng</p>
             <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Đơn hàng Shop</h1>
           </div>
-          <button
-            onClick={loadOrders}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-pill ring-1 ring-paper/20 hover:bg-paper/5 transition text-sm disabled:opacity-60"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} strokeWidth={1.75} /> Làm mới
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={backfillTickets}
+              disabled={backfilling}
+              title="Quét đơn paid/fulfilled + tạo PoolTicket còn thiếu (cho data lịch sử trước Phase 18.2)"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-pill ring-1 ring-paper/20 hover:bg-paper/5 transition text-sm disabled:opacity-60"
+            >
+              {backfilling
+                ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.75} />
+                : <Ticket className="h-4 w-4" strokeWidth={1.75} />
+              }
+              Quét vé thiếu
+            </button>
+            <button
+              onClick={loadOrders}
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-pill ring-1 ring-paper/20 hover:bg-paper/5 transition text-sm disabled:opacity-60"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} strokeWidth={1.75} /> Làm mới
+            </button>
+          </div>
         </div>
       </div>
 
