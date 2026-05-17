@@ -27,18 +27,27 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  // Đo container để force cropSize gần sát mép → vòng tròn to nhất có thể
+  // Đo container để force cropSize gần sát mép → vòng tròn to nhất có thể.
+  // Khởi tạo default 280px để Cropper luôn render ngay (tránh đen xì trên
+  // mobile nếu ResizeObserver fire chậm).
   const containerRef = useRef<HTMLDivElement>(null)
-  const [cropSize, setCropSize] = useState<{ width: number; height: number } | null>(null)
+  const [cropSize, setCropSize] = useState<{ width: number; height: number }>({ width: 280, height: 280 })
 
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
-    const ro = new ResizeObserver((entries) => {
-      const w = entries[0]?.contentRect.width ?? 0
-      // -8px chừa biên rất mỏng → vòng tròn nearly full container
+
+    function applySize(w: number) {
+      if (w <= 0) return
       const size = Math.max(0, w - 8)
       setCropSize({ width: size, height: size })
+    }
+
+    // Initial sync measure (Dialog render xong DOM đã có width)
+    applySize(el.clientWidth)
+
+    const ro = new ResizeObserver((entries) => {
+      applySize(entries[0]?.contentRect.width ?? 0)
     })
     ro.observe(el)
     return () => ro.disconnect()
@@ -80,21 +89,19 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
 
           {/* Crop area — vuông, ảnh fill, vòng tròn nearly full container */}
           <div ref={containerRef} className="relative w-full aspect-square rounded-card overflow-hidden bg-ink mb-3">
-            {cropSize && (
-              <Cropper
-                image={src}
-                crop={crop}
-                zoom={zoom}
-                aspect={1}
-                cropShape="round"
-                showGrid={false}
-                cropSize={cropSize}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={onCropComplete}
-                objectFit="cover"
-              />
-            )}
+            <Cropper
+              image={src}
+              crop={crop}
+              zoom={zoom}
+              aspect={1}
+              cropShape="round"
+              showGrid={false}
+              cropSize={cropSize}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={onCropComplete}
+              objectFit="cover"
+            />
           </div>
 
           {/* Zoom slider */}
