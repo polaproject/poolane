@@ -27,7 +27,7 @@ export function ScheduleGrid({ week, emptySlotBuilder, dayLabels }: Props) {
   return (
     <div className="rounded-card-lg bg-[var(--surface)] ring-1 ring-foreground/10 p-4 sm:p-5">
       <div className="overflow-x-auto pb-2">
-        <div className="min-w-[820px]">
+        <div className="min-w-[1050px]">
           {/* Day headers */}
           <div className="grid grid-cols-7 gap-2 mb-3">
             {dayLabels.map((d, i) => (

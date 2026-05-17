@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import type { UserRole } from '@/lib/auth'
 import { NotificationFab } from './NotificationFab'
 import { QuickAddFab } from './QuickAddFab'
+import { MessagesFab } from './MessagesFab'
 
 type OpenPanel = 'notif' | 'add' | null
 
@@ -69,6 +70,9 @@ export function FloatingActions({ role, hidden = false }: FloatingActionsProps) 
           onOpenChange={onNotifChange}
           allowedTypes={settings?.notif_filter.types ?? []}
         />
+      </div>
+      <div className={hidden ? '' : 'pointer-events-auto'}>
+        <MessagesFab role={role} />
       </div>
       <div className={hidden ? '' : 'pointer-events-auto'}>
         <QuickAddFab

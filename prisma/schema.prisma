@@ -50,6 +50,8 @@ model User {
   studentNotesCreated  StudentNote[]
   auditLogs            AuditLog[]
   notificationsReceived Notification[]
+  staffConversations   Conversation[]  @relation("StaffConversations")
+  sentMessages         ChatMessage[]   @relation("SentMessages")
 
   @@map("users")
 }
@@ -102,6 +104,7 @@ model Student {
   profileChangeRequests ProfileChangeRequest[]
   videoLinks           VideoLink[]
   orders               Order[]
+  conversations        Conversation[]
 
   @@map("students")
 }
@@ -1129,4 +1132,52 @@ model DashboardWidget {
 
   @@index([dashboardId])
   @@map("dashboard_widgets")
+}
+
+// ─────────────────────────────────────────
+// CHAT (Phase 19)
+// Admin/Staff ↔ Student — polling 3s khi open, 30s background
+// ─────────────────────────────────────────
+
+model Conversation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  staffUserId        String    @map("staff_user_id")
+  studentId          String    @map("student_id")
+  lastMessageAt      DateTime? @map("last_message_at")
+  lastMessagePreview String?   @db.VarChar(100) @map("last_message_preview")
+  isResolved         Boolean   @default(false) @map("is_resolved")
+  resolvedAt         DateTime? @map("resolved_at")
+  resolvedBy         String?   @map("resolved_by")
+
+  staffUser User        @relation("StaffConversations", fields: [staffUserId], references: [id])
+  student   Student     @relation(fields: [studentId], references: [id])
+  messages  ChatMessage[]
+
+  @@unique([staffUserId, studentId])
+  @@index([staffUserId, isResolved])
+  @@index([studentId])
+  @@index([lastMessageAt])
+  @@map("conversations")
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  conversationId String    @map("conversation_id")
+  senderId       String    @map("sender_id")
+  senderRole     String    @map("sender_role")
+  content        String    @db.VarChar(2000)
+  readAt         DateTime? @map("read_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       User         @relation("SentMessages", fields: [senderId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@map("chat_messages")
 }

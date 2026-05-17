@@ -14,6 +14,7 @@ import {
   LogOut, Menu, X, Activity, UserCog, IdCard, HelpCircle,
   ChevronDown, ChevronRight, FileText, Video, Image as ImageIcon,
   ReceiptText, Award, Tags, ShoppingCart, Package, Settings, Home,
+  MessageSquare,
 } from 'lucide-react'
 import { PolarisStar } from '@/components/brand/PolarisStar'
 import { FloatingActions } from './FloatingActions'
@@ -98,6 +99,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
     {
       key: 'lienlac', label: 'Liên lạc', icon: BellRing,
       items: [
+        { label: 'Tin nhắn', href: '/admin/messages', icon: MessageSquare },
         { label: 'Gửi thông báo chung', href: '/admin/broadcast', icon: BellRing },
       ]
     },
@@ -131,6 +133,12 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
         { label: 'Video bơi', href: '/staff/videos', icon: Video },
       ]
     },
+    {
+      key: 'lienlac', label: 'Liên lạc', icon: BellRing,
+      items: [
+        { label: 'Tin nhắn', href: '/staff/messages', icon: MessageSquare },
+      ]
+    },
   ],
   student: [
     {
@@ -138,6 +146,7 @@ const NAV_GROUPS: Record<UserRole, NavGroup[]> = {
       items: [
         { label: 'Hồ sơ của tôi', href: '/student/profile', icon: IdCard },
         { label: 'Lịch sử thanh toán', href: '/student/payments', icon: ReceiptText },
+        { label: 'Tin nhắn', href: '/student/messages', icon: MessageSquare },
       ]
     },
     {

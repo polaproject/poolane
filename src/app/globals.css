@@ -263,8 +263,8 @@ select.input-pola:focus {
   --hero-overlay-1: rgba(200, 168, 75, 0.12);
   --hero-overlay-2: rgba(127, 168, 181, 0.10);
 
-  /* Glass surface (semi-transparent paper trên ambient bg) */
-  --glass-bg: rgba(251, 247, 240, 0.08);
+  /* Glass surface — ngang bằng sidebar (0.94) để popover dễ đọc */
+  --glass-bg: rgba(26, 24, 37, 0.94);
   --glass-ring: rgba(255, 255, 255, 0.15);
   --glass-text: #FBF7F0;
 
@@ -376,7 +376,7 @@ select.input-pola:focus {
   --hero-overlay-1: rgba(232, 155, 122, 0.18);
   --hero-overlay-2: rgba(155, 145, 214, 0.15);
 
-  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-bg: rgba(255, 255, 255, 0.94);
   --glass-ring: rgba(45, 42, 74, 0.08);
   --glass-text: var(--ink);
 

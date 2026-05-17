@@ -129,15 +129,9 @@ export function InteractiveSessionCard({ session, cap }: Props) {
           {reg.student.fullName}
         </span>
 
-        {/* Course chip + status indicator */}
+        {/* Course chip — chỉ hiện khi có khoá, không hiện khi đã rút */}
         {reg.course && variant !== 'withdrawn' && (
           <Chip variant="neutral" className="text-[9px] px-1.5 py-0 shrink-0">{reg.course.code}</Chip>
-        )}
-        {variant === 'pending' && (
-          <span className="text-[9px] text-accent font-bold shrink-0">CHỜ</span>
-        )}
-        {variant === 'withdrawn' && (
-          <span className="text-[9px] text-foreground/40 font-bold uppercase shrink-0">Nghỉ</span>
         )}
       </button>
     )

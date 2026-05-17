@@ -7,6 +7,7 @@ import {
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { VietQRPayButton } from '@/components/features/VietQRPayButton'
+import { CancelOrderButton } from '@/components/features/CancelOrderButton'
 import { Chip } from '@/components/ui/Chip'
 
 type Variant = 'neutral' | 'accent' | 'mist' | 'success' | 'warn' | 'danger'
@@ -120,6 +121,16 @@ export default async function StudentOrdersPage() {
                 {order.status === 'approved' && (
                   <div className="mt-3 pt-3 border-t border-foreground/8">
                     <VietQRPayButton orderId={order.id} />
+                  </div>
+                )}
+
+                {(order.status === 'pending' || order.status === 'approved') && (
+                  <div className="mt-3 pt-3 border-t border-foreground/8 flex justify-end">
+                    <CancelOrderButton
+                      orderId={order.id}
+                      orderStatus={order.status}
+                      orderRef={order.id.slice(0, 8).toUpperCase()}
+                    />
                   </div>
                 )}
 
