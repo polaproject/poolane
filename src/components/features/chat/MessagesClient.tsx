@@ -490,18 +490,13 @@ export function MessagesClient({
               {messages.map((msg, i) => {
                 const isMine = msg.senderId === currentUserId
                 const prevMsg = i > 0 ? messages[i - 1] : null
-                const nextMsg = i < messages.length - 1 ? messages[i + 1] : null
                 const showAvatar = !isMine && (i === 0 || prevMsg?.senderId !== msg.senderId)
                 const showSenderLabel = isGroupActive && !isMine && (i === 0 || prevMsg?.senderId !== msg.senderId)
 
-                // Phase 22 time dedup: ẩn time + tick nếu next msg cùng phút
-                const minKey = (d: string) => format(new Date(d), 'yyyy-MM-dd HH:mm')
-                const sameMinAsNext = nextMsg && minKey(msg.createdAt) === minKey(nextMsg.createdAt)
-                const showMeta = !sameMinAsNext
-
+                // Phase 24: hiển thị time MỌI tin (bỏ dedup) — read receipt rõ ràng
                 const isRead = isGroupActive ? groupReadByMsg(msg.createdAt) : !!msg.readAt
                 const showTick = isMine && !msg.id.startsWith('opt-')
-                const useDoubleTick = showTick && isRead // symmetric
+                const useDoubleTick = showTick && isRead
 
                 return (
                   <div key={msg.id} className="flex items-end gap-2">
@@ -518,25 +513,21 @@ export function MessagesClient({
                             {msg.content}
                           </div>
                         </div>
-                        {showMeta && (
-                          <span className="ml-auto text-[10px] text-foreground/35 self-end shrink-0">
-                            {formatMsgTime(msg.createdAt)}
-                          </span>
-                        )}
+                        <span className="ml-auto text-[10px] text-foreground/35 self-end shrink-0">
+                          {formatMsgTime(msg.createdAt)}
+                        </span>
                       </>
                     )}
                     {isMine && (
                       <>
-                        {showMeta && (
-                          <span className="text-[10px] text-foreground/35 self-end shrink-0 inline-flex items-center gap-0.5">
-                            {formatMsgTime(msg.createdAt)}
-                            {showTick && (
-                              useDoubleTick
-                                ? <CheckCheck className="h-3 w-3 text-accent" />
-                                : <Check className="h-3 w-3 text-foreground/35" />
-                            )}
-                          </span>
-                        )}
+                        <span className="text-[10px] text-foreground/35 self-end shrink-0 inline-flex items-center gap-0.5">
+                          {formatMsgTime(msg.createdAt)}
+                          {showTick && (
+                            useDoubleTick
+                              ? <CheckCheck className="h-3 w-3 text-accent" />
+                              : <Check className="h-3 w-3 text-foreground/35" />
+                          )}
+                        </span>
                         <div className="ml-auto max-w-[70%] flex flex-col items-end space-y-0.5">
                           <div className="px-3 py-2 rounded-card rounded-br-sm text-sm leading-relaxed break-words bg-accent/15 text-foreground">
                             {msg.content}

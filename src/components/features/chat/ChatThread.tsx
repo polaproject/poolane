@@ -325,22 +325,15 @@ export function ChatThread({
         {messages.map((msg, i) => {
           const isMine = msg.senderId === currentUserId
           const prevMsg = i > 0 ? messages[i - 1] : null
-          const nextMsg = i < messages.length - 1 ? messages[i + 1] : null
           const showAvatar = !isMine && (i === 0 || prevMsg?.senderId !== msg.senderId)
           const showSenderLabel = isGroup && !isMine && (i === 0 || prevMsg?.senderId !== msg.senderId)
 
-          // Phase 22 time dedup: ẩn time + tick nếu next msg cùng phút
-          // (tin cuối chuỗi cùng phút sẽ giữ time + tick)
-          const minKey = (d: string) => format(new Date(d), 'yyyy-MM-dd HH:mm')
-          const sameMinAsNext = nextMsg && minKey(msg.createdAt) === minKey(nextMsg.createdAt)
-          const showMeta = !sameMinAsNext
-
-          // Tick logic (Phase 22): per-message, áp dụng cả DM + group
-          // - DM: msg.readAt true = đã đọc
-          // - Group: dùng groupReadByMsg() — bất kỳ participant khác đã đọc = true
+          // Phase 24: hiển thị time cho MỌI tin (bỏ dedup) — read receipt per-message
+          // rõ ràng + khớp UX WhatsApp/Telegram/Zalo. Không tốn space vì time ở
+          // opposite edge cùng row với bubble.
           const isRead = isGroup ? groupReadByMsg(msg.createdAt) : !!msg.readAt
           const showTick = isMine && !msg.id.startsWith('opt-')
-          const useDoubleTick = showTick && isRead // symmetric — bỏ asymmetric
+          const useDoubleTick = showTick && isRead
 
           return (
             <div key={msg.id} className="flex items-end gap-1.5">
@@ -358,27 +351,23 @@ export function ChatThread({
                       {msg.content}
                     </div>
                   </div>
-                  {showMeta && (
-                    <span className="ml-auto text-[9px] text-foreground/35 self-end shrink-0">
-                      {formatMsgTime(msg.createdAt)}
-                    </span>
-                  )}
+                  <span className="ml-auto text-[9px] text-foreground/35 self-end shrink-0">
+                    {formatMsgTime(msg.createdAt)}
+                  </span>
                 </>
               )}
 
               {/* Outgoing: time + tick (sát lề TRÁI) | bubble (ml-auto sát lề PHẢI) */}
               {isMine && (
                 <>
-                  {showMeta && (
-                    <span className="text-[9px] text-foreground/35 self-end shrink-0 inline-flex items-center gap-0.5">
-                      {formatMsgTime(msg.createdAt)}
-                      {showTick && (
-                        useDoubleTick
-                          ? <CheckCheck className="h-2.5 w-2.5 text-accent" />
-                          : <Check className="h-2.5 w-2.5 text-foreground/35" />
-                      )}
-                    </span>
-                  )}
+                  <span className="text-[9px] text-foreground/35 self-end shrink-0 inline-flex items-center gap-0.5">
+                    {formatMsgTime(msg.createdAt)}
+                    {showTick && (
+                      useDoubleTick
+                        ? <CheckCheck className="h-2.5 w-2.5 text-accent" />
+                        : <Check className="h-2.5 w-2.5 text-foreground/35" />
+                    )}
+                  </span>
                   <div className="ml-auto max-w-[70%] flex flex-col items-end space-y-0.5">
                     <div className="px-2.5 py-1.5 rounded-card rounded-br-sm text-sm leading-relaxed break-words bg-accent/15 text-foreground">
                       {msg.content}
