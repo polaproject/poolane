@@ -2565,6 +2565,7 @@ Mọi route phải có check ở TẦNG 2. UI và DB là defense in depth.
 1. **Acceptance Checklist** mỗi tính năng
 2. **Seed data script** để test thật
 3. **Vercel Preview Deployment** để test trước khi production
+4. **Multi-device responsive test**: dùng [Responsively App](https://responsively.app) (free, open-source) trỏ vào `localhost:3000` → xem N device side-by-side, session share, sync click/scroll, hot-reload đồng bộ. Real device thật: mở `http://<local-IP>:3000` từ điện thoại (cùng WiFi) — IP in ra ở terminal khi `npm run dev` dưới dòng `Network:`
 
 ### 17.2. Seed Data Bắt Buộc
 

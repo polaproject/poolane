@@ -15,15 +15,15 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  email    String  @unique
-  phone    String? @unique
-  fullName String  @map("full_name")
+  email    String    @unique
+  phone    String?   @unique
+  fullName String    @map("full_name")
   dob      DateTime?
   gender   String?
 
-  ward     String?
-  district String?
-  province String?
+  ward          String?
+  district      String?
+  province      String?
   addressStreet String? @map("address_street")
 
   emergencyContactName  String? @map("emergency_contact_name")
@@ -40,18 +40,20 @@ model User {
   refundPolicyAcknowledgedAt DateTime? @map("refund_policy_acknowledged_at")
   termsAcknowledgedAt        DateTime? @map("terms_acknowledged_at")
 
-  /** Avatar URL trên Supabase Storage. NULL = fallback initial chữ cái. */
+  /**
+   * Avatar URL trên Supabase Storage. NULL = fallback initial chữ cái.
+   */
   avatarUrl String? @map("avatar_url")
 
   isActive    Boolean   @default(true) @map("is_active")
   lastLoginAt DateTime? @map("last_login_at")
 
-  student              Student?
-  studentNotesCreated  StudentNote[]
-  auditLogs            AuditLog[]
-  notificationsReceived Notification[]
+  student                    Student?
+  studentNotesCreated        StudentNote[]
+  auditLogs                  AuditLog[]
+  notificationsReceived      Notification[]
   conversationParticipations ConversationParticipant[] @relation("ConversationParticipations")
-  sentMessages               ChatMessage[]              @relation("SentMessages")
+  sentMessages               ChatMessage[]             @relation("SentMessages")
 
   @@map("users")
 }
@@ -87,23 +89,23 @@ model Student {
   lastAttendedAt     DateTime?     @map("last_attended_at")
   notesSummary       String?       @map("notes_summary")
 
-  user                 User                  @relation(fields: [userId], references: [id])
-  enrollments          Enrollment[]
-  poolTickets          PoolTicket[]
-  sessionRegistrations SessionRegistration[]
-  attendances          Attendance[]
-  assessments          Assessment[]
-  payments             Payment[]
-  refundRequests       RefundRequest[]
-  notifications        Notification[]        @relation("StudentNotification")
-  practiceLogs         PracticeLog[]
-  skillGoals           SkillGoal[]
-  challengeProgress    ChallengeProgress[]
-  quizAttempts         QuizAttempt[]
-  studentNotes         StudentNote[]
+  user                  User                   @relation(fields: [userId], references: [id])
+  enrollments           Enrollment[]
+  poolTickets           PoolTicket[]
+  sessionRegistrations  SessionRegistration[]
+  attendances           Attendance[]
+  assessments           Assessment[]
+  payments              Payment[]
+  refundRequests        RefundRequest[]
+  notifications         Notification[]         @relation("StudentNotification")
+  practiceLogs          PracticeLog[]
+  skillGoals            SkillGoal[]
+  challengeProgress     ChallengeProgress[]
+  quizAttempts          QuizAttempt[]
+  studentNotes          StudentNote[]
   profileChangeRequests ProfileChangeRequest[]
-  videoLinks           VideoLink[]
-  orders               Order[]
+  videoLinks            VideoLink[]
+  orders                Order[]
 
   @@map("students")
 }
@@ -151,10 +153,10 @@ model Enrollment {
   studentId String @map("student_id")
   courseId  String @map("course_id")
 
-  paymentPlan     PaymentPlan      @map("payment_plan")
-  depositAmount   Int              @default(0) @map("deposit_amount")
-  totalPaid       Int              @default(0) @map("total_paid")
-  paymentDeadline DateTime?        @map("payment_deadline")
+  paymentPlan     PaymentPlan @map("payment_plan")
+  depositAmount   Int         @default(0) @map("deposit_amount")
+  totalPaid       Int         @default(0) @map("total_paid")
+  paymentDeadline DateTime?   @map("payment_deadline")
 
   status                EnrollmentStatus @default(active)
   isViaShop             Boolean          @default(false) @map("is_via_shop")
@@ -238,6 +240,7 @@ model ClassSession {
   videoLinks    VideoLink[]
   sessionPhotos SessionPhoto[]
 
+  @@index([date])
   @@map("class_sessions")
 }
 
@@ -272,11 +275,12 @@ model SessionRegistration {
   decidedAt          DateTime?          @map("decided_at")
   decidedBy          String?            @map("decided_by")
 
-  session ClassSession  @relation(fields: [sessionId], references: [id])
-  student Student       @relation(fields: [studentId], references: [id])
-  course  Course?       @relation(fields: [courseId], references: [id])
+  session ClassSession @relation(fields: [sessionId], references: [id])
+  student Student      @relation(fields: [studentId], references: [id])
+  course  Course?      @relation(fields: [courseId], references: [id])
 
   @@unique([sessionId, studentId])
+  @@index([sessionId, status])
   @@map("session_registrations")
 }
 
@@ -337,9 +341,9 @@ model Assessment {
   isVoiceNote    Boolean        @default(false) @map("is_voice_note")
   voiceNoteUrl   String?        @map("voice_note_url")
 
-  student Student      @relation(fields: [studentId], references: [id])
-  course  Course       @relation(fields: [courseId], references: [id])
-  session ClassSession? @relation(fields: [sessionId], references: [id])
+  student Student           @relation(fields: [studentId], references: [id])
+  course  Course            @relation(fields: [courseId], references: [id])
+  session ClassSession?     @relation(fields: [sessionId], references: [id])
   scores  AssessmentScore[]
   metrics ObjectiveMetric[]
 
@@ -357,9 +361,9 @@ enum AssessmentType {
 }
 
 model AssessmentScore {
-  id           String @id @default(uuid())
-  assessmentId String @map("assessment_id")
-  skillKey     String @map("skill_key")
+  id           String  @id @default(uuid())
+  assessmentId String  @map("assessment_id")
+  skillKey     String  @map("skill_key")
   score        Int
   note         String?
 
@@ -372,15 +376,15 @@ model SelfAssessment {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now()) @map("created_at")
 
-  studentId     String @map("student_id")
-  courseId      String @map("course_id")
-  sessionNumber Int    @map("session_number")
-  scoresJson    Json   @map("scores_json")
+  studentId     String  @map("student_id")
+  courseId      String  @map("course_id")
+  sessionNumber Int     @map("session_number")
+  scoresJson    Json    @map("scores_json")
   notes         String?
 
-  @@map("self_assessments")
   @@unique([studentId, courseId, sessionNumber])
   @@index([studentId])
+  @@map("self_assessments")
 }
 
 model ObjectiveMetric {
@@ -452,8 +456,8 @@ model Payment {
 
   student Student @relation(fields: [studentId], references: [id])
 
-  @@map("payments")
   @@index([gatewayTransactionId])
+  @@map("payments")
 }
 
 model GatewayTransaction {
@@ -461,24 +465,24 @@ model GatewayTransaction {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  gatewayName   String   @map("gateway_name")
-  requestId     String   @unique @map("request_id")
-  orderId       String   @map("order_id")
-  orderInfo     String?  @map("order_info")
+  gatewayName   String    @map("gateway_name")
+  requestId     String    @unique @map("request_id")
+  orderId       String    @map("order_id")
+  orderInfo     String?   @map("order_info")
   amount        Int
-  status        String   @default("pending")
-  studentId     String?  @map("student_id")
-  referenceType String?  @map("reference_type")
-  referenceId   String?  @map("reference_id")
-  paymentId     String?  @map("payment_id")
-  rawRequest    Json     @default("{}") @map("raw_request")
-  rawResponse   Json     @default("{}") @map("raw_response")
-  errorMessage  String?  @map("error_message")
+  status        String    @default("pending")
+  studentId     String?   @map("student_id")
+  referenceType String?   @map("reference_type")
+  referenceId   String?   @map("reference_id")
+  paymentId     String?   @map("payment_id")
+  rawRequest    Json      @default("{}") @map("raw_request")
+  rawResponse   Json      @default("{}") @map("raw_response")
+  errorMessage  String?   @map("error_message")
   completedAt   DateTime? @map("completed_at")
 
-  @@map("gateway_transactions")
   @@index([orderId])
   @@index([status])
+  @@map("gateway_transactions")
 }
 
 enum PaymentType {
@@ -566,7 +570,9 @@ model Product {
   photos            Json        @default("[]")
   description       String?
   isActive          Boolean     @default(true) @map("is_active")
-  /** Vị trí hiển thị (admin sắp xếp). ASC = đầu danh sách trên student shop. */
+  /**
+   * Vị trí hiển thị (admin sắp xếp). ASC = đầu danh sách trên student shop.
+   */
   displayOrder      Int         @default(0) @map("display_order")
 
   orderItems OrderItem[]
@@ -638,15 +644,15 @@ model ImprovementSessionPack {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now()) @map("created_at")
 
-  studentId          String   @map("student_id")
-  orderId            String?  @map("order_id")
-  sessionsPurchased  Int      @map("sessions_purchased")
-  sessionsUsed       Int      @default(0) @map("sessions_used")
-  targetSkills       Json     @default("[]") @map("target_skills")
-  expiresAt          DateTime? @map("expires_at")
+  studentId         String    @map("student_id")
+  orderId           String?   @map("order_id")
+  sessionsPurchased Int       @map("sessions_purchased")
+  sessionsUsed      Int       @default(0) @map("sessions_used")
+  targetSkills      Json      @default("[]") @map("target_skills")
+  expiresAt         DateTime? @map("expires_at")
 
-  @@map("improvement_session_packs")
   @@index([studentId])
+  @@map("improvement_session_packs")
 }
 
 // ─────────────────────────────────────────
@@ -740,12 +746,12 @@ model QuizQuestion {
   id     String @id @default(uuid())
   quizId String @map("quiz_id")
 
-  questionText  String @map("question_text")
+  questionText  String  @map("question_text")
   type          String
-  options       Json   @default("[]")
-  correctAnswer String @map("correct_answer")
+  options       Json    @default("[]")
+  correctAnswer String  @map("correct_answer")
   explanation   String?
-  orderIndex    Int    @map("order_index")
+  orderIndex    Int     @map("order_index")
 
   quiz Quiz @relation(fields: [quizId], references: [id])
 
@@ -803,11 +809,11 @@ model Challenge {
 }
 
 model ChallengeProgress {
-  id          String   @id @default(uuid())
-  challengeId String   @map("challenge_id")
-  studentId   String   @map("student_id")
-  currentValue Int     @default(0) @map("current_value")
-  lastUpdated DateTime @default(now()) @map("last_updated")
+  id           String   @id @default(uuid())
+  challengeId  String   @map("challenge_id")
+  studentId    String   @map("student_id")
+  currentValue Int      @default(0) @map("current_value")
+  lastUpdated  DateTime @default(now()) @map("last_updated")
 
   challenge Challenge @relation(fields: [challengeId], references: [id])
   student   Student   @relation(fields: [studentId], references: [id])
@@ -842,7 +848,7 @@ model VideoLink {
   caption   String?
   createdBy String  @map("created_by")
 
-  student Student      @relation(fields: [studentId], references: [id])
+  student Student       @relation(fields: [studentId], references: [id])
   session ClassSession? @relation(fields: [sessionId], references: [id])
 
   @@map("video_links")
@@ -856,15 +862,15 @@ model Notification {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now()) @map("created_at")
 
-  userId    String  @map("user_id")
-  studentId String? @map("student_id")
-  senderId  String? @map("sender_id")
+  userId    String    @map("user_id")
+  studentId String?   @map("student_id")
+  senderId  String?   @map("sender_id")
   type      String
   title     String
   body      String
-  actionUrl String? @map("action_url")
+  actionUrl String?   @map("action_url")
   readAt    DateTime? @map("read_at")
-  metadata  Json    @default("{}")
+  metadata  Json      @default("{}")
 
   recipient User     @relation(fields: [userId], references: [id])
   student   Student? @relation("StudentNotification", fields: [studentId], references: [id])
@@ -913,19 +919,19 @@ model PushSubscription {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now()) @map("created_at")
 
-  userId   String @map("user_id")
-  endpoint String @unique
-  keysP256 String @map("keys_p256")
-  keysAuth String @map("keys_auth")
+  userId    String  @map("user_id")
+  endpoint  String  @unique
+  keysP256  String  @map("keys_p256")
+  keysAuth  String  @map("keys_auth")
   userAgent String? @map("user_agent")
 
-  @@map("push_subscriptions")
   @@index([userId])
+  @@map("push_subscriptions")
 }
 
 model UnmatchedTransaction {
-  id              String   @id @default(uuid())
-  createdAt       DateTime @default(now()) @map("created_at")
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
 
   sepayId         Int?     @unique @map("sepay_id")
   gateway         String?
@@ -936,15 +942,15 @@ model UnmatchedTransaction {
   referenceCode   String?  @map("reference_code")
   rawPayload      Json     @map("raw_payload")
 
-  status          String   @default("pending")
-  matchedToType   String?  @map("matched_to_type")
-  matchedToId     String?  @map("matched_to_id")
-  matchedAt       DateTime? @map("matched_at")
-  matchedBy       String?  @map("matched_by")
-  notes           String?
+  status        String    @default("pending")
+  matchedToType String?   @map("matched_to_type")
+  matchedToId   String?   @map("matched_to_id")
+  matchedAt     DateTime? @map("matched_at")
+  matchedBy     String?   @map("matched_by")
+  notes         String?
 
-  @@map("unmatched_transactions")
   @@index([status, createdAt])
+  @@map("unmatched_transactions")
 }
 
 model PasswordResetRequest {
@@ -952,16 +958,16 @@ model PasswordResetRequest {
   createdAt DateTime @default(now()) @map("created_at")
 
   phone        String
-  fullNameHint String?  @map("full_name_hint")
-  status       String   @default("pending")
-  requestedAt  DateTime @default(now()) @map("requested_at")
+  fullNameHint String?   @map("full_name_hint")
+  status       String    @default("pending")
+  requestedAt  DateTime  @default(now()) @map("requested_at")
   processedAt  DateTime? @map("processed_at")
   processedBy  String?   @map("processed_by")
   ipAddress    String?   @map("ip_address")
 
-  @@map("password_reset_requests")
   @@index([phone, status])
   @@index([status, requestedAt])
+  @@map("password_reset_requests")
 }
 
 model AuditLog {
@@ -1039,17 +1045,17 @@ model Exercise {
 
   title       String
   description String
-  skillTarget String   @map("skill_target")
+  skillTarget String  @map("skill_target")
   difficulty  String
-  videoUrl    String?  @map("video_url")
-  stepsJson   Json     @default("[]") @map("steps_json")
-  isPublished Boolean  @default(true) @map("is_published")
-  createdBy   String   @map("created_by")
+  videoUrl    String? @map("video_url")
+  stepsJson   Json    @default("[]") @map("steps_json")
+  isPublished Boolean @default(true) @map("is_published")
+  createdBy   String  @map("created_by")
 
   assignments ExerciseAssignment[]
 
-  @@map("exercises")
   @@index([skillTarget, difficulty])
+  @@map("exercises")
 }
 
 model ExerciseAssignment {
@@ -1066,8 +1072,8 @@ model ExerciseAssignment {
 
   exercise Exercise @relation(fields: [exerciseId], references: [id])
 
-  @@map("exercise_assignments")
   @@index([studentId, status])
+  @@map("exercise_assignments")
 }
 
 // ────────────────────────────────────────────────────────────
@@ -1097,17 +1103,17 @@ enum WidgetType {
 }
 
 model Dashboard {
-  id          String   @id @default(uuid())
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  ownerId     String   @map("owner_id")
+  ownerId     String  @map("owner_id")
   name        String
   description String?
-  isHome      Boolean  @default(false) @map("is_home")
-  layout      Json     @default("[]")           // [{ id, x, y, w, h }]
-  slicers     Json     @default("[]")           // [{ field, op, value }]
-  timeRange   Json     @default("{}") @map("time_range") // { preset, from?, to?, compare? }
+  isHome      Boolean @default(false) @map("is_home")
+  layout      Json    @default("[]") // [{ id, x, y, w, h }]
+  slicers     Json    @default("[]") // [{ field, op, value }]
+  timeRange   Json    @default("{}") @map("time_range") // { preset, from?, to?, compare? }
 
   widgets DashboardWidget[]
 
@@ -1117,17 +1123,17 @@ model Dashboard {
 }
 
 model DashboardWidget {
-  id          String   @id @default(uuid())
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  dashboardId String     @map("dashboard_id")
-  dashboard   Dashboard  @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  dashboardId String    @map("dashboard_id")
+  dashboard   Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
 
   title    String
   type     WidgetType
   config   Json
-  position Json   @default("{}")   // { x, y, w, h }
+  position Json       @default("{}") // { x, y, w, h }
 
   @@index([dashboardId])
   @@map("dashboard_widgets")
@@ -1144,17 +1150,25 @@ model Conversation {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  /** Group name (NULL = DM, hiển thị join(participantNames)). Max 80 char. */
-  name      String?  @db.VarChar(80)
-  /** false = DM (2 người), true = nhóm (>2 hoặc có name). Cached cho query. */
-  isGroup   Boolean  @default(false) @map("is_group")
-  /** Creator userId (audit + group permissions). */
-  createdBy String?  @map("created_by")
+  /**
+   * Group name (NULL = DM, hiển thị join(participantNames)). Max 80 char.
+   */
+  name      String? @db.VarChar(80)
+  /**
+   * false = DM (2 người), true = nhóm (>2 hoặc có name). Cached cho query.
+   */
+  isGroup   Boolean @default(false) @map("is_group")
+  /**
+   * Creator userId (audit + group permissions).
+   */
+  createdBy String? @map("created_by")
 
   lastMessageAt      DateTime? @map("last_message_at")
-  lastMessagePreview String?   @db.VarChar(100) @map("last_message_preview")
+  lastMessagePreview String?   @map("last_message_preview") @db.VarChar(100)
 
-  /** Admin/Staff đóng cuộc hội thoại. Trong group = "đã archive". */
+  /**
+   * Admin/Staff đóng cuộc hội thoại. Trong group = "đã archive".
+   */
   isResolved Boolean   @default(false) @map("is_resolved")
   resolvedAt DateTime? @map("resolved_at")
   resolvedBy String?   @map("resolved_by")
@@ -1171,15 +1185,23 @@ model ConversationParticipant {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now()) @map("created_at")
 
-  conversationId String @map("conversation_id")
-  userId         String @map("user_id")
-  /** Role TRONG conversation, không phải UserRole. 'member' | 'admin' (creator). */
-  role           String @default("member")
-  /** Mọi message createdAt ≤ này = đã đọc bởi user này. */
+  conversationId String    @map("conversation_id")
+  userId         String    @map("user_id")
+  /**
+   * Role TRONG conversation, không phải UserRole. 'member' | 'admin' (creator).
+   */
+  role           String    @default("member")
+  /**
+   * Mọi message createdAt ≤ này = đã đọc bởi user này.
+   */
   lastReadAt     DateTime? @map("last_read_at")
-  /** Soft leave — user rời nhóm nhưng giữ history. NULL = đang trong nhóm. */
+  /**
+   * Soft leave — user rời nhóm nhưng giữ history. NULL = đang trong nhóm.
+   */
   leftAt         DateTime? @map("left_at")
-  /** Notif on/off per user per conv (future-proof). */
+  /**
+   * Notif on/off per user per conv (future-proof).
+   */
   isMuted        Boolean   @default(false) @map("is_muted")
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -1197,10 +1219,14 @@ model ChatMessage {
 
   conversationId String    @map("conversation_id")
   senderId       String    @map("sender_id")
-  /** Denormalized — sender role tại thời điểm gửi (audit + UI badges). */
+  /**
+   * Denormalized — sender role tại thời điểm gửi (audit + UI badges).
+   */
   senderRole     String    @map("sender_role")
   content        String    @db.VarChar(2000)
-  /** Giữ cho DM tương thích visual (single tick / double tick). */
+  /**
+   * Giữ cho DM tương thích visual (single tick / double tick).
+   */
   readAt         DateTime? @map("read_at")
   deletedAt      DateTime? @map("deleted_at")
 

@@ -19,22 +19,27 @@ export async function GET(request: NextRequest) {
     // Phase 15.2: Exclude demo accounts khỏi reconciliation (analytics integrity)
     const demoStudentIds = await getDemoStudentIds(prisma)
 
-    // Check 1: Order paid → có Payment?
+    // Check 1: Order paid → có Payment? Batch query thay vì N+1.
+    const sevenDaysAgo = new Date(Date.now() - 7 * 86400000)
     const recentPaidOrders = await prisma.order.findMany({
       where: {
         status: 'paid',
-        createdAt: { gte: new Date(Date.now() - 7 * 86400000) },
+        createdAt: { gte: sevenDaysAgo },
         studentId: { notIn: demoStudentIds },
       },
-      select: { id: true, studentId: true }
+      select: { id: true, studentId: true },
+      take: 500, // cap để cron không timeout 60s nếu data lớn
     })
 
     let missingPayment = 0
-    for (const o of recentPaidOrders) {
-      const p = await prisma.payment.findFirst({
-        where: { studentId: o.studentId, type: 'shop', referenceType: 'order', referenceId: o.id }
+    if (recentPaidOrders.length > 0) {
+      const orderIds = recentPaidOrders.map(o => o.id)
+      const payments = await prisma.payment.findMany({
+        where: { type: 'shop', referenceType: 'order', referenceId: { in: orderIds } },
+        select: { referenceId: true },
       })
-      if (!p) missingPayment++
+      const paidIds = new Set(payments.map(p => p.referenceId))
+      missingPayment = recentPaidOrders.filter(o => !paidIds.has(o.id)).length
     }
 
     // Check 2: Sức chứa buổi học

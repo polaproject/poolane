@@ -18,6 +18,8 @@ export async function GET(request: NextRequest) {
 
     // Query: dob có month+day khớp hôm nay
     // Prisma không có extract function trực tiếp → dùng raw SQL
+    // Cap 100 birthday/day để tránh email burst vượt Resend free tier
+    // (3000 email/tháng = ~100/day) khi gặp cohort lớn.
     const users = await prisma.$queryRaw<Array<{ id: string; email: string; full_name: string }>>`
       SELECT id, email, full_name
       FROM users
@@ -25,6 +27,7 @@ export async function GET(request: NextRequest) {
         AND dob IS NOT NULL
         AND EXTRACT(MONTH FROM dob) = ${m}
         AND EXTRACT(DAY FROM dob) = ${d}
+      LIMIT 100
     `
 
     let sent = 0
