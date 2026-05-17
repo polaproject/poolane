@@ -1953,6 +1953,36 @@ Khi user phàn nàn về visual ("hình lạ", "vệt sáng", "vương vãi", "e
 
 **Bài học từ Phase 16:** owner phàn nàn "specular vương vãi" → AI fix specular nhưng MISS 2 element khác (logo halo `motion-glow rounded-full` + decoration blobs `<div blur-3xl>` 68 chỗ). Tốn 2 round-trip mới sạch hết. Nếu apply 5 steps trên → 1 round-trip done.
 
+### 12.9. Responsive Cross-Device Verification (RULE BẮT BUỘC)
+
+**Mỗi tính năng hoặc cập nhật UI mới — AI BẮT BUỘC verify trên ≥ 4 viewport trước khi commit:**
+
+| Viewport | Lý do |
+|---|---|
+| **Mobile nhỏ** (iPhone SE 375×667 hoặc 12 Pro 390×844) | Tightest layout — popover, dialog, sidebar dễ collision |
+| **Mobile lớn** (iPhone 14 Pro Max 430×932) | Edge case khác mobile nhỏ |
+| **Tablet** (iPad 768×1024) | Breakpoint `md` của Tailwind — UX thường khác mobile + desktop |
+| **Desktop** (≥ 1280×800) | Baseline layout owner build |
+
+**Pattern cần đặc biệt verify:**
+- **Popover / dropdown / tooltip** — base-ui `Popover.Positioner` auto-flip `data-side` khi collision → đo `data-side` attr ở mỗi viewport. Setup `collisionPadding` thấp (vd 8) + width formula adaptive (vd `min(380px, 100vw-7rem)`) để side STABLE.
+- **Dialog / modal** — width responsive (vd `w-[min(480px, calc(100vw-2rem))]`), max-height `calc(100vh-3rem)` chứ đừng cứng pixel.
+- **Sidebar / nav drawer** — overlay vs push-content; mobile cần backdrop, desktop fixed.
+- **Form layout** — grid `md:grid-cols-2` collapse về 1 column trên mobile.
+- **Table** — overflow-x-auto + min-width container, hoặc card view trên mobile.
+- **FAB / sticky button** — chừa `env(safe-area-inset-bottom)` cho iOS notch + bottom-nav clearance trên mobile.
+
+**Workflow verify (qua Claude Preview MCP hoặc Responsively App):**
+1. Start dev server, login demo account
+2. Navigate đến page có thay đổi
+3. Loop 4 viewport: resize → trigger UI mới → đo bounding rect + data attributes → screenshot
+4. Báo cáo: table 4 row × N column (data-side, popup width, gap, etc.)
+5. Nếu inconsistent → fix, lặp lại
+
+**Bài học từ Phase 25:** owner dùng Responsively App phát hiện MessagesFab popover ở iPhone 12 Pro KHÔNG nằm bên trái FAB (auto-flip do `collisionPadding=60` + viewport hẹp). AI không verify cross-device khi build feature → blind spot. Fix: lower collisionPadding + adaptive width formula → 3 FAB (Notification, Messages, QuickAdd) consistent `data-side=left` trên 4 viewport.
+
+**Trade-off:** Verify 4 viewport tốn ~3-5 phút mỗi tính năng. Nhưng catch issue sớm rẻ hơn 100x so với owner phát hiện sau khi merge.
+
 ---
 
 ## 13. Logging & Traceability
