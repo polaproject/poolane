@@ -6,12 +6,8 @@ import { Users, X as XIcon, AlertCircle } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
 import { CAPACITY } from '@/config/constants'
 import { useScheduleSelection } from './ScheduleSelectionContext'
-
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/)
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-}
+import { getInitials } from '@/components/ui/Avatar'
+import { shortenVietnameseName } from '@/lib/format-name'
 
 export type RegStatus = 'pending' | 'approved' | 'waitlist' | 'withdrawn'
 
@@ -110,7 +106,7 @@ export function InteractiveSessionCard({ session, cap }: Props) {
             <img src={reg.student.avatarUrl} alt={reg.student.fullName} className="w-full h-full object-cover" />
           ) : (
             <span className="text-[9px] font-bold text-foreground/70">
-              {initials(reg.student.fullName)}
+              {getInitials(reg.student.fullName)}
             </span>
           )}
         </div>
@@ -126,7 +122,7 @@ export function InteractiveSessionCard({ session, cap }: Props) {
                 : 'text-foreground'
           }`}
         >
-          {reg.student.fullName}
+          {shortenVietnameseName(reg.student.fullName)}
         </span>
 
         {/* Course chip — chỉ hiện khi có khoá, không hiện khi đã rút */}
