@@ -13,15 +13,13 @@ interface Props {
 }
 
 /**
- * AvatarUploader (Phase 18.11) — circular avatar + 1 nút "Sửa" duy nhất.
+ * AvatarUploader — circular avatar + nút "Sửa" → Popover (Cập nhật / Xoá).
  *
  * Flow:
- *   - Click "Sửa" → Popover hiện 2 option:
- *     - "Cập nhật" → file picker → AvatarCropDialog (zoom + drag + crop)
- *     - "Xoá ảnh" → PATCH null → fallback initials
- *   - Crop dialog: vuông + overlay tròn, output qua canvas (max 512px)
- *
- * Trước Phase 18.11: 2 button rời "Đổi ảnh" + "Xoá" tốn diện tích.
+ *   - Click "Sửa" → Popover 2 option
+ *   - "Cập nhật" → file picker → AvatarCropDialog (zoom + drag + crop)
+ *     → upload cropped blob → PATCH user.avatarUrl
+ *   - "Xoá ảnh" → PATCH null → fallback initials
  */
 export function AvatarUploader({ currentAvatarUrl, fullName, size = 'lg' }: Props) {
   const [avatarUrl, setAvatarUrl] = useState(currentAvatarUrl)
@@ -37,6 +35,10 @@ export function AvatarUploader({ currentAvatarUrl, fullName, size = 'lg' }: Prop
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Chỉ chấp nhận file ảnh')
+      return
+    }
     const reader = new FileReader()
     reader.onload = (ev) => {
       setSourceImage(ev.target?.result as string)

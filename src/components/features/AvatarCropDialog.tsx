@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import Cropper, { type Area } from 'react-easy-crop'
 import { X, ZoomIn, ZoomOut, Loader2 } from 'lucide-react'
@@ -12,67 +12,94 @@ interface Props {
   onCropped: (blob: Blob) => void
 }
 
+const MIN_ZOOM = 0.4 // < 1 → user co ảnh nhỏ hơn container, có khoảng trống quanh ảnh
+const MAX_ZOOM = 4
+const ZOOM_STEP = 0.1
+const CIRCLE_RATIO = 0.78 // crop circle = 78% smaller dimension → fit gọn trong vùng ảnh
+
 /**
- * AvatarCropDialog — Dialog cho phép user crop ảnh thành vùng tròn để dùng
- * làm avatar. Layout:
- *   - Khung vuông (aspect-square) chứa ảnh gốc
- *   - Overlay tròn ở giữa = vùng hiển thị thực tế (cropShape="round")
- *   - Phần ngoài tròn trong vuông: tối mờ (react-easy-crop tự render)
- *   - Slider zoom + 2 nút ZoomIn/ZoomOut
+ * AvatarCropDialog — hiển thị ảnh ở TỶ LỆ THẬT (không ép vuông), user toàn quyền
+ * phóng to / thu nhỏ / pan để đưa vùng muốn chọn vào khung tròn.
  *
- * Output: square Blob qua canvas (CSS render thành tròn ở UI).
+ * Key change vs trước:
+ *   - Container có `aspectRatio = imageAspect` (set sau onMediaLoaded) → ảnh
+ *     wide hiển thị container wide, ảnh portrait hiển thị container tall.
+ *   - `objectFit="contain"` → ảnh fill container 100% (no letterbox vì aspect match).
+ *   - `cropSize` = 78% smaller dimension → vòng tròn LUÔN nằm gọn trong vùng ảnh.
+ *   - `minZoom=1` cố định → user thấy nguyên ảnh khi mở, zoom in để chọn vùng nhỏ hơn.
+ *
+ * Trước (sai): container aspect-square ép mọi ảnh vào khung 1:1 → user nhìn
+ * ảnh wide qua "lỗ vuông" + cropSize ≈ container → vòng tròn kéo vào letterbox.
  */
 export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
   const [crop, setCrop] = useState({ x: 0, y: 0 })
-  // Phase 25: minZoom dynamic theo aspect ảnh — cho user zoom out tới mức ảnh
-  // contain trong crop (chiều dài chạm mép). Default 0.5 fallback trước khi
-  // onMediaLoaded fire.
-  const [minZoom, setMinZoom] = useState(0.5)
   const [zoom, setZoom] = useState(1)
+  const [imageAspect, setImageAspect] = useState<number | null>(null)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  // Đo container để force cropSize gần sát mép → vòng tròn to nhất có thể.
-  // Khởi tạo default 280px để Cropper luôn render ngay (tránh đen xì trên
-  // mobile nếu ResizeObserver fire chậm).
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [cropSize, setCropSize] = useState<{ width: number; height: number }>({ width: 280, height: 280 })
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [available, setAvailable] = useState({ w: 360, h: 480 })
 
+  // Đo width khả dụng của dialog body + viewport height cap (responsive mobile).
   useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-
-    function applySize(w: number) {
-      if (w <= 0) return
-      const size = Math.max(0, w - 8)
-      setCropSize({ width: size, height: size })
+    function update() {
+      const w = contentRef.current?.clientWidth ?? 360
+      const maxH = typeof window !== 'undefined' ? Math.min(window.innerHeight * 0.55, 480) : 360
+      setAvailable({ w, h: maxH })
     }
-
-    // Initial sync measure (Dialog render xong DOM đã có width)
-    applySize(el.clientWidth)
-
-    const ro = new ResizeObserver((entries) => {
-      applySize(entries[0]?.contentRect.width ?? 0)
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
+    update()
+    const ro = new ResizeObserver(update)
+    if (contentRef.current) ro.observe(contentRef.current)
+    window.addEventListener('resize', update)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', update)
+    }
   }, [])
 
   const onCropComplete = useCallback((_: Area, areaPixels: Area) => {
     setCroppedAreaPixels(areaPixels)
   }, [])
 
-  // Phase 25: compute minZoom theo aspect ảnh.
-  // Formula: min(naturalW, naturalH) / max(naturalW, naturalH).
-  // Ví dụ ảnh 4:3 → minZoom=0.75; 16:9 → 0.5625; vuông → 1.
-  // Tại minZoom đó, chiều dài của ảnh vừa khít chiều cropSize.
   const onMediaLoaded = useCallback((mediaSize: { naturalWidth: number; naturalHeight: number }) => {
     const w = mediaSize.naturalWidth
     const h = mediaSize.naturalHeight
     if (!w || !h) return
-    const ratio = Math.min(w, h) / Math.max(w, h)
-    setMinZoom(ratio)
-    setZoom(ratio) // reset zoom về full-contain để user thấy toàn ảnh khi mở
+    setImageAspect(w / h)
   }, [])
+
+  // Tính kích thước container theo aspect ảnh + giới hạn viewport.
+  // - Landscape (aspect ≥ 1): bắt đầu với full width → height = w/aspect.
+  //   Nếu height > maxH → bound bằng maxH, width = maxH × aspect.
+  // - Portrait (aspect < 1): bắt đầu với maxH → width = maxH × aspect.
+  //   Nếu width > availW → bound bằng availW.
+  let dispW = available.w
+  let dispH = available.w
+  if (imageAspect) {
+    if (imageAspect >= 1) {
+      dispW = available.w
+      dispH = available.w / imageAspect
+      if (dispH > available.h) {
+        dispH = available.h
+        dispW = available.h * imageAspect
+      }
+    } else {
+      dispH = available.h
+      dispW = available.h * imageAspect
+      if (dispW > available.w) {
+        dispW = available.w
+        dispH = available.w / imageAspect
+      }
+    }
+  }
+  // cropSize phải <= minDim của container (nếu không circle tràn ra ngoài).
+  // Standard: 78% minDim. Floor 80px cho touch target nhưng cap = 95% minDim
+  // để extreme aspect (panorama 4:1, dải hẹp 1:4) vẫn fit.
+  const minDim = Math.min(dispW, dispH)
+  const cropSize = Math.max(
+    Math.min(80, Math.round(minDim * 0.95)),
+    Math.round(minDim * CIRCLE_RATIO),
+  )
 
   async function handleSubmit() {
     if (!croppedAreaPixels) return
@@ -89,7 +116,7 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
     <Dialog.Root open onOpenChange={(o) => !o && onCancel()}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-ink/65 backdrop-blur-sm data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 transition-opacity duration-200" />
-        <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[min(440px,calc(100vw-2rem))] max-h-[calc(100vh-3rem)] overflow-y-auto bg-[var(--surface)] rounded-card-xl shadow-glass ring-1 ring-foreground/10 p-5 data-[starting-style]:opacity-0 data-[starting-style]:scale-95 data-[ending-style]:opacity-0 data-[ending-style]:scale-95 transition-all duration-200">
+        <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[min(480px,calc(100vw-2rem))] max-h-[calc(100vh-3rem)] overflow-y-auto bg-[var(--surface)] rounded-card-xl shadow-glass ring-1 ring-foreground/10 p-5 data-[starting-style]:opacity-0 data-[starting-style]:scale-95 data-[ending-style]:opacity-0 data-[ending-style]:scale-95 transition-all duration-200">
           <Dialog.Close
             aria-label="Đóng"
             className="absolute top-3 right-3 h-9 w-9 rounded-pill bg-foreground/5 hover:bg-foreground/10 grid place-items-center transition z-10"
@@ -101,33 +128,41 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
             Cập nhật ảnh đại diện
           </Dialog.Title>
           <Dialog.Description className="text-sm text-foreground/65 mb-4 leading-relaxed">
-            Kéo ảnh để di chuyển vào vùng tròn. Trượt thanh để thu nhỏ (thấy toàn ảnh) hoặc phóng to.
+            Phóng to, thu nhỏ và kéo ảnh để đưa vùng muốn chọn vào khung tròn.
           </Dialog.Description>
 
-          {/* Crop area — vuông, ảnh fill, vòng tròn nearly full container */}
-          <div ref={containerRef} className="relative w-full aspect-square rounded-card overflow-hidden bg-ink mb-3">
-            <Cropper
-              image={src}
-              crop={crop}
-              zoom={zoom}
-              minZoom={minZoom}
-              aspect={1}
-              cropShape="round"
-              showGrid={false}
-              cropSize={cropSize}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
-              onMediaLoaded={onMediaLoaded}
-              objectFit="cover"
-            />
+          <div ref={contentRef} className="mb-3 w-full">
+            {/* Container có width/height THẬT theo aspect ảnh → ảnh hiển thị
+                ở tỷ lệ tự nhiên, không bị ép vuông. */}
+            <div
+              className="relative rounded-card overflow-hidden bg-ink/85 mx-auto"
+              style={{ width: dispW, height: dispH }}
+            >
+              <Cropper
+                image={src}
+                crop={crop}
+                zoom={zoom}
+                minZoom={MIN_ZOOM}
+                maxZoom={MAX_ZOOM}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                cropSize={{ width: cropSize, height: cropSize }}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+                onMediaLoaded={onMediaLoaded}
+                objectFit="contain"
+                restrictPosition={false}
+              />
+            </div>
           </div>
 
           {/* Zoom slider */}
           <div className="flex items-center gap-3 mb-4">
             <button
               type="button"
-              onClick={() => setZoom((z) => Math.max(minZoom, z - 0.1))}
+              onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP))}
               aria-label="Thu nhỏ"
               className="h-8 w-8 rounded-pill bg-foreground/5 grid place-items-center hover:bg-foreground/10 transition shrink-0"
             >
@@ -135,8 +170,8 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
             </button>
             <input
               type="range"
-              min={minZoom}
-              max={3}
+              min={MIN_ZOOM}
+              max={MAX_ZOOM}
               step={0.01}
               value={zoom}
               onChange={(e) => setZoom(Number(e.target.value))}
@@ -145,7 +180,7 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
             />
             <button
               type="button"
-              onClick={() => setZoom((z) => Math.min(3, z + 0.1))}
+              onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_STEP))}
               aria-label="Phóng to"
               className="h-8 w-8 rounded-pill bg-foreground/5 grid place-items-center hover:bg-foreground/10 transition shrink-0"
             >
