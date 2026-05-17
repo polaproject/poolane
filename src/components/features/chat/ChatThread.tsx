@@ -84,7 +84,7 @@ export function ChatThread({
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
 
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const lastMsgTimeRef = useRef<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -173,9 +173,13 @@ export function ChatThread({
     }
   }, [conversationId, fetchMessages])
 
-  // Auto-scroll bottom (block: 'nearest' để không scroll background — Phase 19 fix)
+  // Phase 22 fix: direct scrollTop thay scrollIntoView (tránh propagate scroll
+  // lên ancestor → bug "page background scroll 2 lần"). Skip khi empty.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    if (messages.length === 0) return
+    const el = messagesContainerRef.current
+    if (!el) return
+    el.scrollTop = el.scrollHeight
   }, [messages])
 
   async function handleSend() {
@@ -238,28 +242,21 @@ export function ChatThread({
     : (others[0]?.fullName ?? 'Hội thoại')
   const headerAvatars = others.slice(0, 3)
 
-  // ─── Read receipt logic ──────────────────────────────
-  // DM: asymmetric — HV thấy, admin/staff không
-  // Group: hiển thị "Đã xem bởi N/M" dưới last sent message
-  const showDmReceipts = !isGroup && currentUserRole === 'student'
+  // ─── Read receipt logic (Phase 22) ───────────────────
+  // Asymmetric: HV thấy CheckCheck khi admin/staff đọc; admin/staff CHỈ thấy
+  // Check (1 tick) cho tin của mình — không show double tick từ HV (tránh áp
+  // lực reply nhanh).
+  const showDoubleTick = currentUserRole === 'student'
 
-  const lastSentMessage = (() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const m = messages[i]
-      if (m.senderId === currentUserId && !m.id.startsWith('opt-')) return m
-    }
-    return null
-  })()
-
-  // Compute group read count
-  const groupReadCount = (() => {
-    if (!isGroup || !lastSentMessage) return null
-    const lastSentTime = new Date(lastSentMessage.createdAt).getTime()
-    const otherReaders = readStates
-      .filter(s => s.userId !== currentUserId && s.lastReadAt)
-      .filter(s => new Date(s.lastReadAt!).getTime() >= lastSentTime)
-    return { read: otherReaders.length, total: others.length }
-  })()
+  // Group read count cho mỗi tin: đếm có bao nhiêu participant khác đã đọc
+  // (lastReadAt >= msg.createdAt). Dùng cho per-message tick trong group.
+  function groupReadByMsg(msgCreatedAt: string): boolean {
+    if (!isGroup) return false
+    const msgTime = new Date(msgCreatedAt).getTime()
+    return readStates.some(
+      s => s.userId !== currentUserId && s.lastReadAt && new Date(s.lastReadAt).getTime() >= msgTime,
+    )
+  }
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -302,7 +299,7 @@ export function ChatThread({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2 min-h-0">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5 min-h-0">
         {loading && (
           <div className="flex justify-center py-4">
             <Loader2 className="h-5 w-5 animate-spin text-foreground/30" />
@@ -314,74 +311,70 @@ export function ChatThread({
         {messages.map((msg, i) => {
           const isMine = msg.senderId === currentUserId
           const prevMsg = i > 0 ? messages[i - 1] : null
+          const nextMsg = i < messages.length - 1 ? messages[i + 1] : null
           const showAvatar = !isMine && (i === 0 || prevMsg?.senderId !== msg.senderId)
           const showSenderLabel = isGroup && !isMine && (i === 0 || prevMsg?.senderId !== msg.senderId)
+
+          // Phase 22 time dedup: ẩn time + tick nếu next msg cùng phút
+          // (tin cuối chuỗi cùng phút sẽ giữ time + tick)
+          const minKey = (d: string) => format(new Date(d), 'yyyy-MM-dd HH:mm')
+          const sameMinAsNext = nextMsg && minKey(msg.createdAt) === minKey(nextMsg.createdAt)
+          const showMeta = !sameMinAsNext
+
+          // Tick logic (Phase 22): per-message, áp dụng cả DM + group
+          // - DM: msg.readAt true = đã đọc
+          // - Group: dùng groupReadByMsg() — bất kỳ participant khác đã đọc = true
+          const isRead = isGroup ? groupReadByMsg(msg.createdAt) : !!msg.readAt
+          const showTick = isMine && !msg.id.startsWith('opt-')
+          const useDoubleTick = showTick && showDoubleTick && isRead
+
           return (
-            <div key={msg.id} className={`flex gap-1.5 ${isMine ? 'justify-end' : 'justify-start'}`}>
+            <div key={msg.id} className="flex items-end gap-1.5">
+              {/* Incoming layout: avatar + bubble | time (sát mép phải) */}
               {!isMine && (
-                <div className="w-5 shrink-0 self-end">
-                  {showAvatar && <Avatar avatarUrl={msg.sender.avatarUrl} fullName={msg.sender.fullName} size="xs" />}
-                </div>
-              )}
-              <div className={`max-w-[75%] space-y-0.5 ${isMine ? 'items-end' : 'items-start'} flex flex-col`}>
-                {showSenderLabel && (
-                  <span className="text-[10px] text-foreground/55 px-1 font-medium">{msg.sender.fullName}</span>
-                )}
-                <div
-                  className={`px-2.5 py-1.5 rounded-card text-sm leading-relaxed break-words
-                    ${isMine ? 'bg-accent/15 text-foreground rounded-br-sm' : 'glass-card text-foreground rounded-bl-sm'}`}
-                >
-                  {msg.content}
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-[9px] text-foreground/35">{formatMsgTime(msg.createdAt)}</span>
-                  {/* Per-message tick CHỈ trong DM (group dùng aggregate dưới) */}
-                  {isMine && !isGroup && !msg.id.startsWith('opt-') && (
-                    showDmReceipts && msg.readAt
-                      ? <CheckCheck className="h-2.5 w-2.5 text-accent" />
-                      : <Check className="h-2.5 w-2.5 text-foreground/35" />
+                <>
+                  <div className="w-5 shrink-0 self-end">
+                    {showAvatar && <Avatar avatarUrl={msg.sender.avatarUrl} fullName={msg.sender.fullName} size="xs" />}
+                  </div>
+                  <div className="max-w-[70%] flex flex-col items-start space-y-0.5">
+                    {showSenderLabel && (
+                      <span className="text-[10px] text-foreground/55 px-1 font-medium">{msg.sender.fullName}</span>
+                    )}
+                    <div className="px-2.5 py-1.5 rounded-card rounded-bl-sm text-sm leading-relaxed break-words glass-card text-foreground">
+                      {msg.content}
+                    </div>
+                  </div>
+                  {showMeta && (
+                    <span className="ml-auto text-[9px] text-foreground/35 self-end shrink-0">
+                      {formatMsgTime(msg.createdAt)}
+                    </span>
                   )}
-                </div>
-              </div>
+                </>
+              )}
+
+              {/* Outgoing layout: time + tick (sát mép trái) | bubble */}
+              {isMine && (
+                <>
+                  {showMeta && (
+                    <span className="mr-auto text-[9px] text-foreground/35 self-end shrink-0 inline-flex items-center gap-0.5">
+                      {formatMsgTime(msg.createdAt)}
+                      {showTick && (
+                        useDoubleTick
+                          ? <CheckCheck className="h-2.5 w-2.5 text-accent" />
+                          : <Check className="h-2.5 w-2.5 text-foreground/35" />
+                      )}
+                    </span>
+                  )}
+                  <div className="max-w-[70%] flex flex-col items-end space-y-0.5">
+                    <div className="px-2.5 py-1.5 rounded-card rounded-br-sm text-sm leading-relaxed break-words bg-accent/15 text-foreground">
+                      {msg.content}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )
         })}
-
-        {/* DM status dưới last sent */}
-        {!isGroup && lastSentMessage && (
-          <div className="flex justify-end pr-1">
-            {showDmReceipts && lastSentMessage.readAt ? (
-              <span className="text-[10px] text-accent font-medium inline-flex items-center gap-0.5">
-                <CheckCheck className="h-2.5 w-2.5" />
-                Đã xem · {format(new Date(lastSentMessage.readAt), 'HH:mm')}
-              </span>
-            ) : (
-              <span className="text-[10px] text-foreground/45 inline-flex items-center gap-0.5">
-                <Check className="h-2.5 w-2.5" />
-                Đã gửi
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Group status: "Đã xem bởi N/M" */}
-        {isGroup && lastSentMessage && groupReadCount && (
-          <div className="flex justify-end pr-1">
-            {groupReadCount.read > 0 ? (
-              <span className="text-[10px] text-accent font-medium inline-flex items-center gap-0.5">
-                <CheckCheck className="h-2.5 w-2.5" />
-                Đã xem bởi {groupReadCount.read}/{groupReadCount.total}
-              </span>
-            ) : (
-              <span className="text-[10px] text-foreground/45 inline-flex items-center gap-0.5">
-                <Check className="h-2.5 w-2.5" />
-                Đã gửi
-              </span>
-            )}
-          </div>
-        )}
-
-        <div ref={bottomRef} />
       </div>
 
       {/* Input */}

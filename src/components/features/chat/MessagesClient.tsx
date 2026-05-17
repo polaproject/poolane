@@ -93,7 +93,7 @@ export function MessagesClient({
   const [showPicker, setShowPicker] = useState(false)
   const [filterResolved, setFilterResolved] = useState(false)
 
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const lastMsgTimeRef = useRef<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -116,9 +116,17 @@ export function MessagesClient({
       .map(p => ({ url: p.user.avatarUrl, name: p.user.fullName, id: p.userId }))
   }
 
-  // Asymmetric DM receipts: chỉ HV thấy "Đã xem" của admin/staff
+  // Asymmetric receipts (Phase 22): chỉ HV thấy double tick (admin/staff luôn chỉ thấy single tick)
   const isGroupActive = activeConv?.isGroup ?? false
-  const showDmReceipts = !isGroupActive && currentUserRole === 'student'
+  const showDoubleTick = currentUserRole === 'student'
+
+  function groupReadByMsg(msgCreatedAt: string): boolean {
+    if (!isGroupActive) return false
+    const msgTime = new Date(msgCreatedAt).getTime()
+    return readStates.some(
+      s => s.userId !== currentUserId && s.lastReadAt && new Date(s.lastReadAt).getTime() >= msgTime,
+    )
+  }
 
   // ─── Fetch messages ──────────────────────────────────
   const fetchMessages = useCallback(
@@ -165,9 +173,13 @@ export function MessagesClient({
     fetchMessages(activeId)
   }, [activeId, fetchMessages])
 
-  // Auto-scroll
+  // Phase 22 fix: direct scrollTop trên overflow container (không propagate
+  // → tránh page background scroll). Skip khi empty.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    if (messages.length === 0) return
+    const el = messagesContainerRef.current
+    if (!el) return
+    el.scrollTop = el.scrollHeight
   }, [messages])
 
   // Polling
@@ -295,24 +307,7 @@ export function MessagesClient({
     }
   }
 
-  // Last sent message + group read count
-  const lastSentMessage = (() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const m = messages[i]
-      if (m.senderId === currentUserId && !m.id.startsWith('opt-')) return m
-    }
-    return null
-  })()
-
-  const groupReadCount = (() => {
-    if (!isGroupActive || !lastSentMessage || !activeConv) return null
-    const lastSentTime = new Date(lastSentMessage.createdAt).getTime()
-    const others = activeConv.participants.filter(p => p.userId !== currentUserId)
-    const otherReaders = readStates
-      .filter(s => s.userId !== currentUserId && s.lastReadAt)
-      .filter(s => new Date(s.lastReadAt!).getTime() >= lastSentTime)
-    return { read: otherReaders.length, total: others.length }
-  })()
+  // Phase 22: lastSentMessage + groupReadCount đã xóa (per-message tick thay aggregate)
 
   const filtered = conversations.filter(c => (filterResolved ? c.isResolved : !c.isResolved))
 
@@ -463,7 +458,7 @@ export function MessagesClient({
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+            <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-1.5 min-h-0">
               {loadingMsgs && (
                 <div className="flex justify-center py-4">
                   <Loader2 className="h-5 w-5 animate-spin text-foreground/30" />
@@ -472,70 +467,63 @@ export function MessagesClient({
               {messages.map((msg, i) => {
                 const isMine = msg.senderId === currentUserId
                 const prevMsg = i > 0 ? messages[i - 1] : null
+                const nextMsg = i < messages.length - 1 ? messages[i + 1] : null
                 const showAvatar = !isMine && (i === 0 || prevMsg?.senderId !== msg.senderId)
                 const showSenderLabel = isGroupActive && !isMine && (i === 0 || prevMsg?.senderId !== msg.senderId)
+
+                // Phase 22 time dedup: ẩn time + tick nếu next msg cùng phút
+                const minKey = (d: string) => format(new Date(d), 'yyyy-MM-dd HH:mm')
+                const sameMinAsNext = nextMsg && minKey(msg.createdAt) === minKey(nextMsg.createdAt)
+                const showMeta = !sameMinAsNext
+
+                const isRead = isGroupActive ? groupReadByMsg(msg.createdAt) : !!msg.readAt
+                const showTick = isMine && !msg.id.startsWith('opt-')
+                const useDoubleTick = showTick && showDoubleTick && isRead
+
                 return (
-                  <div key={msg.id} className={`flex gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
+                  <div key={msg.id} className="flex items-end gap-2">
                     {!isMine && (
-                      <div className="w-6 shrink-0 self-end">
-                        {showAvatar && <Avatar avatarUrl={msg.sender.avatarUrl} fullName={msg.sender.fullName} size="xs" />}
-                      </div>
-                    )}
-                    <div className={`max-w-[70%] space-y-0.5 ${isMine ? 'items-end' : 'items-start'} flex flex-col`}>
-                      {showSenderLabel && (
-                        <span className="text-[10px] text-foreground/55 px-1 font-medium">{msg.sender.fullName}</span>
-                      )}
-                      <div
-                        className={`px-3 py-2 rounded-card text-sm leading-relaxed break-words
-                          ${isMine ? 'bg-accent/15 text-foreground rounded-br-sm' : 'glass-card text-foreground rounded-bl-sm'}`}
-                      >
-                        {msg.content}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="text-[10px] text-foreground/35">{formatMsgTime(msg.createdAt)}</span>
-                        {isMine && !isGroupActive && !msg.id.startsWith('opt-') && (
-                          showDmReceipts && msg.readAt
-                            ? <CheckCheck className="h-3 w-3 text-accent" />
-                            : <Check className="h-3 w-3 text-foreground/35" />
+                      <>
+                        <div className="w-6 shrink-0 self-end">
+                          {showAvatar && <Avatar avatarUrl={msg.sender.avatarUrl} fullName={msg.sender.fullName} size="xs" />}
+                        </div>
+                        <div className="max-w-[70%] flex flex-col items-start space-y-0.5">
+                          {showSenderLabel && (
+                            <span className="text-[10px] text-foreground/55 px-1 font-medium">{msg.sender.fullName}</span>
+                          )}
+                          <div className="px-3 py-2 rounded-card rounded-bl-sm text-sm leading-relaxed break-words glass-card text-foreground">
+                            {msg.content}
+                          </div>
+                        </div>
+                        {showMeta && (
+                          <span className="ml-auto text-[10px] text-foreground/35 self-end shrink-0">
+                            {formatMsgTime(msg.createdAt)}
+                          </span>
                         )}
-                      </div>
-                    </div>
+                      </>
+                    )}
+                    {isMine && (
+                      <>
+                        {showMeta && (
+                          <span className="mr-auto text-[10px] text-foreground/35 self-end shrink-0 inline-flex items-center gap-0.5">
+                            {formatMsgTime(msg.createdAt)}
+                            {showTick && (
+                              useDoubleTick
+                                ? <CheckCheck className="h-3 w-3 text-accent" />
+                                : <Check className="h-3 w-3 text-foreground/35" />
+                            )}
+                          </span>
+                        )}
+                        <div className="max-w-[70%] flex flex-col items-end space-y-0.5">
+                          <div className="px-3 py-2 rounded-card rounded-br-sm text-sm leading-relaxed break-words bg-accent/15 text-foreground">
+                            {msg.content}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )
               })}
-
-              {!isGroupActive && lastSentMessage && (
-                <div className="flex justify-end pr-1">
-                  {showDmReceipts && lastSentMessage.readAt ? (
-                    <span className="text-[10px] text-accent font-medium inline-flex items-center gap-0.5">
-                      <CheckCheck className="h-3 w-3" />
-                      Đã xem · {format(new Date(lastSentMessage.readAt), 'HH:mm')}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-foreground/45 inline-flex items-center gap-0.5">
-                      <Check className="h-3 w-3" />
-                      Đã gửi
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {isGroupActive && lastSentMessage && groupReadCount && (
-                <div className="flex justify-end pr-1">
-                  {groupReadCount.read > 0 ? (
-                    <span className="text-[10px] text-accent font-medium inline-flex items-center gap-0.5">
-                      <CheckCheck className="h-3 w-3" />
-                      Đã xem bởi {groupReadCount.read}/{groupReadCount.total}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-foreground/45 inline-flex items-center gap-0.5">
-                      <Check className="h-3 w-3" />
-                      Đã gửi
-                    </span>
-                  )}
-                </div>
-              )}
-              <div ref={bottomRef} />
             </div>
 
             {/* Input */}

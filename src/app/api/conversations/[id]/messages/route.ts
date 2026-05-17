@@ -11,12 +11,6 @@ const sendMessageSchema = z.object({
   content: z.string().min(1).max(2000),
 })
 
-const ACTION_URL_BY_ROLE: Record<string, string> = {
-  admin: '/admin/messages',
-  staff: '/staff/messages',
-  student: '/student/messages',
-}
-
 /** Verify caller là participant — admin bypass. Trả conv (include participants) hoặc null. */
 async function verifyAccess(conversationId: string, userId: string, userRole: string) {
   const conv = await prisma.conversation.findUnique({
@@ -160,31 +154,9 @@ export async function POST(request: NextRequest, { params }: Params) {
       }),
     ])
 
-    // Broadcast notification tới TẤT CẢ participants khác (trừ sender)
-    const recipients = conv.participants.filter(p => p.userId !== user.id).map(p => p.userId)
-    if (recipients.length > 0) {
-      const recipientUsers = await prisma.user.findMany({
-        where: { id: { in: recipients }, isActive: true },
-        select: { id: true, role: true },
-      })
-      const groupSuffix = conv.isGroup && conv.name
-        ? ` trong "${conv.name}"`
-        : conv.isGroup
-          ? ' trong nhóm'
-          : ''
-
-      await prisma.notification.createMany({
-        data: recipientUsers.map(r => ({
-          userId: r.id,
-          senderId: user.id,
-          type: 'general',
-          title: `${user.fullName} đã nhắn tin${groupSuffix}`,
-          body: parsed.data.content.slice(0, 80),
-          actionUrl: ACTION_URL_BY_ROLE[r.role] ?? '/shared/notifications',
-          metadata: { conversationId: id, chatMessage: true, isGroup: conv.isGroup },
-        })),
-      }).catch(() => null)
-    }
+    // Phase 22: bỏ broadcast notification cho chat — chat đã có badge unread
+    // riêng (FAB count + conversation list). Tránh chồng noise lên notification
+    // feed chính. Audit log vẫn ghi đầy đủ cho forensic.
 
     await prisma.auditLog.create({
       data: {
