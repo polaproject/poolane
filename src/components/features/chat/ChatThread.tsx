@@ -242,14 +242,13 @@ export function ChatThread({
     : (others[0]?.fullName ?? 'Hội thoại')
   const headerAvatars = others.slice(0, 3)
 
-  // ─── Read receipt logic (Phase 22) ───────────────────
-  // Asymmetric: HV thấy CheckCheck khi admin/staff đọc; admin/staff CHỈ thấy
-  // Check (1 tick) cho tin của mình — không show double tick từ HV (tránh áp
-  // lực reply nhanh).
-  const showDoubleTick = currentUserRole === 'student'
+  // ─── Read receipt logic (Phase 23) ───────────────────
+  // Symmetric: cả 2 bên thấy CheckCheck khi đối phương đã đọc.
+  // (Trước đây asymmetric — student thấy admin đã đọc nhưng admin không.
+  // Owner muốn thống nhất giữa các role.)
+  void currentUserRole // intentionally unused — giữ prop để future-proof
 
-  // Group read count cho mỗi tin: đếm có bao nhiêu participant khác đã đọc
-  // (lastReadAt >= msg.createdAt). Dùng cho per-message tick trong group.
+  // Group read count cho mỗi tin: bất kỳ participant khác đã đọc (lastReadAt >= msg.createdAt)
   function groupReadByMsg(msgCreatedAt: string): boolean {
     if (!isGroup) return false
     const msgTime = new Date(msgCreatedAt).getTime()
@@ -326,11 +325,11 @@ export function ChatThread({
           // - Group: dùng groupReadByMsg() — bất kỳ participant khác đã đọc = true
           const isRead = isGroup ? groupReadByMsg(msg.createdAt) : !!msg.readAt
           const showTick = isMine && !msg.id.startsWith('opt-')
-          const useDoubleTick = showTick && showDoubleTick && isRead
+          const useDoubleTick = showTick && isRead // symmetric — bỏ asymmetric
 
           return (
             <div key={msg.id} className="flex items-end gap-1.5">
-              {/* Incoming layout: avatar + bubble | time (sát mép phải) */}
+              {/* Incoming: avatar + bubble | time (sát lề PHẢI) */}
               {!isMine && (
                 <>
                   <div className="w-5 shrink-0 self-end">
@@ -352,11 +351,11 @@ export function ChatThread({
                 </>
               )}
 
-              {/* Outgoing layout: time + tick (sát mép trái) | bubble */}
+              {/* Outgoing: time + tick (sát lề TRÁI) | bubble (ml-auto sát lề PHẢI) */}
               {isMine && (
                 <>
                   {showMeta && (
-                    <span className="mr-auto text-[9px] text-foreground/35 self-end shrink-0 inline-flex items-center gap-0.5">
+                    <span className="text-[9px] text-foreground/35 self-end shrink-0 inline-flex items-center gap-0.5">
                       {formatMsgTime(msg.createdAt)}
                       {showTick && (
                         useDoubleTick
@@ -365,7 +364,7 @@ export function ChatThread({
                       )}
                     </span>
                   )}
-                  <div className="max-w-[70%] flex flex-col items-end space-y-0.5">
+                  <div className="ml-auto max-w-[70%] flex flex-col items-end space-y-0.5">
                     <div className="px-2.5 py-1.5 rounded-card rounded-br-sm text-sm leading-relaxed break-words bg-accent/15 text-foreground">
                       {msg.content}
                     </div>

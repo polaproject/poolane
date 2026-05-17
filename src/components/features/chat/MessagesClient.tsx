@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns'
 import { vi } from 'date-fns/locale'
-import { Send, Plus, Check, CheckCheck, Loader2, MessageSquare, Users } from 'lucide-react'
+import { Send, Plus, Check, CheckCheck, Loader2, MessageSquare, Users, ArrowLeft } from 'lucide-react'
 import type { UserRole } from '@/lib/auth'
 import { Avatar } from '@/components/ui/Avatar'
 import { UserPicker } from './UserPicker'
@@ -81,9 +81,9 @@ export function MessagesClient({
   const router = useRouter()
 
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations)
-  const [activeId, setActiveId] = useState<string | null>(
-    initialConversations.length > 0 ? initialConversations[0].id : null,
-  )
+  // Không auto-select first conv — để mobile user thấy list trước, click vào để mở chat.
+  // Desktop user vẫn click 1 lần để bắt đầu (consistent với popover).
+  const [activeId, setActiveId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [readStates, setReadStates] = useState<ParticipantReadState[]>([])
   const [input, setInput] = useState('')
@@ -116,9 +116,9 @@ export function MessagesClient({
       .map(p => ({ url: p.user.avatarUrl, name: p.user.fullName, id: p.userId }))
   }
 
-  // Asymmetric receipts (Phase 22): chỉ HV thấy double tick (admin/staff luôn chỉ thấy single tick)
+  // Phase 23: symmetric — cả 2 bên thấy CheckCheck khi đối phương đã đọc.
+  void currentUserRole // intentionally unused
   const isGroupActive = activeConv?.isGroup ?? false
-  const showDoubleTick = currentUserRole === 'student'
 
   function groupReadByMsg(msgCreatedAt: string): boolean {
     if (!isGroupActive) return false
@@ -313,8 +313,9 @@ export function MessagesClient({
 
   return (
     <div className="flex h-[calc(100vh-6rem)] min-h-0 gap-0 rounded-card overflow-hidden glass-card border border-foreground/8">
-      {/* Left pane */}
-      <div className="w-72 shrink-0 flex flex-col border-r border-foreground/8 bg-[var(--lqg-bg-base)]/40 relative">
+      {/* Left pane — mobile: hide khi có conv active; desktop: luôn show */}
+      <div className={`w-full sm:w-72 shrink-0 flex-col border-r border-foreground/8 bg-[var(--lqg-bg-base)]/40 relative
+        ${activeId ? 'hidden sm:flex' : 'flex'}`}>
         <div className="p-3 border-b border-foreground/8 flex items-center justify-between gap-2">
           <span className="lqg-headline text-sm">Tin nhắn</span>
           <div className="flex items-center gap-1">
@@ -406,8 +407,8 @@ export function MessagesClient({
         </div>
       </div>
 
-      {/* Right pane — chat */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Right pane — chat. Mobile: chỉ show khi có conv active; desktop: luôn show */}
+      <div className={`flex-1 flex-col min-w-0 ${activeId ? 'flex' : 'hidden sm:flex'}`}>
         {!activeConv ? (
           <div className="flex-1 grid place-items-center text-foreground/40">
             <div className="text-center space-y-2">
@@ -419,6 +420,14 @@ export function MessagesClient({
           <>
             {/* Header */}
             <div className="px-4 py-3 border-b border-foreground/8 flex items-center gap-3">
+              {/* Mobile back button (chỉ hiện < sm) — đóng conv → về list */}
+              <button
+                onClick={() => setActiveId(null)}
+                aria-label="Quay lại danh sách"
+                className="sm:hidden shrink-0 p-1 rounded-lg hover:bg-foreground/5 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4 text-foreground/65" />
+              </button>
               {activeConv.isGroup ? (
                 <div className="relative w-9 h-9 shrink-0">
                   {getDisplayAvatars(activeConv).map((a, i, arr) => (
@@ -478,7 +487,7 @@ export function MessagesClient({
 
                 const isRead = isGroupActive ? groupReadByMsg(msg.createdAt) : !!msg.readAt
                 const showTick = isMine && !msg.id.startsWith('opt-')
-                const useDoubleTick = showTick && showDoubleTick && isRead
+                const useDoubleTick = showTick && isRead // symmetric
 
                 return (
                   <div key={msg.id} className="flex items-end gap-2">
@@ -505,7 +514,7 @@ export function MessagesClient({
                     {isMine && (
                       <>
                         {showMeta && (
-                          <span className="mr-auto text-[10px] text-foreground/35 self-end shrink-0 inline-flex items-center gap-0.5">
+                          <span className="text-[10px] text-foreground/35 self-end shrink-0 inline-flex items-center gap-0.5">
                             {formatMsgTime(msg.createdAt)}
                             {showTick && (
                               useDoubleTick
@@ -514,7 +523,7 @@ export function MessagesClient({
                             )}
                           </span>
                         )}
-                        <div className="max-w-[70%] flex flex-col items-end space-y-0.5">
+                        <div className="ml-auto max-w-[70%] flex flex-col items-end space-y-0.5">
                           <div className="px-3 py-2 rounded-card rounded-br-sm text-sm leading-relaxed break-words bg-accent/15 text-foreground">
                             {msg.content}
                           </div>
