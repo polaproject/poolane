@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns'
 import { vi } from 'date-fns/locale'
-import { Send, Plus, CheckCheck, Loader2, X, MessageSquare } from 'lucide-react'
+import { Send, Plus, Check, CheckCheck, Loader2, X, MessageSquare } from 'lucide-react'
 import type { UserRole } from '@/lib/auth'
 import { Avatar } from '@/components/ui/Avatar'
 
@@ -162,6 +162,19 @@ export function MessagesClient({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const activeConv = conversations.find(c => c.id === activeId) ?? null
+
+  // Asymmetric read receipt: chỉ HV xem được "đã xem" của admin/staff,
+  // admin/staff KHÔNG xem được "đã xem" của HV (tránh áp lực reply).
+  const showReadReceipts = currentUserRole === 'student'
+
+  // Tìm tin nhắn cuối cùng mình gửi (không phải optimistic) để hiện status text
+  const lastSentMessage = (() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i]
+      if (m.senderId === currentUserId && !m.id.startsWith('opt-')) return m
+    }
+    return null
+  })()
 
   // ─── Fetch messages for active conversation ───────────
 
@@ -508,14 +521,31 @@ export function MessagesClient({
                       </div>
                       <div className="flex items-center gap-1">
                         <span className="text-[10px] text-foreground/35">{formatMsgTime(msg.createdAt)}</span>
-                        {isMine && msg.readAt && (
-                          <CheckCheck className="h-3 w-3 text-accent" />
+                        {isMine && !msg.id.startsWith('opt-') && (
+                          showReadReceipts && msg.readAt
+                            ? <CheckCheck className="h-3 w-3 text-accent" />
+                            : <Check className="h-3 w-3 text-foreground/35" />
                         )}
                       </div>
                     </div>
                   </div>
                 )
               })}
+              {lastSentMessage && (
+                <div className="flex justify-end pr-1">
+                  {showReadReceipts && lastSentMessage.readAt ? (
+                    <span className="text-[10px] text-accent font-medium inline-flex items-center gap-0.5">
+                      <CheckCheck className="h-3 w-3" />
+                      Đã xem · {format(new Date(lastSentMessage.readAt), 'HH:mm')}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-foreground/45 inline-flex items-center gap-0.5">
+                      <Check className="h-3 w-3" />
+                      Đã gửi
+                    </span>
+                  )}
+                </div>
+              )}
               <div ref={bottomRef} />
             </div>
 

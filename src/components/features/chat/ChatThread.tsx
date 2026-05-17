@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { ArrowLeft, Send, Loader2, CheckCheck } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, Check, CheckCheck } from 'lucide-react'
 import { format, isToday, isYesterday } from 'date-fns'
 import { Avatar } from '@/components/ui/Avatar'
 
@@ -59,6 +59,7 @@ export function ChatThread({
   currentUserId,
   currentUserName,
   currentUserAvatar,
+  currentUserRole,
   recipient,
   onBack,
   onMessageSent,
@@ -168,10 +169,10 @@ export function ChatThread({
       id: `opt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       content: text,
       senderId: currentUserId,
-      senderRole: 'student',
+      senderRole: currentUserRole,
       createdAt: new Date().toISOString(),
       readAt: null,
-      sender: { id: currentUserId, fullName: currentUserName, avatarUrl: currentUserAvatar, role: 'student' },
+      sender: { id: currentUserId, fullName: currentUserName, avatarUrl: currentUserAvatar, role: currentUserRole },
     }
     setMessages(prev => [...prev, optimistic])
 
@@ -208,6 +209,19 @@ export function ChatThread({
       handleSend()
     }
   }
+
+  // Asymmetric read receipt: HV xem được "Đã xem" của admin/staff,
+  // admin/staff KHÔNG xem được "đã xem" của HV (tránh áp lực reply).
+  const showReadReceipts = currentUserRole === 'student'
+
+  // Tìm tin nhắn cuối cùng mình gửi (không phải optimistic) để hiện status text
+  const lastSentMessage = (() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i]
+      if (m.senderId === currentUserId && !m.id.startsWith('opt-')) return m
+    }
+    return null
+  })()
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -256,12 +270,32 @@ export function ChatThread({
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="text-[9px] text-foreground/35">{formatMsgTime(msg.createdAt)}</span>
-                  {isMine && msg.readAt && <CheckCheck className="h-2.5 w-2.5 text-accent" />}
+                  {isMine && !msg.id.startsWith('opt-') && (
+                    showReadReceipts && msg.readAt
+                      ? <CheckCheck className="h-2.5 w-2.5 text-accent" />
+                      : <Check className="h-2.5 w-2.5 text-foreground/35" />
+                  )}
                 </div>
               </div>
             </div>
           )
         })}
+        {/* Status text dưới last sent message — chỉ HV thấy "đã xem" */}
+        {lastSentMessage && (
+          <div className="flex justify-end pr-1">
+            {showReadReceipts && lastSentMessage.readAt ? (
+              <span className="text-[10px] text-accent font-medium inline-flex items-center gap-0.5">
+                <CheckCheck className="h-2.5 w-2.5" />
+                Đã xem · {format(new Date(lastSentMessage.readAt), 'HH:mm')}
+              </span>
+            ) : (
+              <span className="text-[10px] text-foreground/45 inline-flex items-center gap-0.5">
+                <Check className="h-2.5 w-2.5" />
+                Đã gửi
+              </span>
+            )}
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
 
