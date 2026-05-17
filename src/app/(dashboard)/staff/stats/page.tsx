@@ -113,7 +113,7 @@ export default async function StaffStatsPage() {
         <div className="rounded-card-xl bg-ink text-paper p-6 sm:p-7 relative overflow-hidden shadow-soft">
 <div className="relative">
             <p className="eyebrow text-paper/55 mb-2">Thu tháng {format(now, 'MM/yyyy')}</p>
-            <p className="lqg-headline text-5xl text-accent leading-none">{fmt(monthSum)}</p>
+            <p className="lqg-headline text-3xl sm:text-5xl text-accent leading-none">{fmt(monthSum)}</p>
             <div className="mt-4 flex gap-6 text-sm text-paper/65 flex-wrap">
               <div><span className="text-paper">{totalStudents}</span> tổng HV</div>
               <div><span className="text-paper">{activeStudents}</span> đang học</div>

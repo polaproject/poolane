@@ -193,7 +193,7 @@ function SummaryCard({
           <Icon className={`h-4 w-4 ${tone === 'warn' ? 'text-warn' : 'text-mist'}`} strokeWidth={1.75} />
         </div>
       </div>
-      <p className="lqg-headline text-4xl text-foreground leading-none">{count}</p>
+      <p className="lqg-headline text-2xl sm:text-4xl text-foreground leading-none">{count}</p>
       <p className="text-sm text-foreground/65 mt-2">{fmt(amount)}</p>
     </div>
   )

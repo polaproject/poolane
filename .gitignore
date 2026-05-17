@@ -47,3 +47,6 @@ next-env.d.ts
 /qa/phase7/
 
 .vercel
+
+# Claude Code local config (launch.json autoPort, ScheduleWakeup state)
+/.claude/

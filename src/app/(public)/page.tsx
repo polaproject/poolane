@@ -242,7 +242,7 @@ export default async function LandingPage() {
         <Stagger step={0.08} className="grid md:grid-cols-4 gap-4">
           {JOURNEY.map((s) => (
             <div key={s.step} className="rounded-card-lg bg-current/5 ring-1 ring-current/10 p-5 backdrop-blur-sm transition-all duration-300 [transition-timing-function:var(--ease-spring-soft)] hover:-translate-y-1 hover:bg-current/10">
-              <p className="lqg-headline text-5xl text-accent leading-none mb-3">{s.step}</p>
+              <p className="lqg-headline text-3xl sm:text-5xl text-accent leading-none mb-3">{s.step}</p>
               <h3 className="font-semibold mb-1.5">{s.title}</h3>
               <p className="text-sm opacity-70 leading-relaxed">{s.desc}</p>
             </div>

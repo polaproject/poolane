@@ -97,7 +97,7 @@ export default function CoursesPage() {
                   </div>
 
                   <div className="mt-6 pt-6 border-t border-paper/12">
-                    <div className="font-heading text-4xl text-accent leading-none">{fmt(price)}</div>
+                    <div className="font-heading text-3xl sm:text-4xl text-accent leading-none">{fmt(price)}</div>
                     <p className="text-xs text-paper/55 mt-1.5">+ vé bơi {fmt(POOL_TICKET.FIRST_PRICE)} (lần đầu, {POOL_TICKET.SESSIONS_INCLUDED} buổi)</p>
                   </div>
                 </div>

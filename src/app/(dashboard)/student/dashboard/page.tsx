@@ -143,7 +143,7 @@ export default async function StudentDashboard() {
 
             {!ticketAgg.isNoTicket ? (
               <>
-                <p className="lqg-headline text-5xl text-foreground leading-none">
+                <p className="lqg-headline text-3xl sm:text-5xl text-foreground leading-none">
                   {sessionsLeft}
                   <span className="text-sm font-body not-italic text-foreground/55 ml-2">buổi còn</span>
                 </p>

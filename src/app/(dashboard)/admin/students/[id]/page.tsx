@@ -123,7 +123,7 @@ export default async function StudentDetailPage({ params }: Params) {
             </div>
             {activeTicket ? (
               <>
-                <p className="lqg-headline text-4xl text-foreground leading-none">
+                <p className="lqg-headline text-2xl sm:text-4xl text-foreground leading-none">
                   {sessionsLeft}
                   <span className="text-sm font-body not-italic text-foreground/55 ml-1.5">buổi</span>
                 </p>
@@ -151,7 +151,7 @@ export default async function StudentDetailPage({ params }: Params) {
               <BookOpen className="h-4 w-4 text-accent" strokeWidth={1.75} />
               <p className="eyebrow text-foreground/55">Khoá học</p>
             </div>
-            <p className="lqg-headline text-4xl text-foreground leading-none">
+            <p className="lqg-headline text-2xl sm:text-4xl text-foreground leading-none">
               {activeEnrollments.length}
               <span className="text-sm font-body not-italic text-foreground/55 ml-1.5">đang học</span>
             </p>
@@ -166,7 +166,7 @@ export default async function StudentDetailPage({ params }: Params) {
             </div>
             {student.lastAttendedAt ? (
               <>
-                <p className="lqg-headline text-4xl text-foreground leading-none">{format(student.lastAttendedAt, 'dd/MM')}</p>
+                <p className="lqg-headline text-2xl sm:text-4xl text-foreground leading-none">{format(student.lastAttendedAt, 'dd/MM')}</p>
                 <p className="text-xs text-foreground/55 mt-2">{format(student.lastAttendedAt, 'yyyy', { locale: vi })}</p>
               </>
             ) : (

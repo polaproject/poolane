@@ -123,7 +123,7 @@ export default async function ProgressPage() {
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="lqg-headline text-5xl text-accent leading-none">{avg.toFixed(1)}</p>
+                    <p className="lqg-headline text-3xl sm:text-5xl text-accent leading-none">{avg.toFixed(1)}</p>
                     <p className="text-xs text-paper/55 mt-1">điểm TB</p>
                   </div>
                 </div>

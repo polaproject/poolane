@@ -24,24 +24,11 @@ import type { PrismaClient } from '@prisma/client'
 
 const DEMO_PHONE_PREFIX = '0900000'
 
-const DEMO_ACCOUNTS = {
-  student: '0900000088',
-  staff: '0900000099',
-} as const
-
 /** Check phone là demo account không */
 export function isDemoAccount(phone: string | null | undefined): boolean {
   if (!phone) return false
   return phone.startsWith(DEMO_PHONE_PREFIX)
 }
-
-/** Get full list demo phones */
-export function getDemoPhones(): string[] {
-  return Object.values(DEMO_ACCOUNTS)
-}
-
-/** Public constant — dùng để loại khỏi analytics nếu cần */
-export const DEMO_ACCOUNT_PHONES = DEMO_ACCOUNTS
 
 // ─── DB lookup helpers (cached per request) ────────────────
 
