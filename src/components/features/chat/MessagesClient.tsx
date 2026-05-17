@@ -97,6 +97,7 @@ export function MessagesClient({
   const lastMsgTimeRef = useRef<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const sendingRef = useRef(false)
 
   const activeConv = conversations.find(c => c.id === activeId) ?? null
 
@@ -147,8 +148,14 @@ export function MessagesClient({
           return
         }
 
-        if (since) setMessages(prev => [...prev, ...newMsgs])
-        else setMessages(newMsgs)
+        if (since) {
+          // Dedupe: tránh duplicate khi polling race với POST response
+          setMessages(prev => {
+            const existingIds = new Set(prev.map(m => m.id))
+            const filtered = newMsgs.filter(m => !existingIds.has(m.id))
+            return filtered.length === 0 ? prev : [...prev, ...filtered]
+          })
+        } else setMessages(newMsgs)
 
         lastMsgTimeRef.current = newMsgs[newMsgs.length - 1].createdAt
 
@@ -217,7 +224,8 @@ export function MessagesClient({
   }, [activeId, fetchMessages])
 
   async function handleSend() {
-    if (!activeId || !input.trim() || sending) return
+    if (!activeId || !input.trim() || sendingRef.current) return
+    sendingRef.current = true
     const text = input.trim()
     setInput('')
     setSending(true)
@@ -248,7 +256,12 @@ export function MessagesClient({
       } else if (j.data?.message) {
         const real: Message = j.data.message
         lastMsgTimeRef.current = real.createdAt
-        setMessages(prev => prev.map(m => (m.id === optimistic.id ? real : m)))
+        // Dedupe: nếu polling đã add real (race), không add lại
+        setMessages(prev => {
+          const withoutOpt = prev.filter(m => m.id !== optimistic.id)
+          if (withoutOpt.some(m => m.id === real.id)) return withoutOpt
+          return [...withoutOpt, real]
+        })
         setConversations(prev =>
           prev.map(c =>
             c.id === activeId
@@ -262,6 +275,7 @@ export function MessagesClient({
       setSendError('Lỗi kết nối, vui lòng thử lại')
       setInput(text)
     } finally {
+      sendingRef.current = false
       setSending(false)
       textareaRef.current?.focus()
     }

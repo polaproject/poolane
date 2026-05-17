@@ -88,6 +88,8 @@ export function ChatThread({
   const lastMsgTimeRef = useRef<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  // sendingRef chống double-fire khi Enter spam (state stale trong same tick).
+  const sendingRef = useRef(false)
 
   // Persist draft
   useEffect(() => {
@@ -118,7 +120,12 @@ export function ChatThread({
         }
 
         if (since) {
-          setMessages(prev => [...prev, ...newMsgs])
+          // Dedupe: tránh add lại tin đã có (race với POST response)
+          setMessages(prev => {
+            const existingIds = new Set(prev.map(m => m.id))
+            const filtered = newMsgs.filter(m => !existingIds.has(m.id))
+            return filtered.length === 0 ? prev : [...prev, ...filtered]
+          })
         } else {
           setMessages(newMsgs)
         }
@@ -183,7 +190,9 @@ export function ChatThread({
   }, [messages])
 
   async function handleSend() {
-    if (!input.trim() || sending) return
+    // Guard: sendingRef chống double-fire trong cùng tick (state stale)
+    if (!input.trim() || sendingRef.current) return
+    sendingRef.current = true
     const text = input.trim()
     setInput('')
     sessionStorage.removeItem(draftKey)
@@ -215,7 +224,12 @@ export function ChatThread({
       } else if (j.data?.message) {
         const real: Message = j.data.message
         lastMsgTimeRef.current = real.createdAt
-        setMessages(prev => prev.map(m => (m.id === optimistic.id ? real : m)))
+        // Dedupe: nếu polling đã add real (race condition), không add lại
+        setMessages(prev => {
+          const withoutOpt = prev.filter(m => m.id !== optimistic.id)
+          if (withoutOpt.some(m => m.id === real.id)) return withoutOpt
+          return [...withoutOpt, real]
+        })
         onMessageSent?.(text.slice(0, 100), real.createdAt)
       }
     } catch {
@@ -223,6 +237,7 @@ export function ChatThread({
       setSendError('Lỗi kết nối, vui lòng thử lại')
       setInput(text)
     } finally {
+      sendingRef.current = false
       setSending(false)
       textareaRef.current?.focus()
     }
