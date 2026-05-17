@@ -7,6 +7,7 @@ import {
   findOrderByShortId,
   findEnrollmentByShortId,
   isSepayIdProcessed,
+  sepayPayloadSchema,
   type SepayPayload,
 } from '@/lib/payments/sepay'
 import {
@@ -25,7 +26,18 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const payload = await request.json() as SepayPayload
+    const raw = await request.json()
+    const parsed = sepayPayloadSchema.safeParse(raw)
+    if (!parsed.success) {
+      await logError({
+        context: 'sepay.webhook',
+        message: 'Invalid payload shape',
+        inputData: { raw, zodError: parsed.error.flatten() },
+      })
+      // Trả 400 — Sepay sẽ retry hoặc admin xử lý qua dashboard
+      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
+    }
+    const payload: SepayPayload = parsed.data
 
     // Chỉ xử lý tiền vào
     if (payload.transferType !== 'in') {

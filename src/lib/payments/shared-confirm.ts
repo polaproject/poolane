@@ -64,11 +64,19 @@ export async function confirmOrderTransfer(
   const memo = buildMemo(order.id)
   const action = input.source === 'sepay' ? 'sepay.confirm_order' : 'order.confirm_transfer'
 
-  const result = await prisma.$transaction(async (tx) => {
-    await tx.order.update({
-      where: { id: order.id },
+  let result: { payment: { id: string } }
+  try {
+    result = await prisma.$transaction(async (tx) => {
+    // Compare-and-set: only update if status STILL 'approved' (race-safe).
+    // Postgres serialize 2 concurrent UPDATE with WHERE clause → loser sees
+    // count=0 và throw CONCURRENT_CONFIRMATION → toàn bộ $transaction rollback.
+    const updated = await tx.order.updateMany({
+      where: { id: order.id, status: 'approved' },
       data: { status: 'paid' }
     })
+    if (updated.count === 0) {
+      throw new Error('CONCURRENT_CONFIRMATION')
+    }
 
     const payment = await tx.payment.create({
       data: {
@@ -151,6 +159,13 @@ export async function confirmOrderTransfer(
 
     return { payment }
   })
+  } catch (e) {
+    if (e instanceof Error && e.message === 'CONCURRENT_CONFIRMATION') {
+      log.warn('payment.confirm_order', 'Concurrent confirm detected — already paid', { orderId: order.id })
+      return { ok: false, code: 'CONCURRENT', message: 'Đơn đang được xử lý bởi giao dịch khác. Hãy refresh và kiểm tra trạng thái đơn.' }
+    }
+    throw e
+  }
 
   // Email biên lai
   if (order.student.user.email && !order.student.user.email.endsWith('@poolane.local')) {
@@ -210,17 +225,24 @@ export async function confirmEnrollmentTransferShared(
 
   const action = input.source === 'sepay' ? 'sepay.confirm_enrollment' : 'enrollment.confirm_transfer'
 
-  const result = await prisma.$transaction(async (tx) => {
+  let result: { payment: { id: string }; paidFull: boolean }
+  try {
+    result = await prisma.$transaction(async (tx) => {
     const newTotalPaid = enrollment.totalPaid + effectiveAmount
     const paidFull = newTotalPaid >= enrollment.course.price
 
-    await tx.enrollment.update({
-      where: { id: enrollment.id },
+    // Compare-and-set trên totalPaid: nếu txn khác đã cộng vào trong lúc ta đang
+    // xử lý → totalPaid khác → updateMany count=0 → throw rollback.
+    const updated = await tx.enrollment.updateMany({
+      where: { id: enrollment.id, totalPaid: enrollment.totalPaid },
       data: {
         totalPaid: newTotalPaid,
         paymentDeadline: paidFull ? null : enrollment.paymentDeadline,
       }
     })
+    if (updated.count === 0) {
+      throw new Error('CONCURRENT_CONFIRMATION')
+    }
 
     if (paidFull && enrollment.student.status === 'enrolled') {
       await tx.student.update({
@@ -273,6 +295,13 @@ export async function confirmEnrollmentTransferShared(
 
     return { payment, paidFull }
   })
+  } catch (e) {
+    if (e instanceof Error && e.message === 'CONCURRENT_CONFIRMATION') {
+      log.warn('payment.confirm_enrollment', 'Concurrent confirm detected', { enrollmentId: enrollment.id })
+      return { ok: false, code: 'CONCURRENT', message: 'Khoá đang được xử lý bởi giao dịch khác. Hãy refresh và kiểm tra trạng thái thanh toán.' }
+    }
+    throw e
+  }
 
   if (enrollment.student.user.email && !enrollment.student.user.email.endsWith('@poolane.local')) {
     const tmpl = paymentReceiptEmail({

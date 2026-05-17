@@ -1,20 +1,26 @@
 import { NextRequest } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 
-export interface SepayPayload {
-  id: number
-  gateway?: string
-  transactionDate: string
-  accountNumber?: string
-  code?: string | null
-  content: string
-  transferType: 'in' | 'out'
-  transferAmount: number
-  accumulated?: number
-  subAccount?: string | null
-  referenceCode?: string
-  description?: string
-}
+// Schema validation cho payload Sepay gửi qua webhook.
+// Defense-in-depth: dù `verifySepayAuth` đã chặn unauthorized request,
+// Sepay vẫn có thể đổi shape API → safeParse tránh runtime crash.
+export const sepayPayloadSchema = z.object({
+  id: z.number().int().nonnegative(),
+  gateway: z.string().optional(),
+  transactionDate: z.string(),
+  accountNumber: z.string().optional(),
+  code: z.string().nullable().optional(),
+  content: z.string(),
+  transferType: z.enum(['in', 'out']),
+  transferAmount: z.number().int().nonnegative(),
+  accumulated: z.number().optional(),
+  subAccount: z.string().nullable().optional(),
+  referenceCode: z.string().optional(),
+  description: z.string().optional(),
+})
+
+export type SepayPayload = z.infer<typeof sepayPayloadSchema>
 
 /** Verify Sepay sent the request — checks Authorization: Apikey <SEPAY_API_KEY> */
 export function verifySepayAuth(req: NextRequest): boolean {
