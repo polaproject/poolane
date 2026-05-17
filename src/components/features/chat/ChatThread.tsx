@@ -152,9 +152,11 @@ export function ChatThread({
     }
   }, [conversationId, fetchMessages])
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom CỦA messages container (không propagate ra document).
+  // `block: 'nearest'` quan trọng — tránh browser scroll cả trang ngoài để
+  // "đưa popover vào view" khi popover nằm trong Portal.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }, [messages])
 
   async function handleSend() {

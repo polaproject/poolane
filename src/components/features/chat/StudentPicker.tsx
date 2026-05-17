@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
 
@@ -24,6 +24,13 @@ export function StudentPicker({ onSelect, onClose, className = '' }: StudentPick
   const [q, setQ] = useState('')
   const [students, setStudents] = useState<StudentItem[]>([])
   const [loading, setLoading] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Focus input KHÔNG dùng autoFocus prop — browser sẽ scrollIntoView khiến
+  // trang background scroll. Dùng focus({ preventScroll: true }) thay thế.
+  useEffect(() => {
+    inputRef.current?.focus({ preventScroll: true })
+  }, [])
 
   useEffect(() => {
     const t = setTimeout(async () => {
@@ -55,7 +62,7 @@ export function StudentPicker({ onSelect, onClose, className = '' }: StudentPick
         </button>
       </div>
       <input
-        autoFocus
+        ref={inputRef}
         value={q}
         onChange={e => setQ(e.target.value)}
         placeholder="Tìm tên học viên..."
