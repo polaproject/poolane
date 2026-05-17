@@ -104,7 +104,7 @@ export function MessagesFab({
         <Popover.Positioner side="left" align="end" sideOffset={10} alignOffset={0} className="z-[60]">
           <Popover.Popup
             className="z-50 relative glass-panel rounded-card-lg shadow-glass overflow-hidden
-                       w-[min(400px,calc(100vw-2.5rem))] h-[min(560px,calc(100vh-8rem))]
+                       w-[min(380px,calc(100vw-2.5rem))] h-[min(480px,calc(100vh-9rem))]
                        origin-bottom-right data-[closed]:hidden"
           >
             <MessagesPopover
