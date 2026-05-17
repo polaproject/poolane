@@ -24,6 +24,10 @@ interface Props {
  */
 export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
   const [crop, setCrop] = useState({ x: 0, y: 0 })
+  // Phase 25: minZoom dynamic theo aspect ảnh — cho user zoom out tới mức ảnh
+  // contain trong crop (chiều dài chạm mép). Default 0.5 fallback trước khi
+  // onMediaLoaded fire.
+  const [minZoom, setMinZoom] = useState(0.5)
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -57,6 +61,19 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
     setCroppedAreaPixels(areaPixels)
   }, [])
 
+  // Phase 25: compute minZoom theo aspect ảnh.
+  // Formula: min(naturalW, naturalH) / max(naturalW, naturalH).
+  // Ví dụ ảnh 4:3 → minZoom=0.75; 16:9 → 0.5625; vuông → 1.
+  // Tại minZoom đó, chiều dài của ảnh vừa khít chiều cropSize.
+  const onMediaLoaded = useCallback((mediaSize: { naturalWidth: number; naturalHeight: number }) => {
+    const w = mediaSize.naturalWidth
+    const h = mediaSize.naturalHeight
+    if (!w || !h) return
+    const ratio = Math.min(w, h) / Math.max(w, h)
+    setMinZoom(ratio)
+    setZoom(ratio) // reset zoom về full-contain để user thấy toàn ảnh khi mở
+  }, [])
+
   async function handleSubmit() {
     if (!croppedAreaPixels) return
     setSubmitting(true)
@@ -84,7 +101,7 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
             Cập nhật ảnh đại diện
           </Dialog.Title>
           <Dialog.Description className="text-sm text-foreground/65 mb-4 leading-relaxed">
-            Kéo ảnh để di chuyển vào vùng tròn. Dùng thanh trượt để phóng to / thu nhỏ.
+            Kéo ảnh để di chuyển vào vùng tròn. Trượt thanh để thu nhỏ (thấy toàn ảnh) hoặc phóng to.
           </Dialog.Description>
 
           {/* Crop area — vuông, ảnh fill, vòng tròn nearly full container */}
@@ -93,6 +110,7 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
               image={src}
               crop={crop}
               zoom={zoom}
+              minZoom={minZoom}
               aspect={1}
               cropShape="round"
               showGrid={false}
@@ -100,6 +118,7 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={onCropComplete}
+              onMediaLoaded={onMediaLoaded}
               objectFit="cover"
             />
           </div>
@@ -108,7 +127,7 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
           <div className="flex items-center gap-3 mb-4">
             <button
               type="button"
-              onClick={() => setZoom((z) => Math.max(1, z - 0.1))}
+              onClick={() => setZoom((z) => Math.max(minZoom, z - 0.1))}
               aria-label="Thu nhỏ"
               className="h-8 w-8 rounded-pill bg-foreground/5 grid place-items-center hover:bg-foreground/10 transition shrink-0"
             >
@@ -116,7 +135,7 @@ export function AvatarCropDialog({ src, onCancel, onCropped }: Props) {
             </button>
             <input
               type="range"
-              min={1}
+              min={minZoom}
               max={3}
               step={0.01}
               value={zoom}
