@@ -291,6 +291,7 @@ function AvatarPopoverButton({
 }
 
 interface DashboardShellProps {
+  userId: string
   children: React.ReactNode
   userRole: UserRole
   userFullName: string
@@ -298,7 +299,7 @@ interface DashboardShellProps {
   userAvatarUrl?: string | null
 }
 
-function ShellInner({ children, userRole, userFullName, userInitial, userAvatarUrl }: DashboardShellProps) {
+function ShellInner({ children, userId, userRole, userFullName, userInitial, userAvatarUrl }: DashboardShellProps) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -658,8 +659,14 @@ function ShellInner({ children, userRole, userFullName, userInitial, userAvatarU
         </nav>
       </div>
 
-      {/* Floating action buttons (notification + quick add) */}
-      <FloatingActions role={userRole} hidden={sidebarOpen} />
+      {/* Floating action buttons (notification + chat + quick add) */}
+      <FloatingActions
+        role={userRole}
+        hidden={sidebarOpen}
+        userId={userId}
+        userFullName={userFullName}
+        userAvatarUrl={userAvatarUrl ?? null}
+      />
     </div>
   )
 }

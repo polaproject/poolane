@@ -14,6 +14,7 @@ export default async function DashboardLayout({
 
   return (
     <DashboardShell
+      userId={user.id}
       userRole={user.role}
       userFullName={user.fullName}
       userInitial={initial}

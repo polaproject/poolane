@@ -1,24 +1,36 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { Popover } from '@base-ui/react/popover'
 import { MessageSquare } from 'lucide-react'
 import type { UserRole } from '@/lib/auth'
+import { MessagesPopover } from '@/components/features/chat/MessagesPopover'
 
 const POLL_MS = 60_000
 
-const MESSAGES_HREF: Record<UserRole, string> = {
-  admin: '/admin/messages',
-  staff: '/staff/messages',
-  student: '/student/messages',
-}
-
 interface MessagesFabProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
   role: UserRole
+  currentUserId: string
+  currentUserName: string
+  currentUserAvatar: string | null
 }
 
-export function MessagesFab({ role }: MessagesFabProps) {
-  const router = useRouter()
+/**
+ * MessagesFab — FAB tin nhắn với popover chat (Intercom-style).
+ * Click → mở popover (KHÔNG navigate). Footer popover có link tới full page.
+ *
+ * Polling unread-count 60s khi tab visible. Pause khi tab hidden.
+ */
+export function MessagesFab({
+  open,
+  onOpenChange,
+  role,
+  currentUserId,
+  currentUserName,
+  currentUserAvatar,
+}: MessagesFabProps) {
   const [unreadCount, setUnreadCount] = useState(0)
 
   const fetchCount = useCallback(async () => {
@@ -26,7 +38,9 @@ export function MessagesFab({ role }: MessagesFabProps) {
       const r = await fetch('/api/conversations/unread-count')
       const j = await r.json()
       if (j.data) setUnreadCount(j.data.count ?? 0)
-    } catch { /* silent */ }
+    } catch {
+      /* silent */
+    }
   }, [])
 
   useEffect(() => {
@@ -59,22 +73,50 @@ export function MessagesFab({ role }: MessagesFabProps) {
     }
   }, [fetchCount])
 
+  // Khi popover đóng → re-fetch unread count (vì user có thể vừa đọc tin)
+  useEffect(() => {
+    if (!open) fetchCount()
+  }, [open, fetchCount])
+
   return (
-    <button
-      onClick={() => router.push(MESSAGES_HREF[role])}
-      aria-label={`Tin nhắn${unreadCount > 0 ? ` (${unreadCount} chưa đọc)` : ''}`}
-      className="relative h-12 w-12 rounded-pill bg-ink dark:bg-paper text-paper dark:text-ink
-                 shadow-glass hover:scale-105 active:scale-95 transition-transform
-                 grid place-items-center"
-    >
-      <MessageSquare className="h-5 w-5" />
-      {unreadCount > 0 && (
-        <span className="absolute -top-1 -right-1 h-5 min-w-5 px-1
-                         bg-accent text-ink text-[10px] font-bold rounded-pill
-                         grid place-items-center leading-none">
-          {unreadCount > 99 ? '99+' : unreadCount}
-        </span>
-      )}
-    </button>
+    <Popover.Root open={open} onOpenChange={onOpenChange} modal={false}>
+      <Popover.Trigger
+        aria-label={`Tin nhắn${unreadCount > 0 ? ` (${unreadCount} chưa đọc)` : ''}`}
+        className="relative grid place-items-center w-[52px] h-[52px] rounded-full
+                   bg-ink text-paper dark:bg-paper dark:text-ink
+                   ring-1 ring-ink/30 dark:ring-paper/30
+                   shadow-xl shadow-black/30
+                   hover:scale-[1.04] active:scale-[0.97] transition-transform cursor-pointer"
+      >
+        <MessageSquare className="w-5 h-5" />
+        {unreadCount > 0 && (
+          <span
+            className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full
+                       bg-danger text-paper text-[10px] font-bold grid place-items-center
+                       leading-none shadow-soft"
+            aria-hidden
+          >
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Positioner side="left" align="end" sideOffset={10} alignOffset={0} className="z-[60]">
+          <Popover.Popup
+            className="z-50 relative glass-panel rounded-card-lg shadow-glass overflow-hidden
+                       w-[min(400px,calc(100vw-2.5rem))] h-[min(560px,calc(100vh-8rem))]
+                       origin-bottom-right data-[closed]:hidden"
+          >
+            <MessagesPopover
+              role={role}
+              currentUserId={currentUserId}
+              currentUserName={currentUserName}
+              currentUserAvatar={currentUserAvatar}
+              onClose={() => onOpenChange(false)}
+            />
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
   )
 }

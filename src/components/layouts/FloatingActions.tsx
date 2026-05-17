@@ -6,7 +6,7 @@ import { NotificationFab } from './NotificationFab'
 import { QuickAddFab } from './QuickAddFab'
 import { MessagesFab } from './MessagesFab'
 
-type OpenPanel = 'notif' | 'add' | null
+type OpenPanel = 'notif' | 'msg' | 'add' | null
 
 /** Settings từ /api/settings — null khi đang loading, default object khi fetch xong */
 interface PublicSettings {
@@ -18,20 +18,26 @@ interface FloatingActionsProps {
   role: UserRole
   /** Khi sidebar mobile mở → ẩn FAB để không peek qua backdrop (cùng z-40) */
   hidden?: boolean
+  /** User info để truyền vào MessagesFab popover */
+  userId: string
+  userFullName: string
+  userAvatarUrl: string | null
 }
 
 /**
- * Mobile bottom nav cao ~60px → FAB cần đẩy lên trên để không bị che.
- * Desktop (lg+) không có bottom nav → 20px là đủ.
- *
- * Edge case: trên `/student/shop` khi giỏ hàng có item, sticky cart bar
- * (z-30, fixed bottom) overlap với FAB → MutationObserver detect element
- * có `data-shop-cart-bar` → đẩy FAB lên thêm chiều cao cart.
+ * FAB stack (bottom-right): NotificationFab (Bell) → MessagesFab (Chat) → QuickAddFab (+).
+ * Chỉ 1 popover mở tại 1 thời điểm — guard bằng OpenPanel state.
  */
-export function FloatingActions({ role, hidden = false }: FloatingActionsProps) {
-  /** Chỉ 1 popover mở tại 1 thời điểm — tránh stack 2 panel chồng nhau */
+export function FloatingActions({
+  role,
+  hidden = false,
+  userId,
+  userFullName,
+  userAvatarUrl,
+}: FloatingActionsProps) {
   const [openPanel, setOpenPanel] = useState<OpenPanel>(null)
   const onNotifChange = useCallback((open: boolean) => setOpenPanel(open ? 'notif' : null), [])
+  const onMsgChange = useCallback((open: boolean) => setOpenPanel(open ? 'msg' : null), [])
   const onAddChange = useCallback((open: boolean) => setOpenPanel(open ? 'add' : null), [])
 
   /** Admin-configured settings (Quick Add items + notification filter) */
@@ -39,8 +45,12 @@ export function FloatingActions({ role, hidden = false }: FloatingActionsProps) 
   useEffect(() => {
     fetch('/api/settings')
       .then(r => r.json())
-      .then(j => { if (j.data) setSettings(j.data) })
-      .catch(() => { /* silent — fallback default trong child component */ })
+      .then(j => {
+        if (j.data) setSettings(j.data)
+      })
+      .catch(() => {
+        /* silent — fallback default trong child component */
+      })
   }, [])
 
   // Phase 18.13: cart bar nay ngang hàng FAB+ (right padding chừa chỗ FAB)
@@ -72,7 +82,14 @@ export function FloatingActions({ role, hidden = false }: FloatingActionsProps) 
         />
       </div>
       <div className={hidden ? '' : 'pointer-events-auto'}>
-        <MessagesFab role={role} />
+        <MessagesFab
+          open={openPanel === 'msg'}
+          onOpenChange={onMsgChange}
+          role={role}
+          currentUserId={userId}
+          currentUserName={userFullName}
+          currentUserAvatar={userAvatarUrl}
+        />
       </div>
       <div className={hidden ? '' : 'pointer-events-auto'}>
         <QuickAddFab
