@@ -399,7 +399,7 @@ export function ChatThread({
               </button>
             </div>
           )}
-          <div className="px-3 py-2 flex items-end gap-1.5">
+          <div className="px-3 py-2 flex items-end gap-2">
             <textarea
               ref={textareaRef}
               value={input}
@@ -407,17 +407,17 @@ export function ChatThread({
               onKeyDown={handleKeyDown}
               placeholder="Nhập tin nhắn..."
               rows={1}
-              className="lqg-input flex-1 resize-none text-sm min-h-[36px] max-h-24 py-1.5 px-3"
+              className="lqg-input flex-1 resize-none text-sm min-h-10 max-h-28 py-2 px-3"
               style={{ overflowY: 'auto' }}
               disabled={sending}
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || sending}
-              className="p-2 rounded-lg bg-accent text-ink disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-105 transition-all shrink-0"
+              className="h-10 w-10 grid place-items-center rounded-lg bg-accent text-ink disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-105 transition-all shrink-0"
               aria-label="Gửi"
             >
-              {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-[18px] w-[18px]" />}
             </button>
           </div>
         </div>

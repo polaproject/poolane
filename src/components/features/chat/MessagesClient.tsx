@@ -568,9 +568,10 @@ export function MessagesClient({
                   <button
                     onClick={handleSend}
                     disabled={!input.trim() || sending}
-                    className="glass-button p-2.5 rounded-lg bg-accent text-ink disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-105 transition-all shrink-0"
+                    aria-label="Gửi"
+                    className="h-10 w-10 grid place-items-center rounded-lg bg-accent text-ink disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-105 transition-all shrink-0"
                   >
-                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-[18px] w-[18px]" />}
                   </button>
                 </div>
               </div>
