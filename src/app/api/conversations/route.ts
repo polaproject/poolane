@@ -34,33 +34,43 @@ export async function GET() {
       take: 100,
     })
 
-    // Tính unreadCount: count messages where createdAt > myParticipation.lastReadAt
+    // Tính unreadCount: trước đây N+1 (1 count query/conversation) → batch lại.
+    // Strategy: 1 query lấy tất cả msg ID + conversationId cho conversations có msg
+    // sau lastReadAt, rồi tally JS-side.
+    const convIds = conversations.map(c => c.id)
     const myParticipations = await prisma.conversationParticipant.findMany({
       where: {
         userId: user.id,
         leftAt: null,
-        conversationId: { in: conversations.map(c => c.id) },
+        conversationId: { in: convIds },
       },
       select: { conversationId: true, lastReadAt: true },
     })
     const lastReadMap = new Map(myParticipations.map(p => [p.conversationId, p.lastReadAt]))
 
-    const unreadCounts = await Promise.all(
-      conversations.map(async c => {
-        const last = lastReadMap.get(c.id) ?? new Date(0)
-        return prisma.chatMessage.count({
-          where: {
-            conversationId: c.id,
-            senderId: { not: user.id },
-            deletedAt: null,
-            createdAt: { gt: last },
-          },
-        })
-      }),
-    )
-
-    const result = conversations.map((c, i) => ({ ...c, unreadCount: unreadCounts[i] }))
-    const totalUnread = unreadCounts.reduce((s, n) => s + n, 0)
+    // Single query lấy unread messages cho tất cả conversation. Lọc thêm JS-side
+    // theo lastReadAt (vì mỗi conv có timestamp riêng — không express được trong
+    // 1 SQL clause). Vẫn tốt hơn N queries (1 row scan vs N x prepared statement).
+    // Để cap cost worst-case: chỉ lấy msg trong 90 ngày qua (>= unread floor reasonable).
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 86400_000)
+    const recentMsgs = await prisma.chatMessage.findMany({
+      where: {
+        conversationId: { in: convIds },
+        senderId: { not: user.id },
+        deletedAt: null,
+        createdAt: { gt: ninetyDaysAgo },
+      },
+      select: { conversationId: true, createdAt: true },
+    })
+    const unreadByConv = new Map<string, number>()
+    for (const m of recentMsgs) {
+      const last = lastReadMap.get(m.conversationId) ?? new Date(0)
+      if (m.createdAt > last) {
+        unreadByConv.set(m.conversationId, (unreadByConv.get(m.conversationId) ?? 0) + 1)
+      }
+    }
+    const result = conversations.map(c => ({ ...c, unreadCount: unreadByConv.get(c.id) ?? 0 }))
+    const totalUnread = result.reduce((s, c) => s + c.unreadCount, 0)
 
     return NextResponse.json({ data: { conversations: result, totalUnread }, error: null })
   } catch (error) {

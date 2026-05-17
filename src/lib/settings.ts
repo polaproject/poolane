@@ -103,19 +103,18 @@ export const SETTING_DEFAULTS: SettingsMap = {
   'format.thousand_separator': '.',
 }
 
-/** Server-only: đọc setting từ DB, fallback default */
-export async function getSetting<K extends SettingKey>(key: K): Promise<SettingsMap[K]> {
-  try {
-    const row = await prisma.systemSetting.findUnique({ where: { key } })
-    if (!row) return SETTING_DEFAULTS[key]
-    return row.value as SettingsMap[K]
-  } catch {
-    return SETTING_DEFAULTS[key]
-  }
+// In-memory cache: tránh hammer DB cho settings được đọc mỗi request
+// (FAB + sidebar + dashboard config). TTL 60s — owner sửa settings sẽ thấy
+// effect sau ≤ 60s; trade-off chấp nhận được cho 200 HV scale.
+let _cache: { all: SettingsMap; ts: number } | null = null
+const CACHE_TTL_MS = 60_000
+
+function invalidateCache() {
+  _cache = null
 }
 
-/** Server-only: đọc tất cả settings (cho client consumption qua API) */
-export async function getAllSettings(): Promise<SettingsMap> {
+async function loadAll(): Promise<SettingsMap> {
+  if (_cache && Date.now() - _cache.ts < CACHE_TTL_MS) return _cache.all
   const rows = await prisma.systemSetting.findMany()
   const result = { ...SETTING_DEFAULTS } as SettingsMap
   for (const r of rows) {
@@ -124,10 +123,26 @@ export async function getAllSettings(): Promise<SettingsMap> {
       (result as any)[r.key] = r.value
     }
   }
+  _cache = { all: result, ts: Date.now() }
   return result
 }
 
-/** Server-only: update 1 setting */
+/** Server-only: đọc setting từ DB, fallback default */
+export async function getSetting<K extends SettingKey>(key: K): Promise<SettingsMap[K]> {
+  try {
+    const all = await loadAll()
+    return all[key]
+  } catch {
+    return SETTING_DEFAULTS[key]
+  }
+}
+
+/** Server-only: đọc tất cả settings (cho client consumption qua API) */
+export async function getAllSettings(): Promise<SettingsMap> {
+  return loadAll()
+}
+
+/** Server-only: update 1 setting — invalidate cache để lần đọc kế tiếp refresh */
 export async function setSetting<K extends SettingKey>(
   key: K,
   value: SettingsMap[K],
@@ -138,4 +153,5 @@ export async function setSetting<K extends SettingKey>(
     create: { key, value: value as object, updatedBy },
     update: { value: value as object, updatedBy },
   })
+  invalidateCache()
 }

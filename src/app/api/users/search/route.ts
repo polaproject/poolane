@@ -32,19 +32,30 @@ export async function GET(request: NextRequest) {
 
     const { q, limit } = parsed.data
 
-    // Empty query → empty results (tránh load all 200 users)
-    if (q.trim().length < 1) {
+    // Empty hoặc 1-char query → empty results. Min 2 chars để giảm bulk
+    // enumeration. Search vẫn hữu ích từ 2 chars cho tên / phone.
+    if (q.trim().length < 2) {
       return NextResponse.json({ data: { items: [] }, error: null })
     }
+
+    // Phase 20 chat cho phép any user nhắn any user. Nhưng cho phép student
+    // search theo PHONE = phone-existence enumeration → restrict phone match
+    // cho staff/admin (legitimate use: tra cứu HV qua sđt). Student chỉ search
+    // theo tên — vẫn dùng được UserPicker cho chat.
+    const canSearchByPhone = user.role === 'admin' || user.role === 'staff'
 
     const users = await prisma.user.findMany({
       where: {
         isActive: true,
         id: { not: user.id }, // exclude self
-        OR: [
-          { fullName: { contains: q, mode: 'insensitive' } },
-          { phone: { contains: q } },
-        ],
+        OR: canSearchByPhone
+          ? [
+              { fullName: { contains: q, mode: 'insensitive' } },
+              { phone: { contains: q } },
+            ]
+          : [
+              { fullName: { contains: q, mode: 'insensitive' } },
+            ],
       },
       select: { id: true, fullName: true, role: true, avatarUrl: true },
       take: limit,
