@@ -149,6 +149,7 @@ LAYER 6 — Validation & Security
 | Admin: broadcast toàn lớp | ✅ `/admin/broadcast` |
 | Push notification (Web Push API) | ✅ Infrastructure: `sw.js`, `PushSubscribeButton`, `/api/push/subscribe`, `manifest.json` (cần `VAPID_PUBLIC/PRIVATE_KEY` env để dùng thật) |
 | Email gửi tự động (Resend) | ✅ 5 templates + sendEmail wrapper. Tích vào: register (welcome), payment record (receipt), refund transfer (confirmation), cron birthday/absence |
+| **Chat real-time (Phase 19-25)** | ✅ Any-to-any DM + group chat ≤20 người. Polling 3s khi popover open, 10s list, 60s FAB badge. FAB thứ 3 (`MessagesFab`) + popover anchored. Full pages `/{admin,staff,student}/messages`. Rate limit 5 msg/10s cho student (admin/staff exempt). Symmetric CheckCheck read receipt. **Không** tạo notification cho chat (badge riêng đủ rồi). |
 
 ### Module: Blog & Nội Dung
 | Hạng mục | Status |
@@ -321,6 +322,55 @@ Theo thứ tự quan trọng (đã hoàn thành redesign sâu, giờ unblock inf
    - **Home button cố định sidebar**: link top-level "Trang chủ" trên đầu nav (mọi role) → tránh chôn trong "Tổng quan" group. Commit: `e7dc7bf`.
    - **Schedule banner "Vé bơi" → shop**: thay "Liên hệ Zalo" bằng CTA "🛍️ Mua vé bơi" → `/student/shop`. Commit: `7ab141d`.
    - **AvatarFOUC fix**: Phase 18.7 owner gửi screenshot avatar không sync mobile/desktop sidebar → trace ra RLS issue (Phase 18.8). Tốn 2 round-trip để xác định gốc rễ.
+
+53. **Phase 19 — Chat real-time MVP (1-staff-1-student rigid)**: ✅ Initial chat schema `Conversation { staffUserId, studentId, @@unique }` + ChatMessage. Polling 3s. FAB thứ 3 (`MessagesFab`). Pages student/admin/staff messages. Bị thay bởi Phase 20.
+
+54. **Phase 20 — Chat redesign any-to-any + groups**: ✅ Schema mới participants-based:
+    - `Conversation { name?, isGroup, createdBy, lastMessageAt, lastMessagePreview, isResolved }` — bỏ FK Staff/Student
+    - `ConversationParticipant` — M2M junction (`conversationId, userId, lastReadAt, leftAt, role, isMuted`)
+    - `ChatMessage` giữ nguyên (giữ `senderRole` denormalized cho audit)
+    - **Bất kỳ user nào nhắn được bất kỳ user nào** (open access)
+    - Group ≤ 20 người, **name bắt buộc**
+    - Rate limit 5 msg/10s cho student qua `src/lib/rate-limit.ts` (sliding window, admin/staff exempt, no Redis)
+    - DM idempotency: tạo DM lần 2 cùng cặp → trả existing convId
+    - `UserPicker.tsx` multi-select chips (replace StudentPicker)
+    - `/api/users/search` open access endpoint
+    - Cleanup script `prisma/cleanup-chat-phase20.ts` chạy 1 lần xóa data legacy
+    - E2E verified: DM/group create, rate limit 429, idempotency, group name required. Commit: `8cbc96d`.
+
+55. **Phase 21 — Schedule cột rộng + Vietnamese name shortening**: ✅ `min-w-[1050px]` → `min-w-[1450px]` (cột từ 143→200px). NEW `src/lib/format-name.ts` với `shortenVietnameseName(fullName, maxLength=20)` — rule: viết tắt họ (từ đầu) còn 2 chữ, giữ nguyên tên đệm + tên chính. `Nguyễn Ngọc Hoàng Việt` → `Ng Ngọc Hoàng Việt`. Hỗ trợ progressive abbreviation cho tên 5+ từ. Wrap `reg.student.fullName` qua function. `title` attribute giữ tên đầy đủ cho hover. Commit: `e2ea5c6`.
+
+56. **Phase 22 — Chat UX polish (6 mobile fixes)**: ✅
+    - **#1 Bỏ notification broadcast cho chat** — chat có badge unread riêng, tránh chồng noise
+    - **#2 Bỏ status text "Đã gửi"/"Đã xem"** — chỉ giữ tick icons per-message
+    - **#3 Time alignment opposite edge**: incoming → time sát mép PHẢI, outgoing → time + tick sát mép TRÁI (bubble bên còn lại)
+    - **#4 Dedup time same-minute** (bỏ ở Phase 24 sau)
+    - **#5 Background scroll fix**: `scrollIntoView({block:nearest})` thay bằng `el.scrollTop = el.scrollHeight` (không propagate ra ancestor)
+    - **#6 Popup overlap header**: `h-[min(480px,calc(100vh-15rem))]` + `collisionPadding={60}` cho Popover.Positioner. Commit: `ff04b89`.
+    - **Phase 22.1 follow-up**: defensive `try/catch + logError` cho 3 messages pages. Empty state text mới "Bấm Mới để bắt đầu nhắn tin với bất cứ ai, hoặc tạo nhóm để cùng 'rủ rê' bơi lội". Commit: `20fd57c`.
+
+57. **Phase 23 — Chat thống nhất giữa roles + mobile responsive**: ✅
+    - **Bỏ asymmetric tick**: trước đây `showDoubleTick = currentUserRole === 'student'` (chỉ HV thấy admin đã đọc). Owner muốn thống nhất → cả 2 bên thấy CheckCheck khi đối phương đọc.
+    - **Outgoing bubble luôn sát lề phải**: bug khi `showMeta=false` (dedup hide time) → bubble không có `ml-auto` → nằm sai. Fix: thêm `ml-auto` vào bubble wrapper.
+    - **MessagesClient mobile responsive**: full page bị squash do split-pane (w-72=288px chiếm 76% mobile viewport). Fix:
+      - Left pane: `w-full sm:w-72` + `hidden sm:flex` khi `activeId`
+      - Right pane: `hidden sm:flex` khi `!activeId`
+      - Back button `ArrowLeft` (sm:hidden) trong chat header → setActiveId(null)
+      - Bỏ auto-select first conv → user click chủ động
+    - **UserPicker opacity**: `glass-card` (55%) → `glass-panel` (94%) ngang notification popover. Commits: `e664c76`, `2283b55`.
+    - **Phase 23.1 textarea padding**: `.lqg-input` base không có horizontal padding. Thêm `px-3` cho textarea (text không sát viền cam). Commit: `128a5d4`.
+    - **Phase 23.2 duplicate message race fix**: 2 nguyên nhân — (1) polling fetch trùng với POST response → dedupe by id Set; (2) double Enter spam → `useRef sendingRef` thay state stale check. Commit: `eddc411`.
+
+58. **Phase 24 — Hiển thị time MỌI tin (bỏ dedup)**: ✅ Trade-off: lặp "11:23 · 11:23 · 11:23" nhưng UX rõ ràng hơn — read receipt per-message hiển thị đúng (trước: chỉ tin cuối chuỗi có tick → 2 tin đầu không biết trạng thái). Khớp WhatsApp/Telegram/Zalo convention. Bỏ logic `nextMsg/sameMinAsNext/showMeta`. Net: -28 dòng code. Time + tick share row với bubble (opposite edge) nên không tốn vertical space. Commit: `567966a`.
+
+59. **Phase 24.1 — AvatarCropDialog đen xì mobile**: ✅ Root cause: `cropSize` init null + conditional `{cropSize && <Cropper/>}` — trên Safari iOS, `ResizeObserver` callback fire chậm/skip lần đầu → Cropper không mount → user thấy `bg-ink` đen. Fix: init `cropSize = {280, 280}` default + initial sync measure `el.clientWidth` trước RO + bỏ conditional. Cropper luôn mount với cropSize hợp lệ. Commit: `5f0217b`.
+
+60. **Phase 25 — Avatar zoom out tới mép ảnh**: ✅ Trước: `minZoom=1` (default react-easy-crop) + `objectFit=cover` → tại zoom thấp nhất, ảnh cover crop hình vuông → chiều dài bị cắt, không thể zoom out tiếp. Fix: dynamic `minZoom` qua `onMediaLoaded`:
+    - Formula: `minZoom = min(naturalW, naturalH) / max(naturalW, naturalH)`
+    - Ảnh 4:3 → 0.75, 16:9 → 0.5625, vuông → 1
+    - Tại minZoom đó, chiều dài chạm mép crop
+    - Auto-reset `zoom = minZoom` khi ảnh load → user thấy full ảnh ngay khi mở
+    - Slider `min={minZoom}` + ZoomOut button bound theo minZoom. Commit: `83420ee`.
 
 ### 🟢 DEPLOY ĐÃ HOÀN TẤT (2026-05-15)
 
@@ -2184,6 +2234,125 @@ Export WidthProvider doesn't exist in target module
 3. **RESTART dev server** (Turbopack cache stale Prisma client)
 4. `npm run build` — full pipeline (compile + typecheck + static gen). Sandbox có thể fail ở static gen do DB unreachable — acceptable, Vercel sẽ pass
 
+### 14.10. Polling Race Condition Pattern (Phase 23.2 lesson)
+
+Khi có **polling interval** + **optimistic mutation** (chat, real-time list...), race condition điển hình:
+
+```
+T=0:    User send → optimistic added to array, POST in flight
+T=3s:   Polling fires → fetchMessages(since=...) → server trả real msg đã tạo từ POST
+        → array append → [..., optimistic_opt, real]
+T=3.05: POST response arrives → setMessages map replace optimistic → real
+        → array = [..., real, real]  ← DUPLICATE
+```
+
+**Fix dedupe by ID (2 chỗ)**:
+
+```typescript
+// 1. Polling append: filter trùng id
+setMessages(prev => {
+  const existingIds = new Set(prev.map(m => m.id))
+  const filtered = newMsgs.filter(m => !existingIds.has(m.id))
+  return filtered.length === 0 ? prev : [...prev, ...filtered]
+})
+
+// 2. POST response: check real đã exists chưa
+setMessages(prev => {
+  const withoutOpt = prev.filter(m => m.id !== optimistic.id)
+  if (withoutOpt.some(m => m.id === real.id)) return withoutOpt
+  return [...withoutOpt, real]
+})
+```
+
+### 14.11. React State Stale Trong Cùng Tick (Phase 23.2 lesson)
+
+Rapid event firing (Enter spam, double-click) trong < 16ms (1 frame) → state chưa propagate → guard `if (sending) return` không hiệu quả.
+
+**Pattern: `useRef` cho sync flag**
+
+```typescript
+const sendingRef = useRef(false)
+
+async function handleSend() {
+  if (sendingRef.current) return  // sync read, không qua React render
+  sendingRef.current = true        // sync write
+  setSending(true)                  // UI state vẫn cần cho disabled button
+  ...
+  finally {
+    sendingRef.current = false
+    setSending(false)
+  }
+}
+```
+
+useRef đọc/ghi đồng bộ → 2 lần Enter trong cùng tick → lần 2 thấy `sendingRef.current === true` → return ngay.
+
+Áp dụng cho: chat send, form submit, payment confirm, action button bất kỳ có async.
+
+### 14.12. Mobile Responsive Audit cho Split-Pane (Phase 23 lesson)
+
+**Pattern bug**: Desktop split-pane (left list + right content) khi resize mobile:
+- Left `w-72` (288px) chiếm 76% của 375px viewport
+- Right `flex-1` còn ~55px → content bị squash, name/avatar/bubble overflow
+
+**Fix mobile-first responsive**:
+
+```tsx
+{/* Left: full mobile, fixed desktop. Hide khi item selected */}
+<div className={`w-full sm:w-72 ${activeId ? 'hidden sm:flex' : 'flex'} ...`}>
+
+{/* Right: hidden khi không có item selected. Hiển full mobile khi có */}
+<div className={`flex-1 ${activeId ? 'flex' : 'hidden sm:flex'} ...`}>
+  {/* Back button chỉ mobile để return về list */}
+  <button onClick={() => setActiveId(null)} className="sm:hidden">
+    <ArrowLeft />
+  </button>
+```
+
+Kèm theo: bỏ auto-select first item — để user click chủ động → mobile thấy list trước.
+
+### 14.13. Production Crash Debugging qua error_logs (Phase 22.1 lesson)
+
+Production error message thường bị minify ("An error occurred in the Server Components render. The specific message is omitted in production builds").
+
+**Workflow**:
+1. User báo lỗi với `digest` code (`1036636938`)
+2. Query `prisma.errorLog.findMany({ where: { context: 'client.error_boundary' }, ... })` — `inputData.digest` match
+3. `userId` tìm được → query user data → reproduce locally
+4. Common cause: **stale Vercel deploy** (schema đã `prisma db push` lên production DB nhưng bundle JS vẫn chạy code cũ) → mismatch → crash
+5. Defensive fix: wrap server component DB queries trong `try/catch + logError + fallback empty array` → page render empty state thay vì error boundary
+
+Script tạm: `prisma/check-error-logs.ts` (xóa sau khi debug xong).
+
+### 14.14. Race trong onMount Measurement (Phase 24.1 lesson)
+
+**Pattern bug**: Dialog/modal cần đo container width để config child component (vd `cropSize` cho Cropper):
+
+```typescript
+// ❌ BAD: chỉ có ResizeObserver — Safari iOS đôi khi fire chậm/skip
+const [size, setSize] = useState(null)
+useEffect(() => {
+  const ro = new ResizeObserver((e) => setSize(...))
+  ro.observe(el)
+}, [])
+{size && <Cropper cropSize={size} />}  // → black screen khi RO chưa fire
+```
+
+**Fix**:
+```typescript
+// ✅ GOOD: init default + initial sync measure + RO cho resize sau
+const [size, setSize] = useState({ width: 280, height: 280 })  // sensible default
+useEffect(() => {
+  const measure = () => { if (el.clientWidth > 0) setSize(...) }
+  measure()  // sync ngay khi mount
+  const ro = new ResizeObserver(measure)
+  ro.observe(el)
+}, [])
+<Cropper cropSize={size} />  // luôn render
+```
+
+Triết lý: **không bao giờ phụ thuộc 100% vào async observer** — luôn có initial sync measurement + sensible default.
+
 ---
 
 ## 15. Operational Principles (Production Discipline)
@@ -2291,6 +2460,44 @@ Apple Liquid Glass framework giữ ở mức **structure** (frosted bg + blur + 
 **Triết lý:** "Premium quiet" — UI không tranh giành sự chú ý với content. App type Poolane = focus mode (không entertainment) → animation noise là anti-pattern.
 
 Chi tiết tại Section 2 (Brand) — Design Discipline subsection.
+
+### 15.8. Role-Agnostic UX Consistency (Phase 23 lesson)
+
+**Triết lý**: KHÔNG có chênh lệch UX giữa các role (admin/staff/student) hay device (mobile/desktop). Cùng action → cùng visual feedback → cùng affordance.
+
+**Anti-pattern tránh**: Asymmetric features dựa trên role.
+- ❌ Phase 22 thử: chỉ HV thấy CheckCheck khi admin đọc, admin không thấy (tránh "áp lực reply nhanh")
+- → Owner phản hồi: "tôi không muốn có sự chênh lệch giữa các role"
+- ✅ Phase 23 sửa: symmetric — cả 2 bên đều thấy CheckCheck khi đối phương đọc
+
+**Lý do**: Hidden rule yêu cầu user học → bad UX. Consistency tạo trust + predictability.
+
+**Áp dụng**:
+- Read receipt: symmetric
+- Edit/delete permissions: cùng role → cùng quyền (không gate theo platform)
+- Notification: cùng event → cùng broadcast (không skip role nào)
+- Form validation: cùng field → cùng rule (không loose hơn cho admin)
+
+Ngoại lệ acceptable: **admin có thêm quyền** (xem all conversations, override resolve, etc.) nhưng không **bớt** UX so với student.
+
+### 15.9. Standard UX Over Custom Rules (Phase 24 lesson)
+
+**Triết lý**: Ưu tiên convention quen thuộc (WhatsApp/Telegram/Zalo cho chat, Google Calendar cho schedule, Shopee/Tiki cho cart) hơn rule clever tự nghĩ ra để "save space".
+
+**Anti-pattern tránh**: Hidden rules user phải học.
+- ❌ Phase 22 thử: dedup time same-minute → chỉ tin cuối chuỗi hiển thị time
+- Vấn đề thực tế:
+  - User phải biết rule mới hiểu
+  - Read receipt per-message ambiguous (tin nào đã đọc?)
+  - Layout "lệch" khi meta bị hide
+- ✅ Phase 24 sửa: hiển thị time MỌI tin (khớp WhatsApp). Lặp "11:23 · 11:23" chấp nhận được, đổi lấy:
+  - Read receipt rõ ràng từng tin
+  - Không rule ngầm
+  - Code đơn giản hơn (-28 dòng)
+
+**Câu hỏi quyết định**: "Có ai cần học rule này để dùng app không?" Nếu có → đổi sang convention chuẩn.
+
+**Trade-off chấp nhận**: Visual lặp lại > hidden complexity. User vẫn ưu tiên cao hơn.
 
 ---
 
@@ -2611,10 +2818,16 @@ Những điều CHƯA chốt, cần quyết định trước khi build:
 | **Press squish** | Click feedback `scale(0.96) + brightness(0.92)` snappy 150ms |
 | **Notion-style sidebar** | Layout pattern: outer padding-left 16rem + sidebar position: fixed (KHÔNG flex parallel) |
 | **Typography discipline** | Phase 13 rule: italic Cormorant CHỈ cho quote/blog body/greeting; sans Plus Jakarta cho mọi UI structural |
+| **Popover vs Picker/Overlay** | Popover = Base UI `Popover.Root` anchored vào trigger (FAB chat, notification bell). Picker/Overlay = absolute-positioned div không anchor (UserPicker trong popover). "Popup" colloquial cho cả 2 |
+| **Participants pattern** | Phase 20 chat schema: `Conversation` không có FK Role-specific, dùng `ConversationParticipant` junction table (any-to-any). Thay 1-staff-1-student rigid pattern |
+| **Symmetric UX** | Phase 23 principle: KHÔNG asymmetric features giữa roles. Cùng action → cùng feedback. Tránh hidden rules dạng "chỉ role X mới thấy" |
+| **Standard UX over custom rules** | Phase 24 principle: ưu tiên convention quen thuộc (WhatsApp/Telegram/Shopee) hơn rule clever. Visual lặp lại > hidden complexity |
+| **sendingRef pattern** | useRef sync flag chống double-fire khi state stale trong cùng tick (Enter spam, rapid click). State `setSending` chỉ cho UI disabled; ref cho logic guard |
+| **shortenVietnameseName** | Phase 21 helper (`src/lib/format-name.ts`): viết tắt họ (từ đầu) còn 2 chữ, giữ tên đệm + tên chính. Ví dụ `Nguyễn Ngọc Hoàng Việt` → `Ng Ngọc Hoàng Việt` |
 
 ---
 
-**Phiên bản:** 1.6 — Phase 18 (Register UX + pool ticket auto-create + multi-ticket aggregate + avatar system-wide + RLS Prisma bypass + schedule UX overhaul + shop e-commerce UX + crop dialog + TZ fix + iOS Safari fix)
+**Phiên bản:** 1.7 — Phase 19-25 (Chat system: any-to-any DM + groups + rate limit + symmetric tick + mobile responsive + standard UX). Schedule wider columns + Vietnamese name shortening. Avatar crop fixes.
 **Cập nhật cuối:** 2026-05-17
 **Maintainer:** Owner + AI
 
