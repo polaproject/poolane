@@ -1,44 +1,52 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { logError } from '@/lib/logger'
 import { MessagesClient } from '@/components/features/chat/MessagesClient'
 
 // Admin xem TẤT CẢ conversations (giữ admin privilege)
 export default async function AdminMessagesPage() {
   const user = await requireRole(['admin'])
 
-  const conversations = await prisma.conversation.findMany({
-    include: {
-      participants: {
-        where: { leftAt: null },
-        include: { user: { select: { id: true, fullName: true, role: true, avatarUrl: true } } },
-      },
-    },
-    orderBy: { lastMessageAt: 'desc' },
-    take: 100,
-  })
-
-  // Admin có thể không là participant của conv → unreadCount = 0 cho những conv đó
-  const myParts = await prisma.conversationParticipant.findMany({
-    where: { userId: user.id, leftAt: null, conversationId: { in: conversations.map(c => c.id) } },
-    select: { conversationId: true, lastReadAt: true },
-  })
-  const lastReadMap = new Map(myParts.map(p => [p.conversationId, p.lastReadAt]))
-
-  const unreadCounts = await Promise.all(
-    conversations.map(async c => {
-      if (!lastReadMap.has(c.id)) return 0 // admin không là participant → 0
-      const last = lastReadMap.get(c.id) ?? new Date(0)
-      return prisma.chatMessage.count({
-        where: {
-          conversationId: c.id,
-          senderId: { not: user.id },
-          deletedAt: null,
-          createdAt: { gt: last },
+  let withUnread: Array<Record<string, unknown>> = []
+  try {
+    const conversations = await prisma.conversation.findMany({
+      include: {
+        participants: {
+          where: { leftAt: null },
+          include: { user: { select: { id: true, fullName: true, role: true, avatarUrl: true } } },
         },
+      },
+      orderBy: { lastMessageAt: 'desc' },
+      take: 100,
+    })
+
+    if (conversations.length > 0) {
+      const myParts = await prisma.conversationParticipant.findMany({
+        where: { userId: user.id, leftAt: null, conversationId: { in: conversations.map(c => c.id) } },
+        select: { conversationId: true, lastReadAt: true },
       })
-    }),
-  )
-  const withUnread = conversations.map((c, i) => ({ ...c, unreadCount: unreadCounts[i] }))
+      const lastReadMap = new Map(myParts.map(p => [p.conversationId, p.lastReadAt]))
+
+      const unreadCounts = await Promise.all(
+        conversations.map(async c => {
+          if (!lastReadMap.has(c.id)) return 0
+          const last = lastReadMap.get(c.id) ?? new Date(0)
+          return prisma.chatMessage.count({
+            where: {
+              conversationId: c.id,
+              senderId: { not: user.id },
+              deletedAt: null,
+              createdAt: { gt: last },
+            },
+          })
+        }),
+      )
+      withUnread = conversations.map((c, i) => ({ ...c, unreadCount: unreadCounts[i] }))
+    }
+  } catch (error) {
+    await logError({ context: 'admin.messages.page', message: 'Failed to load conversations', error, userId: user.id })
+    withUnread = []
+  }
 
   return (
     <div className="p-4 md:p-6 h-full flex flex-col">

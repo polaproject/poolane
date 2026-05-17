@@ -191,7 +191,9 @@ export function MessagesPopover({
           <div className="px-6 py-10 text-center">
             <MessageSquare className="h-8 w-8 mx-auto text-foreground/20 mb-2" strokeWidth={1.5} />
             <p className="text-sm text-foreground/55 mb-1">Chưa có tin nhắn nào</p>
-            <p className="text-xs text-foreground/40">Bấm &quot;Mới&quot; để bắt đầu</p>
+            <p className="text-xs text-foreground/40 leading-relaxed">
+              Bấm &quot;Mới&quot; để bắt đầu nhắn tin với bất cứ ai, hoặc tạo nhóm để cùng &quot;rủ rê&quot; bơi lội
+            </p>
           </div>
         )}
         {conversations.map(conv => {
