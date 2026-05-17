@@ -105,7 +105,7 @@ export function UserPicker({ onCreate, onClose, className = '' }: UserPickerProp
           : `Tạo nhóm (${selected.length + 1} người)`
 
   return (
-    <div className={`glass-card rounded-card p-3 w-72 shadow-glass ${className}`}>
+    <div className={`glass-panel rounded-card p-3 w-72 shadow-glass ring-1 ring-foreground/10 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <span className="lqg-headline text-sm">Nhắn tin mới</span>
