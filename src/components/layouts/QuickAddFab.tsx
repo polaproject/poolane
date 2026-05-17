@@ -60,7 +60,8 @@ export function QuickAddFab({ role, open, onOpenChange, itemKeys }: QuickAddFabP
         <Plus className="w-5 h-5" />
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner side="left" align="end" sideOffset={10} alignOffset={0} className="z-[60]">
+        {/* collisionPadding=8 đồng bộ với 2 FAB còn lại — đảm bảo side="left" stable trên mobile */}
+        <Popover.Positioner side="left" align="end" sideOffset={10} alignOffset={0} collisionPadding={8} className="z-[60]">
           <Popover.Popup
             className="z-50 glass-panel rounded-card-lg p-1.5 w-[240px] origin-bottom-right shadow-glass data-[closed]:hidden"
           >

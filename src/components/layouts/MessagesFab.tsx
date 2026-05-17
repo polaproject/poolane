@@ -101,10 +101,14 @@ export function MessagesFab({
         )}
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner side="left" align="end" sideOffset={10} alignOffset={0} collisionPadding={60} className="z-[60]">
+        {/* collisionPadding=8 + width formula `100vw - 7rem` đảm bảo side="left"
+            LUÔN fit bên trái FAB trên mọi viewport (iPhone SE 375 → desktop).
+            Tránh base-ui auto-flip side khi viewport hẹp.
+            7rem = FAB 52 + right 20 + sideOffset 10 + collisionPad 8 + buffer 22 */}
+        <Popover.Positioner side="left" align="end" sideOffset={10} alignOffset={0} collisionPadding={8} className="z-[60]">
           <Popover.Popup
             className="z-50 relative glass-panel rounded-card-lg shadow-glass overflow-hidden
-                       w-[min(380px,calc(100vw-2.5rem))] h-[min(480px,calc(100vh-15rem))]
+                       w-[min(380px,calc(100vw-7rem))] h-[min(480px,calc(100vh-15rem))]
                        origin-bottom-right data-[closed]:hidden"
           >
             <MessagesPopover

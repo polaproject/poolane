@@ -158,9 +158,11 @@ export function NotificationFab({ open, onOpenChange, allowedTypes }: Notificati
         )}
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner side="left" align="end" sideOffset={10} alignOffset={0} className="z-[60]">
+        {/* Đồng bộ với MessagesFab + QuickAddFab: collisionPadding=8 + width formula
+            đảm bảo popover LUÔN ở bên trái FAB trên mọi viewport (iPhone SE → desktop). */}
+        <Popover.Positioner side="left" align="end" sideOffset={10} alignOffset={0} collisionPadding={8} className="z-[60]">
           <Popover.Popup
-            className="z-50 glass-panel rounded-card-lg w-[min(380px,calc(100vw-2.5rem))] max-h-[480px] flex flex-col origin-bottom-right shadow-glass overflow-hidden data-[closed]:hidden"
+            className="z-50 glass-panel rounded-card-lg w-[min(380px,calc(100vw-7rem))] max-h-[480px] flex flex-col origin-bottom-right shadow-glass overflow-hidden data-[closed]:hidden"
           >
             <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-foreground/8">
               <div className="flex items-center gap-2 min-w-0">
