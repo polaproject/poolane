@@ -206,7 +206,10 @@ export default function AssessPage() {
         )}
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 z-30 p-4 max-w-2xl mx-auto">
+      <div
+        className="fixed bottom-0 inset-x-0 z-30 p-4 max-w-2xl mx-auto"
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0))' }}
+      >
         <button
           onClick={handleSubmit}
           disabled={loading || completedCount === 0}

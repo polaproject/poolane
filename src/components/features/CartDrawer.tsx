@@ -46,7 +46,10 @@ export function CartDrawer({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-ink/55 backdrop-blur-sm data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 transition-opacity duration-200" />
-        <Dialog.Popup className="fixed bottom-0 inset-x-0 z-50 max-h-[88vh] overflow-y-auto bg-[var(--surface)] rounded-t-card-xl shadow-glass ring-1 ring-foreground/10 p-5 data-[starting-style]:translate-y-full data-[ending-style]:translate-y-full transition-transform duration-300">
+        <Dialog.Popup
+          className="fixed bottom-0 inset-x-0 z-50 max-h-[88vh] overflow-y-auto bg-[var(--surface)] rounded-t-card-xl shadow-glass ring-1 ring-foreground/10 p-5 data-[starting-style]:translate-y-full data-[ending-style]:translate-y-full transition-transform duration-300"
+          style={{ paddingBottom: 'calc(1.25rem + env(safe-area-inset-bottom, 0))' }}
+        >
           {/* Pull handle */}
           <div className="flex justify-center mb-3">
             <span className="h-1 w-10 rounded-pill bg-foreground/15" />
