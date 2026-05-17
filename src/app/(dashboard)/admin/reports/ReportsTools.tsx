@@ -72,7 +72,7 @@ export function ReportsTools() {
           <h2 className="font-semibold text-foreground">Xuất Excel doanh thu</h2>
         </div>
         <p className="text-xs text-foreground/50 mb-3">File có 3 sheet: Tổng quan, Chi tiết, Theo loại</p>
-        <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
           <div>
             <label className="block text-xs uppercase tracking-wider text-foreground/50 font-semibold mb-1">Từ</label>
             <input type="date" value={from} onChange={e => setFrom(e.target.value)}

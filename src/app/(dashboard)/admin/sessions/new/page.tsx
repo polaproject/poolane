@@ -83,7 +83,7 @@ export default function NewSessionPage() {
 
             <div className="space-y-1.5">
               <Label>Ca học <span className="text-danger">*</span></Label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   { value: 'morning', label: 'Ca Sáng', time: '5:30 – 7:30', max: 5 },
                   { value: 'evening', label: 'Ca Chiều', time: '18:00 – 20:00', max: 7 },

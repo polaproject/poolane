@@ -171,7 +171,7 @@ export function ProductForm({ courses, mode, initial }: Props) {
 
       {/* Basic info */}
       <div className="glass-card glass-card-hover p-5 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Label>Tên sản phẩm <Req /></Label>
             <Input value={form.name} onChange={v => update('name', v)} maxLength={100} placeholder="VD: Kính bơi Aqua Pro" />
@@ -190,7 +190,7 @@ export function ProductForm({ courses, mode, initial }: Props) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Label>Giá bán (VNĐ) <Req /></Label>
             <Input type="number" value={form.price} onChange={v => update('price', v)} placeholder="VD: 150000" />

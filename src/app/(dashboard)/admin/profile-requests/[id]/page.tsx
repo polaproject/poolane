@@ -91,7 +91,7 @@ export default async function ProfileRequestDetailPage({ params }: Params) {
                       {FIELD_LABELS[field] ?? field}
                     </p>
                   </div>
-                  <div className="grid grid-cols-2 divide-x divide-foreground/8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 sm:divide-x divide-foreground/8">
                     <div className="p-4">
                       <p className="text-xs uppercase tracking-wider text-foreground/40 mb-1">Hiện tại</p>
                       <p className="text-sm text-foreground">

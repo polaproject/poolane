@@ -128,7 +128,7 @@ export function BlogForm({ mode, initial }: Props) {
             className="input-blog font-mono text-sm" placeholder="vd-loi-hoc-boi" />
         </FormField>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField label="Danh mục" required>
             <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="input-blog">
               {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}

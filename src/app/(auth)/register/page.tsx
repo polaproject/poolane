@@ -129,7 +129,7 @@ export default function RegisterPage() {
               />
             </Field>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label="Mật khẩu" required error={fieldErrors.password}>
                 <GlassInput
                   type="password"
@@ -150,7 +150,7 @@ export default function RegisterPage() {
               </Field>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label="Ngày sinh" required error={fieldErrors.dob}>
                 <DateInput
                   value={form.dob}

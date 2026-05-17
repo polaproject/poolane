@@ -98,7 +98,7 @@ export default function NewStudentPage() {
             <h2 className="text-base font-semibold text-foreground">Thông tin cơ bản</h2>
           </CardHeader>
           <CardContent className="px-6 pb-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="col-span-2 space-y-1.5">
                 <Label htmlFor="fullName">Họ và tên <span className="text-danger">*</span></Label>
                 <Input id="fullName" {...register('fullName')} placeholder="Nguyễn Văn A" />
@@ -176,7 +176,7 @@ export default function NewStudentPage() {
             <p className="text-xs text-foreground/50">Không bắt buộc</p>
           </CardHeader>
           <CardContent className="px-6 pb-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="emergencyContactName">Liên hệ khẩn cấp</Label>
                 <Input id="emergencyContactName" {...register('emergencyContactName')} placeholder="Tên người thân" />

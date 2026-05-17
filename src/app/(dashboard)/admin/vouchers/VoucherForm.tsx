@@ -97,7 +97,7 @@ export function VoucherForm({ mode, initial }: Props) {
           className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
       </Field>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Loại giảm" required>
           <select value={form.discountType} disabled={mode === 'edit'}
             onChange={e => setForm(f => ({ ...f, discountType: e.target.value }))}
@@ -132,7 +132,7 @@ export function VoucherForm({ mode, initial }: Props) {
           className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
       </Field>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Có hiệu lực từ">
           <input type="date" value={form.validFrom}
             onChange={e => setForm(f => ({ ...f, validFrom: e.target.value }))}

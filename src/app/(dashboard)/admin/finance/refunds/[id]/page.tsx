@@ -78,7 +78,7 @@ export default async function RefundDetailPage({ params }: Params) {
                 </p>
                 <p className="lqg-headline text-xl text-foreground">{fmt(refund.courseRefundAmount)}</p>
               </div>
-              <div className="grid grid-cols-3 gap-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div>
                   <p className="eyebrow text-foreground/45">Đã học</p>
                   <p className="text-foreground mt-1 text-sm">{refund.courseSessionsAttended} buổi</p>
@@ -104,7 +104,7 @@ export default async function RefundDetailPage({ params }: Params) {
                 </p>
                 <p className="lqg-headline text-xl text-foreground">{fmt(refund.ticketRefundAmount)}</p>
               </div>
-              <div className="grid grid-cols-3 gap-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div>
                   <p className="eyebrow text-foreground/45">Đã dùng</p>
                   <p className="text-foreground mt-1 text-sm">{refund.ticketSessionsUsed} buổi</p>

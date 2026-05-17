@@ -136,7 +136,7 @@ export function ExerciseForm({ mode, initial }: { mode: 'create' | 'edit'; initi
           className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
       </Field>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Kỹ năng mục tiêu" required>
           <select value={form.skillTarget} onChange={e => setForm(f => ({ ...f, skillTarget: e.target.value }))}
             className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]">

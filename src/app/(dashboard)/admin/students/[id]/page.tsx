@@ -231,7 +231,7 @@ export default async function StudentDetailPage({ params }: Params) {
             <Mail className="h-4 w-4 text-accent" strokeWidth={1.75} />
             <p className="eyebrow text-foreground/55">Thông tin cá nhân</p>
           </div>
-          <div className="px-5 py-4 grid grid-cols-2 gap-4 text-sm">
+          <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             {[
               { label: 'Email', value: student.user.email },
               { label: 'Giới tính', value: student.user.gender === 'male' ? 'Nam' : student.user.gender === 'female' ? 'Nữ' : student.user.gender },

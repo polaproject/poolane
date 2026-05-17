@@ -76,7 +76,7 @@ export function PaymentForm({ studentId, enrollmentId, defaultAmount, defaultTyp
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <Label className="text-xs mb-1 block">Loại thu</Label>
           <select

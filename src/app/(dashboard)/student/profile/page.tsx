@@ -97,7 +97,7 @@ export default async function StudentProfilePage() {
           )}
           footnote="Các trường định danh cần staff/admin duyệt khi cập nhật để đảm bảo chính xác."
         >
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Họ và tên" value={u.fullName} />
             <Field label="Ngày sinh" value={u.dob ? format(u.dob, 'dd/MM/yyyy') : null} />
             <Field label="Số điện thoại" value={u.phone} />
@@ -124,7 +124,7 @@ export default async function StudentProfilePage() {
             </Link>
           }
         >
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Nghề nghiệp" value={u.occupation} />
             <Field label="Ghi chú sức khoẻ" value={u.healthNotes} />
             <Field label="Liên hệ khẩn — Tên" value={u.emergencyContactName} />

@@ -72,7 +72,7 @@ export default function BroadcastPage() {
           {/* Target */}
           <div className="glass-card glass-card-hover p-5">
             <p className="eyebrow text-foreground/55 mb-3">Gửi đến</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
                 { value: 'all', label: 'Tất cả học viên', icon: Users, desc: 'Đang học + ôn luyện' },
                 { value: 'specific', label: 'Chọn cụ thể', icon: User, desc: 'Chọn từng người' },

@@ -187,7 +187,7 @@ export function QuizForm({ courses }: { courses: Course[] }) {
                 className="w-full px-3 py-2 text-sm border border-foreground/20 rounded-lg bg-[var(--surface)]" />
             </Field>
 
-            <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
               <Field label="Loại câu hỏi">
                 <select value={q.type}
                   onChange={e => updateQuestion(qi, {

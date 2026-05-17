@@ -310,7 +310,7 @@ export function WidgetBuilderModal({ dashboardId, initial, timeRange, globalForm
               {/* Visualization type */}
               <div>
                 <p className="text-[10px] uppercase tracking-wider text-foreground/55 mb-1.5 font-semibold">Loại hiển thị</p>
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                   {WIDGET_TYPES.map(wt => {
                     const Icon = wt.icon
                     const active = config.visualization.type === wt.value
