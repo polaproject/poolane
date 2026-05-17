@@ -3,43 +3,42 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logError } from '@/lib/logger'
 
-// ─── GET /api/conversations/unread-count — Cho FAB badge ──
+// ─── GET /api/conversations/unread-count ──────────────────
+// Count messages chưa đọc qua participant.lastReadAt. Admin không là
+// participant ở conv nào → count = 0 (admin xem qua /admin/messages page).
 export async function GET() {
   try {
     const user = await requireRole(['admin', 'staff', 'student'])
 
-    if (user.role === 'student') {
-      const student = await prisma.student.findFirst({ where: { userId: user.id } })
-      if (!student) return NextResponse.json({ data: { count: 0 }, error: null })
+    const myParticipations = await prisma.conversationParticipant.findMany({
+      where: { userId: user.id, leftAt: null },
+      select: { conversationId: true, lastReadAt: true },
+    })
 
-      const count = await prisma.chatMessage.count({
-        where: {
-          conversation: { studentId: student.id },
-          senderId: { not: user.id },
-          readAt: null,
-          deletedAt: null,
-        },
-      })
-      return NextResponse.json({ data: { count }, error: null })
+    if (myParticipations.length === 0) {
+      return NextResponse.json({ data: { count: 0 }, error: null })
     }
 
-    // admin/staff
-    const where = user.role === 'admin' ? {} : { staffUserId: user.id }
-    const count = await prisma.chatMessage.count({
-      where: {
-        conversation: where,
-        senderId: { not: user.id },
-        readAt: null,
-        deletedAt: null,
-      },
-    })
-    return NextResponse.json({ data: { count }, error: null })
+    const counts = await Promise.all(
+      myParticipations.map(p =>
+        prisma.chatMessage.count({
+          where: {
+            conversationId: p.conversationId,
+            senderId: { not: user.id },
+            deletedAt: null,
+            ...(p.lastReadAt ? { createdAt: { gt: p.lastReadAt } } : {}),
+          },
+        }),
+      ),
+    )
 
+    const count = counts.reduce((s, n) => s + n, 0)
+    return NextResponse.json({ data: { count }, error: null })
   } catch (error) {
     await logError({ context: 'conversations.unread-count', message: 'Failed to count unread', error })
     return NextResponse.json(
       { data: null, error: { code: 'INTERNAL_ERROR', message: 'Có lỗi xảy ra' } },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

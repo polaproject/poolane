@@ -50,8 +50,8 @@ model User {
   studentNotesCreated  StudentNote[]
   auditLogs            AuditLog[]
   notificationsReceived Notification[]
-  staffConversations   Conversation[]  @relation("StaffConversations")
-  sentMessages         ChatMessage[]   @relation("SentMessages")
+  conversationParticipations ConversationParticipant[] @relation("ConversationParticipations")
+  sentMessages               ChatMessage[]              @relation("SentMessages")
 
   @@map("users")
 }
@@ -104,7 +104,6 @@ model Student {
   profileChangeRequests ProfileChangeRequest[]
   videoLinks           VideoLink[]
   orders               Order[]
-  conversations        Conversation[]
 
   @@map("students")
 }
@@ -1135,8 +1134,9 @@ model DashboardWidget {
 }
 
 // ─────────────────────────────────────────
-// CHAT (Phase 19)
-// Admin/Staff ↔ Student — polling 3s khi open, 30s background
+// CHAT (Phase 20 — flexible any-to-any DM + groups)
+// Bất kỳ user nào nhắn được bất kỳ user nào. Groups ≤20 người.
+// Rate limit 5 msg/10s cho student (admin/staff exempt).
 // ─────────────────────────────────────────
 
 model Conversation {
@@ -1144,23 +1144,51 @@ model Conversation {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  staffUserId        String    @map("staff_user_id")
-  studentId          String    @map("student_id")
+  /** Group name (NULL = DM, hiển thị join(participantNames)). Max 80 char. */
+  name      String?  @db.VarChar(80)
+  /** false = DM (2 người), true = nhóm (>2 hoặc có name). Cached cho query. */
+  isGroup   Boolean  @default(false) @map("is_group")
+  /** Creator userId (audit + group permissions). */
+  createdBy String?  @map("created_by")
+
   lastMessageAt      DateTime? @map("last_message_at")
   lastMessagePreview String?   @db.VarChar(100) @map("last_message_preview")
-  isResolved         Boolean   @default(false) @map("is_resolved")
-  resolvedAt         DateTime? @map("resolved_at")
-  resolvedBy         String?   @map("resolved_by")
 
-  staffUser User        @relation("StaffConversations", fields: [staffUserId], references: [id])
-  student   Student     @relation(fields: [studentId], references: [id])
-  messages  ChatMessage[]
+  /** Admin/Staff đóng cuộc hội thoại. Trong group = "đã archive". */
+  isResolved Boolean   @default(false) @map("is_resolved")
+  resolvedAt DateTime? @map("resolved_at")
+  resolvedBy String?   @map("resolved_by")
 
-  @@unique([staffUserId, studentId])
-  @@index([staffUserId, isResolved])
-  @@index([studentId])
+  participants ConversationParticipant[]
+  messages     ChatMessage[]
+
   @@index([lastMessageAt])
+  @@index([isGroup, lastMessageAt])
   @@map("conversations")
+}
+
+model ConversationParticipant {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  conversationId String @map("conversation_id")
+  userId         String @map("user_id")
+  /** Role TRONG conversation, không phải UserRole. 'member' | 'admin' (creator). */
+  role           String @default("member")
+  /** Mọi message createdAt ≤ này = đã đọc bởi user này. */
+  lastReadAt     DateTime? @map("last_read_at")
+  /** Soft leave — user rời nhóm nhưng giữ history. NULL = đang trong nhóm. */
+  leftAt         DateTime? @map("left_at")
+  /** Notif on/off per user per conv (future-proof). */
+  isMuted        Boolean   @default(false) @map("is_muted")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation("ConversationParticipations", fields: [userId], references: [id])
+
+  @@unique([conversationId, userId])
+  @@index([userId, leftAt])
+  @@index([conversationId])
+  @@map("conversation_participants")
 }
 
 model ChatMessage {
@@ -1169,12 +1197,14 @@ model ChatMessage {
 
   conversationId String    @map("conversation_id")
   senderId       String    @map("sender_id")
+  /** Denormalized — sender role tại thời điểm gửi (audit + UI badges). */
   senderRole     String    @map("sender_role")
   content        String    @db.VarChar(2000)
+  /** Giữ cho DM tương thích visual (single tick / double tick). */
   readAt         DateTime? @map("read_at")
   deletedAt      DateTime? @map("deleted_at")
 
-  conversation Conversation @relation(fields: [conversationId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation("SentMessages", fields: [senderId], references: [id])
 
   @@index([conversationId, createdAt])

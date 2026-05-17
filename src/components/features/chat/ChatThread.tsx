@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { ArrowLeft, Send, Loader2, Check, CheckCheck } from 'lucide-react'
+import { ArrowLeft, Send, Loader2, Check, CheckCheck, Users } from 'lucide-react'
 import { format, isToday, isYesterday } from 'date-fns'
 import { Avatar } from '@/components/ui/Avatar'
 
@@ -22,18 +22,28 @@ interface Message {
   sender: Sender
 }
 
+interface ParticipantInfo {
+  id: string // userId
+  fullName: string
+  avatarUrl: string | null
+  role: string
+}
+
+interface ParticipantReadState {
+  userId: string
+  lastReadAt: string | null
+}
+
 interface ChatThreadProps {
   conversationId: string
   isResolved: boolean
+  isGroup: boolean
+  groupName: string | null
+  participants: ParticipantInfo[]
   currentUserId: string
   currentUserName: string
   currentUserAvatar: string | null
   currentUserRole: 'admin' | 'staff' | 'student'
-  recipient: {
-    fullName: string
-    avatarUrl: string | null
-    role?: string
-  }
   onBack: () => void
   onMessageSent?: (preview: string, createdAt: string) => void
 }
@@ -49,24 +59,23 @@ const POLL_ACTIVE_MS = 3_000
 const POLL_BG_MS = 30_000
 const DRAFT_KEY_PREFIX = 'chat-draft-'
 
-/**
- * Single conversation chat view — header + messages + input.
- * Polling 3s khi tab focused, 30s khi hidden. Draft preserve qua sessionStorage.
- */
 export function ChatThread({
   conversationId,
   isResolved,
+  isGroup,
+  groupName,
+  participants,
   currentUserId,
   currentUserName,
   currentUserAvatar,
   currentUserRole,
-  recipient,
   onBack,
   onMessageSent,
 }: ChatThreadProps) {
   const draftKey = `${DRAFT_KEY_PREFIX}${conversationId}`
 
   const [messages, setMessages] = useState<Message[]>([])
+  const [readStates, setReadStates] = useState<ParticipantReadState[]>([])
   const [loading, setLoading] = useState(true)
   const [input, setInput] = useState(() => {
     if (typeof window === 'undefined') return ''
@@ -80,7 +89,7 @@ export function ChatThread({
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Persist draft to sessionStorage on every input change
+  // Persist draft
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (input.trim()) sessionStorage.setItem(draftKey, input)
@@ -95,9 +104,18 @@ export function ChatThread({
           : `/api/conversations/${conversationId}/messages`
         const r = await fetch(url)
         const j = await r.json()
-        if (!j.data?.messages) return
-        const newMsgs: Message[] = j.data.messages
-        if (newMsgs.length === 0) return
+        if (!j.data) return
+
+        // Always update readStates (participants.lastReadAt) — cho group receipt
+        if (j.data.participants) {
+          setReadStates(j.data.participants)
+        }
+
+        const newMsgs: Message[] = j.data.messages ?? []
+        if (newMsgs.length === 0) {
+          if (!since) setMessages([])
+          return
+        }
 
         if (since) {
           setMessages(prev => [...prev, ...newMsgs])
@@ -106,6 +124,7 @@ export function ChatThread({
         }
         lastMsgTimeRef.current = newMsgs[newMsgs.length - 1].createdAt
 
+        // Mark read
         fetch(`/api/conversations/${conversationId}/read`, { method: 'PATCH' }).catch(() => null)
       } catch {
         /* silent — retry on next poll */
@@ -113,7 +132,7 @@ export function ChatThread({
         if (!since) setLoading(false)
       }
     },
-    [conversationId]
+    [conversationId],
   )
 
   // Initial load + polling
@@ -126,7 +145,9 @@ export function ChatThread({
     function startPoll(ms: number) {
       if (pollRef.current) clearInterval(pollRef.current)
       pollRef.current = setInterval(() => {
+        // Always re-fetch (with `since` if has data) — participants/readStates đổi liên tục
         if (lastMsgTimeRef.current) fetchMessages(lastMsgTimeRef.current)
+        else fetchMessages()
       }, ms)
     }
     function stopPoll() {
@@ -152,9 +173,7 @@ export function ChatThread({
     }
   }, [conversationId, fetchMessages])
 
-  // Auto-scroll to bottom CỦA messages container (không propagate ra document).
-  // `block: 'nearest'` quan trọng — tránh browser scroll cả trang ngoài để
-  // "đưa popover vào view" khi popover nằm trong Portal.
+  // Auto-scroll bottom (block: 'nearest' để không scroll background — Phase 19 fix)
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }, [messages])
@@ -187,8 +206,8 @@ export function ChatThread({
       const j = await r.json()
       if (!r.ok || j.error) {
         setMessages(prev => prev.filter(m => m.id !== optimistic.id))
-        setSendError(j.error?.message ?? 'Không thể gửi tin nhắn')
-        setInput(text) // restore so user không mất tin
+        setSendError(j.error?.message ?? 'Không thể gửi tin nhắn, vui lòng thử lại')
+        setInput(text)
       } else if (j.data?.message) {
         const real: Message = j.data.message
         lastMsgTimeRef.current = real.createdAt
@@ -212,17 +231,34 @@ export function ChatThread({
     }
   }
 
-  // Asymmetric read receipt: HV xem được "Đã xem" của admin/staff,
-  // admin/staff KHÔNG xem được "đã xem" của HV (tránh áp lực reply).
-  const showReadReceipts = currentUserRole === 'student'
+  // ─── Header info ──────────────────────────────────────
+  const others = participants.filter(p => p.id !== currentUserId)
+  const headerName = isGroup
+    ? (groupName ?? others.map(p => p.fullName.split(' ').pop()).join(', ').slice(0, 40))
+    : (others[0]?.fullName ?? 'Hội thoại')
+  const headerAvatars = others.slice(0, 3)
 
-  // Tìm tin nhắn cuối cùng mình gửi (không phải optimistic) để hiện status text
+  // ─── Read receipt logic ──────────────────────────────
+  // DM: asymmetric — HV thấy, admin/staff không
+  // Group: hiển thị "Đã xem bởi N/M" dưới last sent message
+  const showDmReceipts = !isGroup && currentUserRole === 'student'
+
   const lastSentMessage = (() => {
     for (let i = messages.length - 1; i >= 0; i--) {
       const m = messages[i]
       if (m.senderId === currentUserId && !m.id.startsWith('opt-')) return m
     }
     return null
+  })()
+
+  // Compute group read count
+  const groupReadCount = (() => {
+    if (!isGroup || !lastSentMessage) return null
+    const lastSentTime = new Date(lastSentMessage.createdAt).getTime()
+    const otherReaders = readStates
+      .filter(s => s.userId !== currentUserId && s.lastReadAt)
+      .filter(s => new Date(s.lastReadAt!).getTime() >= lastSentTime)
+    return { read: otherReaders.length, total: others.length }
   })()
 
   return (
@@ -236,10 +272,32 @@ export function ChatThread({
         >
           <ArrowLeft className="h-4 w-4 text-foreground/65" />
         </button>
-        <Avatar avatarUrl={recipient.avatarUrl} fullName={recipient.fullName} size="sm" />
+
+        {/* Avatar(s) */}
+        {isGroup ? (
+          <div className="relative w-9 h-9 shrink-0">
+            {headerAvatars.map((a, i) => (
+              <div
+                key={a.id}
+                className="absolute ring-2 ring-paper rounded-pill"
+                style={{ left: i * 8, top: i * 3, zIndex: headerAvatars.length - i }}
+              >
+                <Avatar avatarUrl={a.avatarUrl} fullName={a.fullName} size="xs" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Avatar avatarUrl={others[0]?.avatarUrl ?? null} fullName={headerName} size="sm" />
+        )}
+
         <div className="flex-1 min-w-0">
-          <p className="lqg-headline text-sm truncate">{recipient.fullName}</p>
-          {isResolved && <span className="text-[10px] text-foreground/50">Đã đóng</span>}
+          <p className="lqg-headline text-sm truncate">{headerName}</p>
+          {isGroup && (
+            <span className="text-[10px] text-foreground/55 inline-flex items-center gap-0.5">
+              <Users className="h-2.5 w-2.5" /> {participants.length} thành viên
+            </span>
+          )}
+          {isResolved && <span className="text-[10px] text-foreground/50 ml-1">· Đã đóng</span>}
         </div>
       </div>
 
@@ -255,7 +313,9 @@ export function ChatThread({
         )}
         {messages.map((msg, i) => {
           const isMine = msg.senderId === currentUserId
-          const showAvatar = !isMine && (i === 0 || messages[i - 1].senderId !== msg.senderId)
+          const prevMsg = i > 0 ? messages[i - 1] : null
+          const showAvatar = !isMine && (i === 0 || prevMsg?.senderId !== msg.senderId)
+          const showSenderLabel = isGroup && !isMine && (i === 0 || prevMsg?.senderId !== msg.senderId)
           return (
             <div key={msg.id} className={`flex gap-1.5 ${isMine ? 'justify-end' : 'justify-start'}`}>
               {!isMine && (
@@ -264,6 +324,9 @@ export function ChatThread({
                 </div>
               )}
               <div className={`max-w-[75%] space-y-0.5 ${isMine ? 'items-end' : 'items-start'} flex flex-col`}>
+                {showSenderLabel && (
+                  <span className="text-[10px] text-foreground/55 px-1 font-medium">{msg.sender.fullName}</span>
+                )}
                 <div
                   className={`px-2.5 py-1.5 rounded-card text-sm leading-relaxed break-words
                     ${isMine ? 'bg-accent/15 text-foreground rounded-br-sm' : 'glass-card text-foreground rounded-bl-sm'}`}
@@ -272,8 +335,9 @@ export function ChatThread({
                 </div>
                 <div className="flex items-center gap-1">
                   <span className="text-[9px] text-foreground/35">{formatMsgTime(msg.createdAt)}</span>
-                  {isMine && !msg.id.startsWith('opt-') && (
-                    showReadReceipts && msg.readAt
+                  {/* Per-message tick CHỈ trong DM (group dùng aggregate dưới) */}
+                  {isMine && !isGroup && !msg.id.startsWith('opt-') && (
+                    showDmReceipts && msg.readAt
                       ? <CheckCheck className="h-2.5 w-2.5 text-accent" />
                       : <Check className="h-2.5 w-2.5 text-foreground/35" />
                   )}
@@ -282,10 +346,11 @@ export function ChatThread({
             </div>
           )
         })}
-        {/* Status text dưới last sent message — chỉ HV thấy "đã xem" */}
-        {lastSentMessage && (
+
+        {/* DM status dưới last sent */}
+        {!isGroup && lastSentMessage && (
           <div className="flex justify-end pr-1">
-            {showReadReceipts && lastSentMessage.readAt ? (
+            {showDmReceipts && lastSentMessage.readAt ? (
               <span className="text-[10px] text-accent font-medium inline-flex items-center gap-0.5">
                 <CheckCheck className="h-2.5 w-2.5" />
                 Đã xem · {format(new Date(lastSentMessage.readAt), 'HH:mm')}
@@ -298,10 +363,28 @@ export function ChatThread({
             )}
           </div>
         )}
+
+        {/* Group status: "Đã xem bởi N/M" */}
+        {isGroup && lastSentMessage && groupReadCount && (
+          <div className="flex justify-end pr-1">
+            {groupReadCount.read > 0 ? (
+              <span className="text-[10px] text-accent font-medium inline-flex items-center gap-0.5">
+                <CheckCheck className="h-2.5 w-2.5" />
+                Đã xem bởi {groupReadCount.read}/{groupReadCount.total}
+              </span>
+            ) : (
+              <span className="text-[10px] text-foreground/45 inline-flex items-center gap-0.5">
+                <Check className="h-2.5 w-2.5" />
+                Đã gửi
+              </span>
+            )}
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </div>
 
-      {/* Input area */}
+      {/* Input */}
       {isResolved ? (
         <div className="px-3 py-2.5 border-t border-foreground/8 text-center text-xs text-foreground/40">
           Cuộc hội thoại đã đóng

@@ -6,23 +6,35 @@ export default async function StaffMessagesPage() {
   const user = await requireRole(['staff'])
 
   const conversations = await prisma.conversation.findMany({
-    where: { staffUserId: user.id },
+    where: { participants: { some: { userId: user.id, leftAt: null } } },
     include: {
-      staffUser: { select: { id: true, fullName: true, role: true, avatarUrl: true } },
-      student: {
-        include: { user: { select: { id: true, fullName: true, avatarUrl: true } } },
+      participants: {
+        where: { leftAt: null },
+        include: { user: { select: { id: true, fullName: true, role: true, avatarUrl: true } } },
       },
-      messages: { where: { deletedAt: null }, orderBy: { createdAt: 'desc' }, take: 1 },
     },
     orderBy: { lastMessageAt: 'desc' },
+    take: 100,
   })
 
+  const myParts = await prisma.conversationParticipant.findMany({
+    where: { userId: user.id, leftAt: null, conversationId: { in: conversations.map(c => c.id) } },
+    select: { conversationId: true, lastReadAt: true },
+  })
+  const lastReadMap = new Map(myParts.map(p => [p.conversationId, p.lastReadAt]))
+
   const unreadCounts = await Promise.all(
-    conversations.map(c =>
-      prisma.chatMessage.count({
-        where: { conversationId: c.id, senderId: { not: user.id }, readAt: null, deletedAt: null },
+    conversations.map(async c => {
+      const last = lastReadMap.get(c.id) ?? new Date(0)
+      return prisma.chatMessage.count({
+        where: {
+          conversationId: c.id,
+          senderId: { not: user.id },
+          deletedAt: null,
+          createdAt: { gt: last },
+        },
       })
-    )
+    }),
   )
   const withUnread = conversations.map((c, i) => ({ ...c, unreadCount: unreadCounts[i] }))
 
@@ -30,7 +42,7 @@ export default async function StaffMessagesPage() {
     <div className="p-4 md:p-6 h-full flex flex-col">
       <div className="mb-4">
         <h1 className="lqg-headline text-xl">Tin nhắn</h1>
-        <p className="text-sm text-foreground/55 mt-0.5">Hội thoại với học viên của bạn</p>
+        <p className="text-sm text-foreground/55 mt-0.5">Hội thoại của bạn</p>
       </div>
       <div className="flex-1 min-h-0">
         <MessagesClient

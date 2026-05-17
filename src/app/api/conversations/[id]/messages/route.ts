@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { logError } from '@/lib/logger'
+import { checkChatRateLimit } from '@/lib/rate-limit'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -10,30 +11,32 @@ const sendMessageSchema = z.object({
   content: z.string().min(1).max(2000),
 })
 
-/** Verify caller là participant — trả null nếu không tồn tại HOẶC không có quyền */
+const ACTION_URL_BY_ROLE: Record<string, string> = {
+  admin: '/admin/messages',
+  staff: '/staff/messages',
+  student: '/student/messages',
+}
+
+/** Verify caller là participant — admin bypass. Trả conv (include participants) hoặc null. */
 async function verifyAccess(conversationId: string, userId: string, userRole: string) {
   const conv = await prisma.conversation.findUnique({
     where: { id: conversationId },
     include: {
-      student: {
-        select: {
-          userId: true,
-          user: { select: { id: true } }, // guard: xác nhận user record vẫn tồn tại
-        },
+      participants: {
+        where: { leftAt: null },
+        include: { user: { select: { id: true, role: true } } },
       },
     },
   })
   if (!conv) return null
-  // Student side: cần student record + user vẫn active
-  if (!conv.student?.user) return null
-
   if (userRole === 'admin') return conv
-  if (conv.staffUserId === userId) return conv
-  if (conv.student.userId === userId) return conv
-  return null
+  const isParticipant = conv.participants.some(p => p.userId === userId)
+  return isParticipant ? conv : null
 }
 
 // ─── GET /api/conversations/[id]/messages ─────────────────
+// Response: { messages, participants } — participants chứa lastReadAt cho
+// read receipt nhóm "Đã xem bởi N/M".
 export async function GET(request: NextRequest, { params }: Params) {
   try {
     const user = await requireRole(['admin', 'staff', 'student'])
@@ -43,12 +46,11 @@ export async function GET(request: NextRequest, { params }: Params) {
     if (!conv) {
       return NextResponse.json(
         { data: null, error: { code: 'NOT_FOUND', message: 'Không tìm thấy cuộc hội thoại' } },
-        { status: 404 }
+        { status: 404 },
       )
     }
 
     const afterParam = request.nextUrl.searchParams.get('after')
-    // Validate ISO date — Invalid Date → null → fallback to last 50
     let afterDate: Date | null = null
     if (afterParam) {
       const d = new Date(afterParam)
@@ -68,17 +70,25 @@ export async function GET(request: NextRequest, { params }: Params) {
       },
     })
 
-    return NextResponse.json({ data: { messages }, error: null })
+    // Participants với lastReadAt — cho ChatThread compute "Đã xem bởi N/M"
+    const participants = await prisma.conversationParticipant.findMany({
+      where: { conversationId: id, leftAt: null },
+      select: { userId: true, lastReadAt: true },
+    })
+
+    return NextResponse.json({ data: { messages, participants }, error: null })
   } catch (error) {
     await logError({ context: 'conversations.messages.list', message: 'Failed to fetch messages', error })
     return NextResponse.json(
       { data: null, error: { code: 'INTERNAL_ERROR', message: 'Có lỗi xảy ra' } },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
 
 // ─── POST /api/conversations/[id]/messages ────────────────
+// Rate limit 5 msg/10s cho student. Broadcast notification tới ALL participants
+// (trừ sender).
 export async function POST(request: NextRequest, { params }: Params) {
   try {
     const user = await requireRole(['admin', 'staff', 'student'])
@@ -88,25 +98,36 @@ export async function POST(request: NextRequest, { params }: Params) {
     if (!conv) {
       return NextResponse.json(
         { data: null, error: { code: 'NOT_FOUND', message: 'Không tìm thấy cuộc hội thoại' } },
-        { status: 404 }
+        { status: 404 },
       )
     }
 
     if (conv.isResolved) {
       return NextResponse.json(
         { data: null, error: { code: 'RESOLVED', message: 'Cuộc hội thoại đã đóng' } },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
-    // JSON parse với error handling rõ ràng
+    // Rate limit BEFORE parsing body — sớm hơn = nhẹ DB hơn khi spam
+    const rl = await checkChatRateLimit(user.id, user.role)
+    if (!rl.allowed) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: { code: 'RATE_LIMITED', message: `Bạn gửi quá nhanh, vui lòng đợi ${rl.retryAfterSec}s` },
+        },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec) } },
+      )
+    }
+
     let body: unknown
     try {
       body = await request.json()
     } catch {
       return NextResponse.json(
         { data: null, error: { code: 'INVALID_JSON', message: 'Dữ liệu không hợp lệ' } },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -114,7 +135,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     if (!parsed.success) {
       return NextResponse.json(
         { data: null, error: { code: 'VALIDATION_ERROR', message: 'Nội dung tin nhắn không hợp lệ' } },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -139,28 +160,30 @@ export async function POST(request: NextRequest, { params }: Params) {
       }),
     ])
 
-    // Gửi notification cho đối phương — fire-and-forget, không block response
-    const isStudent = user.role === 'student'
-    const recipientUserId = isStudent ? conv.staffUserId : conv.student.userId
-    const actionUrl = isStudent ? '/admin/messages' : '/student/messages'
+    // Broadcast notification tới TẤT CẢ participants khác (trừ sender)
+    const recipients = conv.participants.filter(p => p.userId !== user.id).map(p => p.userId)
+    if (recipients.length > 0) {
+      const recipientUsers = await prisma.user.findMany({
+        where: { id: { in: recipients }, isActive: true },
+        select: { id: true, role: true },
+      })
+      const groupSuffix = conv.isGroup && conv.name
+        ? ` trong "${conv.name}"`
+        : conv.isGroup
+          ? ' trong nhóm'
+          : ''
 
-    // Xác nhận recipient vẫn tồn tại trước khi tạo notification
-    const recipientExists = await prisma.user.findUnique({
-      where: { id: recipientUserId },
-      select: { id: true },
-    })
-    if (recipientExists) {
-      await prisma.notification.create({
-        data: {
-          userId: recipientUserId,
+      await prisma.notification.createMany({
+        data: recipientUsers.map(r => ({
+          userId: r.id,
           senderId: user.id,
           type: 'general',
-          title: `${user.fullName} đã nhắn tin`,
+          title: `${user.fullName} đã nhắn tin${groupSuffix}`,
           body: parsed.data.content.slice(0, 80),
-          actionUrl,
-          metadata: { conversationId: id, chatMessage: true },
-        },
-      }).catch(() => null) // notification fail không block
+          actionUrl: ACTION_URL_BY_ROLE[r.role] ?? '/shared/notifications',
+          metadata: { conversationId: id, chatMessage: true, isGroup: conv.isGroup },
+        })),
+      }).catch(() => null)
     }
 
     await prisma.auditLog.create({
@@ -170,7 +193,7 @@ export async function POST(request: NextRequest, { params }: Params) {
         action: 'chat_message.send',
         entityType: 'chat_message',
         entityId: message.id,
-        afterData: { conversationId: id, contentLength: parsed.data.content.length },
+        afterData: { conversationId: id, contentLength: parsed.data.content.length, isGroup: conv.isGroup },
       },
     }).catch(() => null)
 
@@ -179,7 +202,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     await logError({ context: 'conversations.messages.send', message: 'Failed to send message', error })
     return NextResponse.json(
       { data: null, error: { code: 'INTERNAL_ERROR', message: 'Có lỗi xảy ra' } },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

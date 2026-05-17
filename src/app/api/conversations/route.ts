@@ -5,83 +5,88 @@ import { prisma } from '@/lib/prisma'
 import { logError } from '@/lib/logger'
 
 const createConversationSchema = z.object({
-  studentId: z.string().uuid().optional(),
+  participantIds: z.array(z.string().uuid()).min(1).max(19),
+  name: z.string().trim().min(1).max(80).optional(),
 })
 
 // ─── GET /api/conversations ────────────────────────────────
-export async function GET(_req: NextRequest) {
+// Admin: thấy TẤT CẢ. Staff/student: chỉ thấy conversations mình là participant.
+export async function GET() {
   try {
     const user = await requireRole(['admin', 'staff', 'student'])
 
-    if (user.role === 'student') {
-      const student = await prisma.student.findFirst({ where: { userId: user.id } })
-      if (!student) return NextResponse.json({ data: { conversations: [], totalUnread: 0 }, error: null })
+    // Admin xem tất cả; staff/student lọc qua participants
+    const where = user.role === 'admin'
+      ? {}
+      : { participants: { some: { userId: user.id, leftAt: null } } }
 
-      // Dùng _count để tránh N+1: count tin chưa đọc trong 1 query per conversation
-      const conversations = await prisma.conversation.findMany({
-        where: { studentId: student.id },
-        include: {
-          staffUser: { select: { id: true, fullName: true, role: true, avatarUrl: true } },
-          messages: {
-            where: { senderId: { not: user.id }, readAt: null, deletedAt: null },
-            select: { id: true }, // chỉ lấy count, không cần dữ liệu
-          },
-          _count: false, // sử dụng messages array length thay
-        },
-        orderBy: { lastMessageAt: 'desc' },
-      })
-
-      const totalUnread = conversations.reduce((sum, c) => sum + c.messages.length, 0)
-      const withUnread = conversations.map(c => ({ ...c, unreadCount: c.messages.length, messages: undefined }))
-
-      return NextResponse.json({ data: { conversations: withUnread, totalUnread }, error: null })
-    }
-
-    // admin / staff
-    const where = user.role === 'admin' ? {} : { staffUserId: user.id }
     const conversations = await prisma.conversation.findMany({
       where,
       include: {
-        staffUser: { select: { id: true, fullName: true, role: true, avatarUrl: true } },
-        student: {
-          include: { user: { select: { id: true, fullName: true, avatarUrl: true } } },
-        },
-        // Count tin chưa đọc cho mỗi conversation trong cùng query
-        messages: {
-          where: { senderId: { not: user.id }, readAt: null, deletedAt: null },
-          select: { id: true },
+        participants: {
+          where: { leftAt: null },
+          include: {
+            user: { select: { id: true, fullName: true, role: true, avatarUrl: true } },
+          },
         },
       },
       orderBy: { lastMessageAt: 'desc' },
       take: 100,
     })
 
-    const totalUnread = conversations.reduce((sum, c) => sum + c.messages.length, 0)
-    const withUnread = conversations.map(c => ({ ...c, unreadCount: c.messages.length, messages: undefined }))
+    // Tính unreadCount: count messages where createdAt > myParticipation.lastReadAt
+    const myParticipations = await prisma.conversationParticipant.findMany({
+      where: {
+        userId: user.id,
+        leftAt: null,
+        conversationId: { in: conversations.map(c => c.id) },
+      },
+      select: { conversationId: true, lastReadAt: true },
+    })
+    const lastReadMap = new Map(myParticipations.map(p => [p.conversationId, p.lastReadAt]))
 
-    return NextResponse.json({ data: { conversations: withUnread, totalUnread }, error: null })
+    const unreadCounts = await Promise.all(
+      conversations.map(async c => {
+        const last = lastReadMap.get(c.id) ?? new Date(0)
+        return prisma.chatMessage.count({
+          where: {
+            conversationId: c.id,
+            senderId: { not: user.id },
+            deletedAt: null,
+            createdAt: { gt: last },
+          },
+        })
+      }),
+    )
+
+    const result = conversations.map((c, i) => ({ ...c, unreadCount: unreadCounts[i] }))
+    const totalUnread = unreadCounts.reduce((s, n) => s + n, 0)
+
+    return NextResponse.json({ data: { conversations: result, totalUnread }, error: null })
   } catch (error) {
     await logError({ context: 'conversations.list', message: 'Failed to list conversations', error })
     return NextResponse.json(
       { data: null, error: { code: 'INTERNAL_ERROR', message: 'Có lỗi xảy ra' } },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
 
 // ─── POST /api/conversations ───────────────────────────────
+// Body: { participantIds: string[], name?: string }
+// - 1 participant + no name → DM (idempotent — trả existing DM nếu có)
+// - 2+ participants HOẶC có name → group (name bắt buộc)
 export async function POST(request: NextRequest) {
   try {
     const user = await requireRole(['admin', 'staff', 'student'])
 
-    // JSON parse với error handling
     let body: unknown
     try {
       body = await request.json()
     } catch {
       return NextResponse.json(
         { data: null, error: { code: 'INVALID_JSON', message: 'Dữ liệu không hợp lệ' } },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -89,60 +94,87 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         { data: null, error: { code: 'VALIDATION_ERROR', message: 'Dữ liệu không hợp lệ' } },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
-    let staffUserId: string
-    let studentId: string
-
-    if (user.role === 'student') {
-      const student = await prisma.student.findFirst({ where: { userId: user.id } })
-      if (!student) {
-        return NextResponse.json(
-          { data: null, error: { code: 'NOT_FOUND', message: 'Không tìm thấy học viên' } },
-          { status: 404 }
-        )
-      }
-      const admin = await prisma.user.findFirst({ where: { role: 'admin', isActive: true } })
-      if (!admin) {
-        return NextResponse.json(
-          { data: null, error: { code: 'NOT_FOUND', message: 'Không tìm thấy quản trị viên' } },
-          { status: 404 }
-        )
-      }
-      staffUserId = admin.id
-      studentId = student.id
-    } else {
-      if (!parsed.data.studentId) {
-        return NextResponse.json(
-          { data: null, error: { code: 'VALIDATION_ERROR', message: 'Cần chỉ định học viên' } },
-          { status: 400 }
-        )
-      }
-      // Validate student tồn tại
-      const studentRecord = await prisma.student.findUnique({
-        where: { id: parsed.data.studentId },
-        select: { id: true },
-      })
-      if (!studentRecord) {
-        return NextResponse.json(
-          { data: null, error: { code: 'INVALID_STUDENT', message: 'Không tìm thấy học viên' } },
-          { status: 400 }
-        )
-      }
-      staffUserId = user.id
-      studentId = parsed.data.studentId
+    // Dedupe + strip self
+    const cleanIds = Array.from(new Set(parsed.data.participantIds)).filter(id => id !== user.id)
+    if (cleanIds.length === 0) {
+      return NextResponse.json(
+        { data: null, error: { code: 'EMPTY_PARTICIPANTS', message: 'Phải có ít nhất 1 người tham gia khác' } },
+        { status: 400 },
+      )
     }
 
-    const conversation = await prisma.conversation.upsert({
-      where: { staffUserId_studentId: { staffUserId, studentId } },
-      create: { staffUserId, studentId },
-      update: {},
-      include: {
-        staffUser: { select: { id: true, fullName: true, role: true, avatarUrl: true } },
-        student: { include: { user: { select: { id: true, fullName: true, avatarUrl: true } } } },
-      },
+    // Verify users exist + active
+    const validCount = await prisma.user.count({
+      where: { id: { in: cleanIds }, isActive: true },
+    })
+    if (validCount !== cleanIds.length) {
+      return NextResponse.json(
+        { data: null, error: { code: 'INVALID_PARTICIPANT', message: 'Một số người tham gia không hợp lệ' } },
+        { status: 400 },
+      )
+    }
+
+    const isDM = cleanIds.length === 1 && !parsed.data.name
+
+    // Nếu là group → name bắt buộc
+    if (!isDM && !parsed.data.name) {
+      return NextResponse.json(
+        { data: null, error: { code: 'GROUP_NAME_REQUIRED', message: 'Vui lòng nhập tên nhóm' } },
+        { status: 400 },
+      )
+    }
+
+    // DM idempotency: tìm existing 2-người conversation
+    if (isDM) {
+      const candidates = await prisma.conversation.findMany({
+        where: {
+          isGroup: false,
+          AND: [
+            { participants: { some: { userId: user.id, leftAt: null } } },
+            { participants: { some: { userId: cleanIds[0], leftAt: null } } },
+          ],
+        },
+        include: {
+          participants: {
+            where: { leftAt: null },
+            include: { user: { select: { id: true, fullName: true, role: true, avatarUrl: true } } },
+          },
+        },
+      })
+      const existing = candidates.find(c => c.participants.length === 2)
+      if (existing) {
+        return NextResponse.json({ data: { ...existing, unreadCount: 0 }, error: null })
+      }
+    }
+
+    // Create new conversation
+    const conversation = await prisma.$transaction(async tx => {
+      const conv = await tx.conversation.create({
+        data: {
+          name: parsed.data.name ?? null,
+          isGroup: !isDM,
+          createdBy: user.id,
+        },
+      })
+      await tx.conversationParticipant.createMany({
+        data: [
+          { conversationId: conv.id, userId: user.id, role: 'admin' },
+          ...cleanIds.map(pid => ({ conversationId: conv.id, userId: pid, role: 'member' })),
+        ],
+      })
+      return tx.conversation.findUnique({
+        where: { id: conv.id },
+        include: {
+          participants: {
+            where: { leftAt: null },
+            include: { user: { select: { id: true, fullName: true, role: true, avatarUrl: true } } },
+          },
+        },
+      })
     })
 
     await prisma.auditLog.create({
@@ -151,17 +183,21 @@ export async function POST(request: NextRequest) {
         role: user.role,
         action: 'conversation.create',
         entityType: 'conversation',
-        entityId: conversation.id,
-        afterData: { staffUserId, studentId },
+        entityId: conversation!.id,
+        afterData: {
+          name: conversation!.name,
+          isGroup: conversation!.isGroup,
+          participantIds: [user.id, ...cleanIds],
+        },
       },
     }).catch(() => null)
 
-    return NextResponse.json({ data: conversation, error: null })
+    return NextResponse.json({ data: { ...conversation, unreadCount: 0 }, error: null })
   } catch (error) {
     await logError({ context: 'conversations.create', message: 'Failed to create conversation', error })
     return NextResponse.json(
       { data: null, error: { code: 'INTERNAL_ERROR', message: 'Có lỗi xảy ra' } },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
