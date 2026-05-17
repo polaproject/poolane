@@ -303,6 +303,12 @@ function ShellInner({ children, userId, userRole, userFullName, userInitial, use
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
+  // Dashboard home URL theo role — dùng cho logo click + Trang chủ link
+  const dashboardHomeHref =
+    userRole === 'admin' ? '/admin/dashboard' :
+    userRole === 'staff' ? '/staff/dashboard' :
+    '/student/dashboard'
+
   // Admin có thể đổi label + thứ tự sidebar qua /admin/settings → fetch override
   const [labelOverrides, setLabelOverrides] = useState<Record<string, string>>({})
   const [orderOverride, setOrderOverride] = useState<string[]>([])
@@ -413,21 +419,29 @@ function ShellInner({ children, userId, userRole, userFullName, userInitial, use
       </a>
       {/* ── SIDEBAR (Notion-style: fixed luôn, nổi trên content) ── */}
       <aside className={`pola-sidebar pola-nav ${sidebarOpen ? 'is-open' : ''}`}>
-        {/* Logo */}
+        {/* Logo — click → dashboard home theo role */}
         <div className="flex items-center gap-2.5 px-5 py-5 border-b" style={{ borderColor: 'var(--pola-nav-active)' }}>
-          <span style={{ color: 'var(--pola-nav-text)' }}>{logoSvg}</span>
-          <div>
-            <p className="font-body font-bold text-sm tracking-[0.16em]" style={{ color: 'var(--pola-nav-text)' }}>
-              POOLANE
-            </p>
-            <p className="text-xs tracking-wide" style={{ color: 'var(--pola-nav-muted)', fontSize: '0.65rem' }}>
-              a Pola Project
-            </p>
-          </div>
+          <Link
+            href={dashboardHomeHref}
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Trang chủ Poolane"
+            className="flex items-center gap-2.5 flex-1 min-w-0 hover:opacity-80 transition-opacity"
+          >
+            <span style={{ color: 'var(--pola-nav-text)' }}>{logoSvg}</span>
+            <div>
+              <p className="font-body font-bold text-sm tracking-[0.16em]" style={{ color: 'var(--pola-nav-text)' }}>
+                POOLANE
+              </p>
+              <p className="text-xs tracking-wide" style={{ color: 'var(--pola-nav-muted)', fontSize: '0.65rem' }}>
+                a Pola Project
+              </p>
+            </div>
+          </Link>
           <button
             className="ml-auto lg:hidden"
             onClick={() => setSidebarOpen(false)}
             style={{ color: 'var(--pola-nav-muted)' }}
+            aria-label="Đóng sidebar"
           >
             <X className="w-4 h-4" />
           </button>
@@ -437,11 +451,7 @@ function ShellInner({ children, userId, userRole, userFullName, userInitial, use
         <nav className="flex-1 overflow-y-auto py-2 px-2">
           {/* Trang chủ — top-level link cố định cho mọi role */}
           {(() => {
-            const homeHref = userRole === 'admin'
-              ? '/admin/dashboard'
-              : userRole === 'staff'
-                ? '/staff/dashboard'
-                : '/student/dashboard'
+            const homeHref = dashboardHomeHref
             const homeActive = isActive(homeHref)
             return (
               <Link
@@ -615,14 +625,18 @@ function ShellInner({ children, userId, userRole, userFullName, userInitial, use
           >
             <Menu className="w-6 h-6" />
           </button>
-          <div className="flex items-center gap-2">
+          <Link
+            href={dashboardHomeHref}
+            aria-label="Trang chủ Poolane"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
             <span style={{ color: 'var(--pola-nav-text)' }}>
               <PolarisStar size={18} animated color="currentColor" />
             </span>
             <span className="font-body font-bold text-sm tracking-[0.16em]" style={{ color: 'var(--pola-nav-text)' }}>
               POOLANE
             </span>
-          </div>
+          </Link>
           <div className="ml-auto flex items-center gap-1">
             <ThemeSwitcherCompact />
             <AvatarPopoverButton userInitial={userInitial} userRole={userRole} userAvatarUrl={userAvatarUrl} userFullName={userFullName} size="md" />
