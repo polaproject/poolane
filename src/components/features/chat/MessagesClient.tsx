@@ -556,7 +556,7 @@ export function MessagesClient({
                     onKeyDown={handleKeyDown}
                     placeholder="Nhập tin nhắn... (Enter để gửi, Shift+Enter xuống dòng)"
                     rows={1}
-                    className="lqg-input flex-1 resize-none text-sm min-h-[40px] max-h-32 py-2"
+                    className="lqg-input flex-1 resize-none text-sm min-h-[40px] max-h-32 py-2 px-3"
                     style={{ overflowY: 'auto' }}
                     disabled={sending}
                   />

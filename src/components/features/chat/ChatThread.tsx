@@ -403,7 +403,7 @@ export function ChatThread({
               onKeyDown={handleKeyDown}
               placeholder="Nhập tin nhắn..."
               rows={1}
-              className="lqg-input flex-1 resize-none text-sm min-h-[36px] max-h-24 py-1.5"
+              className="lqg-input flex-1 resize-none text-sm min-h-[36px] max-h-24 py-1.5 px-3"
               style={{ overflowY: 'auto' }}
               disabled={sending}
             />
