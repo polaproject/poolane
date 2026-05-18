@@ -1300,23 +1300,30 @@ body.lqg-body {
  *   3. Greeting message ("Chào buổi sáng/tối, [Tên]")
  * Tất cả heading/UI structural khác → sans (Plus Jakarta) qua .lqg-headline.
  * Tất cả stats/currency → sans tabular qua .lqg-numeric-sans.
+ *
+ * BẮT BUỘC nằm trong @layer components để Tailwind utilities (text-paper,
+ * text-accent, text-foreground/N...) có thể override color khi explicit set.
+ * Trước: outside layer → win cascade → bug "chữ đen trên nền tối" ở các card
+ * bg-ink (vì .lqg-headline ép color = adaptive, không nhường text-paper).
  */
-.lqg-headline {
-  font-family: var(--font-body), system-ui, sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  line-height: 1.15;
-  color: var(--lqg-text-primary);
-}
+@layer components {
+  .lqg-headline {
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    color: var(--lqg-text-primary);
+  }
 
-.lqg-numeric-sans {
-  font-family: var(--font-body), system-ui, sans-serif;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  display: inline-block;
-  color: var(--lqg-text-primary);
+  .lqg-numeric-sans {
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    display: inline-block;
+    color: var(--lqg-text-primary);
+  }
 }
 .lqg-numeric-sans-xs  { font-size: 0.875rem; }
 .lqg-numeric-sans-sm  { font-size: 1rem; }
