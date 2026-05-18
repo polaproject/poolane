@@ -32,7 +32,7 @@ export const QUICK_ADD_CATALOG: QuickAddCatalogItem[] = [
   { key: 'new_event',       label: 'Tạo sự kiện',            href: '/admin/events/new',            icon: 'Star',        roles: ['admin'] },
   { key: 'broadcast',       label: 'Gửi thông báo chung',   href: '/admin/broadcast',             icon: 'BellRing',    roles: ['admin'] },
   { key: 'walk_in',         label: 'Thêm học viên walk-in', href: '/staff/students/new',          icon: 'UserPlus',    roles: ['staff'] },
-  { key: 'attendance',      label: 'Điểm danh hôm nay',      href: '/staff/attendance',            icon: 'CheckSquare', roles: ['staff'] },
+  { key: 'attendance',      label: 'Điểm danh hôm nay',      href: '/staff/attendance',            icon: 'CheckSquare', roles: ['admin', 'staff'] },
   { key: 'approve_regs',    label: 'Duyệt đăng ký',          href: '/staff/registrations',         icon: 'ClipboardList', roles: ['staff'] },
   { key: 'register_session',label: 'Đăng ký buổi',           href: '/student/schedule',            icon: 'Calendar',    roles: ['student'] },
   { key: 'log_practice',    label: 'Ghi nhật ký luyện tập', href: '/student/log',                 icon: 'BookOpen',    roles: ['student'] },

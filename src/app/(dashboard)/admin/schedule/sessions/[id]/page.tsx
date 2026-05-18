@@ -2,7 +2,7 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Sunrise, Sunset, Users, AlertCircle, FileText } from 'lucide-react'
+import { ArrowLeft, Sunrise, Sunset, Users, AlertCircle, FileText, ClipboardCheck } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { CAPACITY } from '@/config/constants'
@@ -136,9 +136,11 @@ export default async function SessionDetailPage({ params }: Params) {
 
     // Tiến độ: số buổi completed của course đó (max 10 cho khoá chuẩn)
     let progressLabel: string | null = null
+    let sessionNumber: number | null = null
     if (reg.courseId) {
       const completed = progressMap.get(`${reg.studentId}__${reg.courseId}`) ?? 0
-      progressLabel = `Buổi ${completed + 1}/10`
+      sessionNumber = completed + 1 // buổi này là buổi thứ N
+      progressLabel = `Buổi ${sessionNumber}/10`
     }
 
     // Assessment metrics
@@ -154,7 +156,9 @@ export default async function SessionDetailPage({ params }: Params) {
       fullName: reg.student.user.fullName,
       avatarUrl: reg.student.user.avatarUrl,
       phone: reg.student.user.phone,
+      courseId: reg.courseId ?? null,
       courseCode: reg.course?.code ?? null,
+      sessionNumber,
       sessionsLeft,
       progressLabel,
       avgScore: assessmentData?.avg ?? null,
@@ -218,6 +222,15 @@ export default async function SessionDetailPage({ params }: Params) {
               >
                 <FileText className="h-3.5 w-3.5 text-accent" strokeWidth={1.75} /> Kế hoạch
               </Link>
+              {/* Điểm danh: chỉ khi buổi chưa cancelled (cho phép cả scheduled + in_progress + completed để xem/sửa) */}
+              {session.status !== 'cancelled' && approved.length > 0 && (
+                <Link
+                  href={`/staff/attendance/${session.id}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-pill bg-accent text-ink hover:scale-[1.02] active:scale-[0.98] transition shadow-cta"
+                >
+                  <ClipboardCheck className="h-3.5 w-3.5" strokeWidth={2} /> Điểm danh
+                </Link>
+              )}
               <SessionActions sessionId={session.id} status={session.status} />
             </div>
           </div>

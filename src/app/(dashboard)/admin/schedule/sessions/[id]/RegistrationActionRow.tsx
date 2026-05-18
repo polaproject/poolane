@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import {
-  Phone, BookOpen, TrendingUp, Loader2, Check, X, AlertCircle,
+  Phone, BookOpen, TrendingUp, Loader2, Check, X, AlertCircle, Star,
 } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
 
@@ -40,7 +40,10 @@ export interface RegRowData {
   fullName: string
   avatarUrl: string | null
   phone: string | null
+  courseId: string | null
   courseCode: string | null
+  /** Buổi thứ N của HV trong khoá (cho assess link); null nếu không có course */
+  sessionNumber: number | null
   /** Vé bơi còn lại (n buổi) */
   sessionsLeft: number | null
   /** Tiến độ khoá đang học (vd "Buổi 5/10") */
@@ -236,9 +239,22 @@ export function RegistrationActionRow({ reg, sessionId, showActions }: Props) {
               </button>
             </>
           ) : (
-            <Chip variant={regCfg.variant} active className="text-[10px]">
-              {regCfg.label}
-            </Chip>
+            <>
+              <Chip variant={regCfg.variant} active className="text-[10px]">
+                {regCfg.label}
+              </Chip>
+              {/* Đánh giá: chỉ HV approved + có courseId (đã enroll) + chưa cancelled */}
+              {reg.status === 'approved' && reg.courseId && reg.courseCode && reg.sessionNumber != null && (
+                <Link
+                  href={`/staff/assess/${reg.studentId}?courseId=${reg.courseId}&code=${reg.courseCode}&session=${reg.sessionNumber}&mode=quick&name=${encodeURIComponent(reg.fullName)}`}
+                  title={`Đánh giá kỹ năng buổi ${reg.sessionNumber}`}
+                  aria-label="Đánh giá"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-accent/15 text-accent ring-1 ring-accent/30 hover:bg-accent/25 transition"
+                >
+                  <Star className="h-4 w-4" strokeWidth={2} />
+                </Link>
+              )}
+            </>
           )}
         </div>
       </div>
