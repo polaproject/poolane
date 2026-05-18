@@ -30,7 +30,7 @@ export default async function SelfAssessmentListPage() {
             <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Nhận ra điểm mù bản thân</h1>
           </div>
         </div>
-        <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-3xl mx-auto">
+        <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto">
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <ClipboardCheck className="h-12 w-12 text-foreground/30 mx-auto mb-4" strokeWidth={1.5} />
             <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có khoá học</p>
@@ -59,7 +59,7 @@ export default async function SelfAssessmentListPage() {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
         {student.enrollments.map(e => (
           <div key={e.id} className="glass-card glass-card-hover overflow-hidden">
             <div className="px-5 py-4 border-b border-foreground/8 flex items-center gap-2">

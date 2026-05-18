@@ -65,7 +65,7 @@ export default async function TeacherMetricsPage() {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-5xl mx-auto space-y-4 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-5xl mx-auto space-y-4 relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <StatCard label="Retention rate" value={`${retentionRate.toFixed(0)}%`} trendLabel={`${activeRecent}/${totalStudents} HV active`} icon={Users} />
           <StatCard label="Tiến bộ TB" value={avgImprovement != null ? `+${avgImprovement.toFixed(2)}` : '—'} trendLabel={`điểm/HV (${studentImprovements.length} đo)`} icon={TrendingUp} tone="accent" />

@@ -52,7 +52,7 @@ export default function NewSessionPage() {
 
   return (
     <div className="ambient-bg min-h-screen">
-      <div className="p-4 pr-[5rem] sm:p-6 sm:pr-6 max-w-lg mx-auto">
+      <div className="p-5 sm:p-6 max-w-lg mx-auto">
         <Link href="/admin/schedule" className="inline-flex items-center gap-1 text-sm text-foreground/70 hover:text-foreground mb-4">
           <ArrowLeft className="w-4 h-4" /> Lịch học
         </Link>

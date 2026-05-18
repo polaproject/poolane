@@ -149,7 +149,7 @@ export default function AIPage() {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-4xl mx-auto space-y-6 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-4xl mx-auto space-y-6 relative z-10">
         {/* Summary */}
         {summary && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

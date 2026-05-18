@@ -100,7 +100,7 @@ export default async function StaffStudentDetailPage({ params }: Params) {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-4xl mx-auto space-y-4 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-4xl mx-auto space-y-4 relative z-10">
         {/* 3 stat cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className={`rounded-card-lg bg-[var(--surface)] p-5 shadow-soft ring-1 ${isLow ? 'ring-danger/30' : 'ring-foreground/8'}`}>

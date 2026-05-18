@@ -116,7 +116,7 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-6xl mx-auto space-y-5 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-6xl mx-auto space-y-5 relative z-10">
         {/* Alerts */}
         {alerts.length > 0 && (
           <div className="space-y-2">

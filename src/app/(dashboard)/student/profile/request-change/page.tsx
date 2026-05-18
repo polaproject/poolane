@@ -50,7 +50,7 @@ export default async function RequestChangePage() {
           </p>
         </div>
       </div>
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-2xl mx-auto relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-2xl mx-auto relative z-10">
         <div className="glass-card glass-card-hover p-5 sm:p-6">
           <RequestChangeForm current={{
             fullName: u.fullName ?? '',

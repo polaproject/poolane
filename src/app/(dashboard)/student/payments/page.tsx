@@ -60,7 +60,7 @@ export default async function StudentPaymentsPage() {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-3xl mx-auto space-y-5 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-5 relative z-10">
         {/* Debt warning — top priority */}
         {debtEnrollments.length > 0 && (
           <div className="rounded-card-lg bg-warn/10 ring-1 ring-warn/30 overflow-hidden backdrop-blur-sm">

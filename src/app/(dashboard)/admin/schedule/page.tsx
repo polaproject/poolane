@@ -88,7 +88,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
           </div>
         </div>
 
-        <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-7xl mx-auto relative z-10">
+        <div className="px-5 sm:px-8 -mt-6 max-w-7xl mx-auto relative z-10">
           <ScheduleGrid
             week={week}
             emptySlotBuilder={{ hrefBase: '/admin/sessions/new' }}

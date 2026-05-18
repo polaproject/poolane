@@ -66,7 +66,7 @@ export default async function RefundDetailPage({ params }: Params) {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
         {/* Breakdown */}
         <div className="glass-card glass-card-hover p-5 space-y-4">
           {refund.includeCourseRefund && (

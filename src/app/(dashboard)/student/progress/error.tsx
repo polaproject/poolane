@@ -20,7 +20,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
   }, [error])
 
   return (
-    <div className="p-4 pr-[5rem] sm:p-6 sm:pr-6 max-w-md mx-auto text-center mt-12">
+    <div className="p-5 sm:p-6 max-w-md mx-auto text-center mt-12">
       <div className="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
         <AlertTriangle className="w-8 h-8 text-danger" />
       </div>

@@ -32,7 +32,7 @@ export default async function StaffVideosPage() {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-4xl mx-auto space-y-6 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-4xl mx-auto space-y-6 relative z-10">
         <div className="glass-card glass-card-hover p-5 sm:p-6">
           <VideoForm
             students={students.map(s => ({ id: s.id, studentCode: s.studentCode, fullName: s.user.fullName, phone: s.user.phone }))}

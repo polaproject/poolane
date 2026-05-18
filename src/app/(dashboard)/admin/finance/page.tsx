@@ -103,7 +103,7 @@ export default async function FinancePage() {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-6xl mx-auto space-y-5 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-6xl mx-auto space-y-5 relative z-10">
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard label="Thu tháng này" value={`${(totalThisMonth / 1_000_000).toFixed(1)}M`} unit="đ" icon={TrendingUp} tone="accent" />

@@ -107,7 +107,7 @@ export default function AssessPage() {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-2xl mx-auto space-y-3 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-2xl mx-auto space-y-3 relative z-10">
         {skills.map(skill => {
           const current = scores[skill.key] ?? 0
           const prev = prevScores[skill.key] ?? 0

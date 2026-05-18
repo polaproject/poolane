@@ -51,7 +51,7 @@ export default function BroadcastPage() {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-2xl mx-auto space-y-4 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-2xl mx-auto space-y-4 relative z-10">
         {/* Templates */}
         <div className="glass-card glass-card-hover p-4">
           <p className="eyebrow text-foreground/55 mb-2">Mẫu nhanh</p>

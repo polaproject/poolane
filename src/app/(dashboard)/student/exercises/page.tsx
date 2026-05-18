@@ -54,7 +54,7 @@ export default async function StudentExercisesPage({ searchParams }: { searchPar
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
         {/* Filter chips */}
         <div className="flex gap-2 flex-wrap">
           <Link href="/student/exercises">

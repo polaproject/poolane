@@ -40,7 +40,7 @@ export default async function DashboardsListPage() {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-5xl mx-auto relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-5xl mx-auto relative z-10">
         <DashboardsListClient initial={dashboards.map(d => ({
           ...d,
           createdAt: d.createdAt.toISOString(),

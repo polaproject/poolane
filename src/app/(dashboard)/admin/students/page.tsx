@@ -98,7 +98,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Sea
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-7xl mx-auto space-y-4 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-7xl mx-auto space-y-4 relative z-10">
         {/* Filters card */}
         <div className="glass-card glass-card-hover p-4 space-y-3">
           <form className="flex gap-2">

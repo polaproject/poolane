@@ -56,7 +56,7 @@ export default async function StaffDashboard() {
         </div>
       </div>
 
-      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-6xl mx-auto space-y-5 relative z-10">
+      <div className="px-5 sm:px-8 -mt-6 max-w-6xl mx-auto space-y-5 relative z-10">
         {/* Stats */}
         <Stagger step={0.1} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link href="/staff/registrations">
