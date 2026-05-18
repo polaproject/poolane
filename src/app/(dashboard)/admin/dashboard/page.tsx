@@ -50,6 +50,7 @@ export default async function AdminDashboard() {
         isReversal: false,
         amount: { gt: 0 },
         studentId: { notIn: demoStudentIds },
+        excludeFromRevenue: false,
       },
       _sum: { amount: true },
     }),

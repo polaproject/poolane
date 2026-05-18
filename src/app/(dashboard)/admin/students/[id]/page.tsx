@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, Phone, MapPin, Calendar, BookOpen, Ticket,
-  Undo2, AlertCircle, Mail,
+  Undo2, AlertCircle, Mail, Wallet,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { vi } from 'date-fns/locale'
@@ -255,7 +255,7 @@ export default async function StudentDetailPage({ params }: Params) {
         </div>
 
         {/* Quick actions */}
-        <div className="grid sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Link
             href={`/admin/students/${id}/enroll`}
             className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-pill bg-ink text-paper font-semibold text-sm hover:bg-foreground/90 transition shadow-soft"
@@ -267,6 +267,12 @@ export default async function StudentDetailPage({ params }: Params) {
             className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-pill ring-1 ring-foreground/15 text-sm font-medium text-foreground hover:bg-foreground/5 transition"
           >
             <Ticket className="h-4 w-4 text-mist" strokeWidth={1.75} /> Tạo vé bơi
+          </Link>
+          <Link
+            href={`/admin/students/${id}/transactions`}
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-pill ring-1 ring-foreground/15 text-sm font-medium text-foreground hover:bg-foreground/5 transition"
+          >
+            <Wallet className="h-4 w-4 text-accent" strokeWidth={1.75} /> Quản lý giao dịch
           </Link>
           <Link
             href={`/admin/finance/refunds/new?student=${id}`}

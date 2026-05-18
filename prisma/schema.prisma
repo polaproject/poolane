@@ -209,6 +209,8 @@ model PoolTicket {
   purchasedAt   DateTime  @default(now()) @map("purchased_at")
   expiresAt     DateTime? @map("expires_at")
   isActive      Boolean   @default(true) @map("is_active")
+  /// Marker: vé carryover (HV cũ đã thanh toán ngoài hệ thống) — không phát sinh Payment record
+  isCarryover   Boolean   @default(false) @map("is_carryover")
 
   student        Student         @relation(fields: [studentId], references: [id])
   refundRequests RefundRequest[]
@@ -438,17 +440,19 @@ model Payment {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now()) @map("created_at")
 
-  studentId       String        @map("student_id")
-  amount          Int
-  type            PaymentType
-  referenceType   String?       @map("reference_type")
-  referenceId     String?       @map("reference_id")
-  paymentMethod   PaymentMethod @map("payment_method")
-  referenceNumber String?       @map("reference_number")
-  recordedBy      String        @map("recorded_by")
-  recordedAt      DateTime      @default(now()) @map("recorded_at")
-  notes           String?
-  isReversal      Boolean       @default(false) @map("is_reversal")
+  studentId          String        @map("student_id")
+  amount             Int
+  type               PaymentType
+  referenceType      String?       @map("reference_type")
+  referenceId        String?       @map("reference_id")
+  paymentMethod      PaymentMethod @map("payment_method")
+  referenceNumber    String?       @map("reference_number")
+  recordedBy         String        @map("recorded_by")
+  recordedAt         DateTime      @default(now()) @map("recorded_at")
+  notes              String?
+  isReversal         Boolean       @default(false) @map("is_reversal")
+  /// Bút toán đặc biệt (carryover, compensation, gift, fix lỗi nhập) — không tính vào doanh thu báo cáo
+  excludeFromRevenue Boolean       @default(false) @map("exclude_from_revenue")
 
   gatewayName          String? @map("gateway_name")
   gatewayTransactionId String? @map("gateway_transaction_id")
@@ -457,6 +461,7 @@ model Payment {
   student Student @relation(fields: [studentId], references: [id])
 
   @@index([gatewayTransactionId])
+  @@index([excludeFromRevenue, recordedAt])
   @@map("payments")
 }
 

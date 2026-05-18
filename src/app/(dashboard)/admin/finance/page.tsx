@@ -28,7 +28,12 @@ export default async function FinancePage() {
 
   const [monthRevenue, totalDebt, pendingRefunds, recentPayments] = await Promise.all([
     prisma.payment.aggregate({
-      where: { recordedAt: { gte: monthStart, lte: monthEnd }, isReversal: false, amount: { gt: 0 } },
+      where: {
+        recordedAt: { gte: monthStart, lte: monthEnd },
+        isReversal: false,
+        amount: { gt: 0 },
+        excludeFromRevenue: false,
+      },
       _sum: { amount: true },
     }),
     prisma.enrollment.findMany({

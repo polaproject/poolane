@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
       where: {
         recordedAt: { gte: from, lte: to },
         studentId: { notIn: demoStudentIds },
+        excludeFromRevenue: false, // exclude carryover/compensation/gift bookings
       },
       orderBy: { recordedAt: 'asc' },
       include: {
