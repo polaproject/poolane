@@ -64,7 +64,16 @@ export function StatCard({
         )}
       </div>
       <div className="mt-3 flex items-baseline gap-2">
-        <span className="lqg-numeric-sans lqg-numeric-sans-xl sm:lqg-numeric-sans-2xl">{value}</span>
+        {/* .lqg-numeric-sans set color = --lqg-text-primary (adaptive) → bị invisible
+            khi tone='dark' (bg-ink) ở light mode. Override explicit theo tone. */}
+        <span
+          className={cn(
+            'lqg-numeric-sans lqg-numeric-sans-xl sm:lqg-numeric-sans-2xl',
+            tone === 'dark' ? 'text-paper' : tone === 'accent' ? 'text-ink' : 'text-foreground',
+          )}
+        >
+          {value}
+        </span>
         {unit && <span className="text-sm opacity-75">{unit}</span>}
       </div>
       {(trend !== undefined || trendLabel) && (

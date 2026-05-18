@@ -93,7 +93,7 @@ export default async function StaffDashboard() {
                         {s.timeSlot === 'morning' ? '5:30 – 7:30' : '18:00 – 20:00'}
                       </p>
                     </div>
-                    <p className="text-xs text-paper/65 mb-2">{s.registrations.length}/{s.capacity} đã duyệt</p>
+                    <p className="text-sm font-medium text-paper/75 mb-2">{s.registrations.length}/{s.capacity} đã duyệt</p>
                     <div className="space-y-0.5">
                       {s.registrations.slice(0, 3).map(r => (
                         <p key={r.id} className="text-xs text-paper/80 truncate">• {r.student.user.fullName}</p>

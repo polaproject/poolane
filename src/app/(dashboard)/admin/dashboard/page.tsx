@@ -174,10 +174,10 @@ export default async function AdminDashboard() {
                       )}
                     </div>
                     <div>
-                      <p className="lqg-headline text-lg leading-none">
+                      <p className="lqg-headline text-lg leading-none text-paper">
                         {s.timeSlot === 'morning' ? '5:30' : '18:00'}
                       </p>
-                      <p className="text-xs text-paper/65 mt-1">{s.registrations.length}/{s.capacity} HV</p>
+                      <p className="text-sm font-medium text-paper/75 mt-1">{s.registrations.length}/{s.capacity} HV</p>
                     </div>
                   </Link>
                 ))}
