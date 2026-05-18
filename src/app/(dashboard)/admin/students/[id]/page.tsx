@@ -71,7 +71,7 @@ export default async function StudentDetailPage({ params }: Params) {
   return (
     <div className="min-h-screen bg-paper pb-12">
       {/* Hero */}
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 
 <div className="relative max-w-4xl mx-auto">
           <Link
@@ -112,7 +112,7 @@ export default async function StudentDetailPage({ params }: Params) {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-4xl mx-auto space-y-4 relative z-10">
+      <div className="-mt-6 max-w-4xl mx-auto space-y-4 relative z-10">
         {/* 3 stat cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Pool ticket */}

@@ -127,7 +127,7 @@ export default function AIPage() {
   return (
     <div className="min-h-screen pb-12">
       {/* Hero */}
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-4xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
             <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
@@ -149,7 +149,7 @@ export default function AIPage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-4xl mx-auto space-y-6 relative z-10">
+      <div className="-mt-6 max-w-4xl mx-auto space-y-6 relative z-10">
         {/* Summary */}
         {summary && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

@@ -145,7 +145,7 @@ export function NotificationFab({ open, onOpenChange, allowedTypes }: Notificati
     <Popover.Root open={open} onOpenChange={onOpenChange} modal={false}>
       <Popover.Trigger
         aria-label={`Thông báo${filteredUnreadCount > 0 ? ` (${filteredUnreadCount} chưa đọc)` : ''}`}
-        className="relative grid place-items-center w-[52px] h-[52px] rounded-full bg-ink text-paper dark:bg-paper dark:text-ink ring-1 ring-ink/30 dark:ring-paper/30 shadow-xl shadow-black/30 hover:scale-[1.04] active:scale-[0.97] transition-transform"
+        className="relative grid place-items-center w-[52px] h-[52px] rounded-full bg-ink/85 text-paper dark:bg-paper/85 dark:text-ink backdrop-blur-md ring-1 ring-ink/30 dark:ring-paper/30 shadow-xl shadow-black/30 hover:scale-[1.04] active:scale-[0.97] transition-transform"
       >
         <Bell className="w-5 h-5" />
         {filteredUnreadCount > 0 && (

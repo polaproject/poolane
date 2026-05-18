@@ -14,7 +14,7 @@ export default async function AdminPhotosPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-5xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">Cộng đồng · {photos.length} ảnh</p>
           <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Album ảnh lớp</h1>
@@ -22,7 +22,7 @@ export default async function AdminPhotosPage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-5xl mx-auto space-y-6 relative z-10">
+      <div className="-mt-6 max-w-5xl mx-auto space-y-6 relative z-10">
         <div className="glass-card glass-card-hover p-5 sm:p-6">
           <PhotoUploadForm />
         </div>

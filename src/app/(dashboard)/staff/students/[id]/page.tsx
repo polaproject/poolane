@@ -57,7 +57,7 @@ export default async function StaffStudentDetailPage({ params }: Params) {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-4xl mx-auto">
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
             <Link
@@ -100,7 +100,7 @@ export default async function StaffStudentDetailPage({ params }: Params) {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-4xl mx-auto space-y-4 relative z-10">
+      <div className="-mt-6 max-w-4xl mx-auto space-y-4 relative z-10">
         {/* 3 stat cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className={`rounded-card-lg bg-[var(--surface)] p-5 shadow-soft ring-1 ${isLow ? 'ring-danger/30' : 'ring-foreground/8'}`}>

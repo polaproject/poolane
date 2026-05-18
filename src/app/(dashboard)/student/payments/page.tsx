@@ -53,14 +53,14 @@ export default async function StudentPaymentsPage() {
   return (
     <div className="min-h-screen bg-paper pb-12">
       {/* Hero */}
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">Tài chính · {payments.length} giao dịch</p>
           <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Lịch sử thanh toán</h1>
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-5 relative z-10">
+      <div className="-mt-6 max-w-3xl mx-auto space-y-5 relative z-10">
         {/* Debt warning — top priority */}
         {debtEnrollments.length > 0 && (
           <div className="rounded-card-lg bg-warn/10 ring-1 ring-warn/30 overflow-hidden backdrop-blur-sm">

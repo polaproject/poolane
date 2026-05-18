@@ -9,7 +9,7 @@ export default async function AdminSettingsPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
         <div className="relative max-w-4xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
             <Settings className="h-3 w-3 text-accent" strokeWidth={1.75} /> Tự cấu hình hệ thống
@@ -21,7 +21,7 @@ export default async function AdminSettingsPage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-4xl mx-auto relative z-10">
+      <div className="-mt-6 max-w-4xl mx-auto relative z-10">
         <SettingsClient
           initial={settings}
           catalog={QUICK_ADD_CATALOG}

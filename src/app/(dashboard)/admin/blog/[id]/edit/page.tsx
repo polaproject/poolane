@@ -16,7 +16,7 @@ export default async function EditBlogPostPage({ params }: Params) {
 
   return (
     <div className="ambient-bg min-h-screen">
-      <div className="p-5 sm:p-6 max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <Link href="/admin/blog" className="inline-flex items-center gap-1 text-sm text-foreground/70 hover:text-foreground mb-4">
           <ArrowLeft className="w-4 h-4" /> Danh sách blog
         </Link>

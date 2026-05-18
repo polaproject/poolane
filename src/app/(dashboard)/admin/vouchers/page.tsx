@@ -17,7 +17,7 @@ export default async function VouchersPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-5xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
             <p className="eyebrow text-paper/55 mb-2">{vouchers.length} mã giảm giá</p>
@@ -32,7 +32,7 @@ export default async function VouchersPage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-5xl mx-auto relative z-10">
+      <div className="-mt-6 max-w-5xl mx-auto relative z-10">
         <div className="glass-card glass-card-hover overflow-hidden">
           {vouchers.length === 0 ? (
             <EmptyState

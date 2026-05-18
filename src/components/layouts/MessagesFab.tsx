@@ -83,7 +83,8 @@ export function MessagesFab({
       <Popover.Trigger
         aria-label={`Tin nhắn${unreadCount > 0 ? ` (${unreadCount} chưa đọc)` : ''}`}
         className="relative grid place-items-center w-[52px] h-[52px] rounded-full
-                   bg-ink text-paper dark:bg-paper dark:text-ink
+                   bg-ink/85 text-paper dark:bg-paper/85 dark:text-ink
+                   backdrop-blur-md
                    ring-1 ring-ink/30 dark:ring-paper/30
                    shadow-xl shadow-black/30
                    hover:scale-[1.04] active:scale-[0.97] transition-transform cursor-pointer"

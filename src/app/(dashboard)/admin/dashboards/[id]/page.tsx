@@ -25,7 +25,7 @@ export default async function DashboardViewPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="hero-block px-5 sm:px-8 pt-6 pb-10 relative overflow-hidden">
+      <div className="hero-block pt-6 pb-10 relative overflow-hidden">
         <div className="relative max-w-6xl mx-auto">
           <Link
             href="/admin/dashboards"
@@ -49,7 +49,7 @@ export default async function DashboardViewPage({ params }: PageProps) {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-4 max-w-6xl mx-auto relative z-10">
+      <div className="-mt-4 max-w-6xl mx-auto relative z-10">
         <DashboardViewClient
           dashboard={{
             id: dashboard.id,

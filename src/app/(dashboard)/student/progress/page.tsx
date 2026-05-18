@@ -22,13 +22,13 @@ export default async function ProgressPage() {
   if (!student || student.enrollments.length === 0) {
     return (
       <div className="min-h-screen bg-paper pb-12">
-        <div className="hero-block px-5 sm:px-8 pt-8 pb-12">
+        <div className="hero-block pt-8 pb-12">
           <div className="max-w-3xl mx-auto">
             <p className="eyebrow text-paper/55 mb-2">Tiến độ học tập</p>
             <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Hành trình của bạn</h1>
           </div>
         </div>
-        <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto">
+        <div className="-mt-6 max-w-3xl mx-auto">
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <BookOpen className="h-12 w-12 mx-auto mb-4 text-foreground/30" strokeWidth={1.5} />
             <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có dữ liệu đánh giá</p>
@@ -52,7 +52,7 @@ export default async function ProgressPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 
 <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">Tiến độ học tập</p>
@@ -63,7 +63,7 @@ export default async function ProgressPage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-8 relative z-10">
+      <div className="-mt-6 max-w-3xl mx-auto space-y-8 relative z-10">
         {assessmentsByEnrollment.map(({ enrollment, assessments }) => {
           const courseCode = enrollment.course.code as 'ECH' | 'SAI' | 'BUOM'
           const skills = COURSE_SKILLS[courseCode] ?? COURSE_SKILLS.ECH

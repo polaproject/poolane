@@ -24,13 +24,13 @@ export default async function SelfAssessmentListPage() {
   if (student.enrollments.length === 0) {
     return (
       <div className="min-h-screen bg-paper pb-12">
-        <div className="hero-block px-5 sm:px-8 pt-8 pb-12">
+        <div className="hero-block pt-8 pb-12">
           <div className="max-w-3xl mx-auto">
             <p className="eyebrow text-paper/55 mb-2">Tự đánh giá kỹ năng</p>
             <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Nhận ra điểm mù bản thân</h1>
           </div>
         </div>
-        <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto">
+        <div className="-mt-6 max-w-3xl mx-auto">
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <ClipboardCheck className="h-12 w-12 text-foreground/30 mx-auto mb-4" strokeWidth={1.5} />
             <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có khoá học</p>
@@ -49,7 +49,7 @@ export default async function SelfAssessmentListPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">Tự đánh giá · Buổi 5 và 9</p>
           <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Nhận ra điểm mù</h1>
@@ -59,7 +59,7 @@ export default async function SelfAssessmentListPage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
+      <div className="-mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
         {student.enrollments.map(e => (
           <div key={e.id} className="glass-card glass-card-hover overflow-hidden">
             <div className="px-5 py-4 border-b border-foreground/8 flex items-center gap-2">

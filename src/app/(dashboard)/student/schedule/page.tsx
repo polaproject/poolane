@@ -77,7 +77,7 @@ export default async function StudentSchedulePage() {
   return (
     <div className="min-h-screen pb-12">
       {/* Hero */}
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">2 tuần tới · Click + để đăng ký</p>
           <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Lịch học</h1>
@@ -107,7 +107,7 @@ export default async function StudentSchedulePage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto relative z-10 space-y-6">
+      <div className="-mt-6 max-w-3xl mx-auto relative z-10 space-y-6">
         {/* Warning banner nếu hết / chưa có vé */}
         {(noTicket || outOfTicket) && (
           <div className="rounded-card-lg bg-warn/10 ring-1 ring-warn/30 p-4 flex flex-col sm:flex-row items-start gap-3">

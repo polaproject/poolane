@@ -92,7 +92,7 @@ export default function AssessPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-28">
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-2xl mx-auto">
           <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group">
             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" strokeWidth={2.25} />
@@ -107,7 +107,7 @@ export default function AssessPage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-2xl mx-auto space-y-3 relative z-10">
+      <div className="-mt-6 max-w-2xl mx-auto space-y-3 relative z-10">
         {skills.map(skill => {
           const current = scores[skill.key] ?? 0
           const prev = prevScores[skill.key] ?? 0

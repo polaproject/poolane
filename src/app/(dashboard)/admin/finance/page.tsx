@@ -77,7 +77,7 @@ export default async function FinancePage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 
 <div className="relative max-w-6xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
@@ -103,7 +103,7 @@ export default async function FinancePage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-6xl mx-auto space-y-5 relative z-10">
+      <div className="-mt-6 max-w-6xl mx-auto space-y-5 relative z-10">
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard label="Thu tháng này" value={`${(totalThisMonth / 1_000_000).toFixed(1)}M`} unit="đ" icon={TrendingUp} tone="accent" />

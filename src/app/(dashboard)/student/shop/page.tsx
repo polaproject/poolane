@@ -158,7 +158,7 @@ export default function ShopPage() {
   return (
     <div className="min-h-screen bg-paper pb-32">
       {/* Hero */}
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
             <p className="eyebrow text-paper/55 mb-2">Cửa hàng · Poolane</p>
@@ -174,7 +174,7 @@ export default function ShopPage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-6xl mx-auto relative z-10 space-y-4">
+      <div className="-mt-6 max-w-6xl mx-auto relative z-10 space-y-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" strokeWidth={1.75} />

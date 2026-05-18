@@ -44,7 +44,7 @@ export default async function RefundDetailPage({ params }: Params) {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-3xl mx-auto">
           <Link
             href="/admin/finance/refunds"
@@ -66,7 +66,7 @@ export default async function RefundDetailPage({ params }: Params) {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
+      <div className="-mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
         {/* Breakdown */}
         <div className="glass-card glass-card-hover p-5 space-y-4">
           {refund.includeCourseRefund && (

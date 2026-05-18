@@ -79,7 +79,7 @@ export default async function StudentDashboard() {
   return (
     <div className="min-h-screen pb-12">
       {/* ── HERO ─────────────────────────────────────────── */}
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-16 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-16 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 rounded-full -translate-y-1/3 translate-x-1/4 blur-2xl motion-sway" style={{ background: 'var(--hero-overlay-1)' }} />
         <div className="absolute bottom-0 left-1/4 w-60 h-60 rounded-full translate-y-1/2 blur-3xl motion-sway" style={{ background: 'var(--hero-overlay-2)', animationDelay: '-7s' }} />
         <div className="absolute top-1/2 right-1/3 w-40 h-40 rounded-full blur-3xl motion-sway" style={{ background: 'var(--hero-overlay-1)', animationDelay: '-12s' }} />
@@ -100,7 +100,7 @@ export default async function StudentDashboard() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-10 max-w-3xl mx-auto space-y-4 relative z-10">
+      <div className="-mt-10 max-w-3xl mx-auto space-y-4 relative z-10">
         {/* ── DEBT WARNING (nếu có) ──────────────────────── */}
         {debts.length > 0 && (
           <Link

@@ -55,7 +55,7 @@ export function QuickAddFab({ role, open, onOpenChange, itemKeys }: QuickAddFabP
     <Popover.Root open={open} onOpenChange={onOpenChange} modal={false}>
       <Popover.Trigger
         aria-label="Thao tác nhanh"
-        className="grid place-items-center w-[52px] h-[52px] rounded-full bg-accent text-ink ring-1 ring-ink/15 shadow-xl shadow-black/30 hover:scale-[1.04] active:scale-[0.97] transition-transform"
+        className="grid place-items-center w-[52px] h-[52px] rounded-full bg-accent/90 text-ink backdrop-blur-md ring-1 ring-ink/15 shadow-xl shadow-black/30 hover:scale-[1.04] active:scale-[0.97] transition-transform"
       >
         <Plus className="w-5 h-5" />
       </Popover.Trigger>

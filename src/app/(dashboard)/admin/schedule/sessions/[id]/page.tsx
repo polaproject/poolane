@@ -171,7 +171,7 @@ export default async function SessionDetailPage({ params }: Params) {
   return (
     <div className="min-h-screen pb-12">
       {/* Hero */}
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-5xl mx-auto">
           <Link
             href="/admin/schedule"
@@ -237,7 +237,7 @@ export default async function SessionDetailPage({ params }: Params) {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-5xl mx-auto space-y-4 relative z-10">
+      <div className="-mt-6 max-w-5xl mx-auto space-y-4 relative z-10">
         {/* Approved — ô bên trên (đã duyệt) */}
         <SectionCard
           eyebrow="Đã duyệt"

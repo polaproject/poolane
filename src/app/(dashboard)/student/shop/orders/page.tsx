@@ -48,7 +48,7 @@ export default async function StudentOrdersPage() {
   return (
     <div className="min-h-screen bg-paper pb-12">
       {/* Hero */}
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-3xl mx-auto">
           <Link
             href="/student/shop"
@@ -62,7 +62,7 @@ export default async function StudentOrdersPage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
+      <div className="-mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
         {orders.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <ShoppingBag className="h-10 w-10 text-foreground/30 mx-auto mb-3" strokeWidth={1.5} />

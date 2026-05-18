@@ -45,7 +45,7 @@ export default async function NewRefundPage({ searchParams }: { searchParams: Se
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-3xl mx-auto">
           <Link
             href="/admin/finance/refunds"
@@ -64,7 +64,7 @@ export default async function NewRefundPage({ searchParams }: { searchParams: Se
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto relative z-10">
+      <div className="-mt-6 max-w-3xl mx-auto relative z-10">
         <div className="glass-card glass-card-hover p-5 sm:p-6">
           <NewRefundForm
             students={students.map(s => ({

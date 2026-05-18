@@ -13,7 +13,7 @@ export default async function StudentPhotosPage() {
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-5xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">{photos.length} ảnh · Cộng đồng</p>
           <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Album lớp Poolane</h1>
@@ -21,7 +21,7 @@ export default async function StudentPhotosPage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-5xl mx-auto relative z-10">
+      <div className="-mt-6 max-w-5xl mx-auto relative z-10">
         {photos.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <ImageIcon className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />

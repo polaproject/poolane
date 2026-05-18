@@ -52,7 +52,7 @@ export default async function RefundsPage({ searchParams }: { searchParams: Sear
 
   return (
     <div className="min-h-screen bg-paper pb-12">
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-6xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>
             <p className="eyebrow text-paper/55 mb-2">{items.length} yêu cầu · {currentTab.label.toLowerCase()}</p>
@@ -67,7 +67,7 @@ export default async function RefundsPage({ searchParams }: { searchParams: Sear
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-6xl mx-auto space-y-4 relative z-10">
+      <div className="-mt-6 max-w-6xl mx-auto space-y-4 relative z-10">
         {/* Summary */}
         <div className="grid sm:grid-cols-2 gap-3">
           <SummaryCard

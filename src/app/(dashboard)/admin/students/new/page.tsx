@@ -75,7 +75,7 @@ export default function NewStudentPage() {
 
   return (
     <div className="ambient-bg min-h-screen">
-      <div className="p-5 sm:p-6 max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto">
         <Link
           href="/admin/students"
           className="inline-flex items-center gap-1 text-sm text-foreground/70 hover:text-foreground mb-4"

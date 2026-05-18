@@ -46,7 +46,7 @@ export default async function StudentProfilePage() {
   return (
     <div className="min-h-screen bg-paper pb-12">
       {/* Hero */}
-      <div className="hero-block px-5 sm:px-8 pt-8 pb-12 relative overflow-hidden">
+      <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 
 <div className="relative max-w-3xl mx-auto flex items-start gap-5">
           <AvatarUploader currentAvatarUrl={u.avatarUrl} fullName={u.fullName} size="lg" />
@@ -66,7 +66,7 @@ export default async function StudentProfilePage() {
         </div>
       </div>
 
-      <div className="px-5 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
+      <div className="-mt-6 max-w-3xl mx-auto space-y-4 relative z-10">
         {/* Pending banner */}
         {pendingRequest && (
           <div className="rounded-card-lg bg-warn/10 ring-1 ring-warn/30 p-4 flex items-start gap-3 backdrop-blur-sm">
