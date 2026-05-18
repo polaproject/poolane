@@ -1983,6 +1983,54 @@ Khi user phàn nàn về visual ("hình lạ", "vệt sáng", "vương vãi", "e
 
 **Trade-off:** Verify 4 viewport tốn ~3-5 phút mỗi tính năng. Nhưng catch issue sớm rẻ hơn 100x so với owner phát hiện sau khi merge.
 
+### 12.10. Root Cause / Architecture First (RULE BẮT BUỘC — Phase 28 lesson)
+
+Trước khi PATCH bug, BẮT BUỘC làm 3 bước:
+
+1. **Root cause analysis** — hỏi: "đây là 1-off bug hay symptom của pattern lớn hơn?"
+   - Grep tìm trường hợp tương tự trong codebase
+   - Nếu xuất hiện ≥3 chỗ → là pattern, không phải one-off
+2. **Đối chiếu chuẩn ngành** — pattern này được giải quyết thế nào ở:
+   - Tailwind CSS, MDN best practices
+   - Notion, Lark, Linear, Stripe (các product team uy tín)
+   - Nếu app đang đi NGƯỢC chuẩn → flag với owner trước khi tiếp tục
+3. **Propose 2 hướng** trước khi sửa:
+   - **A. Localized patch** (nhanh, không refactor) — effort + risk
+   - **B. Architectural fix** (refactor pattern) — effort + benefit dài hạn
+
+Owner chọn. KHÔNG default về patch khi pattern thực sự sai từ kiến trúc.
+
+**Bài học từ Phase 28 — "sát lề phải" iPhone 12 Pro:**
+
+Owner báo: "sát lề phải" → AI patch `pr-[5rem]` (chừa FAB).
+Owner báo lại: "né khỏi FAB" → AI revert.
+Owner hỏi: "tại sao lại lệch? Phải có kỹ thuật chứ?" → AI mới đề xuất Design Tokens architecture (CSS Custom Property `--page-px` + apply ở `.pola-main` 1 lần).
+
+3 round-trip + 2 commit revert. Nếu apply 3 bước trên → 1 round-trip done.
+
+**Anti-patterns cần TRÁNH:**
+
+- ❌ "Codebase pattern inheritance bias" — thấy 80 page dùng `px-4 sm:px-8` → mặc định đó là đúng. Phải question pattern.
+- ❌ "Minimal change mặc định" — fix dòng được hỏi, không zoom out. Phải hỏi "có pattern lớn hơn không?"
+- ❌ "Patch chuỗi" — sửa A xong B vỡ, sửa B xong C vỡ → dấu hiệu pattern sai từ gốc. Stop, propose refactor.
+
+**Pattern phổ biến cần Token hoá (nếu phát hiện drift):**
+
+| Drift | Token chuẩn ngành |
+|---|---|
+| Padding ngang page | `--page-px` |
+| Padding dọc section | `--section-py` |
+| Max-width content | `--content-max-w` |
+| Card padding | `--card-px`, `--card-py` |
+| Card border radius | `--card-radius` |
+| Gap giữa sections | `--section-gap` |
+| Font size scale | `--text-xs`, `--text-sm`, ... (Tailwind đã có) |
+| Color palette | `--ink`, `--paper`, `--accent` (Poolane đã có) |
+
+Nếu thấy hardcode `px-4`, `gap-3`, `rounded-card-lg` lặp lại ở 10+ chỗ với value khác nhau → consider tokenize.
+
+**Khi owner prompt rút gọn ("fix bug X"), AI vẫn BẮT BUỘC apply 3 bước trên trong âm thầm + flag pattern trước khi sửa.**
+
 ---
 
 ## 13. Logging & Traceability
