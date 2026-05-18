@@ -707,9 +707,12 @@ select.input-pola:focus {
   flex-direction: column;
   min-width: 0;
   min-height: 100vh;
-  /* Single source of truth cho horizontal padding TOÀN APP.
-     Mọi page chỉ cần `mx-auto max-w-Xxl` cho centering, KHÔNG cần `px-X`.
-     Đảm bảo symmetric padding cả 2 lề trên mọi viewport. */
+}
+/* Single source of truth cho horizontal padding TOÀN APP.
+   Apply tại <main id="main-content"> (NOT .pola-main) để ambient-bg fill
+   edge-to-edge, không bị lộ page-bg phía sau ở 2 lề.
+   Mọi page chỉ cần `mx-auto max-w-Xxl` (centering), KHÔNG cần `px-X` riêng. */
+#main-content {
   padding-inline: var(--page-px);
 }
 :root {
