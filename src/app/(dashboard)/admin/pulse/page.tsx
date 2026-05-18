@@ -151,7 +151,7 @@ export default function PulsePage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-6 relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-3xl mx-auto space-y-6 relative z-10">
         {/* Summary chips */}
         <div className="flex gap-2 flex-wrap">
           <Chip variant="danger" active>{data.summary.redCount} nguy cấp</Chip>

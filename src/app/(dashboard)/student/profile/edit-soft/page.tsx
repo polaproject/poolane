@@ -38,7 +38,7 @@ export default async function EditSoftProfilePage() {
           <p className="text-sm text-paper/65 mt-2">Các trường mềm — có thể tự sửa không cần duyệt.</p>
         </div>
       </div>
-      <div className="px-4 sm:px-8 -mt-6 max-w-2xl mx-auto relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-2xl mx-auto relative z-10">
         <div className="glass-card glass-card-hover p-5 sm:p-6">
           <EditSoftForm initial={{
             occupation: u.occupation ?? '',

@@ -107,7 +107,7 @@ export default async function StudentSchedulePage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto relative z-10 space-y-6">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-3xl mx-auto relative z-10 space-y-6">
         {/* Warning banner nếu hết / chưa có vé */}
         {(noTicket || outOfTicket) && (
           <div className="rounded-card-lg bg-warn/10 ring-1 ring-warn/30 p-4 flex flex-col sm:flex-row items-start gap-3">

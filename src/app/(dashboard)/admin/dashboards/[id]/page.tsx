@@ -49,7 +49,7 @@ export default async function DashboardViewPage({ params }: PageProps) {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-4 max-w-6xl mx-auto relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-4 max-w-6xl mx-auto relative z-10">
         <DashboardViewClient
           dashboard={{
             id: dashboard.id,

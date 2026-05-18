@@ -56,7 +56,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-7xl mx-auto space-y-4 relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-7xl mx-auto space-y-4 relative z-10">
         <div className="glass-card glass-card-hover p-4 space-y-3">
           <form className="flex gap-2">
             <div className="relative flex-1">

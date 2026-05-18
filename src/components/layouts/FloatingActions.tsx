@@ -68,7 +68,7 @@ export function FloatingActions({
           '--fab-base-desktop': desktopBase,
         } as React.CSSProperties
       }
-      className={`fixed right-5 z-40 flex flex-col gap-3 pointer-events-none
+      className={`fixed right-3 lg:right-5 z-40 flex flex-col gap-3 pointer-events-none
                   bottom-[calc(var(--fab-base-mobile,64px)+1.25rem+env(safe-area-inset-bottom,0px))]
                   lg:bottom-[calc(var(--fab-base-desktop,0px)+1.25rem+env(safe-area-inset-bottom,0px))]
                   transition-[bottom,opacity] duration-200

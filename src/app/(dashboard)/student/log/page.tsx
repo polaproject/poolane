@@ -93,7 +93,7 @@ export default function PracticeLogPage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-3xl mx-auto space-y-3 relative z-10">
         {showForm && (
           <form onSubmit={handleAdd} className="rounded-card-lg bg-[var(--surface)] shadow-soft ring-1 ring-accent/40 p-5 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

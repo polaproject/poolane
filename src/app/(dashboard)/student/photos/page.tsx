@@ -21,7 +21,7 @@ export default async function StudentPhotosPage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-5xl mx-auto relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-5xl mx-auto relative z-10">
         {photos.length === 0 ? (
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <ImageIcon className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />

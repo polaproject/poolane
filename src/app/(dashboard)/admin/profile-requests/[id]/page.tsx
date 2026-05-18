@@ -50,7 +50,7 @@ export default async function ProfileRequestDetailPage({ params }: Params) {
   const fields = Object.keys(changes) as ApprovalRequiredField[]
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-4 pr-[5rem] sm:p-6 sm:pr-6 max-w-3xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
         <Link
           href="/admin/profile-requests"

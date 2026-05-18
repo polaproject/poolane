@@ -149,7 +149,7 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-5xl mx-auto space-y-4 relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-5xl mx-auto space-y-4 relative z-10">
         <div className="flex gap-2 flex-wrap">
           {Object.entries(STATUS_CONFIG).map(([status, cfg]) => (
             <Chip

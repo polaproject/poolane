@@ -52,7 +52,7 @@ export default async function StaffStatsPage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-4xl mx-auto space-y-4 relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-4xl mx-auto space-y-4 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard label="Buổi đã dạy" value={totalSessions} icon={Calendar} />
           <StatCard label="TB HV/buổi" value={avgAttendance} icon={BookOpen} />

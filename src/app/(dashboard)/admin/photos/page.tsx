@@ -22,7 +22,7 @@ export default async function AdminPhotosPage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-5xl mx-auto space-y-6 relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-5xl mx-auto space-y-6 relative z-10">
         <div className="glass-card glass-card-hover p-5 sm:p-6">
           <PhotoUploadForm />
         </div>

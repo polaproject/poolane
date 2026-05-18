@@ -100,7 +100,7 @@ export default async function StudentDashboard() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-10 max-w-3xl mx-auto space-y-4 relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-10 max-w-3xl mx-auto space-y-4 relative z-10">
         {/* ── DEBT WARNING (nếu có) ──────────────────────── */}
         {debts.length > 0 && (
           <Link

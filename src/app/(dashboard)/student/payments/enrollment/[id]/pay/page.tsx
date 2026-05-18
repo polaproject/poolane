@@ -65,7 +65,7 @@ export default async function PayEnrollmentPage({ params }: Params) {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-md mx-auto space-y-4 relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-md mx-auto space-y-4 relative z-10">
         {!qrInfo.configured && (
           <div className="rounded-card bg-warn/10 ring-1 ring-warn/30 p-3 text-xs text-foreground/75 flex items-start gap-2">
             <AlertCircle className="h-4 w-4 text-warn shrink-0 mt-0.5" strokeWidth={1.75} />

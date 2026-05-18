@@ -114,7 +114,7 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-2xl mx-auto relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-2xl mx-auto relative z-10">
         {loading ? (
           <div className="flex justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-accent" strokeWidth={1.75} />

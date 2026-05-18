@@ -14,7 +14,7 @@ export default async function NewQuizPage() {
 
   return (
     <div className="ambient-bg min-h-screen">
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-4 pr-[5rem] sm:p-6 sm:pr-6 max-w-4xl mx-auto">
         <Link href="/admin/quizzes" className="inline-flex items-center gap-1 text-sm text-foreground/70 hover:text-foreground mb-4">
           <ArrowLeft className="w-4 h-4" /> Danh sách quiz
         </Link>

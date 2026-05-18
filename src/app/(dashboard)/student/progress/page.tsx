@@ -28,7 +28,7 @@ export default async function ProgressPage() {
             <h1 className="font-heading text-4xl sm:text-5xl italic leading-tight">Hành trình của bạn</h1>
           </div>
         </div>
-        <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto">
+        <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-3xl mx-auto">
           <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-12 text-center">
             <BookOpen className="h-12 w-12 mx-auto mb-4 text-foreground/30" strokeWidth={1.5} />
             <p className="lqg-headline text-2xl text-foreground mb-1">Chưa có dữ liệu đánh giá</p>
@@ -63,7 +63,7 @@ export default async function ProgressPage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-3xl mx-auto space-y-8 relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-3xl mx-auto space-y-8 relative z-10">
         {assessmentsByEnrollment.map(({ enrollment, assessments }) => {
           const courseCode = enrollment.course.code as 'ECH' | 'SAI' | 'BUOM'
           const skills = COURSE_SKILLS[courseCode] ?? COURSE_SKILLS.ECH

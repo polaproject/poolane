@@ -40,7 +40,7 @@ export default async function UnmatchedTransactionsPage({ searchParams }: { sear
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-5xl mx-auto space-y-4 relative z-10">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-5xl mx-auto space-y-4 relative z-10">
         {/* Tabs */}
         <div className="flex gap-2 flex-wrap">
           {STATUS_TABS.map(t => (

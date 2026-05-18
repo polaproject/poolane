@@ -174,7 +174,7 @@ export default function ShopPage() {
         </div>
       </div>
 
-      <div className="px-4 sm:px-8 -mt-6 max-w-6xl mx-auto relative z-10 space-y-4">
+      <div className="pl-5 pr-[5rem] sm:px-8 -mt-6 max-w-6xl mx-auto relative z-10 space-y-4">
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" strokeWidth={1.75} />
