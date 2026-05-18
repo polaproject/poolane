@@ -56,7 +56,11 @@ export function FloatingCard({
         )}
         <div className="min-w-0 flex-1">
           {label && <p className="text-xs opacity-60 leading-none">{label}</p>}
-          <p className="lqg-headline text-lg leading-tight mt-1 truncate">{title}</p>
+          {/* .lqg-headline set color = --lqg-text-primary (adaptive) → bị invisible
+              khi tone='dark' (bg-ink) ở light mode. Explicit text-paper khi dark. */}
+          <p className={cn('lqg-headline text-lg leading-tight mt-1 truncate', tone === 'dark' ? 'text-paper' : 'text-foreground')}>
+            {title}
+          </p>
         </div>
       </div>
       {(meta || action) && (

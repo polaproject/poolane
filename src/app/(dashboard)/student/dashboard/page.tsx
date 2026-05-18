@@ -186,7 +186,7 @@ export default async function StudentDashboard() {
 
               {nextSession ? (
                 <div className="relative flex-1">
-                  <p className="lqg-headline text-3xl leading-tight">
+                  <p className="lqg-headline text-3xl leading-tight text-paper">
                     {format(nextSession.session.date, 'EEEE', { locale: vi })}
                   </p>
                   <p className="font-heading text-2xl text-accent mt-1">
@@ -205,7 +205,7 @@ export default async function StudentDashboard() {
                 </div>
               ) : (
                 <div className="relative flex-1">
-                  <p className="lqg-headline text-2xl">Chưa đăng ký</p>
+                  <p className="lqg-headline text-2xl text-paper">Chưa đăng ký</p>
                   <p className="text-sm text-paper/65 mt-2">Đăng ký buổi học mới ở tab kế bên</p>
                 </div>
               )}

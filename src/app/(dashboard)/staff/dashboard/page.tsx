@@ -89,7 +89,7 @@ export default async function StaffDashboard() {
                       {s.timeSlot === 'morning'
                         ? <Sunrise className="h-4 w-4 text-accent" strokeWidth={1.75} />
                         : <Sunset className="h-4 w-4 text-accent" strokeWidth={1.75} />}
-                      <p className="lqg-headline text-lg leading-none">
+                      <p className="lqg-headline text-lg leading-none text-paper">
                         {s.timeSlot === 'morning' ? '5:30 – 7:30' : '18:00 – 20:00'}
                       </p>
                     </div>
