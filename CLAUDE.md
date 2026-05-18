@@ -372,6 +372,45 @@ Theo thứ tự quan trọng (đã hoàn thành redesign sâu, giờ unblock inf
     - Auto-reset `zoom = minZoom` khi ảnh load → user thấy full ảnh ngay khi mở
     - Slider `min={minZoom}` + ZoomOut button bound theo minZoom. Commit: `83420ee`.
 
+61. **Phase 26 — Avatar simple upload (bỏ crop dialog)**: ✅ Sau nhiều round-trip fix crop dialog cho ảnh dài/portrait, owner: "tại sao không upload thẳng ảnh nguyên?". Rewrite: AvatarCropDialog REMOVED. AvatarUploader upload file gốc thẳng → CSS clip tròn qua `rounded-pill overflow-hidden + object-cover`. Discord/Telegram/Zalo pattern — đơn giản nhất, không bug aspect. Bỏ ~250 dòng code crop. Commits: `74240cf` (rebuild), later `7f...` (final).
+
+62. **Phase 26.1 — Crop dialog back với aspect THẬT (true ratio)**: ✅ Owner muốn quay lại crop có UI nhưng hiển thị ảnh ở tỷ lệ thật (không ép vuông). Container `aspectRatio` dynamic theo `naturalW/naturalH`. cropSize = 78% smaller dim. minZoom=0.4 + restrictPosition=false (full pan). E2E test 5 aspect (16:9, 2:3, 1:1, 4:1, 1:3) đều hiển thị đúng tỷ lệ. Commit: `74240cf`.
+
+63. **Phase 27 — System audit + Production Hardening**: ✅ Spawn 3 parallel agent rà 6 dimension (consistency, mobile, flow/a11y, performance, security, cost). Tìm 80+ issue. Fix theo 3 tier:
+    - **P0 Security**: Sepay webhook Zod validation, payment race condition (compare-and-set updateMany), order/enrollment concurrent confirm rollback. Commit: `0c717c7`.
+    - **P1 Performance**: Settings cache 60s in-memory (3 DB query → 0), chat unread N+1 batch (200 query → 2), users.search restrict phone match cho non-staff, logout try/catch. Commit: `1989eda`.
+    - **P2 Indexes + cron**: ClassSession @@index([date]), SessionRegistration @@index([sessionId, status]), birthday cron LIMIT 100, reconciliation cron batch query. Commit: `e659516`.
+    - Doc CLAUDE.md §17.1: Responsively App workflow cho multi-device test.
+
+64. **Phase 27.1 — Theme contrast + send button + grid responsive + safe-area**: ✅ Nhiều UI fix dồn 1 commit:
+    - "Chưa đăng ký" + "18:00" hero card chữ đen trên nền tối (light mode) → thêm explicit `text-paper` override `.lqg-headline`. Commit: `082e7ae` + root cause fix `32c24d2` (move `.lqg-headline` + `.lqg-numeric-sans` vào `@layer components` để Tailwind utilities override được).
+    - Chat send button h-10 w-10 ngang bằng textarea (cả ChatThread + MessagesClient). Commit: `534d0d3`.
+    - Grid-cols mobile breakpoint 24 fix / 18 file (admin + student + staff forms). Commit: `e3c495b`.
+    - Safe-area + dialog max-height (CartDrawer, staff assess, ChangePasswordDialog). Commit: `bf9bbe6`.
+    - Heading responsive scale (`text-4xl` → `text-2xl sm:text-4xl` 10 files) + cleanup orphan + gitignore `.claude/`. Commit: `990a3db`.
+    - StatCard tone='dark' explicit text-paper override + dashboard "1/7 HV" bump text-sm. Commit: `ddd3286`.
+
+65. **Phase 27.2 — FAB popover position stable cross-viewport**: ✅ Owner phát hiện MessagesFab popover bị auto-flip side trên iPhone 12 Pro. Root cause `collisionPadding=60` + popup width 350-380px + viewport hẹp → base-ui auto-flip. Fix 3 FAB đồng bộ: `collisionPadding=8` + `w-[min(380px,calc(100vw-7rem))]`. Verified e2e 4 viewport. Commit: `f26001b`. Bài học `§12.9` CLAUDE.md.
+
+66. **Phase 27.3 — Wire UI cho điểm danh + đánh giá**: ✅ Code `/staff/attendance/[sessionId]` + `/staff/assess/[studentId]` đã có từ Phase 3-5 nhưng KHÔNG có button UI để bấm vào → owner phải gõ URL tay. Add: button "Điểm danh" trên `/admin/schedule/sessions/[id]` + ⭐ button per HV row Approved section + page mới `/staff/attendance` (index list buổi hôm nay). settings.ts catalog: attendance item mở rộng cho cả admin + staff. Commit: `1a75d5d`.
+
+67. **Phase 27.4 — Transaction CRUD (carryover + manual + reverse)**: ✅ Owner gặp 2 vấn đề: (1) HV cũ có vé từ trước hệ thống — cần PoolTicket KHÔNG tạo Payment record. (2) Owner cần CRUD lịch sử giao dịch (manual cash, compensation, fix lỗi). Build 1-form admin-only `/admin/students/[id]/transactions`:
+    - Schema: Payment.excludeFromRevenue + PoolTicket.isCarryover
+    - API POST `/api/admin/transactions` (tạo Payment ± PoolTicket atomic)
+    - API POST `/api/admin/transactions/[paymentId]/reverse` (đảo bút toán)
+    - UI form 2 toggle (Payment + Ticket) + summary preview live
+    - Anti-fraud: strict admin role, KHÔNG xoá/sửa Payment, chỉ tạo mới hoặc reverse
+    - Revenue filter `excludeFromRevenue: false` ở 3 chỗ (reports, admin/finance, admin/dashboard)
+    - E2E verified 4 use case + auth check. Commit: `1198869`.
+
+68. **Phase 28 — Centralized Padding System (Design Tokens)**: ✅ Owner báo "sát lề phải iPhone 12 Pro" → AI patch `pr-[5rem]` → "né khỏi FAB" → revert. Owner hỏi: "tại sao lệch? Phải có kỹ thuật chứ?" → AI mới propose **Design Tokens architecture**.
+
+    **Pattern**: CSS Custom Property `--page-px` ở `:root` + apply ở `.pola-main { padding-inline: var(--page-px) }` 1 lần. Toàn app inherit. Sửa 1 dòng → 80+ pages đồng bộ. Mọi page chỉ cần `mx-auto max-w-Xxl` (centering), KHÔNG cần `px-X` riêng. Hero blocks escape padding qua `margin-inline: calc(-1 * var(--page-px))`. FAB frosted backdrop `bg-X/85 backdrop-blur-md` cho content dưới mờ ảo thấy.
+
+    **Migration**: 151 replacements / 87 files. Token values: mobile 20px, tablet 32px, desktop 40px.
+
+    **Bài học `§12.10`** (CLAUDE.md): trước khi PATCH bug, BẮT BUỘC analyze root cause + đối chiếu chuẩn ngành (Notion/Lark/Linear/Stripe dùng Design Tokens) + propose 2 hướng (patch vs architectural) cho owner chọn. KHÔNG default về patch. Commit: `e092f90` + `d036a5e` (rule doc).
+
 ### 🟢 DEPLOY ĐÃ HOÀN TẤT (2026-05-15)
 
 - ✅ **GitHub repo**: `polaproject/poolane@master` (4 commit Phase 13.1-14)
@@ -2903,11 +2942,16 @@ Những điều CHƯA chốt, cần quyết định trước khi build:
 | **Standard UX over custom rules** | Phase 24 principle: ưu tiên convention quen thuộc (WhatsApp/Telegram/Shopee) hơn rule clever. Visual lặp lại > hidden complexity |
 | **sendingRef pattern** | useRef sync flag chống double-fire khi state stale trong cùng tick (Enter spam, rapid click). State `setSending` chỉ cho UI disabled; ref cho logic guard |
 | **shortenVietnameseName** | Phase 21 helper (`src/lib/format-name.ts`): viết tắt họ (từ đầu) còn 2 chữ, giữ tên đệm + tên chính. Ví dụ `Nguyễn Ngọc Hoàng Việt` → `Ng Ngọc Hoàng Việt` |
+| **Design Tokens** | Phase 28 architecture: CSS Custom Properties ở `:root` làm single source of truth cho design decisions (color, spacing, padding, radius, font). Tham chiếu Notion/Lark/Linear/Stripe/Material Design. Sửa 1 token → toàn app đồng bộ. Token `--page-px` (mobile 20px / tablet 32px / desktop 40px) quản padding ngang trang qua `.pola-main { padding-inline: var(--page-px) }` |
+| **Centralized Padding** | Phase 28 pattern: padding TOÀN APP managed ở 1 chỗ duy nhất (`.pola-main` rule + `--page-px` var). Pages chỉ cần `mx-auto max-w-Xxl` (centering), KHÔNG được tự thêm `px-X` riêng → tránh drift. Hero blocks escape qua `margin-inline: calc(-1 * var(--page-px))` cho band edge-to-edge. |
+| **Carryover ticket** | Phase 27.4: HV cũ đã trả tiền vé ngoài hệ thống → admin tạo PoolTicket với flag `isCarryover=true` KHÔNG tạo Payment record. Doanh thu báo cáo filter `excludeFromRevenue: false` để loại trừ. |
+| **Reversal payment** | Phase 27.4: KHÔNG xoá Payment đã tạo. Sửa lỗi bằng cách tạo Payment mới với `amount` âm + `isReversal=true` + notes link Payment gốc. Forward-only audit. |
+| **Root Cause / Architecture First** | Phase 28 rule §12.10: trước khi patch bug, BẮT BUỘC analyze root cause (grep tương tự ≥3 chỗ = pattern) + đối chiếu chuẩn ngành + propose 2 hướng (patch vs architectural) cho owner chọn. KHÔNG default về patch. |
 
 ---
 
-**Phiên bản:** 1.7 — Phase 19-25 (Chat system: any-to-any DM + groups + rate limit + symmetric tick + mobile responsive + standard UX). Schedule wider columns + Vietnamese name shortening. Avatar crop fixes.
-**Cập nhật cuối:** 2026-05-17
+**Phiên bản:** 1.8 — Phase 26-28 (Avatar simple upload → crop true ratio; System audit + production hardening; Theme contrast + FAB cross-viewport; Wire điểm danh/đánh giá; Transaction CRUD; **Centralized Padding System / Design Tokens**). Rule mới §12.10: Root Cause / Architecture First trước khi patch.
+**Cập nhật cuối:** 2026-05-19
 **Maintainer:** Owner + AI
 
 > Mọi quyết định nghiệp vụ phải được phản ánh ở đây. Code đi theo file này, không ngược lại.
