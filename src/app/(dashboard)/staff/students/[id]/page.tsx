@@ -56,7 +56,7 @@ export default async function StaffStudentDetailPage({ params }: Params) {
   const activeEnr = student.enrollments.filter(e => ['active', 'extension'].includes(e.status))
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-4xl mx-auto">
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">

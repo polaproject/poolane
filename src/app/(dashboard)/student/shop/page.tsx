@@ -129,7 +129,7 @@ export default function ShopPage() {
 
   if (ordered) {
     return (
-      <div className="min-h-screen bg-paper grid place-items-center px-4">
+      <div className="min-h-screen grid place-items-center px-4">
         <div className="rounded-card-xl bg-[var(--surface)] shadow-glass ring-1 ring-foreground/8 p-8 sm:p-12 text-center max-w-md">
           <div className="grid place-items-center h-16 w-16 rounded-pill bg-success/15 mx-auto mb-4">
             <CheckCircle className="h-8 w-8 text-success" strokeWidth={1.75} />
@@ -156,7 +156,7 @@ export default function ShopPage() {
   }
 
   return (
-    <div className="min-h-screen bg-paper pb-32">
+    <div className="min-h-screen pb-32">
       {/* Hero */}
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">

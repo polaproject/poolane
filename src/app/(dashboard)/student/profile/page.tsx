@@ -44,7 +44,7 @@ export default async function StudentProfilePage() {
   const initial = u.fullName?.charAt(0).toUpperCase() ?? '?'
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       {/* Hero */}
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 

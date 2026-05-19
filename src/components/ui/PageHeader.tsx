@@ -15,8 +15,12 @@ interface PageHeaderProps {
 }
 
 /**
- * Page header chuẩn — eyebrow + title + description + actions.
- * Dùng đầu mọi trang dashboard/admin/student/staff để đồng bộ.
+ * @deprecated Phase 29 — Use `<PageHero>` from `@/components/layouts` instead.
+ *
+ * PageHero là full hero block (bao gồm `hero-block` wrapper + max-w container).
+ * PageHeader CHỈ render inner content — buộc page phải tự inline `<div hero-block>...</div>`.
+ *
+ * Sau khi migrate 42 trang sang `<PageHero>`, component này sẽ bị xoá ở Phase 29.4.
  *
  * Phase 13 typography: cả title đều dùng sans (.lqg-headline).
  * Italic serif chỉ giữ cho quote/greeting/blog body.

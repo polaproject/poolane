@@ -12,7 +12,7 @@ export default async function StudentPhotosPage() {
   })
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-5xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">{photos.length} ảnh · Cộng đồng</p>

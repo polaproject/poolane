@@ -23,7 +23,7 @@ export default async function SelfAssessmentListPage() {
 
   if (student.enrollments.length === 0) {
     return (
-      <div className="min-h-screen bg-paper pb-12">
+      <div className="min-h-screen pb-12">
         <div className="hero-block pt-8 pb-12">
           <div className="max-w-3xl mx-auto">
             <p className="eyebrow text-paper/55 mb-2">Tự đánh giá kỹ năng</p>
@@ -48,7 +48,7 @@ export default async function SelfAssessmentListPage() {
   const submittedMap = new Set(submitted.map(s => `${s.courseId}-${s.sessionNumber}`))
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">Tự đánh giá · Buổi 5 và 9</p>

@@ -11,7 +11,7 @@ export default async function AdminEventsPage() {
   const events = await prisma.event.findMany({ orderBy: { date: 'desc' }, take: 50 })
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-4xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>

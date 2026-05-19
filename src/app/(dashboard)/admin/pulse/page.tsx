@@ -132,7 +132,7 @@ export default function PulsePage() {
   const total = data.summary.redCount + data.summary.yellowCount + data.summary.lowTicketCount + data.summary.staleProspectsCount
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-3xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>

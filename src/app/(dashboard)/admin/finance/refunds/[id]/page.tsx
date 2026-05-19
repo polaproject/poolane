@@ -43,7 +43,7 @@ export default async function RefundDetailPage({ params }: Params) {
   const cfg = STATUS[refund.status] ?? STATUS.pending
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-3xl mx-auto">
           <Link

@@ -51,7 +51,7 @@ export default async function RefundsPage({ searchParams }: { searchParams: Sear
   const currentTab = STATUS_TABS.find(t => t.value === status) ?? STATUS_TABS[0]
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-6xl mx-auto flex items-end justify-between gap-3 flex-wrap">
           <div>

@@ -91,7 +91,7 @@ export default function AssessPage() {
     { variant: 'neutral' as const, label: 'Chi tiết' }
 
   return (
-    <div className="min-h-screen bg-paper pb-28">
+    <div className="min-h-screen pb-28">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-2xl mx-auto">
           <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-sm text-paper/65 hover:text-paper transition mb-4 group">

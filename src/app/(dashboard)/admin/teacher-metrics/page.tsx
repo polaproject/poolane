@@ -57,7 +57,7 @@ export default async function TeacherMetricsPage() {
   const retentionRate = totalStudents > 0 ? (activeRecent / totalStudents) * 100 : 0
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-5xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2">30 ngày · cập nhật {format(now, 'dd/MM/yyyy HH:mm', { locale: vi })}</p>

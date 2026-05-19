@@ -24,7 +24,7 @@ export default async function DashboardViewPage({ params }: PageProps) {
   const settings = await getAllSettings()
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-6 pb-10 relative overflow-hidden">
         <div className="relative max-w-6xl mx-auto">
           <Link

@@ -246,10 +246,12 @@ select.input-pola:focus {
   --warn: #D89B3A;
   --danger: #B5483C;
 
-  /* Adaptive surface tokens — KEY của dark/light mode */
-  --surface:        var(--ink-soft);       /* card bg = navy đậm */
-  --surface-soft:   #243456;               /* hover/alt surface */
-  --surface-fg:     var(--paper);          /* text trên card */
+  /* Adaptive surface tokens — KEY của dark/light mode
+   * Phase 28.1: translucent thay cho solid ink-soft → ambient gradient thấm qua → KHÔNG cắt bg
+   * Phase 28.2: opacity 0.92 (gần solid) + đổi color về ink-soft palette → cards chắc chắn */
+  --surface:        rgba(28, 43, 74, 0.92);    /* ink-soft @ 92% — solid-feel, 8% ambient bleed */
+  --surface-soft:   rgba(36, 52, 86, 0.82);    /* hover/alt surface */
+  --surface-fg:     var(--paper);              /* text trên card */
   --surface-ring:   rgba(251, 247, 240, 0.10);
 
   --nav-bg:         var(--ink-soft);       /* sidebar = navy */
@@ -359,9 +361,10 @@ select.input-pola:focus {
   --warn: #D89B3A;
   --danger: #C25A4A;
 
-  /* Adaptive surface tokens — LIGHT mode = white cards trên lavender bg */
-  --surface:        #FFFFFF;
-  --surface-soft:   #F8F4ED;
+  /* Adaptive surface tokens — LIGHT mode (Phase 28.1 → 28.2)
+   * 28.1: translucent 0.78 (quá see-through) → 28.2: 0.92 (solid-feel + subtle bleed) */
+  --surface:        rgba(255, 255, 255, 0.92);
+  --surface-soft:   rgba(255, 255, 255, 0.78);
   --surface-fg:     var(--ink);
   --surface-ring:   rgba(45, 42, 74, 0.08);
 
@@ -708,11 +711,12 @@ select.input-pola:focus {
   min-width: 0;
   min-height: 100vh;
 }
-/* Single source of truth cho horizontal padding TOÀN APP.
+/* Single source of truth cho horizontal padding TOÀN APP (DASHBOARD only).
    Apply tại <main id="main-content"> (NOT .pola-main) để ambient-bg fill
    edge-to-edge, không bị lộ page-bg phía sau ở 2 lề.
-   Mọi page chỉ cần `mx-auto max-w-Xxl` (centering), KHÔNG cần `px-X` riêng. */
-#main-content {
+   Mọi page chỉ cần `mx-auto max-w-Xxl` (centering), KHÔNG cần `px-X` riêng.
+   Scope `.pola-shell` để KHÔNG áp lên public pages (có section px-4 riêng — tránh double padding). */
+.pola-shell #main-content {
   padding-inline: var(--page-px);
 }
 :root {
@@ -726,6 +730,78 @@ select.input-pola:focus {
   .pola-shell { padding-left: 16rem; }
   .pola-sidebar { transform: translateX(0) !important; }
 }
+
+/* ════════════════════════════════════════════════════════════
+ * Phase 29 — Unified Page Architecture Tokens (SSOT)
+ *
+ * 4 token groups:
+ *   - Spacing scale (atomic + semantic page/hero/section/card)
+ *   - Container width tokens (narrow/content/wide/full)
+ *   - Text hierarchy (4 levels thay opacity chaos)
+ *   - Typography role tokens (Material Design pattern)
+ *
+ * Layout primitives ở src/components/layouts/ consume các token này.
+ * KHÔNG hardcode pb-12/pt-8/max-w-* trong page nữa — qua primitive props.
+ * ════════════════════════════════════════════════════════════ */
+:root {
+  /* ── Atomic spacing scale (Stripe convention) ── */
+  --space-1:  0.25rem;  /* 4px  */
+  --space-2:  0.5rem;   /* 8px  */
+  --space-3:  0.75rem;  /* 12px */
+  --space-4:  1rem;     /* 16px */
+  --space-5:  1.25rem;  /* 20px */
+  --space-6:  1.5rem;   /* 24px */
+  --space-8:  2rem;     /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-32: 8rem;     /* 128px — for shop cart bar */
+
+  /* ── Page-level semantic spacing ── */
+  --page-pb:           var(--space-12);   /* 48px bottom default */
+  --page-pb-with-cart: var(--space-32);   /* 128px chỉ cho shop có cart bar */
+
+  /* ── Hero block ── */
+  --hero-pt:      var(--space-8);   /* 32px */
+  --hero-pb:      var(--space-12);  /* 48px */
+  --hero-overlap: var(--space-6);   /* 24px content overlap */
+
+  /* ── Section / content gaps ── */
+  --section-gap-compact: var(--space-3);  /* 12px */
+  --section-gap:         var(--space-5);  /* 20px DEFAULT */
+  --section-gap-loose:   var(--space-8);  /* 32px */
+
+  /* ── Card ── */
+  --card-p-compact: var(--space-4);  /* 16px */
+  --card-p:         var(--space-5);  /* 20px DEFAULT */
+  --card-p-loose:   var(--space-6);  /* 24px */
+  --card-gap:       var(--space-4);  /* 16px grid gap */
+
+  /* ── Container width tokens ── */
+  --w-narrow:  42rem;  /* 672px  — auth, short forms */
+  --w-content: 48rem;  /* 768px  — DEFAULT (67% pages) */
+  --w-wide:    64rem;  /* 1024px — admin lists, schedule */
+  --w-full:    72rem;  /* 1152px — wide tables, dashboard builder */
+
+  /* ── Text hierarchy opacity (thay /50, /55, /65, /70, /75, /80 chaos) ── */
+  --text-opacity-primary:   1;
+  --text-opacity-secondary: 0.72;
+  --text-opacity-tertiary:  0.55;
+  --text-opacity-muted:     0.40;
+}
+
+/* Semantic text utility classes — pages dùng class thay free-form opacity */
+.text-primary   { color: var(--foreground); }
+.text-secondary { color: color-mix(in srgb, var(--foreground) 72%, transparent); }
+.text-tertiary  { color: color-mix(in srgb, var(--foreground) 55%, transparent); }
+.text-muted     { color: color-mix(in srgb, var(--foreground) 40%, transparent); }
+
+/* Hero scope override — hero-block dùng --hero-fg thay --foreground */
+.hero-block .text-primary   { color: var(--hero-fg); }
+.hero-block .text-secondary { color: color-mix(in srgb, var(--hero-fg) 72%, transparent); }
+.hero-block .text-tertiary  { color: color-mix(in srgb, var(--hero-fg) 55%, transparent); }
+.hero-block .text-muted     { color: color-mix(in srgb, var(--hero-fg) 40%, transparent); }
 
 /* Phase 12 — Sidebar Liquid Glass (family.co) — KHÔNG override position */
 .pola-nav    {
@@ -1037,6 +1113,14 @@ select.input-pola:focus {
 @keyframes liquid-press {
   0%, 100% { filter: brightness(1); }
   50%      { filter: brightness(0.88); }
+}
+
+/* Phase 28.1 — Auto-glass cho elements dùng `bg-[var(--surface)]` Tailwind arbitrary.
+ * Cần `!important` vì Lightning CSS đôi khi dedupe backdrop-filter property nhầm. */
+.bg-\[var\(--surface\)\],
+.bg-\[var\(--surface-soft\)\] {
+  -webkit-backdrop-filter: blur(20px) saturate(140%) brightness(1.05) !important;
+  backdrop-filter: blur(20px) saturate(140%) brightness(1.05) !important;
 }
 
 /* Glass card — utility class chuẩn Liquid Glass (Phase 12 — uses LQG tokens) */

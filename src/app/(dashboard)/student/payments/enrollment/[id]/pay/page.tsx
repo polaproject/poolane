@@ -29,7 +29,7 @@ export default async function PayEnrollmentPage({ params }: Params) {
   }
   if (enrollment.status === 'cancelled' || enrollment.status === 'refunded') {
     return (
-      <div className="min-h-screen bg-paper grid place-items-center px-4">
+      <div className="min-h-screen grid place-items-center px-4">
         <div className="rounded-card-xl bg-[var(--surface)] shadow-glass ring-1 ring-warn/30 p-8 text-center max-w-md">
           <div className="grid place-items-center h-16 w-16 rounded-pill bg-warn/15 mx-auto mb-4">
             <AlertCircle className="h-8 w-8 text-warn" strokeWidth={1.75} />
@@ -48,7 +48,7 @@ export default async function PayEnrollmentPage({ params }: Params) {
   const qrInfo = buildQRInfo(debt, memo)
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-md mx-auto">
           <Link

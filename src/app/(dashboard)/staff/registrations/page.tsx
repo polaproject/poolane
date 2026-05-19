@@ -73,7 +73,7 @@ export default function RegistrationsPage() {
 
   if (!sessionId) {
     return (
-      <div className="min-h-screen bg-paper grid place-items-center p-6">
+      <div className="min-h-screen grid place-items-center p-6">
         <div className="rounded-card-xl bg-[var(--surface)] shadow-soft ring-1 ring-foreground/8 p-8 text-center max-w-md">
           <CheckSquare className="h-10 w-10 mx-auto mb-3 text-foreground/30" strokeWidth={1.5} />
           <p className="lqg-headline text-2xl text-foreground mb-1">Chưa chọn buổi</p>
@@ -87,7 +87,7 @@ export default function RegistrationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-3xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">

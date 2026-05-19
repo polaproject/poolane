@@ -8,7 +8,7 @@ export default async function AdminSettingsPage() {
   const settings = await getAllSettings()
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
         <div className="relative max-w-4xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">

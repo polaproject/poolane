@@ -52,7 +52,7 @@ export default async function SkillHeatmapPage({ searchParams }: { searchParams:
   const sorted = [...skillStats].sort((a, b) => a.avg - b.avg)
 
   return (
-    <div className="min-h-screen bg-paper pb-12">
+    <div className="min-h-screen pb-12">
       <div className="hero-block pt-8 pb-12 relative overflow-hidden">
 <div className="relative max-w-5xl mx-auto">
           <p className="eyebrow text-paper/55 mb-2 inline-flex items-center gap-1.5">
