@@ -45,7 +45,7 @@ const STATUS_LABEL = {
 
 export default function LayoutV2Sandbox() {
   return (
-    <div className="min-h-screen bg-[color-mix(in_srgb,var(--paper)_98%,var(--ink))]">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8">
         {/* Sandbox banner */}
         <Link

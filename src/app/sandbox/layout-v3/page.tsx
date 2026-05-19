@@ -31,7 +31,7 @@ const STUDENTS = [
 
 export default function LayoutV3Sandbox() {
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="max-w-2xl mx-auto px-6 sm:px-8 py-12 sm:py-20">
         {/* Sandbox back link */}
         <Link
